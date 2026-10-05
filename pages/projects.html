@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECTS.HTML - Portfolio page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="846285e4">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio</title>
+    <meta name="description" content="Portfolio of Joseph VanWagner.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="js/collection.js?v=34b91636"></script>
+    <script src="../shared/share.js?v=1caee827"></script>
+</head>
+<body data-title="Portfolio">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <!-- PORTFOLIO: four roles (each links to related areas of expertise), then a grid of my areas of expertise.
+             Each project has its own page: pages/project-<name>.html -->
+        <section class="panel">
+            <div class="panel-body">
+                <h1>Portfolio</h1>
+                <p class="lede">My work, organized by the roles I play and the experience behind them.</p>
+                <p class="jump-links"><a href="#games"><strong>Learning games</strong></a> &middot; <a href="#courses">Sample courses</a> &middot; <a href="#leader">Leader</a> &middot; <a href="#writer">Writer</a> &middot; <a href="#collaborator">Collaborator</a> &middot; <a href="#advocate">Advocate</a> &middot; <a href="#projects">Areas of expertise</a></p>
+            </div>
+        </section>
+
+        <section class="panel" id="games">
+            <div class="panel-body">
+                <h2>Learning games</h2>
+                <p>Arcade-style quiz games I programmed in plain HTML and JavaScript and dropped into training modules.
+                In training, each one reviewed a piece of software training between rounds of play; the versions here use easy general trivia so anyone can jump in.</p>
+                <p class="media-note"></p>
+                <div class="grid" data-collection="games" data-show="4" data-page="games.html" data-noun="games">
+                    <article class="card">
+                        <div class="thumb alt1"><a class="thumb-link" href="project-game-mall-run.html" tabindex="-1" aria-hidden="true" title="Open Mall Run"><img src="../images/games/mall-run.jpg" alt="Title screen"></a></div>
+                        <div class="content">
+                            <h3><a href="project-game-mall-run.html">Mall Run</a></h3>
+                            <p>An endless 3D runner with quick trivia questions.</p>
+                            <div class="links"><a href="project-game-mall-run.html">Play</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb alt2"><a class="thumb-link" href="project-game-quiz-man.html" tabindex="-1" aria-hidden="true" title="Open Quiz-Man"><img src="../images/games/quiz-man.jpg" alt="Title screen"></a></div>
+                        <div class="content">
+                            <h3><a href="project-game-quiz-man.html">Quiz-Man</a></h3>
+                            <p>A maze-chase game with quick trivia questions.</p>
+                            <div class="links"><a href="project-game-quiz-man.html">Play</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb alt3"><a class="thumb-link" href="project-game-quizaga.html" tabindex="-1" aria-hidden="true" title="Open Quizaga"><img src="../images/games/quizaga.jpg" alt="Title screen"></a></div>
+                        <div class="content">
+                            <h3><a href="project-game-quizaga.html">Quizaga</a></h3>
+                            <p>A space-shooter with quick trivia questions.</p>
+                            <div class="links"><a href="project-game-quizaga.html">Play</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-game-quizcavator.html" tabindex="-1" aria-hidden="true" title="Open Quizcavator"><img src="../images/games/quizcavator.jpg" alt="Title screen"></a></div>
+                        <div class="content">
+                            <h3><a href="project-game-quizcavator.html">Quizcavator</a></h3>
+                            <p>A digging game with quick trivia questions.</p>
+                            <div class="links"><a href="project-game-quizcavator.html">Play</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-game-right-this-way.html" tabindex="-1" aria-hidden="true" title="Open Right This Way, Please"><img src="../images/games/right-this-way.jpg" alt="A 3D view of the visitor center with a waiting line and an officer"></a></div>
+                        <div class="content">
+                            <h3><a href="project-game-right-this-way.html">Right This Way, Please</a></h3>
+                            <p>An entry-control minigame: check badges, call escorts, and answer incidents before the timer runs out.</p>
+                            <div class="links"><a href="project-game-right-this-way.html">Play</a></div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- SAMPLE COURSES: real, playable e-learning (files live in /work/) -->
+        <section class="panel" id="courses">
+            <div class="panel-body">
+                <h2>Sample courses</h2>
+                <p>Interactive e-learning I designed and built in Articulate Rise 360 for security officers, supervisors, and corporate teams: compliance, safety, de-escalation, policy, and software training. Open one to try it right here.</p>
+                <p class="media-note"></p>
+                <div class="grid" data-collection="courses" data-show="4" data-page="courses.html" data-noun="courses">
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-ctpat-course.html" tabindex="-1" aria-hidden="true" title="Open C-TPAT Import Container Security Training"><img src="../work/ctpat-course/assets/ctpat%20circle%20with%20gray%20bac.jpg" alt=""></a></div>
+                        <div class="content">
+                            <h3><a href="project-ctpat-course.html">C-TPAT Import Container Security Training</a></h3>
+                            <p>Supply chain security training for distribution center officers: C-TPAT, container inspections, and reporting.</p>
+                            <div class="links"><a href="project-ctpat-course.html">Try the course</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-supervisors-as-trainers.html" tabindex="-1" aria-hidden="true" title="Open Supervisors as Trainers: Building Officer Readiness"><img src="../work/supervisors-as-trainers/assets/stock-image-2.jpg" alt="" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-supervisors-as-trainers.html">Supervisors as Trainers: Building Officer Readiness</a></h3>
+                            <p>Train-the-trainer prework for security supervisors: communication, adapting training, coaching, and assessment.</p>
+                            <div class="links"><a href="project-supervisors-as-trainers.html">Try the course</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-body-worn-cameras.html" tabindex="-1" aria-hidden="true" title="Open Daily Duties &amp; Body-Worn Camera Expectations"><img src="../work/body-worn-cameras/assets/officer-entrance.jpg" alt="" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-body-worn-cameras.html">Daily Duties &amp; Body-Worn Camera Expectations</a></h3>
+                            <p>Blended-learning prework for retail asset protection officers: shift routines, patrols, and body-worn camera use.</p>
+                            <div class="links"><a href="project-body-worn-cameras.html">Try the course</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-ai-use-policy.html" tabindex="-1" aria-hidden="true" title="Open A.I. Use Policy and Ethics"><img src="../work/ai-use-policy/assets/An-office-scene-showing-a-.jpg" alt="" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-ai-use-policy.html">A.I. Use Policy and Ethics</a></h3>
+                            <p>Company-wide A.I. policy training: approved tools, data safety, and ethical principles, with a final quiz.</p>
+                            <div class="links"><a href="project-ai-use-policy.html">Try the course</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-asana-custom-fields.html" tabindex="-1" aria-hidden="true" title="Open Mastering Custom Fields for Asana Transition Projects"><img src="../work/asana-custom-fields/assets/ai-generated-image-4.jpg" alt="" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-asana-custom-fields.html">Mastering Custom Fields for Asana Transition Projects</a></h3>
+                            <p>Software training for Asana: portfolio and task custom fields, consistent updates, and reading the metrics.</p>
+                            <div class="links"><a href="project-asana-custom-fields.html">Try the course</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-retail-post-orders.html" tabindex="-1" aria-hidden="true" title="Open Retail Security Standards Training"><img src="../work/retail-post-orders/assets/BDU_TOP-Photoroom.png" alt="" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-retail-post-orders.html">Retail Security Standards Training</a></h3>
+                            <p>Post orders for retail security officers: guest service, professional image, patrol tours, and emergencies.</p>
+                            <div class="links"><a href="project-retail-post-orders.html">Try the course</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-first-amendment-auditors.html" tabindex="-1" aria-hidden="true" title="Open Professional Engagement with First Amendment Auditors"><img src="../work/first-amendment-auditors/assets/first-amendment-auditor.jpg" alt="" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-first-amendment-auditors.html">Professional Engagement with First Amendment Auditors</a></h3>
+                            <p>De-escalation for security officers: public vs. private space, officer authority, and staying hands-off on camera.</p>
+                            <div class="links"><a href="project-first-amendment-auditors.html">Try the course</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-heat-safety.html" tabindex="-1" aria-hidden="true" title="Open Heat Safety"><img src="../work/heat-safety/assets/A-security-guard-applying-.jpg" alt="" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-heat-safety.html">Heat Safety</a></h3>
+                            <p>Summer safety for security officers: heat stress warning signs, prevention, emergencies, sun, and insects.</p>
+                            <div class="links"><a href="project-heat-safety.html">Try the course</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-use-of-force.html" tabindex="-1" aria-hidden="true" title="Open Use of Force for Security Officers"><img src="../work/use-of-force/assets/Friendly-security-officer-.jpg" alt="" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-use-of-force.html">Use of Force for Security Officers</a></h3>
+                            <p>Legal authority, proportionality, the use-of-force continuum, de-escalation, and reporting for private security officers.</p>
+                            <div class="links"><a href="project-use-of-force.html">Try the course</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-property-post-orders.html" tabindex="-1" aria-hidden="true" title="Open Commercial Property Security Standards"><img src="../work/property-post-orders/assets/134af709-3a5a-4d7d-be.jpg" alt="" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-property-post-orders.html">Commercial Property Security Standards</a></h3>
+                            <p>Post orders for a commercial office property: roles and conduct, access control, documentation, and emergencies.</p>
+                            <div class="links"><a href="project-property-post-orders.html">Try the course</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-humanizing-ai-content.html" tabindex="-1" aria-hidden="true" title="Open Humanizing AI-Generated Content"><img src="../work/humanizing-ai-content/assets/a-robot-handing-a-small-st.jpg" alt="" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-humanizing-ai-content.html">Humanizing AI-Generated Content</a></h3>
+                            <p>Spotting the telltale signs of AI writing and editing it into warm, human communication that learners connect with.</p>
+                            <div class="links"><a href="project-humanizing-ai-content.html">Try the course</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-hands-free-bag-checks.html" tabindex="-1" aria-hidden="true" title="Open Hands-Free Bag Checks"><img src="../work/hands-free-bag-checks/assets/commuter-getting-bag-check.jpg" alt="" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-hands-free-bag-checks.html">Hands-Free Bag Checks</a></h3>
+                            <p>Screening bags without touching them: the tools, a three-step process, and what to do when a check turns something up.</p>
+                            <div class="links"><a href="project-hands-free-bag-checks.html">Try the course</a></div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" id="leader">
+            <div class="panel-body">
+                <h2>Leader</h2>
+                <p class="role-tagline">As an educator, trainer, and coach, I am a passionate and empathetic leader with a focus on growth whose qualities shine in cooperative and collaborative environments.</p>
+                <p>With extensive education experience, I bring a wealth of knowledge and expertise to my teaching, training, and orientation projects. Through personalized tutoring and mentoring, as well as curriculum development, I foster engaging and supportive learning experiences, ensuring participants gain the necessary skills and knowledge to excel in their fields. With a focus on effective communication and interactive learning, my aim is to empower people to succeed in their endeavors.</p>
+                <div class="related">
+                    <h3>Related areas of expertise</h3>
+                    <div class="related-grid">
+                        <a class="related-card" href="project-teaching-training.html"><img src="../images/portfolio/teaching-training.jpg" alt="" loading="lazy"><span>Teaching &amp; Training</span></a>
+                        <a class="related-card" href="project-instructional-design.html"><img src="../images/portfolio/instructional-design.jpg" alt="" loading="lazy"><span>Instructional Design</span></a>
+                        <a class="related-card" href="project-technology.html"><img src="../images/portfolio/technology.jpg" alt="" loading="lazy"><span>Technology</span></a>
+                        <a class="related-card" href="project-mindfulness-wellness.html"><img src="../images/portfolio/mindfulness-wellness.jpg" alt="" loading="lazy"><span>Mindfulness &amp; Wellness</span></a>
+                        <a class="related-card" href="project-community-engagement.html"><img src="../images/portfolio/community-engagement.jpg" alt="" loading="lazy"><span>Community Engagement</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" id="writer">
+            <div class="panel-body">
+                <h2>Writer</h2>
+                <p class="role-tagline">Getting the message across through stories, lessons, presentations, news, briefs, and more using tools like SEO to make sure it's seen!</p>
+                <p>Drawing on my award-winning experience in news writing and my passion for language, I expertly copywrite, proofread, and edit to capture attention and convey messages effectively. I have a keen eye for detail and compose compelling copy that engages readers and drives results, from aiding literacy skills to earning grants.</p>
+                <div class="related">
+                    <h3>Related areas of expertise</h3>
+                    <div class="related-grid">
+                        <a class="related-card" href="project-copywriting-editing.html"><img src="../images/portfolio/copywriting-editing.jpg" alt="" loading="lazy"><span>Copywriting &amp; Editing</span></a>
+                        <a class="related-card" href="project-curriculum.html"><img src="../images/portfolio/curriculum.jpg" alt="" loading="lazy"><span>Curriculum</span></a>
+                        <a class="related-card" href="project-instructional-design.html"><img src="../images/portfolio/instructional-design.jpg" alt="" loading="lazy"><span>Instructional Design</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" id="collaborator">
+            <div class="panel-body">
+                <h2>Collaborator</h2>
+                <p class="role-tagline">Whether presenting proposals or engaging in creative pursuits, we can do more together.</p>
+                <p>With a strong background in education and curriculum development, I excel in team and project management roles. As a classroom educator and curriculum writer, I collaborate with diverse teams to effectively coordinate efforts and ensure seamless execution. Through my experience designing lessons and instructional materials, as well as cooperating with multiple Professional Learning Communities, I foster collaboration, facilitate communication, and drive successful outcomes.</p>
+                <div class="related">
+                    <h3>Related areas of expertise</h3>
+                    <div class="related-grid">
+                        <a class="related-card" href="project-instructional-design.html"><img src="../images/portfolio/instructional-design.jpg" alt="" loading="lazy"><span>Instructional Design</span></a>
+                        <a class="related-card" href="project-curriculum.html"><img src="../images/portfolio/curriculum.jpg" alt="" loading="lazy"><span>Curriculum</span></a>
+                        <a class="related-card" href="project-technology.html"><img src="../images/portfolio/technology.jpg" alt="" loading="lazy"><span>Technology</span></a>
+                        <a class="related-card" href="project-copywriting-editing.html"><img src="../images/portfolio/copywriting-editing.jpg" alt="" loading="lazy"><span>Copywriting &amp; Editing</span></a>
+                        <a class="related-card" href="project-entertainment.html"><img src="../images/portfolio/entertainment.jpg" alt="" loading="lazy"><span>Entertainment</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" id="advocate">
+            <div class="panel-body">
+                <h2>Advocate</h2>
+                <p class="role-tagline">Whether a cause for equity and justice or for individuals less-privileged and underserved, I amplify voices and provide safe circles of trust.</p>
+                <p>With a diverse background in education, coaching, and mentorship, I specialize in advocacy and coaching that empowers individuals to reach their full potential. I am deeply committed to promoting inclusivity and supporting diverse learners from the struggling and underserved to the gifted and talented. Through personalized guidance and support, I build environments where people can thrive, develop essential skills, and become their own best advocates.</p>
+                <div class="related">
+                    <h3>Related areas of expertise</h3>
+                    <div class="related-grid">
+                        <a class="related-card" href="project-mindfulness-wellness.html"><img src="../images/portfolio/mindfulness-wellness.jpg" alt="" loading="lazy"><span>Mindfulness &amp; Wellness</span></a>
+                        <a class="related-card" href="project-community-engagement.html"><img src="../images/portfolio/community-engagement.jpg" alt="" loading="lazy"><span>Community Engagement</span></a>
+                        <a class="related-card" href="project-instructional-design.html"><img src="../images/portfolio/instructional-design.jpg" alt="" loading="lazy"><span>Instructional Design</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" id="projects">
+            <div class="panel-body">
+                <h2>Areas of expertise</h2>
+                <div class="grid">
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-teaching-training.html" tabindex="-1" aria-hidden="true" title="Open Teaching &amp; Training"><img src="../images/portfolio/teaching-training.jpg" alt="Joseph teaching a math lesson at the whiteboard" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-teaching-training.html">Teaching &amp; Training</a></h3>
+                            <p>Preparing professionals and engaging minds.</p>
+                            <div class="links"><a href="project-teaching-training.html">Read more</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb alt1"><a class="thumb-link" href="project-instructional-design.html" tabindex="-1" aria-hidden="true" title="Open Instructional Design"><img src="../images/portfolio/instructional-design.jpg" alt="A &quot;Project Goldberg&quot; unit bulletin board with student work" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-instructional-design.html">Instructional Design</a></h3>
+                            <p>Creating and executing effective lessons and units of study.</p>
+                            <div class="links"><a href="project-instructional-design.html">Read more</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb alt3"><a class="thumb-link" href="project-curriculum.html" tabindex="-1" aria-hidden="true" title="Open Curriculum"><img src="../images/portfolio/curriculum.jpg" alt="Color-coded curriculum packets laid out on a table" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-curriculum.html">Curriculum</a></h3>
+                            <p>Collecting and connecting material to learners and expectations.</p>
+                            <div class="links"><a href="project-curriculum.html">Read more</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-technology.html" tabindex="-1" aria-hidden="true" title="Open Technology"><img src="../images/portfolio/technology.jpg" alt="Students working on laptops" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-technology.html">Technology</a></h3>
+                            <p>Exploring new technologies and closing the digital divide.</p>
+                            <div class="links"><a href="project-technology.html">Read more</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb alt2"><a class="thumb-link" href="project-copywriting-editing.html" tabindex="-1" aria-hidden="true" title="Open Copywriting &amp; Editing"><img src="../images/portfolio/copywriting-editing.jpg" alt="Writing by hand at a desk" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-copywriting-editing.html">Copywriting &amp; Editing</a></h3>
+                            <p>Composing, editing, revising, and workshopping.</p>
+                            <div class="links"><a href="project-copywriting-editing.html">Read more</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb alt1"><a class="thumb-link" href="project-community-engagement.html" tabindex="-1" aria-hidden="true" title="Open Community Engagement"><img src="../images/portfolio/community-engagement.jpg" alt="Joseph shaking hands with rower Charles Hedrich on the Arctic coast" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-community-engagement.html">Community Engagement</a></h3>
+                            <p>Partnering for success and building culture.</p>
+                            <div class="links"><a href="project-community-engagement.html">Read more</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb alt2"><a class="thumb-link" href="project-mindfulness-wellness.html" tabindex="-1" aria-hidden="true" title="Open Mindfulness &amp; Wellness"><img src="../images/portfolio/mindfulness-wellness.jpg" alt="A "Safe Space" sign from the Allen High School GSA" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-mindfulness-wellness.html">Mindfulness &amp; Wellness</a></h3>
+                            <p>Promoting physical, social, and mental health.</p>
+                            <div class="links"><a href="project-mindfulness-wellness.html">Read more</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb alt3"><a class="thumb-link" href="project-entertainment.html" tabindex="-1" aria-hidden="true" title="Open Entertainment"><img src="../images/portfolio/entertainment.jpg" alt="Joseph on stage in a candlelit scene" loading="lazy"></a></div>
+                        <div class="content">
+                            <h3><a href="project-entertainment.html">Entertainment</a></h3>
+                            <p>Creativity, performance, and presentation.</p>
+                            <div class="links"><a href="project-entertainment.html">Read more</a></div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!--
+    PAGES/ABOUT.HTML - Portfolio page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="1a42cadb">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Me</title>
+    <meta name="description" content="About Joseph VanWagner.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="js/ticker.js?v=d5167092"></script>
+    <script src="../shared/share.js?v=1caee827"></script>
+</head>
+<body data-title="About Me">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <h1>About me</h1>
+                <p class="lede">I design training that people actually finish, and I've spent more than
+                <span data-years-since="2011-06">15</span> years figuring out what makes that happen.</p>
+                <!-- Headshot on the right, like the photos on the other pages ("On this page" goes on the left, js/page-toc.js) -->
+                <figure class="side-photo wide about-me-photo">
+                    <img src="../images/me.jpg" alt="Joseph VanWagner speaking with a group">
+                </figure>
+
+                <h2>How I got here</h2>
+                <!-- My story, with photos tucked into the text on alternating sides (no captions). Styles: .bio-photo in css/classic.css -->
+                <img class="bio-photo left bio-kid-salute" src="../images/portfolio/about/kid-salute.png" alt="Joseph as a young boy in a sweater, saluting the camera" loading="lazy">
+                <p>Growing up in Northern Michigan offered an abundance of opportunities. As a kid, I was an avid sports
+                           enthusiast, enjoying baseball, soccer, track, mountain biking, and winter sports like skiing and
+                           snowboarding. Ice hockey in particular taught me the value of teamwork, dedication, and a strong work
+                           ethic, and even led to some incredible experiences like meeting some of my hockey heroes as a stick boy
+                           for the <a href="https://www.nhl.com/redwings" target="_blank" rel="noopener">Detroit Red Wings</a> training camp.</p>
+                <img class="bio-photo right bio-ice-hockey" src="../images/portfolio/about/ice-hockey.png" alt="Joseph as a teenager playing ice hockey in a white jersey and helmet" loading="lazy">
+                <p>Beyond sports, I nurtured my curiosity through diverse hobbies. Writing became a passion from a young
+                           age. Participating in the Young Author's program, I connected with like-minded creatives and even
+                           inspired my classmates. Collaborative projects soon blossomed between teams of elementary writers and
+                           artists crafting stories and eventually engineering complex tabletop game scenarios.</p>
+                <img class="bio-photo left bio-horseback" src="../images/portfolio/about/horseback.png" alt="Joseph as a teenager riding a horse" loading="lazy">
+                <p>As technology and the internet played a bigger role in everyday life, I ventured into the digital realm
+                           by creating video games and exploring information technology through my local Career-Tech Center. In
+                           college, my creativity and passion for writing led me to tutoring; witnessing students' growth ignited
+                           a sense of purpose that drove me to pursue a career in education.</p>
+                <img class="bio-photo right bio-alaska" src="../images/portfolio/about/alaska.png" alt="Joseph in a blue parka with binoculars on the Alaskan tundra, with friends behind him" loading="lazy">
+                <p>Throughout my career, I have been fortunate to work in a wide range of settings, from the picturesque
+                           Midwest wine country to the beautiful but demanding Alaskan tundra. This rich diversity of experiences
+                           has cultivated my ability to thrive in varied environments. It has instilled in me a profound
+                           appreciation for cultural diversity and the skills to connect with people from all walks of life.</p>
+                <img class="bio-photo left bio-thumbs-up" src="../images/portfolio/about/thumbs-up.jpg" alt="Joseph today, grinning and giving two thumbs up" loading="lazy">
+                <p>With a diverse background spanning athletics, writing, technology, and education, I embrace innovative
+                           approaches to inspire and empower individuals across various fields. As I embark on the next phase of
+                           my career, I eagerly seek new opportunities to utilize my interdisciplinary skills, creativity,
+                           enthusiasm, and dedication to making a meaningful impact wherever my path leads.</p>
+                <div class="clearfix"></div>
+
+                <blockquote class="philosophy">
+                    <p>I believe learning fuels growth and understanding, and creativity turns it into lasting innovation.</p>
+                </blockquote>
+
+                <h2 id="recommendations">What colleagues say</h2>
+                <!-- Excerpts from LinkedIn recommendations; full text at linkedin.com/in/jpvanwagner -->
+                <!-- Carousel: 3 at a time (fewer on small screens), < > loop both ways, steps every 30 s (pages/js/ticker.js) -->
+                <div class="quotes" data-ticker data-per-view="3" data-interval="30000" data-shared="colleague-quotes"></div>   <!-- quotes: config/shared-content.js -->
+                <p><small>Excerpts from recommendations on <a href="https://linkedin.com/in/jpvanwagner" target="_blank" rel="noopener">LinkedIn</a>.</small></p>
+
+                <h2>What I work with</h2>
+                <ul class="tags">
+                    <li>Instructional design</li><li>Curriculum writing</li><li>Gamified learning</li>
+                    <li>LMS administration</li><li>Facilitation</li>
+                    <li>Copywriting</li><li>Grant writing</li><li>Project management</li><li>Coaching</li>
+                </ul>
+                <a class="tool-callout" href="resume.html#tools" title="The software and platforms I use, grouped by what they're for, with links">
+                    <span class="tc-icon" aria-hidden="true">&#128295;</span>
+                    <span class="tc-text"><strong>My toolkit</strong>
+                    <small>Authoring, learning platforms, AI assistants, and more: see every tool I use</small></span>
+                    <span class="tc-go" aria-hidden="true">&#8594;</span>
+                </a>
+
+                <div class="btn-row" style="clear: both;">
+                    <a class="btn primary" href="resume.html">See my experience</a>
+                    <span data-resume-doc></span>   <!-- link: config/site-config.js (resumeDocId) -->
+                    <a class="btn btn-mail" href="contact.html">Get in touch</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- "Why the strange layout?": a short note at the very bottom (styles: .why-layout in css/classic.css) -->
+        <section class="panel why-layout">
+            <div class="panel-body" data-shared="why-layout"></div>   <!-- text: config/shared-content.js (whyLayout) -->
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

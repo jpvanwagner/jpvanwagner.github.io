@@ -1,0 +1,538 @@
+/*
+ * MODERN.CSS - The Traditional View look: a clean, modern professional portfolio.
+ *
+ * Loaded after classic.css on every page. EVERY rule here is scoped to
+ * html:not(.in-desktop), so it only applies when a page is viewed as a normal website.
+ * Inside the Retro Desktop's NetCrawler browser (html.in-desktop, set by classic.js)
+ * the pages keep the full retro look from classic.css.
+ *
+ * Retro tinges kept on purpose: the pixel-art logo, the pixel font for the tagline and the
+ * big numbers, and a thin navy > teal > magenta stripe across the top of the header.
+ *
+ * Sections: tokens > page > header/nav > panels & type > buttons > cards > tags/stats/etc > footer > small screens
+ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');   /* Traditional View's typeface */
+
+
+/* ---------- Tokens ---------- */
+html:not(.in-desktop) {
+    --m-bg: #e3e8f0;        /* page background: a slate tint so white panels stand out */
+    --m-surface: #ffffff;
+    --m-ink: #1c2433;
+    --m-muted: #5b6475;
+    --m-line: #d3dae6;
+    --m-navy: #14286b;        /* primary (the old title-bar navy, softened) */
+    --m-teal: #0f7c80;        /* secondary (the old desktop teal) */
+    --m-magenta: #b3268f;     /* a small fuchsia accent */
+    --m-soft: #eef2fb;        /* tinted background for highlights */
+    --m-radius: 12px;
+    --m-shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 4px 16px rgba(16, 24, 40, .06);
+    --m-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    /* the base stylesheet reads these, so re-point them */
+    --muted: var(--m-muted);
+    --accent: var(--m-navy);
+    --link: #14286b;
+    --visited: #14286b;
+    --face-text: var(--m-ink);
+}
+
+/* ---------- Page ---------- */
+html:not(.in-desktop) body {
+    background: var(--m-bg);
+    color: var(--m-ink);
+    font-family: var(--m-font);
+    font-size: 17px;
+    line-height: 1.75;
+}
+html:not(.in-desktop) a { color: var(--m-navy); text-decoration: underline; text-decoration-color: rgba(15,124,128,.45); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+html:not(.in-desktop) a:hover { color: var(--m-teal); text-decoration-color: currentColor; }
+html:not(.in-desktop) a:focus-visible,
+html:not(.in-desktop) button:focus-visible { outline: 3px solid var(--m-magenta); outline-offset: 2px; }
+
+/* ---------- Header / nav: white, sticky, with a slim retro stripe on top ---------- */
+html:not(.in-desktop) .site-header {
+    position: sticky; top: 0; z-index: 20;
+    /* layer 1: the 4px retro stripe along the top; layer 2: the white bar */
+    background:
+        linear-gradient(90deg, var(--m-navy), var(--m-teal), var(--m-magenta)) top / 100% 4px no-repeat,
+        rgba(255, 255, 255, .96);
+    backdrop-filter: saturate(1.4) blur(6px);
+    color: var(--m-ink);
+    border-bottom: 1px solid var(--m-line);
+    padding-top: 4px;
+    box-shadow: 0 1px 8px rgba(16, 24, 40, .05);
+}
+html:not(.in-desktop) .site-header .inner { max-width: 1080px; padding: 10px 20px; }
+html:not(.in-desktop) .brand { color: var(--m-ink) !important; }
+html:not(.in-desktop) .brand .name { font-family: var(--m-font); font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
+
+html:not(.in-desktop) .site-nav { gap: 2px; }
+html:not(.in-desktop) .site-nav a {
+    background: none; border: 0; border-radius: 8px;
+    padding: 7px 12px; font-size: 15px; font-weight: 600;
+    color: var(--m-muted) !important; filter: none;
+}
+html:not(.in-desktop) .site-nav a:hover { background: var(--m-soft); color: var(--m-navy) !important; }
+html:not(.in-desktop) .site-nav a[aria-current="page"] { background: var(--m-soft); color: var(--m-navy) !important; filter: none; }
+
+/* "Retro Desktop" switch: a small, friendly pill with a hint of the old yellow */
+html:not(.in-desktop) .mode-btn {
+    background: #fff8d9; color: #5a4700 !important;
+    border: 1px solid #ecd67a; border-radius: 999px;
+    padding: 6px 14px; font-size: 13px; font-weight: 700;
+}
+html:not(.in-desktop) .mode-btn:hover { background: #fff1b3; }
+
+/* ---------- Panels become simple white cards ---------- */
+html:not(.in-desktop) main { max-width: 1080px; margin: 18px auto; padding: 0 16px; }
+html:not(.in-desktop) .panel {
+    background: var(--m-surface);
+    border: 1px solid var(--m-line); border-radius: var(--m-radius);
+    box-shadow: var(--m-shadow);
+    padding: 0; margin-bottom: 14px;
+}
+html:not(.in-desktop) .panel-body {
+    background: none; border: 0;
+    padding: clamp(14px, 3vw, 30px);
+}
+
+html:not(.in-desktop) h1, html:not(.in-desktop) h2, html:not(.in-desktop) h3 { color: var(--m-navy); letter-spacing: -.01em; }
+html:not(.in-desktop) h1 { font-size: clamp(30px, 4.5vw, 44px); }
+html:not(.in-desktop) h2 {
+    font-size: 24px; border-bottom: 0; padding-bottom: 0; margin-top: 26px;
+}
+/* short accent bar under section headings (a quiet nod to the old dotted rules) */
+html:not(.in-desktop) h2::after {
+    content: ''; display: block; width: 44px; height: 3px; margin-top: 8px; border-radius: 2px;
+    background: linear-gradient(90deg, var(--m-teal), var(--m-magenta));
+}
+html:not(.in-desktop) .lede { font-size: 19px; color: var(--m-muted); }
+html:not(.in-desktop) .tagline { color: var(--m-teal); font-size: 11px; }
+html:not(.in-desktop) .kicker { color: var(--m-teal); font-weight: 700; }
+
+/* ---------- Buttons ---------- */
+html:not(.in-desktop) .btn {
+    background: var(--m-surface); color: var(--m-navy) !important;
+    border: 1px solid #d6dce8; border-radius: 999px;
+    padding: 8px 18px; font-size: 15px; font-weight: 600;
+    box-shadow: none;
+    transition: background .15s, border-color .15s, box-shadow .15s, transform .15s;
+}
+html:not(.in-desktop) .btn:hover { background: var(--m-soft); border-color: #b8c3da; filter: none; box-shadow: 0 2px 8px rgba(20,40,107,.12); transform: translateY(-1px); }
+html:not(.in-desktop) .btn:active { transform: translateY(0); filter: none; }
+html:not(.in-desktop) .btn.primary { background: var(--m-navy); border-color: var(--m-navy); color: #fff !important; }
+html:not(.in-desktop) .btn.primary:hover { background: #1c3690; }
+
+/* ---------- Cards ---------- */
+html:not(.in-desktop) .grid { gap: 18px; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+/* text-only banners (no screenshot yet) don't need to be tall */
+html:not(.in-desktop) .card .thumb:not(:has(img)) { aspect-ratio: 5 / 2; }
+/* in a grid that has any photo, every thumbnail keeps the same shape */
+html:not(.in-desktop) .grid:has(.thumb img) .card .thumb { aspect-ratio: 16 / 9; }
+html:not(.in-desktop) #projects .card .thumb { aspect-ratio: 4 / 3; }
+html:not(.in-desktop) #projects .grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); }
+html:not(.in-desktop) #projects .card .content { padding: 10px 12px 12px; }
+html:not(.in-desktop) .card {
+    border: 1px solid var(--m-line); outline: 0; border-radius: 10px; overflow: hidden;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+    transition: box-shadow .2s, transform .2s;
+}
+html:not(.in-desktop) .card:hover { box-shadow: var(--m-shadow); transform: translateY(-2px); }
+html:not(.in-desktop) .card .thumb {
+    font-family: var(--pixel-font); text-shadow: none; letter-spacing: 1px;
+    background: linear-gradient(135deg, var(--m-navy), #2a4bb3);
+}
+html:not(.in-desktop) .card .thumb.alt1 { background: linear-gradient(135deg, var(--m-teal), #22a3a6); }
+html:not(.in-desktop) .card .thumb.alt2 { background: linear-gradient(135deg, #6b2a8f, var(--m-magenta)); }
+html:not(.in-desktop) .card .thumb.alt3 { background: linear-gradient(135deg, #7a6212, #b08d1a); }
+html:not(.in-desktop) .card .content { padding: 16px 18px 18px; }
+html:not(.in-desktop) .card .links a { text-decoration: none; }
+html:not(.in-desktop) .card .links a::after { content: ' \2192'; }
+
+/* ---------- Tags, stats, services, quotes, photos ---------- */
+html:not(.in-desktop) .tags li {
+    background: var(--m-soft); color: var(--m-navy);
+    border: 0; border-radius: 999px; padding: 3px 12px; font-size: 13px; font-weight: 600;
+}
+html:not(.in-desktop) .stat {
+    background: var(--m-surface); border: 1px solid var(--m-line); border-radius: 10px;
+    padding: 14px 10px; border-top: 3px solid var(--m-teal);
+}
+html:not(.in-desktop) .stat strong { color: var(--m-navy); font-size: 20px; }
+html:not(.in-desktop) .service,
+html:not(.in-desktop) .related {
+    background: #f8fafc; border: 1px solid var(--m-line); border-radius: 10px;
+}
+html:not(.in-desktop) .service { padding: 16px 18px; }
+html:not(.in-desktop) .service-icon,
+html:not(.in-desktop) .side-photo { border-radius: 8px; border-color: var(--m-line); box-shadow: none; }
+html:not(.in-desktop) .testimonial {
+    background: var(--m-soft); border-left: 4px solid var(--m-teal); border-radius: 0 10px 10px 0;
+    padding: 14px 20px;
+}
+html:not(.in-desktop) .photo {
+    background: var(--m-soft); border: 1px dashed #c3cbe0; border-radius: 12px;
+}
+html:not(.in-desktop) .gallery figure { border-radius: 10px; border-color: var(--m-line); background: #f8fafc; }
+html:not(.in-desktop) .course-frame { border: 1px solid var(--m-line); border-radius: 10px; overflow: hidden; }
+html:not(.in-desktop) .course-panel { padding: 14px; }
+html:not(.in-desktop) .key-note,
+html:not(.in-desktop) .tool-group li.key { background: #fff6cc; border-radius: 4px; }
+html:not(.in-desktop) .toolbox, html:not(.in-desktop) .tool-group { border-color: var(--m-line); }
+html:not(.in-desktop) .tool-group h3 { color: var(--m-navy); }
+html:not(.in-desktop) .tool-chips li { background: #f8fafc; border-color: var(--m-line); border-radius: 999px; }
+html:not(.in-desktop) .tool-chips li a { text-decoration: none; border-bottom: 0; }
+html:not(.in-desktop) .tool-chips li a:hover { text-decoration: underline; }
+html:not(.in-desktop) .game-tile { border: 1px solid var(--m-line); border-radius: 10px; overflow: hidden; transition: transform .2s, box-shadow .2s; }
+html:not(.in-desktop) .game-tile:hover { transform: translateY(-2px); box-shadow: var(--m-shadow); }
+html:not(.in-desktop) .note { border-radius: 8px; }
+
+html:not(.in-desktop) .ticker { background: var(--m-soft); border-left: 4px solid var(--m-teal); border-radius: 0 10px 10px 0; }
+html:not(.in-desktop) .quotes.ticker-ready { border-left-width: 4px; }
+html:not(.in-desktop) .ticker-btn { background: var(--m-surface); border: 1px solid #cfd6e2; border-radius: 6px; }
+html:not(.in-desktop) .hero-photo { border: 0; border-radius: 14px; box-shadow: var(--m-shadow); }
+
+html:not(.in-desktop) .history li { border-bottom-color: var(--m-line); }
+
+html:not(.in-desktop) .site-search input { border: 1px solid #cfd6e2; border-radius: 8px; background: #f7f9fc; }
+html:not(.in-desktop) .site-search input:focus { background: #fff; border-color: var(--m-teal); outline: none; }
+html:not(.in-desktop) .search-page-form input { border: 1px solid #cfd6e2; border-radius: 8px; }
+html:not(.in-desktop) .search-hit mark { background: #fff1a8; }
+html:not(.in-desktop) .tags li:has(.tag-link) { padding: 0; }
+html:not(.in-desktop) .tag-link { padding: 3px 12px; border-radius: 999px; }
+html:not(.in-desktop) .tag-link:hover { background: #dfe6f7; text-decoration: none; }
+html:not(.in-desktop) .hit-tags .tag-link { background: var(--m-soft); border: 0; color: var(--m-navy) !important; }
+html:not(.in-desktop) .hit-tags .tag-link.is-current { background: #fff1a8; }
+
+html:not(.in-desktop) .media-note { border: 0; border-left: 3px solid #e0b400; border-radius: 6px; }
+
+/* ---------- Footer ---------- */
+html:not(.in-desktop) .site-footer { color: var(--m-muted); text-shadow: none; font-size: 14px; padding-bottom: 10px; }
+
+/* ---------- Small screens ---------- */
+@media (max-width: 640px) {
+    html:not(.in-desktop) body { font-size: 16px; }
+    html:not(.in-desktop) main { margin-top: 8px; padding: 0 6px; }
+    html:not(.in-desktop) .panel { margin-bottom: 8px; border-radius: 10px; }
+    html:not(.in-desktop) .panel-body { padding: 12px 14px; }
+    html:not(.in-desktop) h2 { font-size: 20px; margin-top: 18px; }
+    html:not(.in-desktop) .btn { padding: 7px 12px; font-size: 14px; }
+    html:not(.in-desktop) .site-header { position: static; }
+    html:not(.in-desktop) .site-header .inner { padding: 8px 12px; }
+    html:not(.in-desktop) .brand .name { font-size: 20px; }
+    html:not(.in-desktop) .site-nav a { padding: 7px 2px; font-size: 13px; background: var(--m-bg); }
+    html:not(.in-desktop) .mode-btn { padding: 4px 10px; font-size: 12px; }
+}
+
+@media print {
+    html:not(.in-desktop) .panel { box-shadow: none; border: 0; }
+    html:not(.in-desktop) h2::after { display: none; }
+}
+
+/* "What I bring" (home.html): slim clickable role headers, four across */
+html:not(.in-desktop) .grid.roles { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+html:not(.in-desktop) .grid.roles .card a.thumb { aspect-ratio: auto; padding: 14px 8px; }
+html:not(.in-desktop) .grid.roles .card .content { padding: 12px 14px 14px; }
+@media (max-width: 760px) { html:not(.in-desktop) .grid.roles { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 400px) { html:not(.in-desktop) .grid.roles { grid-template-columns: 1fr; } }
+
+/* "Related areas of expertise" (Portfolio page): small picture tiles, same look as the Areas of expertise tiles */
+html:not(.in-desktop) .related { border-left: 4px solid var(--m-teal); padding: 14px 16px 16px; }
+html:not(.in-desktop) .related h3 { color: var(--m-navy); font-size: 13px; }
+html:not(.in-desktop) .related-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+html:not(.in-desktop) .related-card {
+    border: 1px solid var(--m-line); border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(16, 24, 40, .06);
+    transition: box-shadow .2s, transform .2s;
+}
+html:not(.in-desktop) .related-card span { color: var(--m-navy); padding: 7px 9px; }
+html:not(.in-desktop) .related-card:hover { box-shadow: var(--m-shadow); transform: translateY(-2px); }
+
+/* Sample courses + learning games: four tiles across */
+html:not(.in-desktop) #courses .grid, html:not(.in-desktop) #games .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+html:not(.in-desktop) #courses .card .content, html:not(.in-desktop) #games .card .content { padding: 12px 14px 14px; }
+@media (max-width: 760px) { html:not(.in-desktop) #courses .grid, html:not(.in-desktop) #games .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 420px) { html:not(.in-desktop) #courses .grid, html:not(.in-desktop) #games .grid { grid-template-columns: 1fr; } }
+
+/* Six menu items: a wider, tighter header so everything stays on one row on a desktop screen */
+html:not(.in-desktop) .site-header .inner { max-width: 1200px; column-gap: 14px; }
+html:not(.in-desktop) .site-search input { width: 130px; }
+@media (max-width: 640px) { html:not(.in-desktop) .site-search input { width: 100%; } }   /* phones: full-width search, icon inside */
+@media (min-width: 641px) { html:not(.in-desktop) .site-nav a { padding-left: 10px; padding-right: 10px; } }
+
+/* Projects page: two wide cards */
+html:not(.in-desktop) .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 820px; }
+@media (max-width: 640px) { html:not(.in-desktop) .project-grid { grid-template-columns: 1fr; } }
+@media (min-width: 641px) and (max-width: 1140px) {
+    html:not(.in-desktop) .site-nav a { padding-left: 7px; padding-right: 7px; font-size: 14px; }
+    html:not(.in-desktop) .brand .name { font-size: 19px; }
+    html:not(.in-desktop) .site-search input { width: 110px; }
+}
+
+/* Screenshot galleries (Traditional View look) */
+html:not(.in-desktop) .shots a.zoom { border: 1px solid var(--m-line); border-radius: 10px; }
+html:not(.in-desktop) .shots figcaption { color: var(--m-muted); }
+
+/* "My toolkit" callout (about.html) */
+html:not(.in-desktop) .tool-callout { background: linear-gradient(90deg, var(--m-soft), #fff); border: 1px solid var(--m-line);
+    border-left: 4px solid var(--m-teal); border-radius: 0 10px 10px 0; transition: box-shadow .2s, transform .2s; }
+html:not(.in-desktop) .tool-callout:hover { box-shadow: var(--m-shadow); transform: translateY(-1px); filter: none; }
+html:not(.in-desktop) .tool-callout strong { color: var(--m-navy); }
+html:not(.in-desktop) .tool-callout .tc-go { color: var(--m-teal); }
+html:not(.in-desktop) .tool-callout, html:not(.in-desktop) .tool-callout:hover { text-decoration: none; }
+html:not(.in-desktop) .motion video { border: 1px solid var(--m-line); border-radius: 10px; }
+html:not(.in-desktop) .motion figcaption { color: var(--m-muted); }
+
+/* ---------- Contrast: no more white-on-white ----------
+   Page = slate tint, panels = white with a border, anything boxed INSIDE a panel (cards, stats,
+   services, quotes, callouts) = a soft blue-gray tint, so each layer reads as its own surface. */
+html:not(.in-desktop) .panel { border: 1px solid var(--m-line); box-shadow: 0 1px 3px rgba(16, 24, 40, .08), 0 6px 20px rgba(16, 24, 40, .07); }
+html:not(.in-desktop) .panel .card,
+html:not(.in-desktop) .panel .stat,
+html:not(.in-desktop) .panel .service,
+html:not(.in-desktop) .panel .related,
+html:not(.in-desktop) .panel .gallery figure,
+html:not(.in-desktop) .panel .shots figure { background: #f3f6fb; border: 1px solid var(--m-line); }
+html:not(.in-desktop) .panel .card .content { background: transparent; }
+html:not(.in-desktop) .panel .stat { background: linear-gradient(180deg, #eef3fb, #f6f8fc); border-top: 3px solid var(--m-teal); }
+html:not(.in-desktop) .panel .card:hover { background: #fff; }
+html:not(.in-desktop) .site-header { box-shadow: 0 1px 0 var(--m-line), 0 2px 10px rgba(16, 24, 40, .06); }
+html:not(.in-desktop) .site-footer { background: #d8dfea; }
+
+/* ======================================================================================
+   DARK MODE (Traditional View only). html[data-theme="dark"] is set by js/classic.js from the
+   visitor's choice (the sun/moon button in the header, saved as localStorage "site-theme") or,
+   if they never chose, from their device's own light/dark setting.
+   Tokens first, then the surfaces that use fixed light colors.
+   ====================================================================================== */
+html[data-theme="dark"]:not(.in-desktop) {
+    color-scheme: dark;
+    --m-bg: #0e1420;
+    --m-surface: #172033;
+    --m-ink: #e4e9f2;
+    --m-muted: #a3aec3;
+    --m-line: #2c3a55;
+    --m-navy: #a9c0ff;        /* headings, links, big numbers: a light periwinkle on dark */
+    --m-teal: #3cc7cb;
+    --m-magenta: #e05ab8;
+    --m-soft: #1d2a42;
+    --m-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 6px 20px rgba(0, 0, 0, .35);
+    --link: #a9c0ff;
+    --visited: #c7b4ff;
+    --dark: #2c3a55;
+    --paper: #172033;         /* base stylesheet surfaces and text (classic.css) */
+    --ink: #e4e9f2;
+}
+html[data-theme="dark"]:not(.in-desktop) a { text-decoration-color: rgba(60, 199, 203, .5); }
+html[data-theme="dark"]:not(.in-desktop) .site-header {
+    background: linear-gradient(90deg, #3552c4, var(--m-teal), var(--m-magenta)) top / 100% 4px no-repeat, rgba(18, 26, 41, .96);
+    box-shadow: 0 1px 0 var(--m-line), 0 2px 10px rgba(0, 0, 0, .4);
+}
+html[data-theme="dark"]:not(.in-desktop) .panel { box-shadow: var(--m-shadow); }
+html[data-theme="dark"]:not(.in-desktop) .panel .card,
+html[data-theme="dark"]:not(.in-desktop) .panel .stat,
+html[data-theme="dark"]:not(.in-desktop) .panel .service,
+html[data-theme="dark"]:not(.in-desktop) .panel .related,
+html[data-theme="dark"]:not(.in-desktop) .panel .gallery figure,
+html[data-theme="dark"]:not(.in-desktop) .panel .shots figure,
+html[data-theme="dark"]:not(.in-desktop) .service,
+html[data-theme="dark"]:not(.in-desktop) .related,
+html[data-theme="dark"]:not(.in-desktop) .gallery figure,
+html[data-theme="dark"]:not(.in-desktop) .tool-chips li { background: #1b2539; border-color: var(--m-line); }
+html[data-theme="dark"]:not(.in-desktop) .panel .stat { background: linear-gradient(180deg, #1e2b45, #1a2438); }
+html[data-theme="dark"]:not(.in-desktop) .panel .card:hover { background: #202c44; }
+html[data-theme="dark"]:not(.in-desktop) .site-footer { background: #0a0f19; color: var(--m-muted); }
+html[data-theme="dark"]:not(.in-desktop) .btn { background: #1d2840; border-color: #34446a; color: var(--m-ink) !important; }
+html[data-theme="dark"]:not(.in-desktop) .btn:hover { background: #26345a; border-color: #4a5d8f; }
+html[data-theme="dark"]:not(.in-desktop) .btn.primary { background: #3552c4; border-color: #3552c4; color: #fff !important; }
+html[data-theme="dark"]:not(.in-desktop) .btn.primary:hover { background: #4263dd; }
+html[data-theme="dark"]:not(.in-desktop) .mode-btn { background: #3a3210; color: #ffe27a !important; border-color: #6b5a1a; }
+html[data-theme="dark"]:not(.in-desktop) .mode-btn:hover { background: #4a3f14; }
+html[data-theme="dark"]:not(.in-desktop) .site-search input,
+html[data-theme="dark"]:not(.in-desktop) .search-page-form input { background: #111a2a; border-color: #34446a; color: var(--m-ink); }
+html[data-theme="dark"]:not(.in-desktop) .site-search input:focus { background: #0e1522; }
+html[data-theme="dark"]:not(.in-desktop) .search-hit mark,
+html[data-theme="dark"]:not(.in-desktop) .hit-tags .tag-link.is-current { background: #6b5a12; color: #fff; }
+html[data-theme="dark"]:not(.in-desktop) .tag-link:hover { background: #2a3960; }
+html[data-theme="dark"]:not(.in-desktop) .tool-group li.key,
+html[data-theme="dark"]:not(.in-desktop) .key-note { background: #3a3210; }
+html[data-theme="dark"]:not(.in-desktop) .tool-callout { background: linear-gradient(90deg, #1d2a42, #172033); }
+html[data-theme="dark"]:not(.in-desktop) .photo { border-color: #34446a; }
+html[data-theme="dark"]:not(.in-desktop) .ticker-btn { background: #1d2840; border-color: #34446a; color: var(--m-ink); }
+html[data-theme="dark"]:not(.in-desktop) img.letterhead { filter: brightness(.92); border-radius: 6px; }
+
+/* The light/dark switch in the header (added by js/classic.js) */
+html:not(.in-desktop) .theme-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0;
+    border-radius: 999px; border: 1px solid var(--m-line); background: var(--m-surface); color: var(--m-navy);
+    cursor: pointer; font-size: 17px; line-height: 1; flex: 0 0 auto;
+}
+html:not(.in-desktop) .theme-btn:hover { background: var(--m-soft); }
+html.in-desktop .theme-btn { display: none; }
+html[data-theme="dark"]:not(.in-desktop) .skip-link { background: #3a3210; color: #ffe27a; }
+html[data-theme="dark"]:not(.in-desktop) .side-photo,
+html[data-theme="dark"]:not(.in-desktop) .related-card,
+html[data-theme="dark"]:not(.in-desktop) .course-frame { background: #1b2539; border-color: var(--m-line); color: var(--m-ink); }
+html[data-theme="dark"]:not(.in-desktop) .media-note,
+html[data-theme="dark"]:not(.in-desktop) .note { background: #2f2a12; color: #f1e6b8; border-color: #8a7420; }
+html[data-theme="dark"]:not(.in-desktop) .media-note a,
+html[data-theme="dark"]:not(.in-desktop) .note a { color: #ffe27a; }
+html[data-theme="dark"]:not(.in-desktop) .ps-menu { background: #172033; border-color: var(--m-line); box-shadow: 0 8px 24px rgba(0, 0, 0, .5); }
+html[data-theme="dark"]:not(.in-desktop) .ps-go:hover { background: #26345a; }
+html[data-theme="dark"]:not(.in-desktop) .resume-switch-btns { background: #111a2a; }
+html[data-theme="dark"]:not(.in-desktop) .resume-switch-btn { color: var(--m-muted); }
+html[data-theme="dark"]:not(.in-desktop) .resume-switch-btn[aria-pressed="true"] { background: #3552c4; color: #fff; }
+html[data-theme="dark"]:not(.in-desktop) .cert-sub { color: var(--m-ink); }
+html[data-theme="dark"]:not(.in-desktop) .game-tile span { background: #1b2539; color: var(--m-ink); }
+html[data-theme="dark"]:not(.in-desktop) .game-tile { color: var(--m-ink) !important; border-color: var(--m-line); }
+html[data-theme="dark"]:not(.in-desktop) .card .thumb:not(.alt1):not(.alt2):not(.alt3) { background: linear-gradient(135deg, #1f3a99, #3552c4); }
+html:not(.in-desktop) .game-embed { border: 1px solid var(--m-line); border-radius: 10px; overflow: hidden; box-shadow: var(--m-shadow); }
+html:not(.in-desktop) .minigame-tip { border-left-color: var(--m-magenta); background: var(--m-soft); border-radius: 0 8px 8px 0; }
+html[data-theme="dark"]:not(.in-desktop) .minigame-tip { background: rgba(224, 90, 184, .1); }
+html[data-theme="dark"]:not(.in-desktop) kbd { background: #1d2840; color: var(--m-ink); border-color: #4a5d8f; }
+
+
+/* ======================================================================================
+   MODERN POLISH (Traditional View). A normal, modern portfolio look; the "retro" is kept to a
+   tinge: the navy / teal / magenta palette, the thin color stripe on top, and the gradient
+   section underlines. No pixel fonts, no underlined buttons, no boxy 90s window panels here.
+   ====================================================================================== */
+/* One modern typeface everywhere (the base stylesheet uses Verdana and a pixel font) */
+html:not(.in-desktop) body,
+html:not(.in-desktop) button,
+html:not(.in-desktop) input,
+html:not(.in-desktop) .btn,
+html:not(.in-desktop) .site-nav a,
+html:not(.in-desktop) .mode-btn,
+html:not(.in-desktop) .tagline,
+html:not(.in-desktop) .stat strong,
+html:not(.in-desktop) .grid.roles .card a.thumb,
+html:not(.in-desktop) .grid.roles .card a.thumb h3,
+html:not(.in-desktop) .brand .name { font-family: var(--m-font); }
+html:not(.in-desktop) h1, html:not(.in-desktop) h2, html:not(.in-desktop) h3 { letter-spacing: -.02em; }
+
+/* Eyebrow line under the name, like modern hero sections */
+html:not(.in-desktop) .tagline { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+/* Big, clean numbers */
+html:not(.in-desktop) .stat strong { font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; }
+html:not(.in-desktop) .grid.roles .card a.thumb h3 { font-size: 14px; font-weight: 700; letter-spacing: .12em; }
+
+/* Links: buttons, nav, brand and card links never underline; text links get a subtle one */
+html:not(.in-desktop) .site-nav a, html:not(.in-desktop) .brand, html:not(.in-desktop) .btn,
+html:not(.in-desktop) .mode-btn, html:not(.in-desktop) .card h3 a, html:not(.in-desktop) .card .links a,
+html:not(.in-desktop) .breadcrumb a, html:not(.in-desktop) .game-tile, html:not(.in-desktop) .related-card { text-decoration: none; }
+html:not(.in-desktop) .card h3 a:hover, html:not(.in-desktop) .breadcrumb a:hover { color: var(--m-teal); }
+/* No underlines by default (a modern look): links read as links by color and weight, and
+   text links underline only on hover / keyboard focus */
+html:not(.in-desktop) a, html:not(.in-desktop) a:visited { text-decoration: none; }
+html:not(.in-desktop) main p a, html:not(.in-desktop) main li a, html:not(.in-desktop) main td a,
+html:not(.in-desktop) .site-footer a, html:not(.in-desktop) .course-note a { color: #1d4ed8; font-weight: 500; }
+html:not(.in-desktop) main p a:hover, html:not(.in-desktop) main li a:hover, html:not(.in-desktop) main td a:hover,
+html:not(.in-desktop) .site-footer a:hover, html:not(.in-desktop) .course-note a:hover,
+html:not(.in-desktop) a:focus-visible { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+html[data-theme="dark"]:not(.in-desktop) main p a, html[data-theme="dark"]:not(.in-desktop) main li a,
+html[data-theme="dark"]:not(.in-desktop) main td a, html[data-theme="dark"]:not(.in-desktop) .site-footer a,
+html[data-theme="dark"]:not(.in-desktop) .course-note a { color: #8fb3ff; }
+
+/* Brand: a "JV" monogram in the retro colors instead of the pixel-art monitor */
+html:not(.in-desktop) .brand img { display: none; }
+html:not(.in-desktop) .brand::before {
+    content: 'JV'; display: inline-grid; place-items: center; width: 36px; height: 36px; flex: 0 0 36px;
+    border-radius: 10px; color: #fff; font: 800 15px/1 var(--m-font); letter-spacing: -.02em;
+    background: linear-gradient(135deg, #14286b 0%, #0f7c80 60%, #b3268f 100%);
+    box-shadow: 0 2px 6px rgba(20, 40, 107, .25);
+}
+
+/* Panels: soft, borderless cards with room to breathe (instead of stacked "windows") */
+html:not(.in-desktop) main { padding-top: 28px; }
+html:not(.in-desktop) .panel { border: 0; border-radius: 18px; margin-bottom: 22px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 8px 28px rgba(16, 24, 40, .06); }
+html:not(.in-desktop) .panel-body { padding: 36px 44px; }
+@media (max-width: 640px) { html:not(.in-desktop) .panel-body { padding: 18px 16px; } }
+
+/* The first section on each page is a hero: a light wash of the retro navy / teal / magenta */
+html:not(.in-desktop) main > .panel:first-child {
+    background:
+        radial-gradient(120% 140% at 100% 0%, rgba(179, 38, 143, .07), transparent 55%),
+        radial-gradient(120% 140% at 0% 100%, rgba(15, 124, 128, .08), transparent 55%),
+        linear-gradient(180deg, #ffffff, #f6f8fd);
+}
+html:not(.in-desktop) main > .panel:first-child h1 { font-size: clamp(34px, 5vw, 52px); line-height: 1.08; font-weight: 800; }
+
+/* Notes: a modern info callout instead of the yellow "NOTE:" strip */
+html:not(.in-desktop) .media-note, html:not(.in-desktop) .note {
+    background: #eef5f6; color: var(--m-ink); border: 0; border-left: 3px solid var(--m-teal);
+    border-radius: 10px; padding: 10px 14px 10px 40px; position: relative; font-size: 14px; line-height: 1.55;
+}
+html:not(.in-desktop) .media-note::before, html:not(.in-desktop) .note::before {
+    content: 'i'; position: absolute; left: 12px; top: 11px; width: 18px; height: 18px; border-radius: 50%;
+    display: grid; place-items: center; font: 700 12px/1 Georgia, serif; font-style: italic;
+    background: var(--m-teal); color: #fff;
+}
+html:not(.in-desktop) .media-note strong:first-child, html:not(.in-desktop) .note strong:first-child { font-weight: 600; color: var(--m-teal); }
+
+/* Footer: a full-width band, not a narrow box */
+html:not(.in-desktop) .site-footer { max-width: none; margin: 30px 0 0; padding: 26px 20px 30px; border-top: 1px solid var(--m-line);
+    background: var(--m-surface); text-align: center; }
+
+/* Buttons: a touch more modern weight */
+html:not(.in-desktop) .btn { font-weight: 600; padding: 9px 18px; }
+html:not(.in-desktop) .mode-btn { font-weight: 600; }
+
+/* Dark mode versions of the new pieces */
+html[data-theme="dark"]:not(.in-desktop) main > .panel:first-child {
+    background:
+        radial-gradient(120% 140% at 100% 0%, rgba(224, 90, 184, .10), transparent 55%),
+        radial-gradient(120% 140% at 0% 100%, rgba(60, 199, 203, .10), transparent 55%),
+        linear-gradient(180deg, #1a2438, #162033);
+}
+html[data-theme="dark"]:not(.in-desktop) .media-note, html[data-theme="dark"]:not(.in-desktop) .note { background: #16303a; color: var(--m-ink); border-color: var(--m-teal); }
+html[data-theme="dark"]:not(.in-desktop) .media-note a, html[data-theme="dark"]:not(.in-desktop) .note a { color: #7fe0e3; }
+html[data-theme="dark"]:not(.in-desktop) .site-footer { background: #0b111c; }
+html[data-theme="dark"]:not(.in-desktop) .panel { box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35); }
+
+/* The light/dark switch glows softly now and then so it reads as a button (not with reduced motion) */
+@keyframes theme-btn-glow {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(15, 124, 128, .25), 0 0 4px rgba(179, 38, 143, .15); }
+    50%      { box-shadow: 0 0 0 4px rgba(15, 124, 128, .35), 0 0 16px 3px rgba(179, 38, 143, .45); }
+}
+html:not(.in-desktop) .theme-btn { animation: theme-btn-glow 2.6s ease-in-out infinite; border-color: rgba(15, 124, 128, .5); }
+html:not(.in-desktop) .theme-btn:hover { animation: none; box-shadow: 0 0 0 3px rgba(15, 124, 128, .25); }
+html[data-theme="dark"]:not(.in-desktop) .theme-btn { color: #ffe27a; }
+@media (prefers-reduced-motion: reduce) { html:not(.in-desktop) .theme-btn { animation: none; } }
+/* Seek page (find.html), Traditional View */
+html:not(.in-desktop) .seek-logo { font-weight: 800; }
+html:not(.in-desktop) .seek-form input { border: 1px solid var(--m-line); border-radius: 999px; background: var(--m-surface); color: var(--m-ink);
+    box-shadow: 0 2px 10px rgba(16, 24, 40, .08); padding: 14px 22px; }
+html:not(.in-desktop) .seek-form input:focus { outline: none; border-color: var(--m-teal); box-shadow: 0 0 0 4px rgba(15, 124, 128, .15); }
+html[data-theme="dark"]:not(.in-desktop) .seek-logo span:nth-child(1) { color: #a9c0ff; }
+html[data-theme="dark"]:not(.in-desktop) .seek-form input { background: #111a2a; border-color: #34446a; }
+html:not(.in-desktop) .why-layout h2 { font-size: 18px; }
+html:not(.in-desktop) .why-layout p { font-size: 14px; }
+
+/* Quiz builder: Traditional View look */
+html:not(.in-desktop) .qb-q { border: 1px solid var(--m-line); border-radius: 10px; background: var(--m-soft); }
+html:not(.in-desktop) .qb-del-q { background: var(--m-soft); border-radius: 6px; }
+html:not(.in-desktop) .qb-x, html:not(.in-desktop) .qb-add-a { border-radius: 6px; border-color: var(--m-line); color: var(--m-ink); }
+html:not(.in-desktop) .qb-qtext, html:not(.in-desktop) .qb-a { border: 1px solid var(--m-line); border-radius: 6px; background: var(--m-surface); color: var(--m-ink); }
+html:not(.in-desktop) .qb-limit, html:not(.in-desktop) .qb-errors, html:not(.in-desktop) .qb-code { border-radius: 8px; }
+html[data-theme="dark"]:not(.in-desktop) .qb-limit { background: #3a3220; color: var(--m-ink); }
+html[data-theme="dark"]:not(.in-desktop) .qb-errors { background: #3a2020; color: var(--m-ink); }
+
+/* The Network (pages/network.html): Traditional View touches */
+html:not(.in-desktop) .net-site { border-radius: 8px; }
+html:not(.in-desktop) .net-site:hover { border-color: var(--m-line); background: var(--m-soft); }
+html:not(.in-desktop) .net-field input, html:not(.in-desktop) .net-code { border: 1px solid var(--m-line); border-radius: 8px; background: var(--m-surface); color: var(--m-ink); }
+
+/* On this page (js/page-toc.js) + section tags: Traditional View */
+html:not(.in-desktop) .page-toc { background: var(--m-surface); border: 1px solid var(--m-line); border-radius: 10px; overflow: hidden; box-shadow: var(--m-shadow); }
+html:not(.in-desktop) .page-toc summary { background: var(--m-soft); color: var(--m-navy); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; padding: 7px 12px; }
+html:not(.in-desktop) .page-toc ul { background: transparent; padding: 6px 12px 10px 28px; }
+html:not(.in-desktop) .page-toc li::marker { color: var(--m-magenta); }
+html:not(.in-desktop) .page-toc a { color: var(--m-ink); }
+html:not(.in-desktop) .page-toc a:hover { color: var(--m-teal); }
+html:not(.in-desktop) .tags.section-tags li { font-size: 11px; padding: 1px 9px; font-weight: 600; }
+html:not(.in-desktop) .tags.section-tags .tag-link { padding: 1px 9px; }
+
+html:not(.in-desktop) .credits-aside { background: var(--m-surface); border: 1px solid var(--m-line); border-radius: 10px; box-shadow: var(--m-shadow); padding: 12px 14px; }
+html:not(.in-desktop) .credits-aside img { border-radius: 6px; }
+html:not(.in-desktop) .credits-aside li { border-bottom-color: var(--m-line); }

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-CTPAT-COURSE.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="79bddba7">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scenemaker</title>
+    <meta name="description" content="Scenemaker by Joseph VanWagner: a node-graph branching-scenario and visual-novel authoring tool that exports SCORM 1.2. Try the live demo in your browser.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=1d028047"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=1caee827"></script>
+</head>
+<body data-title="Scenemaker" data-nav="my-projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="my-projects.html">&larr; Back to Projects</a></p>
+                <p class="kicker">Software · HTML / JavaScript / Python</p>
+                <h1>Scenemaker</h1>
+                <p class="lede">Build branching stories. Ship them as SCORM.</p>
+                <p>Scenemaker is the authoring tool I'm building for branching scenarios and visual novels. You lay out a story as connected scenes on a node graph, wire up choices with variables, conditions, and dice rolls, design the game screen in a drag-and-drop canvas, preview it, and export a SCORM 1.2 package any LMS understands (or a single self-contained web page).</p>
+                <p>I built it because branching-scenario tools tend to be either expensive subscription suites or bare-bones text tools that can't show what the finished scene will look like. Scenemaker sits in between, and it costs nothing to run: plain HTML and JavaScript, with a small Python standard-library helper on the desktop.</p>
+                <div class="btn-row">
+                    <a class="btn primary" href="../work/scenemaker/app/editor/editor.html" target="_blank" rel="noopener">Open the editor (live demo)</a>
+                    <button class="btn retro-only" type="button" onclick="parent.SceneMakerApp && parent.SceneMakerApp.open()" title="Opens the editor as its own program on the desktop, with a full-screen button">Open as a desktop program</button>
+                    <a class="btn" href="../work/scenemaker/index.html" target="_blank" rel="noopener">Scenemaker's own site</a>
+                </div>
+                <p class="course-note">The demo runs entirely in your browser: nothing to install, no account. Saving downloads a project file, exports carry a small "made with the demo" credit, and SCORM export is reserved for the full desktop app.</p>
+                <p><strong>Want to test the full app?</strong> Scenemaker isn't public yet. <a href="contact.html">Contact me</a> and I'll set you up with access.</p>
+            </div>
+        </section>
+
+        <!-- A sample story made with Scenemaker: /work/scenemaker/downloads/whistleblower-sample.html -->
+        <section class="panel">
+            <div class="panel-body course-panel">
+                <h2>Play a story made with it</h2>
+                <p>"The Whistleblower" is Scenemaker's built-in sample: seven scenes, branching choices, tracked variables, and three endings, exported as one web page.</p>
+                <div class="course-frame">
+                    <iframe data-demo src="../work/scenemaker/downloads/whistleblower-sample.html" title="The Whistleblower (sample story made with Scenemaker)" loading="lazy" allow="fullscreen; autoplay" allowfullscreen></iframe>
+                </div>
+                <p class="course-note">Also available as a real <a href="../work/scenemaker/downloads/whistleblower-scorm.zip">SCORM 1.2 package</a> (the kind Scenemaker builds for an LMS).</p>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Branching scenarios</li><li>SCORM</li><li>Playable demo</li></ul>
+
+                <h2>What it does</h2>
+                <ul>
+                    <li><strong>Story structure:</strong> a node graph where every scene is a draggable box; groups, zoom to fit, and choices with variable requirements, variable changes, dice rolls, and multi-branch routing.</li>
+                    <li><strong>Game screen:</strong> a canvas editor for backgrounds, characters with expressions, dialogue boxes, and layers, plus scene effects, transitions, and sound.</li>
+                    <li><strong>Export:</strong> SCORM 1.2 with scoring and mastery settings, a single self-contained web page, a standalone app, or a printable storyboard.</li>
+                    <li><strong>Built to teach itself:</strong> a searchable help index, a guided tour through a sample story, and mini-tutorials the first time you open each panel.</li>
+                </ul>
+                <figure class="side-photo"><img src="../work/scenemaker/shots/start-screen.png" alt="Scenemaker's start screen" loading="lazy"><figcaption>The start screen: a new story, an existing one, or the guided sample tour.</figcaption></figure>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Node graphs</li><li>Authoring tools</li></ul>
+                <h2>Design features</h2>
+                <ul class="tags"><li>Branching scenarios</li><li>SCORM</li><li>JavaScript</li><li>Python</li><li>Node graphs</li><li>Visual novels</li><li>Walkthroughs</li></ul>
+                <div class="btn-row">
+                    <a class="btn" href="my-projects.html">&larr; Back to Projects</a>
+                    <a class="btn primary" href="contact.html">Contact me for access</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

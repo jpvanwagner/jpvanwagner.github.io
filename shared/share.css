@@ -1,0 +1,73 @@
+/*
+ * SHARE.CSS - The Share and Add to Favorites pop-ups (shared/share.js), used by both the
+ * Traditional View pages and the retro desktop. Self-contained colors so it looks right in both.
+ */
+.share-overlay {
+    position: fixed; inset: 0; z-index: 1000005; display: flex; align-items: center; justify-content: center;
+    background: rgba(10, 16, 40, .45); padding: 12px;
+}
+.share-dialog {
+    width: min(540px, 100%); max-height: calc(100vh - 24px); overflow: auto;
+    background: #fff; color: #1c2433; font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    border: 2px solid; border-color: #dfdfdf #404040 #404040 #dfdfdf; box-shadow: 4px 4px 0 rgba(0,0,0,.35);
+}
+.share-titlebar {
+    display: flex; align-items: center; justify-content: space-between; padding: 4px 6px 4px 10px;
+    background: linear-gradient(90deg, #14286b, #0f7c80); color: #fff; font-weight: bold; font-size: 14px;
+}
+.share-x { width: 22px; height: 20px; padding: 0; border: 1px solid #fff; background: #c0c0c0; color: #000; font: bold 11px Tahoma, sans-serif; cursor: pointer; }
+.share-body { padding: 14px 16px 16px; }
+.share-lead { margin: 0 0 10px; }
+.share-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+/* Group labels: Work / Messaging / Social */
+.share-group { margin: 12px 0 6px; font: bold 11px system-ui, sans-serif; letter-spacing: 1px; text-transform: uppercase; color: #5b6475; }
+.share-lead + .share-group { margin-top: 4px; }
+.share-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px;
+    background: #f4f6f9; border: 1px solid #e3e7ee; border-radius: 10px; color: #1c2433; font: 12px system-ui, sans-serif;
+    text-decoration: none; cursor: pointer;
+}
+.share-item:hover, .share-item:focus { background: #eef2fb; border-color: #b7c1d3; outline: none; }
+/* the page's own link underlines and focus rings don't belong on the share tiles */
+.share-overlay a.share-item, .share-overlay a.share-item:hover, .share-win a.share-item, .share-win a.share-item:hover { text-decoration: none !important; color: #1c2433 !important; }
+.share-overlay .share-item:focus-visible, .share-win .share-item:focus-visible { outline: 2px solid #14286b !important; outline-offset: 1px; }
+.share-badge {
+    width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    color: #fff; font: bold 17px system-ui, sans-serif;
+}
+.share-link { display: flex; gap: 6px; margin-top: 12px; }
+.share-link input { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid #cfd6e2; border-radius: 6px; font: 13px system-ui, sans-serif; }
+.share-link button, .share-more {
+    padding: 6px 12px; border: 1px solid #14286b; border-radius: 6px; background: #14286b; color: #fff; font: bold 13px system-ui, sans-serif; cursor: pointer;
+}
+.share-more { margin-top: 10px; width: 100%; background: #fff; color: #14286b; }
+.share-bm { display: flex; gap: 12px; align-items: flex-start; }
+.share-star { font-size: 36px; line-height: 1; color: #e0a800; }
+.share-bm p { margin: 0 0 6px; }
+.share-small { font-size: 13px; color: #5b6475; margin: 8px 0 0; }
+.share-dialog kbd, .share-win kbd { display: inline-block; padding: 0 5px; border: 1px solid #999; border-bottom-width: 2px; border-radius: 4px; background: #f4f4f4; font: 12px monospace; }
+.share-toast {
+    position: fixed; left: 50%; bottom: 60px; z-index: 1000006; transform: translate(-50%, 20px); opacity: 0;
+    padding: 8px 14px; border-radius: 8px; background: #1c2433; color: #fff; font: 14px system-ui, sans-serif;
+    transition: opacity .2s, transform .2s; pointer-events: none;
+}
+.share-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* On the retro desktop, Share / Add to Favorites open as real windows (share.js) */
+.share-win { height: 100%; overflow: auto; box-sizing: border-box; background: #fff; color: #1c2433; font-family: system-ui, sans-serif; font-size: 14px; }
+
+/* ---------- DEMO CONTROLS (shared/demo-controls.js): tiny Mute + Full screen buttons on each game screen ---------- */
+/* Same look as the Midnight demo's own mute button (work/midnight-multiplex/demo-mute.js) */
+:where(.demo-host) { position: relative; }   /* zero weight: a box that is already positioned (desktop .game-window) keeps its own */
+.demo-ov { position: absolute; top: 8px; right: 8px; z-index: 5; display: flex; gap: 6px; }
+.demo-ov.own-mute { right: 48px; }                 /* the Midnight demo draws its own speaker in that corner */
+.demo-ov.own-mute .demo-mute { display: none; }
+.demo-btn { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; padding: 0; margin: 0;
+    cursor: pointer; color: #f1c84b; background: rgba(5, 6, 10, .72); border: 1px solid #6b2a6f; border-radius: 6px;
+    opacity: .75; transition: opacity .15s, border-color .15s; box-shadow: none; }
+.demo-btn:hover, .demo-btn:focus-visible { opacity: 1; border-color: #c9a227; }
+.demo-btn svg { display: block; }
+/* Full screen: the box fills the screen and the game fills the box; the buttons stay in the corner */
+.demo-host:fullscreen { width: 100vw !important; height: 100vh !important; max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; background: #000; }
+.demo-host:fullscreen > iframe { position: absolute; inset: 0; width: 100% !important; height: 100% !important; aspect-ratio: auto !important; max-height: none !important; }
+

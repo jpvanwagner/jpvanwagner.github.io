@@ -1,0 +1,52 @@
+CREDITS
+=======
+
+Site design and code: Joseph VanWagner (see the About Me page).
+Built on "Brickroad OS," a retro desktop I also built, heavily reworked here.
+
+FONTS AND CODE
+--------------
+"Press Start 2P" by CodeMan38, via Google Fonts (SIL Open Font License).
+Screenshot saving in DoodleTop: html2canvas (MIT License).
+
+WALLPAPERS
+----------
+These classic wallpapers shipped with Microsoft Windows and are
+(c) Microsoft Corporation. They're included here as a nostalgic
+nod to the computers many of us learned on.
+
+Windows 3.1 (1992):
+  Arches, Argyle, Castle, Egypt, Honey, Leaves, Blue Marble, Redbrick, Tartan, Zigzag
+
+Windows 95 (1995):
+  Clouds, Setup, Black Thatch, Bubbles, Gold Weave, Houndstooth, Metal Links, Red Blocks, Sandstone, Stitches, Straw Mat, Blue Triangles, Blue Waves
+
+Windows 98 (1998):
+  Furry Dog, Gone Fishing, Greenstone, Hiking Boot, Seaside, Zapotec
+
+Windows NT 4.0 (1996):
+  Coffee Bean
+
+Sunburst: from the original site collection; original artist unknown.
+Never Gonna: a still from the set of Rick Astley's "Never Gonna Give You Up"
+music video (1987). If you picked it, congratulations: you've been rickrolled.
+
+PHOTOGRAPHS
+-----------
+Every "Photo:" wallpaper is a picture I took myself:
+  Grand Canyon, Alaska Range, Arctic Swings, Rusted Suburban, Arctic Evening,
+  Winter Over Anchorage, Tundra Valley, Scree Slope, Passing Rain, Village Snowfall,
+  Tundra Sunset, Golden Shore, Aurora Sweep, Aurora and Stars, Frozen Sea at Dusk,
+  The Hippie Tree, River Bluff.
+Photos (c) Joseph VanWagner. Please don't reuse them without asking.
+
+THEMES
+------
+Color themes inspired by classic Windows, Mac OS, Linux desktops
+(Ubuntu, Red Hat, Fedora, Debian, Linux Mint, KDE, GNOME), BeOS,
+NeXTSTEP and Amiga Workbench. Names are trademarks of their owners;
+no endorsement implied.
+
+If you made any of the artwork used here and would like credit
+(or would like it taken down), please get in touch through the
+Contact page and I will fix it right away.

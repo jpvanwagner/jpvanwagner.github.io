@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<!--
+    PAGES/FIND.HTML - "Seek", a 90s-style search engine start page for the whole portfolio (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="f2b1086c">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seek: search the portfolio</title>
+    <meta name="description" content="Seek: a search engine for the portfolio of Joseph VanWagner. Search every page, or browse by topic.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/share.js?v=1caee827"></script>
+    <script src="js/search-index.js?v=d7bd069e"></script>  <!-- built by tools/build-search-index.py -->
+    <script src="js/seek.js?v=cdf34560"></script>          <!-- this page: random page button, page count -->
+</head>
+<body data-title="Seek" class="seek-page">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <!-- SEEK: a search-engine home page for this site. Searching goes to search.html?q=...
+             (results), tags go to search.html?tag=... ; "I'm feeling curious" opens a random page. -->
+        <section class="panel seek-hero">
+            <div class="panel-body">
+                <h1 class="seek-logo" aria-label="Seek"><span>S</span><span>e</span><span>e</span><span>k</span><small>the portfolio</small></h1>
+                <form class="seek-form" action="search.html" method="get" role="search">
+                    <input type="search" name="q" placeholder="Search courses, games, skills, tools..." aria-label="Search the whole portfolio" autocomplete="off" autofocus>
+                    <div class="seek-buttons">
+                        <button class="btn primary" type="submit" title="Search every page of the portfolio">Seek</button>
+                        <button class="btn" type="button" id="seek-curious" title="Open a random page from the portfolio">I'm Feeling Curious</button>
+                    </div>
+                </form>
+                <p class="seek-count" id="seek-count">Searching every page of Joseph VanWagner's portfolio.</p>
+                <p class="seek-popular"><strong>Popular:</strong>
+                    <a href="search.html?q=Articulate%20Rise">Articulate Rise</a> &middot;
+                    <a href="search.html?q=compliance">Compliance</a> &middot;
+                    <a href="search.html?q=AI">AI</a> &middot;
+                    <a href="search.html?q=Canvas">Canvas</a> &middot;
+                    <a href="search.html?q=game">Games</a> &middot;
+                    <a href="search.html?q=de-escalation">De-escalation</a> &middot;
+                    <a href="search.html?q=Write%20Club">Write Club</a> &middot;
+                    <a href="search.html?q=Alaska">Alaska</a>
+                </p>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-body">
+                <h2>Browse the directory</h2>
+                <div class="seek-directory">
+                    <div><h3><a href="projects.html#courses">Sample courses</a></h3>
+                        <p><a href="project-ctpat-course.html">C-TPAT</a>, <a href="project-use-of-force.html">Use of Force</a>, <a href="project-heat-safety.html">Heat Safety</a>, <a href="project-ai-use-policy.html">A.I. Use Policy</a>...</p></div>
+                    <div><h3><a href="projects.html#games">Learning games</a></h3>
+                        <p><a href="project-game-mall-run.html">Mall Run</a>, <a href="project-game-quiz-man.html">Quiz-Man</a>, <a href="project-game-quizaga.html">Quizaga</a>, <a href="project-game-quizcavator.html">Quizcavator</a>, <a href="project-game-right-this-way.html">Right This Way, Please</a></p></div>
+                    <div><h3><a href="my-projects.html">Projects</a></h3>
+                        <p><a href="project-scenemaker.html">Scenemaker</a>, <a href="project-midnight-multiplex.html">Midnight at the Multiplex</a></p></div>
+                    <div><h3><a href="resume.html">Resume</a></h3>
+                        <p><a href="resume.html#tools">Software &amp; platforms</a>, experience, certifications, awards</p></div>
+                    <div><h3><a href="projects.html#projects">Areas of expertise</a></h3>
+                        <p><a href="project-instructional-design.html">Instructional Design</a>, <a href="project-teaching-training.html">Teaching &amp; Training</a>, <a href="project-curriculum.html">Curriculum</a>, <a href="project-technology.html">Technology</a>...</p></div>
+                    <div><h3><a href="about.html">About &amp; contact</a></h3>
+                        <p><a href="about.html">About me</a>, <a href="about.html#recommendations">What colleagues say</a>, <a href="contact.html">Contact</a></p></div>
+                </div>
+                <div id="search-tags"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

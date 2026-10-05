@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!--
+    INDEX.HTML - The retro desktop ("Retro View").
+    Traditional View (the plain website) lives in /pages/; see DEVELOPER-NOTES.md for the map.
+    A tiny script below sends visitors who prefer Traditional View straight there.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio</title>
+    <meta name="description" content="Joseph VanWagner: educator, instructional designer, and writer.">
+    <link rel="icon" href="images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png">
+
+    <!-- Settings (names, pages, links) live in one file -->
+    <script src="config/site-config.js?v=74d996dd"></script>
+    <script src="config/site-version.js?v=762d9161"></script>   <!-- a new stamp = tutorial tips show again -->
+    <script src="config/page-versions.js?v=17094b59"></script>   <!-- lets NetCrawler spot old cached copies of pages -->
+    <script>
+        /*
+         * VIEW MODE GATE: decide retro desktop vs classic site before anything draws.
+         *   ?mode=retro    -> remember "retro" and stay here
+         *   ?mode=classic  -> remember "classic" and go to the plain site
+         *   no preference  -> phones/narrow screens get classic, everyone else retro
+         */
+        (function () {
+            var params = new URLSearchParams(location.search);
+            var asked = params.get('mode');
+            if (asked === 'retro' || asked === 'classic') SiteMode.set(asked);
+
+            var mode = SiteMode.get();
+            if (!mode) mode = window.matchMedia('(max-width: 700px)').matches ? 'classic' : 'retro';
+
+            if (mode === 'classic') {
+                var page = (params.get('page') || 'home').replace(/\.html$/i, '') + '.html';   // ?page=about or about.html
+                if (!/^[a-z0-9_-]+\.html$/i.test(page)) page = 'home.html';
+                location.replace('pages/' + page);
+                return;
+            }
+            document.title = SiteConfig.ownerName + ' | ' + SiteConfig.osName;
+        })();
+    </script>
+    <!-- Boot animation starts as early as possible -->
+    <script src="desktop/js/core/startup.js?v=3d5c37e0"></script>
+
+    <!-- ===== DESKTOP STYLES (desktop/css/) ===== -->
+    <link rel="stylesheet" href="desktop/css/base.css?v=19d663e5">          <!-- variables, reset, wallpaper, bevels -->
+    <link rel="stylesheet" href="desktop/css/desktop-icons.css?v=a36611c9"> <!-- icons on the desktop -->
+    <link rel="stylesheet" href="desktop/css/windows.css?v=467cf603">       <!-- program windows -->
+    <link rel="stylesheet" href="desktop/css/taskbricks.css?v=15285ff0">    <!-- the brick taskbar -->
+    <link rel="stylesheet" href="desktop/css/start-menu.css?v=984fdb19">    <!-- Start menu items -->
+    <link rel="stylesheet" href="desktop/css/drawers.css?v=448d9ba3">       <!-- TOOLS + DOODLETOP drawers -->
+    <link rel="stylesheet" href="desktop/css/apps.css?v=d9ecd8bc">          <!-- browser + notes menus -->
+    <link rel="stylesheet" href="desktop/css/effects.css?v=fa4eeea8">       <!-- CRT, boot, shutdown -->
+    <link rel="stylesheet" href="desktop/css/idle-help.css?v=a06012d3">     <!-- "Need a hand?" dialog -->
+    <link rel="stylesheet" href="desktop/css/context-menu.css?v=4dcdfb98">  <!-- right-click menus -->
+    <link rel="stylesheet" href="desktop/css/first-tips.css?v=5b1a5ab9">    <!-- first-visit tip balloons -->
+    <link rel="stylesheet" href="desktop/css/os-settings.css?v=c8d17b42">   <!-- Settings window -->
+    <link rel="stylesheet" href="desktop/css/desktop-files.css?v=407b0d36">    <!-- visitor folders/files + Rubbish -->
+    <link rel="stylesheet" href="shared/share.css?v=b6d946d8">             <!-- Share / Add to Favorites pop-ups -->
+    <link rel="stylesheet" href="desktop/css/retro-cursor.css?v=af6af531">  <!-- pixel mouse pointers (TOOLS toggle) -->
+    <link rel="stylesheet" href="desktop/css/y2k.css?v=ba4f3073">           <!-- Date/Time Properties + Y2K Easter egg -->
+</head>
+<body>
+
+    <noscript>
+        <div style="position:fixed; inset:0; background:#008080; color:#fff; display:flex; align-items:center; justify-content:center; text-align:center; font:16px Verdana, sans-serif; z-index:1000000;">
+            <p>The retro desktop needs JavaScript.<br><a href="pages/home.html" style="color:#ff0;">Open the classic site instead</a>.</p>
+        </div>
+    </noscript>
+
+    <div id="boot-screen" style="display:none;"></div>
+
+    <div id="desktop-environment">
+
+        <main id="desktop"></main>
+        <div id="window-container"></div>
+        <div id="brick-layer"></div>
+
+    </div>
+
+    <div id="crt-overlay" class="crt-off"></div>
+
+    <!-- ===== DESKTOP SCRIPTS (desktop/js/) =====
+         Order matters: each "-parts / -ui / -timers / -toggles / theme-browser / wallpaper-gallery"
+         file adds onto an object created by the file listed just above it. -->
+
+    <!-- core: the "operating system" -->
+    <script src="desktop/js/core/window-manager.js?v=cc581e91"></script>
+    <script src="desktop/js/core/taskbricks.js?v=f9844bb9"></script>
+    <script src="desktop/js/core/taskbricks-parts.js?v=f9f80b1c"></script>
+    <script src="desktop/js/core/volume.js?v=0dcd63f7"></script>
+    <script src="desktop/js/core/tray-share.js?v=421831c3"></script>
+    <script src="desktop/js/core/sys-clock.js?v=ae6070cb"></script>
+    <script src="shared/demo-controls.js?v=1d028047"></script>   <!-- Mute for game / demo windows -->
+    <script src="shared/share.js?v=1caee827"></script>
+    <script src="desktop/js/core/start-menu-data.js?v=ae899bdf"></script>
+    <script src="desktop/js/core/start-menu.js?v=79c9c1e3"></script>
+    <script src="desktop/js/core/desktop-files.js?v=e6194ec1"></script>
+    <script src="desktop/js/core/desktop-icons.js?v=a1b0ca46"></script>
+    <script src="desktop/js/core/desktop-arrange.js?v=501f2b9c"></script>
+    <script src="desktop/js/core/desktop-undo.js?v=47b4f273"></script>        <!-- undo/redo for moves and the Rubbish -->
+    <script src="desktop/js/core/shutdown.js?v=83b59b34"></script>
+    <script src="desktop/js/core/view-mode.js?v=215aacb1"></script>
+    <script src="desktop/js/core/first-tips.js?v=f8a2b71b"></script>
+    <script src="desktop/js/core/feature-hints.js?v=e6c8ea54"></script>
+    <script src="desktop/js/core/idle-help.js?v=0d6cec79"></script>
+    <script src="desktop/js/core/context-menu.js?v=65a56b8d"></script>
+    <script src="desktop/js/core/menubar.js?v=0fda8124"></script>
+    <script src="desktop/js/core/menu-shortcuts.js?v=ba7b511a"></script>
+
+    <!-- apps: programs that open in windows -->
+    <script src="desktop/js/apps/browser.js?v=77915e24"></script>
+    <script src="desktop/js/apps/browser-tabs.js?v=bc3d76ff"></script>
+    <script src="desktop/js/apps/notes.js?v=6705eeee"></script>
+    <script src="desktop/js/apps/calculator.js?v=0405cb9f"></script>
+    <script src="desktop/js/apps/clock.js?v=c2ab332a"></script>
+    <script src="desktop/js/apps/clock-timers.js?v=ae68d2ed"></script>
+    <script src="desktop/js/apps/about.js?v=da79b130"></script>
+    <script src="desktop/js/apps/games.js?v=32cdcc64"></script>
+    <script src="shared/network-ring.js?v=85cbc1f1"></script>
+    <script src="desktop/js/apps/network.js?v=b6b1de90"></script>
+    <script src="desktop/js/apps/scenemaker.js?v=ce9ee986"></script>
+    <script src="desktop/js/apps/midnight.js?v=424db15b"></script>
+    <script src="desktop/js/apps/folders.js?v=92228956"></script>         <!-- Sample Courses / Games / Projects folders -->
+    <script src="desktop/js/apps/messenger.js?v=2c768e57"></script>       <!-- Messages from Joe (tray) -->
+    <script src="desktop/js/apps/os-settings.js?v=7560c767"></script>
+
+    <!-- customize: themes, wallpapers, and toys -->
+    <script src="desktop/js/customize/themes-data.js?v=bc97af1c"></script>
+    <script src="desktop/js/customize/theme-browser.js?v=cafe56b8"></script>
+    <script src="config/photos.js?v=f6819afd"></script>                <!-- my photographs (wallpapers, future Photos viewer) -->
+    <script src="desktop/js/customize/wallpapers-data.js?v=d84814ee"></script>
+    <script src="desktop/js/customize/wallpaper-gallery.js?v=f487e0a4"></script>
+    <script src="desktop/js/customize/wallpaper-cycle.js?v=4b5cdf79"></script>
+    <script src="desktop/js/customize/tools-drawer.js?v=a46130be"></script>
+    <script src="desktop/js/customize/tools-toggles.js?v=fdfdc200"></script>
+    <script src="desktop/js/customize/doodletop.js?v=65874302"></script>
+    <script src="desktop/js/customize/doodletop-ui.js?v=d9672458"></script>
+    <script src="desktop/js/customize/screensaver.js?v=95c35398"></script>
+    <script src="desktop/js/customize/drawer-tabs.js?v=dc86b7c9"></script>
+    <script src="desktop/js/customize/retro-cursor.js?v=810b91ad"></script>
+    <script src="desktop/js/customize/y2k.js?v=ffa41cf5"></script>
+
+    <!-- start-up (runs last) -->
+    <script src="desktop/js/core/main.js?v=5aefd931"></script>
+
+</body>
+</html>

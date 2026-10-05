@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<!--
+    PAGES/RESUME.HTML - Portfolio page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="ef178065">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume</title>
+    <meta name="description" content="Resume of Joseph VanWagner.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/share.js?v=1caee827"></script>
+    <script src="js/resume-view.js?v=f9017264"></script>
+</head>
+<body data-title="Resume">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <img class="letterhead" src="../images/signature-banner.png" alt="Joseph VanWagner">
+                <p class="tagline" data-tagline></p>   <!-- text: config/site-config.js (tagline) -->
+                <div class="btn-row no-print">
+                    <button class="btn" type="button" onclick="window.print()"><span class="retro-only" aria-hidden="true">🖨️ </span>Print</button>
+                    <button class="btn" type="button" data-resume-pdf title="Save the resume format you're viewing (Traditional or Functional) as a PDF: pick &quot;Save as PDF&quot; in the print window">Save as PDF</button>
+                    <span data-resume-doc class="primary"></span>   <!-- link: config/site-config.js (resumeDocId) -->
+                    <a class="btn btn-mail" href="contact.html">Contact me</a>
+                </div>
+
+                <!-- RESUME FORMAT SWITCH: "traditional" (chronological, like the PDF) is the default;
+                     "functional" groups accomplishments by skill. pages/js/resume-view.js runs it. -->
+                <div class="resume-switch no-print" role="group" aria-label="Resume format">
+                    <span class="resume-switch-label">Resume format:</span>
+                    <span class="resume-switch-btns">
+                    <button type="button" class="resume-switch-btn" data-view="traditional" aria-pressed="true"
+                        title="Jobs listed in order, most recent first (like my PDF resume)">Traditional</button>
+                    <button type="button" class="resume-switch-btn" data-view="functional" aria-pressed="false"
+                        title="Accomplishments grouped by skill, with a short work history">Functional</button>
+                    </span>
+                </div>
+
+                <h2>Summary</h2>
+                <p>
+                    Instructional designer and educator with <span data-years-since="2011-06">15</span>+ years in corporate L&amp;D and public education.
+                    I build enterprise training programs for heavily regulated industries, set up the LMS and
+                    reporting behind them, and use AI tools to cut development time without cutting quality.
+                    I work closely with operations and leadership so training lines up with what the business
+                    actually needs, and I measure whether it worked.
+                </p>
+
+                <!-- The stat boxes live in config/shared-content.js (SharedContent.stats) -->
+                <div class="stats" data-shared="stats"></div>
+
+                <div class="resume-view" data-view="traditional">
+                <h2>Core competencies</h2>
+                <ul class="competencies">
+                    <li><strong>Instructional design &amp; e-learning:</strong> Articulate Rise &amp; Storyline 360, Descript, Adobe Captivate, custom HTML/JavaScript applications</li>
+                    <li><strong>Enterprise learning systems:</strong> learning and knowledge management systems (LMS/KMS) in Tovuti, Workday, UKG, and Canvas</li>
+                    <li><strong>Artificial intelligence:</strong> Claude, Gemini, ChatGPT, Copilot</li>
+                    <li><strong>Project management &amp; data:</strong> Asana, Tableau, cross-functional collaboration, KPI (key performance indicator) tracking</li>
+                    <li><strong>Content development:</strong> curriculum design, copywriting, video production, scalable training models</li>
+                </ul>
+
+                <h2>Professional experience</h2>
+                <div class="entry">
+                    <div class="entry-head"><h3>Instructional Designer &amp; Training Facilitator</h3><span class="when">2023 to present</span></div>
+                    <p class="where">Specialized (national security services)</p>
+                    <ul>
+                        <li>Design and deliver compliance and leadership training for 16,200+ frontline officers, managers, and administrators across finance, pharmaceutical, data center, logistics, and retail client sites nationwide.</li>
+                        <li>Built and manage the company LMS/KMS: vertical-specific onboarding, branded client portals, and curated dashboards that lifted nationwide completion rates above 96%.</li>
+                        <li>Connected Asana, Tovuti, UKG, and Workday so training data is accurate and visible to Talent, Workforce, and site management teams.</li>
+                        <li>Brought AI tools into the design workflow, tripling e-course output per designer while keeping content on-brand; use agentic AI workflows with shared templates to standardize and speed up team-wide content creation.</li>
+                        <li>Put employee and client relationships first: built layered accountability that helps site and regional teams run their own training, strengthening team connections and retention while meeting compliance standards.</li>
+                        <li>Programmed custom HTML/JavaScript arcade-style quiz games directly into learning modules to raise engagement and retention.</li>
+                        <li>Work with client stakeholders, HR, and senior leadership to tailor hybrid and virtual training for high-profile national accounts.</li>
+                        <li>Deliver training from CPR/AED/First Aid and post orders to leadership development, and coach emerging leaders on facilitation and project ownership.</li>
+                    </ul>
+                </div>
+                <div class="entry">
+                    <div class="entry-head"><h3>English Teacher, Mentor Teacher &amp; Club Sponsor</h3><span class="when">2015 to 2023</span></div>
+                    <p class="where"><a href="https://www.allenisd.org/" target="_blank" rel="noopener">Allen Independent School District</a> · Allen, Texas</p>
+                    <ul>
+                        <li>Taught Phoenix GT (Pre-AP/IB) and on-level English I; served on the district English Curriculum Cadre (2019 to 2023) and rewrote the Phoenix GT English I curriculum.</li>
+                        <li>Led hands-on SaaS/PaaS training for 140+ educators and 1,700+ students, reaching 100% campus-wide Canvas adoption within the first month.</li>
+                        <li>Used student performance data to adjust curriculum and target interventions, contributing to 11%+ gains in achievement scores three years running.</li>
+                        <li>Ran small-group pull-out sessions for struggling students that raised grades by an average of one letter grade; taught summer remediation in person and online (Edgenuity) for five summers.</li>
+                        <li>As Mentor Teacher, observed and coached colleagues, gave feedback, and facilitated professional learning communities.</li>
+                        <li>Sponsored Write Club for six years, an after-school writing program that grew so large other teachers pitched in (student work published in regional and national contests and anthologies), plus Student Council; wrote and won a Creative Writing Resource Library Grant for Allen ISD, adding 100+ student-chosen books on the writing craft.</li>
+                        <li>Piloted classroom technology including Canvas (Trainer of Trainers), ClassCraft, Nearpod, and ClassroomScreen; received the Bellringer Award for years of open &ldquo;office hours&rdquo; and consistent communication with hundreds of students&rsquo; families.</li>
+                        <li>Served as <a href="https://hopesquad.com/" target="_blank" rel="noopener">Hope Squad</a> Trusted Educator and campus GSA liaison; used restorative "circles" that noticeably reduced classroom discipline incidents.</li>
+                    </ul>
+                </div>
+                <div class="entry">
+                    <div class="entry-head"><h3>Middle School Teacher &amp; Coach</h3><span class="when">2013 to 2015</span></div>
+                    <p class="where"><a href="https://www.nsbsd.org/" target="_blank" rel="noopener">North Slope Borough School District</a> · Harold Kaveolook School, Kaktovik, Alaska</p>
+                    <ul>
+                        <li>Taught a combined grades 5&ndash;8 classroom in every subject: English, social studies, science, math, and physical education.</li>
+                        <li>Built cross-curricular units on the Iñupiaq Learning Framework, connecting local culture to physics and climate change with input from families and Elders.</li>
+                        <li>Brought video games into instruction through Steam for Schools and Teach With Portals, using Portal 2, <a href="https://www.kerbalspaceprogram.com/" target="_blank" rel="noopener">Kerbal Space Program</a>, and <a href="https://universesandbox.com/" target="_blank" rel="noopener">Universe Sandbox</a> to explore physics.</li>
+                        <li>Coached cross-country running and taught cross-country skiing (Schools on Skis); sponsored the Chess Club and Writing Club.</li>
+                    </ul>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-head"><h3>Summer Extern</h3><span class="when">2023</span></div>
+                    <p class="where"><a href="https://www.netscout.com/" target="_blank" rel="noopener">NETSCOUT</a> · Allen, Texas (with <a href="https://www.wfsdallas.com/" target="_blank" rel="noopener">Dallas Workforce Solutions</a> and <a href="https://www.allenisd.org/" target="_blank" rel="noopener">Allen ISD</a>)</p>
+                    <ul>
+                        <li>Shadowed cybersecurity and network performance teams, then turned their real workflows into student-friendly case studies and career presentations for local high schools.</li>
+                    </ul>
+                </div>
+
+                <h3 class="subhead">Earlier teaching &amp; tutoring</h3>
+                <div class="entry">
+                    <div class="entry-head"><h3>Tutor, Mentor &amp; Instructor</h3><span class="when">2011 to 2013</span></div>
+                    <p class="where"><a href="https://www.kaptest.com/" target="_blank" rel="noopener">Kaplan</a> · <a href="https://www.sylvanlearning.com/" target="_blank" rel="noopener">Sylvan Learning</a> · C.H.O.I.C.E.S. · <a href="https://www.tcaps.net/" target="_blank" rel="noopener">Traverse City Area Public Schools</a> · Indiana school districts</p>
+                    <ul>
+                        <li>Tutored K&ndash;college learners one-on-one and in small groups in reading, writing, math, and ACT prep; rolled out iPad programs and trained staff and students on them.</li>
+                        <li>Mentored neurodivergent students on life skills such as goal-setting and money management; substitute taught across several Indiana districts.</li>
+                        <li>Received the 2011 Phils Award from Sylvan Learning Centers for tutoring non-traditional college students, mostly military veterans, earning college credits and trade certifications to re-enter the workforce.</li>
+                    </ul>
+                </div>
+
+                <h3 class="subhead">Writing, editing &amp; marketing</h3>
+                <div class="entry">
+                    <div class="entry-head"><h3>Marketing Copywriter</h3><span class="when">2023</span></div>
+                    <p class="where"><a href="https://www.quintessamarketing.com/" target="_blank" rel="noopener">Quintessa Marketing</a></p>
+                    <ul>
+                        <li>Wrote SEO-focused copy for personal injury law firms on tight turnarounds.</li>
+                    </ul>
+                </div>
+                <div class="entry">
+                    <div class="entry-head"><h3>Assistant Book Editor</h3><span class="when">2023</span></div>
+                    <p class="where"><a href="https://edioak.com/" target="_blank" rel="noopener">Edioak</a></p>
+                    <ul>
+                        <li>Edited manuscripts for grammar, style, and content, and connected new authors with editing and publishing resources.</li>
+                    </ul>
+                </div>
+                <div class="entry">
+                    <div class="entry-head"><h3>Literary Editor</h3><span class="when">2011 to 2012</span></div>
+                    <p class="where">Orange Quarterly (online fine arts magazine)</p>
+                    <ul>
+                        <li>Selected, proofread, and edited poetry, fiction, nonfiction, and visual art for each issue.</li>
+                    </ul>
+                </div>
+                <div class="entry">
+                    <div class="entry-head"><h3>Sales &amp; Product Demonstrations</h3><span class="when">2009 to 2011</span></div>
+                    <p class="where"><a href="https://www.rosettastone.com/" target="_blank" rel="noopener">Rosetta Stone</a></p>
+                    <ul>
+                        <li>Demonstrated language-learning software to prospective customers and built a shared sales-lead database that helped the team earn Top Regional Sales in Q4 2011.</li>
+                    </ul>
+                </div>
+                <div class="entry">
+                    <div class="entry-head"><h3>Managing Editor, Co-Editor-in-Chief &amp; Staff Writer</h3><span class="when">2006 to 2009</span></div>
+                    <p class="where"><a href="https://www.whitepinepresstc.com/" target="_blank" rel="noopener">White Pine Press</a> (college newspaper) · NMC Magazine</p>
+                    <ul>
+                        <li>Ran the editorial process and wrote news, features, and editorials; won First Place Staff Editorial from the <a href="https://www.mccpa2026.com/" target="_blank" rel="noopener">Community College Press Association</a> two years running (2007, 2008).</li>
+                        <li>Reported from the <a href="https://transmediale.de/" target="_blank" rel="noopener">Transmediale Festival for Art and Digital Culture</a> in Berlin for the college arts magazine.</li>
+                    </ul>
+                </div>
+
+                </div>
+
+                <div class="resume-view" data-view="functional">
+                <h2>Areas of expertise</h2>
+                <div class="expertise">
+                    <section>
+                        <h3>Instructional design</h3>
+                        <ul>
+                            <li>Lead the design, delivery, and improvement of large-scale leadership, compliance, and workforce training for officers, managers, talent specialists, and administrators in finance, pharmaceutical, data center, logistics, and retail settings.</li>
+                            <li>Use AI tools (Claude, Gemini, ChatGPT, Copilot) and authoring platforms (Articulate 360, Twine, Descript) to build three times as many e-courses per designer while keeping quality, personality, and brand alignment.</li>
+                            <li>Program arcade-style HTML/JavaScript quiz games into courses to raise engagement and retention.</li>
+                            <li>Adapt curriculum to new technology, earning strong feedback from learners, colleagues, and supervisors.</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h3>Learning systems &amp; project management</h3>
+                        <ul>
+                            <li>Architect and run enterprise learning, HR, and knowledge management systems: branded client portals, industry-specific onboarding, and curated dashboards that lifted completion above 96%.</li>
+                            <li>Drive adoption and integration of Asana, Tovuti, Workday, UKG, and Tableau so training data is accurate and visible across Talent, Workforce, and regional management teams.</li>
+                            <li>Serve as liaison between clients, operations, talent acquisition, and senior leadership on national accounts.</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h3>Training, teaching &amp; mentoring</h3>
+                        <ul>
+                            <li>Deliver virtual, on-site, and hybrid training for 16,200+ frontline workers, from First Aid / CPR / AED and post orders to advanced leadership development; certified HSI Instructor Trainer.</li>
+                            <li>Mentor and coach emerging leaders on facilitation, instructional design, and project ownership.</li>
+                            <li>Trained 140+ educators and 1,700+ students on Canvas, reaching 100% campus adoption in the first month; wrote guides and hands-on sessions for other classroom software.</li>
+                            <li>Taught 1,200+ students as a classroom teacher in person, live online, and in hybrid classes, and tutored 500+ more privately; data-driven interventions raised achievement scores 11%+ three years running.</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h3>Writing, editing &amp; communication</h3>
+                        <ul>
+                            <li>Search-optimized marketing copy for law firms; book and magazine editing; grant writing (Creative Writing Resource Library Grant for Allen ISD).</li>
+                            <li>Award-winning editorial writing (two-time First Place Staff Editorial) and managing editor of a college newspaper.</li>
+                        </ul>
+                    </section>
+                </div>
+
+                <h2>Work history</h2>
+                <div class="history">
+                    <section>
+                        <h3>Training, teaching &amp; mentoring</h3>
+                        <ul>
+                            <li><span class="when">2023 to present</span> Instructional Designer &amp; Training Facilitator, Specialized</li>
+                            <li><span class="when">2023</span> Summer Extern, NETSCOUT</li>
+                            <li><span class="when">2015 to 2023</span> English Teacher &amp; Mentor Teacher, <a href="https://www.allenisd.org/" target="_blank" rel="noopener">Allen ISD</a></li>
+                            <li><span class="when">2013 to 2015</span> Middle School Teacher &amp; Coach, North Slope Borough School District</li>
+                            <li><span class="when">2011 to 2013</span> Tutor &amp; Mentor: Kaplan, <a href="https://www.sylvanlearning.com/" target="_blank" rel="noopener">Sylvan Learning</a>, C.H.O.I.C.E.S., Traverse City Area Public Schools</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h3>Writing, editing &amp; marketing</h3>
+                        <ul>
+                            <li><span class="when">2023</span> Copywriter &amp; Editor, Quintessa Marketing</li>
+                            <li><span class="when">2023</span> Assistant Book Editor, Edioak</li>
+                            <li><span class="when">2011 to 2012</span> Literary Editor, Orange Quarterly</li>
+                            <li><span class="when">2009 to 2011</span> Sales &amp; Product Demonstrations, <a href="https://www.rosettastone.com/" target="_blank" rel="noopener">Rosetta Stone</a></li>
+                            <li><span class="when">2006 to 2009</span> Managing Editor &amp; Staff Writer, White Pine Press</li>
+                        </ul>
+                    </section>
+                </div>
+
+                </div>
+
+                <h2>Education</h2>
+                <div class="entry">
+                    <div class="entry-head"><h3>Bachelor of Arts, English</h3><span class="when">2011</span></div>
+                    <p class="where"><a href="https://www.gvsu.edu/" target="_blank" rel="noopener">Grand Valley State University</a> · Minor in Psychology · Dean's List · Berkowitz Scholarship</p>
+                </div>
+                <div class="entry">
+                    <div class="entry-head"><h3>Associate of Arts &amp; Sciences</h3><span class="when">2006</span></div>
+                    <p class="where"><a href="https://www.nmc.edu/" target="_blank" rel="noopener">Northwestern Michigan College</a> · Writing Center tutor, White Pine Press, NMC Magazine</p>
+                </div>
+
+                <!-- Certifications: acronyms spelled out, each issuer linked to its own website -->
+                <h2 id="certifications">Certifications &amp; licenses</h2>
+                <ul class="cert-list">
+                    <li class="cert-group"><strong>First Aid / CPR / AED Instructor</strong>
+                        <ul>
+                            <li><span class="cert-sub">Instructor &amp; Instructor Trainer</span><span><a href="https://www.hsi.com/" target="_blank" rel="noopener">Health &amp; Safety Institute (HSI)</a>, 2024 to 2026</span></li>
+                            <li><span class="cert-sub">Instructor</span><span><a href="https://www.heart.org/" target="_blank" rel="noopener">American Heart Association (AHA)</a>, 2010 to 2022</span></li>
+                        </ul></li>
+                    <li class="cert-group"><strong>Texas Educator Certificate</strong>
+                        <ul>
+                            <li><span class="cert-sub">Secondary English</span></li>
+                            <li><span class="cert-sub">English as a Second Language (ESL)</span></li>
+                            <li><span class="cert-sub">Gifted &amp; Talented</span></li>
+                            <li><span class="cert-sub">Psychology</span></li>
+                        </ul>
+                        <span><a href="https://tea.texas.gov/" target="_blank" rel="noopener">Texas Education Agency (TEA)</a>, 2015 to 2026</span>
+                        <span class="cert-older">Previously licensed to teach English and Psychology in Alaska, Colorado, Illinois, Indiana, Michigan, Virginia, and Washington</span></li>
+                    <li class="cert-group"><strong>CS50: Introduction to Computer Science</strong><span><a href="https://cs50.harvard.edu/" target="_blank" rel="noopener">Harvard University</a>, 2023</span></li>
+                    <li class="cert-group"><strong>QPR (Question, Persuade, Refer) Suicide Prevention</strong><span><a href="https://www.granthalliburton.org/" target="_blank" rel="noopener">Grant Halliburton Foundation</a>, 2023</span></li>
+                    <li class="cert-group"><strong>Stop the Bleed</strong><span><a href="https://www.stopthebleed.org/" target="_blank" rel="noopener">Stop the Bleed</a>, <a href="https://www.dhs.gov/" target="_blank" rel="noopener">U.S. Department of Homeland Security</a> program, 2022</span></li>
+                    <li class="cert-group"><strong>Accredited Interscholastic Coach</strong><span><a href="https://www.nfhs.org/" target="_blank" rel="noopener">National Federation of State High School Associations (NFHS)</a>, 2013</span></li>
+                    <li class="cert-group"><strong>Responsible Thinking Process (RTP) Practitioner</strong><span><a href="https://responsiblethinking.com/" target="_blank" rel="noopener">Responsible Thinking Process</a>, 2010</span></li>
+                </ul>
+
+                <h2 id="tools">Software &amp; platforms</h2>
+                <div class="toolbox">
+                    <section class="tool-group">
+                        <h3>E-learning authoring &amp; media</h3>
+                        <ul class="tool-chips">
+                            <li><a href="https://www.articulate.com/360/" target="_blank" rel="noopener" title="Rise &amp; Storyline courses">Articulate 360</a><span class="tool-what">Rise &amp; Storyline courses</span></li>
+                            <li><a href="https://www.adobe.com/products/captivate.html" target="_blank" rel="noopener" title="Interactive e-learning">Adobe Captivate</a><span class="tool-what">Interactive e-learning</span></li>
+                            <li><a href="https://www.descript.com/" target="_blank" rel="noopener" title="Video, audio &amp; narration editing">Descript</a><span class="tool-what">Video, audio &amp; narration editing</span></li>
+                            <li><a href="https://twinery.org/" target="_blank" rel="noopener" title="Branching scenarios">Twine</a><span class="tool-what">Branching scenarios</span></li>
+                                                    <li><a href="https://www.canva.com/" target="_blank" rel="noopener" title="Graphics, slides &amp; job aids">Canva</a><span class="tool-what">Graphics, slides &amp; job aids</span></li>
+                            <li><a href="https://www.capcut.com/" target="_blank" rel="noopener" title="Short-form video editing">CapCut</a><span class="tool-what">Short-form video editing</span></li>
+                            <li><a href="https://clipchamp.com/" target="_blank" rel="noopener" title="Quick video edits &amp; screen recordings">Clipchamp</a><span class="tool-what">Quick video edits &amp; screen recordings</span></li>
+                            <li><a href="https://www.construct.net/" target="_blank" rel="noopener" title="HTML5 game prototypes">Construct 2</a><span class="tool-what">HTML5 game prototypes</span></li>
+                                                    <li><a href="https://www.vyond.com/" target="_blank" rel="noopener" title="Animated explainer videos">Vyond</a><span class="tool-what">Animated explainer videos</span></li>
+                            <li><a href="https://hourone.ai/" target="_blank" rel="noopener" title="AI presenter videos">Hour One</a><span class="tool-what">AI presenter videos</span></li>
+                            <li><a href="https://speechify.com/" target="_blank" rel="noopener" title="AI voiceover &amp; text-to-speech">Speechify</a><span class="tool-what">AI voiceover &amp; text-to-speech</span></li>
+                        </ul>
+                    </section>
+                    <section class="tool-group">
+                        <h3>Learning &amp; workforce platforms</h3>
+                        <ul class="tool-chips">
+                            <li><a href="https://www.workday.com/" target="_blank" rel="noopener" title="HR &amp; learning records">Workday</a><span class="tool-what">HR &amp; learning records</span></li>
+                            <li><a href="https://www.tovutilms.com/" target="_blank" rel="noopener" title="LMS / KMS administration">Tovuti LMS</a><span class="tool-what">LMS / KMS administration</span></li>
+                            <li><a href="https://www.ukg.com/" target="_blank" rel="noopener" title="Workforce management">UKG (Kronos)</a><span class="tool-what">Workforce management</span></li>
+                            <li><a href="https://www.instructure.com/canvas" target="_blank" rel="noopener" title="Course delivery &amp; rollout">Canvas LMS</a><span class="tool-what">Course delivery &amp; rollout</span></li>
+                            <li><a href="https://edu.google.com/workspace-for-education/classroom/" target="_blank" rel="noopener" title="Assignments, feedback &amp; class stream">Google Classroom</a><span class="tool-what">Assignments, feedback &amp; class stream</span></li>
+                        
+                            <li><b class="tool-name" title="Class communication &amp; assignments (retired in 2022)">Edmodo</b><span class="tool-what">Class communication &amp; assignments</span></li>
+                                                    <li><a href="https://www.opus.so/" target="_blank" rel="noopener" title="Mobile-first frontline training">Opus</a><span class="tool-what">Mobile-first frontline training</span></li>
+                            <li><b class="tool-name" title="Security officer training &amp; compliance">Defensify</b><span class="tool-what">Security officer training &amp; compliance</span></li>
+                            <li><a href="https://hsi.com/" target="_blank" rel="noopener" title="Safety training &amp; certification records">Otis (HSI)</a><span class="tool-what">Safety training &amp; certification records</span></li>
+                        </ul>
+                    </section>
+                    <section class="tool-group">
+                        <h3>AI assistants &amp; research</h3>
+                        <ul class="tool-chips">
+                            <li><a href="https://claude.ai/" target="_blank" rel="noopener" title="Drafting &amp; analysis">Claude</a><span class="tool-what">Drafting &amp; analysis</span></li>
+                            <li><a href="https://chatgpt.com/" target="_blank" rel="noopener" title="Outlining &amp; privacy-safe stand-in photos">ChatGPT</a><span class="tool-what">Outlining &amp; privacy-safe stand-in photos</span></li>
+                            <li><a href="https://gemini.google.com/" target="_blank" rel="noopener" title="Research &amp; Google Workspace">Gemini</a><span class="tool-what">Research &amp; Google Workspace</span></li>
+                            <li><a href="https://copilot.microsoft.com/" target="_blank" rel="noopener" title="Microsoft 365 workflows">Microsoft Copilot</a><span class="tool-what">Microsoft 365 workflows</span></li>
+                            <li><a href="https://notebooklm.google/" target="_blank" rel="noopener" title="Source-grounded research &amp; study guides">NotebookLM</a><span class="tool-what">Source-grounded research &amp; study guides</span></li>
+                            <li><a href="https://grok.com/" target="_blank" rel="noopener" title="Research &amp; ideation">Grok</a><span class="tool-what">Research &amp; ideation</span></li>
+                                                    <li><a href="https://otter.ai/" target="_blank" rel="noopener" title="Meeting transcripts &amp; notes">Otter</a><span class="tool-what">Meeting transcripts &amp; notes</span></li>
+                        </ul>
+                    </section>
+                    <section class="tool-group">
+                        <h3>Collaboration, productivity &amp; data</h3>
+                        <ul class="tool-chips">
+                            <li><a href="https://asana.com/" target="_blank" rel="noopener" title="Projects, requests &amp; integrations">Asana</a><span class="tool-what">Projects, requests &amp; integrations</span></li>
+                            <li><a href="https://www.smartsheet.com/" target="_blank" rel="noopener" title="Project tracking &amp; workflows">Smartsheet</a><span class="tool-what">Project tracking &amp; workflows</span></li>
+                            <li><a href="https://www.tableau.com/" target="_blank" rel="noopener" title="KPI dashboards &amp; reporting">Tableau</a><span class="tool-what">KPI dashboards &amp; reporting</span></li>
+                            <li><a href="https://www.microsoft.com/microsoft-365" target="_blank" rel="noopener" title="Email, calendar &amp; the Office apps">Microsoft 365 (Office 365)</a><span class="tool-what">Email, calendar &amp; the Office apps</span></li>
+                            <li><a href="https://www.microsoft.com/microsoft-365/word" target="_blank" rel="noopener" title="Documents, guides &amp; job aids">Word</a><span class="tool-what">Documents, guides &amp; job aids</span></li>
+                            <li><a href="https://www.microsoft.com/microsoft-365/excel" target="_blank" rel="noopener" title="Tracking, reports &amp; data clean-up">Excel</a><span class="tool-what">Tracking, reports &amp; data clean-up</span></li>
+                            <li><a href="https://www.microsoft.com/microsoft-365/powerpoint" target="_blank" rel="noopener" title="Slides &amp; presentations">PowerPoint</a><span class="tool-what">Slides &amp; presentations</span></li>
+                            <li><a href="https://www.microsoft.com/microsoft-365/sharepoint" target="_blank" rel="noopener" title="Intranet sites &amp; document libraries">SharePoint</a><span class="tool-what">Intranet sites &amp; document libraries</span></li>
+                            <li><a href="https://www.microsoft.com/microsoft-365/onedrive" target="_blank" rel="noopener" title="File storage &amp; sharing">OneDrive</a><span class="tool-what">File storage &amp; sharing</span></li>
+                            <li><a href="https://workspace.google.com/" target="_blank" rel="noopener" title="Docs, Drive &amp; Forms">Google Workspace</a><span class="tool-what">Docs, Drive &amp; Forms</span></li>
+                                                    <li><a href="https://www.microsoft.com/microsoft-365/visio" target="_blank" rel="noopener" title="Flowcharts &amp; process diagrams">Microsoft Visio</a><span class="tool-what">Flowcharts &amp; process diagrams</span></li>
+                            <li><a href="https://www.libreoffice.org/" target="_blank" rel="noopener" title="Open-source office suite">LibreOffice</a><span class="tool-what">Open-source office suite</span></li>
+                            <li><a href="https://drive.google.com/" target="_blank" rel="noopener" title="File storage &amp; sharing">Google Drive</a><span class="tool-what">File storage &amp; sharing</span></li>
+                            <li><a href="https://www.dropbox.com/" target="_blank" rel="noopener" title="File storage &amp; sharing">Dropbox</a><span class="tool-what">File storage &amp; sharing</span></li>
+                            <li><a href="https://mega.io/" target="_blank" rel="noopener" title="Encrypted file storage &amp; sharing">MEGA</a><span class="tool-what">Encrypted file storage &amp; sharing</span></li>
+                                                    <li><a href="https://monday.com/" target="_blank" rel="noopener" title="Project &amp; workflow boards">monday.com</a><span class="tool-what">Project &amp; workflow boards</span></li>
+                            <li><a href="https://www.onenote.com/" target="_blank" rel="noopener" title="Shared notebooks">OneNote</a><span class="tool-what">Shared notebooks</span></li>
+                            <li><a href="https://www.concur.com/" target="_blank" rel="noopener" title="Travel &amp; expense reporting">SAP Concur</a><span class="tool-what">Travel &amp; expense reporting</span></li>
+                        </ul>
+                    </section>
+                    <section class="tool-group">
+                        <h3>Meetings, chat &amp; community</h3>
+                        <ul class="tool-chips">
+                            <li><a href="https://www.microsoft.com/microsoft-teams" target="_blank" rel="noopener" title="Meetings, chat &amp; team channels">Microsoft Teams</a><span class="tool-what">Meetings, chat &amp; team channels</span></li>
+                            <li><a href="https://zoom.us/" target="_blank" rel="noopener" title="Virtual training &amp; meetings">Zoom</a><span class="tool-what">Virtual training &amp; meetings</span></li>
+                            <li><a href="https://www.webex.com/" target="_blank" rel="noopener" title="Virtual training &amp; meetings">Webex</a><span class="tool-what">Virtual training &amp; meetings</span></li>
+                            <li><a href="https://www.gather.town/" target="_blank" rel="noopener" title="Virtual offices, events &amp; training spaces">Gather</a><span class="tool-what">Virtual offices, events &amp; training spaces</span></li>
+                            <li><a href="https://discord.com/" target="_blank" rel="noopener" title="Community servers, voice &amp; chat">Discord</a><span class="tool-what">Community servers, voice &amp; chat</span></li>
+                            <li><a href="https://stoat.chat/" target="_blank" rel="noopener" title="Open-source community chat">Stoat</a><span class="tool-what">Open-source community chat</span></li>
+                            <li><b class="tool-name" title="Classic real-time chat channels">IRC</b><span class="tool-what">Classic real-time chat channels</span></li>
+                        </ul>
+                    </section>
+                    <section class="tool-group">
+                        <h3>Social media &amp; video</h3>
+                        <ul class="tool-chips">
+                            <li><a href="https://www.linkedin.com/" target="_blank" rel="noopener" title="Professional networking &amp; posts">LinkedIn</a><span class="tool-what">Professional networking &amp; posts</span></li>
+                            <li><a href="https://www.facebook.com/" target="_blank" rel="noopener" title="Pages, groups &amp; events">Facebook</a><span class="tool-what">Pages, groups &amp; events</span></li>
+                            <li><a href="https://www.instagram.com/" target="_blank" rel="noopener" title="Photos, reels &amp; stories">Instagram</a><span class="tool-what">Photos, reels &amp; stories</span></li>
+                            <li><a href="https://www.snapchat.com/" target="_blank" rel="noopener" title="Short-form stories">Snapchat</a><span class="tool-what">Short-form stories</span></li>
+                            <li><a href="https://x.com/" target="_blank" rel="noopener" title="Updates &amp; announcements">X (Twitter)</a><span class="tool-what">Updates &amp; announcements</span></li>
+                            <li><a href="https://bsky.app/" target="_blank" rel="noopener" title="Decentralized social posts">Bluesky</a><span class="tool-what">Decentralized social posts</span></li>
+                            <li><a href="https://www.reddit.com/" target="_blank" rel="noopener" title="Community discussion">Reddit</a><span class="tool-what">Community discussion</span></li>
+                            <li><a href="https://join-lemmy.org/" target="_blank" rel="noopener" title="Federated community forums">Lemmy</a><span class="tool-what">Federated community forums</span></li>
+                            <li><a href="https://www.pinterest.com/" target="_blank" rel="noopener" title="Visual idea boards">Pinterest</a><span class="tool-what">Visual idea boards</span></li>
+                            <li><a href="https://www.youtube.com/" target="_blank" rel="noopener" title="Video publishing &amp; channels">YouTube</a><span class="tool-what">Video publishing &amp; channels</span></li>
+                            <li><a href="https://vimeo.com/" target="_blank" rel="noopener" title="Video hosting &amp; embeds">Vimeo</a><span class="tool-what">Video hosting &amp; embeds</span></li>
+                            <li><a href="https://www.loom.com/" target="_blank" rel="noopener" title="Quick screen-recorded walkthroughs">Loom</a><span class="tool-what">Quick screen-recorded walkthroughs</span></li>
+                        </ul>
+                    </section>
+                    <section class="tool-group">
+                        <h3>Engagement &amp; classroom tools</h3>
+                        <ul class="tool-chips">
+                            <li><a href="https://kahoot.com/" target="_blank" rel="noopener" title="Live quiz games">Kahoot!</a><span class="tool-what">Live quiz games</span></li>
+                            <li><a href="https://nearpod.com/" target="_blank" rel="noopener" title="Interactive lessons">Nearpod</a><span class="tool-what">Interactive lessons</span></li>
+                            <li><a href="https://www.peardeck.com/" target="_blank" rel="noopener" title="Interactive slides">Pear Deck</a><span class="tool-what">Interactive slides</span></li>
+                            <li><a href="https://www.haikudeck.com/" target="_blank" rel="noopener" title="Simple, image-rich presentations">Haiku Deck</a><span class="tool-what">Simple, image-rich presentations</span></li>
+                            <li><a href="https://www.gimkit.com/" target="_blank" rel="noopener" title="Game-based review">Gimkit</a><span class="tool-what">Game-based review</span></li>
+                            <li><a href="https://quizlet.com/" target="_blank" rel="noopener" title="Flashcards &amp; study sets">Quizlet</a><span class="tool-what">Flashcards &amp; study sets</span></li>
+                            <li><a href="https://padlet.com/" target="_blank" rel="noopener" title="Collaborative boards &amp; walls">Padlet</a><span class="tool-what">Collaborative boards &amp; walls</span></li>
+                            <li><a href="https://classroomscreen.com/" target="_blank" rel="noopener" title="Classroom display widgets">ClassroomScreen</a><span class="tool-what">Classroom display widgets</span></li>
+                            <li><a href="https://www.remind.com/" target="_blank" rel="noopener" title="Class messaging">Remind</a><span class="tool-what">Class messaging</span></li>
+                            <li><a href="https://www.classdojo.com/" target="_blank" rel="noopener" title="Classroom community">ClassDojo</a><span class="tool-what">Classroom community</span></li>
+                            <li><a href="https://www.edgenuity.com/" target="_blank" rel="noopener" title="Online courses &amp; credit recovery">Edgenuity</a><span class="tool-what">Online courses &amp; credit recovery</span></li>
+                            <li><a href="https://www.classcraft.com/" target="_blank" rel="noopener" title="Gamified classroom (piloted)">ClassCraft</a><span class="tool-what">Gamified classroom (piloted)</span></li>
+                            <li><a href="https://education.minecraft.net/" target="_blank" rel="noopener" title="Game-based learning">Minecraft Education</a><span class="tool-what">Game-based learning</span></li>
+                            <li><b class="tool-name" title="Physics puzzles with Portal 2 in class (retired)">Steam for Schools</b><span class="tool-what">Physics puzzles with Portal 2 in class (retired)</span></li>
+                            <li><a href="https://dakboard.com/" target="_blank" rel="noopener" title="Digital signage &amp; dashboards">DAKboard</a><span class="tool-what">Digital signage &amp; dashboards</span></li>
+                        </ul>
+                    </section>
+                    <section class="tool-group">
+                        <h3>Writing, publishing &amp; world-building</h3>
+                        <ul class="tool-chips">
+                            <li><a href="https://www.literatureandlatte.com/scrivener" target="_blank" rel="noopener" title="Long-form writing &amp; scripts">Scrivener</a><span class="tool-what">Long-form writing &amp; scripts</span></li>
+                            <li><a href="https://www.wonderdraft.net/" target="_blank" rel="noopener" title="Illustrated maps for stories &amp; games">Wonderdraft</a><span class="tool-what">Illustrated maps for stories &amp; games</span></li>
+                            <li><a href="https://www.campfirewriting.com/" target="_blank" rel="noopener" title="Story planning &amp; world bibles">Campfire</a><span class="tool-what">Story planning &amp; world bibles</span></li>
+                            <li><b class="tool-name" title="Student novel-writing challenges (now defunct)">NaNoWriMo Young Writers Program</b><span class="tool-what">Student novel-writing challenges (now defunct)</span></li>
+                            <li><a href="https://wordpress.com/" target="_blank" rel="noopener" title="Websites &amp; blogs">WordPress</a><span class="tool-what">Websites &amp; blogs</span></li>
+                            <li><a href="https://www.blogger.com/" target="_blank" rel="noopener" title="Blogs">Blogger</a><span class="tool-what">Blogs</span></li>
+                        </ul>
+                    </section>
+                    <section class="tool-group">
+                        <h3>Streaming &amp; production</h3>
+                        <ul class="tool-chips">
+                            <li><a href="https://obsproject.com/" target="_blank" rel="noopener" title="Screen capture &amp; live streaming">OBS Studio</a><span class="tool-what">Screen capture &amp; live streaming</span></li>
+                            <li><a href="https://www.elgato.com/" target="_blank" rel="noopener" title="Video capture">Elgato Studio</a><span class="tool-what">Video capture</span></li>
+                            <li><a href="https://www.elgato.com/stream-deck" target="_blank" rel="noopener" title="Live production controls">Stream Deck</a><span class="tool-what">Live production controls</span></li>
+                            <li><a href="https://streamlabs.com/" target="_blank" rel="noopener" title="Stream overlays, alerts &amp; tools">Streamlabs</a><span class="tool-what">Stream overlays, alerts &amp; tools</span></li>
+                            <li><a href="https://www.twitch.tv/" target="_blank" rel="noopener" title="Live streaming">Twitch</a><span class="tool-what">Live streaming</span></li>
+                            <li><a href="https://kick.com/" target="_blank" rel="noopener" title="Live streaming">Kick</a><span class="tool-what">Live streaming</span></li>
+                                                    <li><a href="https://epic-pen.com/" target="_blank" rel="noopener" title="On-screen annotation for live demos">Epic Pen</a><span class="tool-what">On-screen annotation for live demos</span></li>
+                        </ul>
+                    </section>
+                    <section class="tool-group">
+                        <h3>Music &amp; sound</h3>
+                        <ul class="tool-chips">
+                            <li><a href="https://openmpt.org/" target="_blank" rel="noopener" title="Tracker music composition (formerly ModPlug Tracker)">OpenMPT (ModPlug Tracker)</a><span class="tool-what">Tracker music composition</span></li>
+                            <li><a href="https://milkytracker.org/" target="_blank" rel="noopener" title="Tracker music composition">MilkyTracker</a><span class="tool-what">Tracker music composition</span></li>
+                            <li><a href="https://www.audacityteam.org/" target="_blank" rel="noopener" title="Audio recording &amp; editing (with MuseHub plugins and effects)">Audacity / MuseHub</a><span class="tool-what">Audio recording &amp; editing</span></li>
+                            <li><a href="https://www.image-line.com/" target="_blank" rel="noopener" title="Music production (now FL Studio)">FruityLoops (FL Studio)</a><span class="tool-what">Music production</span></li>
+                        </ul>
+                    </section>
+                    <section class="tool-group">
+                        <h3>Code</h3>
+                        <ul class="tool-chips">
+                            <li><a href="https://developer.mozilla.org/en-US/docs/Web" target="_blank" rel="noopener" title="Custom quiz games &amp; web pages">HTML, CSS &amp; JavaScript</a><span class="tool-what">Custom quiz games &amp; web pages</span></li>
+                            <li><a href="https://www.python.org/" target="_blank" rel="noopener" title="Scripts &amp; data clean-up">Python</a><span class="tool-what">Scripts &amp; data clean-up</span></li>
+                            <li><a href="https://www.anthropic.com/claude-code" target="_blank" rel="noopener" title="Debugging &amp; optimizing code">Claude Code</a><span class="tool-what">Debugging &amp; optimizing code</span></li>
+                                                    <li><a href="https://github.com/" target="_blank" rel="noopener" title="Version control &amp; project hosting">GitHub</a><span class="tool-what">Version control &amp; project hosting</span></li>
+                        </ul>
+                    </section>
+                </div>
+
+                <h2>Awards</h2>
+                <ul>
+                    <li>Bellringer Award (2017), <a href="https://www.allenisd.org/" target="_blank" rel="noopener">Allen Independent School District (ISD)</a>: years of open &ldquo;office hours&rdquo; and consistent communication supporting hundreds of students&rsquo; families</li>
+                    <li>Creative Writing Resource Library Grant (author and recipient), <a href="https://www.allenisd.org/" target="_blank" rel="noopener">Allen ISD</a></li>
+                    <li>Phils Award (2011), <a href="https://www.sylvanlearning.com/" target="_blank" rel="noopener">Sylvan Learning Centers</a>: tutoring non-traditional college students, mostly veterans, re-entering the workforce</li>
+                    <li>Top Regional Sales, <a href="https://www.rosettastone.com/" target="_blank" rel="noopener">Rosetta Stone</a> (Q4 2011)</li>
+                    <li>Berkowitz Scholarship and Dean's List, <a href="https://www.gvsu.edu/" target="_blank" rel="noopener">Grand Valley State University</a> (2011)</li>
+                    <li>First Place Staff Editorial, <a href="https://www.mccpa2026.com/" target="_blank" rel="noopener">Community College Press Association</a> (2007, 2008)</li>
+                </ul>
+
+                <h2>Professional memberships</h2>
+                <ul>
+                    <li><a href="https://ncte.org/" target="_blank" rel="noopener">National Council of Teachers of English (NCTE)</a> (2011 to 2023), including several of its conferences</li>
+                    <li><a href="https://tcea.org/" target="_blank" rel="noopener">Texas Computer Education Association (TCEA)</a></li>
+                    <li><a href="https://www.txgifted.org/" target="_blank" rel="noopener">Texas Association for the Gifted and Talented (TAGT)</a></li>
+                    <li><a href="https://www.allenisd.org/" target="_blank" rel="noopener">Allen ISD</a> English Curriculum Cadre (2019 to 2023)</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

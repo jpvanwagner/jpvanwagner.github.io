@@ -1,0 +1,14 @@
+<!-- "System Reset" icon: a monitor with a yellow counter-clockwise "start over" arrow, 32x32 grid -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges">
+  <rect x="3" y="4" width="26" height="19" fill="#000"/><rect x="4" y="5" width="24" height="17" fill="#c0c0c0"/>
+  <rect x="6" y="7" width="20" height="13" fill="#000080"/>
+  <rect x="13" y="23" width="6" height="3" fill="#000"/><rect x="8" y="26" width="16" height="3" fill="#000"/><rect x="9" y="27" width="14" height="1" fill="#808080"/>
+  <!-- arrow circle -->
+  <rect x="13" y="9" width="6" height="2" fill="#ffd400"/>
+  <rect x="19" y="11" width="2" height="2" fill="#ffd400"/><rect x="21" y="13" width="2" height="3" fill="#ffd400"/>
+  <rect x="19" y="16" width="2" height="2" fill="#ffd400"/><rect x="13" y="18" width="6" height="2" fill="#ffd400"/>
+  <rect x="11" y="16" width="2" height="2" fill="#ffd400"/><rect x="9" y="13" width="2" height="3" fill="#ffd400"/>
+  <!-- arrow head at top-left -->
+  <rect x="11" y="8" width="2" height="5" fill="#ffd400"/><rect x="9" y="10" width="2" height="2" fill="#ffd400"/>
+  <rect x="8" y="12" width="5" height="1" fill="#ffd400"/>
+</svg>

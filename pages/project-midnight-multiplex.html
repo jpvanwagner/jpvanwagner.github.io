@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-CTPAT-COURSE.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="69718d0d">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midnight at the Multiplex</title>
+    <meta name="description" content="Midnight at the Multiplex by Joseph VanWagner: a lo-fi life and work sim, with a supernatural streak, about the staff of a nine-screen movie theater in 1999. Play the web demo in your browser.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=1d028047"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=1caee827"></script>
+    <script src="js/lightbox.js?v=af09d593"></script>          <!-- click a screenshot to see it full size -->
+</head>
+<body data-title="Midnight at the Multiplex" data-nav="my-projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="my-projects.html">&larr; Back to Projects</a></p>
+                <p class="kicker">Game · In development · Playable demo</p>
+                <h1>Midnight at the Multiplex</h1>
+                <p class="lede">A lo-fi, 1999-set life and work sim about the people who turn the lights off after the last show.</p>
+                <p>It's the summer before Y2K. Cell phones are bulky luxuries, the internet crawls, and you just got hired at the
+                   Grande: nine screens anchoring a mid-sized mall, a marquee with a couple of bulbs burned out, and carpet that smells
+                   like butter and spilled soda. Pay is $5.15 an hour. Rent is due. And after the last show lets out and the lights go
+                   down, some things in the building don't quite add up.</p>
+
+                <h2>Play the demo</h2>
+                <p>The opening of the game, right here in your browser: the title screen and intro, character creation, your first
+                   morning, arriving at the mall, the tutorial rooms, and the start of your first shift. About 15 to 20 minutes.</p>
+                <div class="game-embed">
+                    <iframe data-demo src="../work/midnight-multiplex/index.html" title="Midnight at the Multiplex: playable web demo"
+                            allow="fullscreen; autoplay" allowfullscreen loading="lazy"></iframe>
+                </div>
+                <p class="course-note"><strong>How to play:</strong> click the game first (that also turns the sound on), then use
+                   the keyboard: type commands like <kbd>look</kbd> or <kbd>talk</kbd>, and move with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>.
+                   The little buttons in the game's top-right corner mute it and make it full screen. Best on a computer; phones can open it but can't really play it. Your save stays in this browser.
+                   <a href="../work/midnight-multiplex/index.html" target="_blank" rel="noopener">Open the demo in its own tab</a>.</p>
+                <!-- Retro Desktop only: the demo as its own program window (with a full-screen button) -->
+                <div class="btn-row retro-only">
+                    <button class="btn" type="button" onclick="parent.MidnightApp && parent.MidnightApp.open()" title="Opens the demo as its own program on the desktop, with a full-screen button">Open as a desktop program</button>
+                </div>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Playable demo</li><li>Text adventure</li></ul>
+
+                <!-- Two standalone minigames from the game (single files in /work/midnight-minigames/) -->
+                <h2 id="minigames">Try the minigames</h2>
+                <p>Shifts at the Grande are full of small jobs and side hustles that turn into games. These two run on their own,
+                   no character needed.</p>
+                <p class="minigame-tip"><strong>Best played full screen:</strong> click the
+                   <span class="fs-glyph" aria-hidden="true">&#x26F6;</span> button in a game's top-right corner (press it again, or hold Esc, to come back).
+                   Click inside a game first so it can hear your keyboard and mouse.</p>
+                <div class="minigames">
+                    <section class="minigame">
+                        <h3>Theater Cleanup</h3>
+                        <p>Four minutes, a leaf blower, and a 50-foot cord that snags on every seat back. Clear auditorium 3 after the
+                           7:15 show and bag what the crowd left (sometimes cash). <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to move.</p>
+                        <div class="game-embed">
+                            <iframe data-demo src="../work/midnight-minigames/theater-cleanup.html" title="Theater Cleanup: a Midnight at the Multiplex minigame"
+                                    allow="fullscreen; autoplay" allowfullscreen loading="lazy"></iframe>
+                        </div>
+                        <p class="course-note"><a href="../work/midnight-minigames/theater-cleanup.html" target="_blank" rel="noopener">Open in its own tab</a></p>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Minigames</li><li>Playable demo</li></ul>
+                    </section>
+                    <section class="minigame">
+                        <h3>Cool Justin's Timber Lanes</h3>
+                        <p>League night down the road: solo, pass-and-play, or against the computer. Aim with the mouse, scroll for spin,
+                           then hold and release to throw. Your bowler's stats change power and hook.</p>
+                        <div class="game-embed">
+                            <iframe data-demo src="../work/midnight-minigames/timber-lanes.html" title="Cool Justin's Timber Lanes: a Midnight at the Multiplex minigame"
+                                    allow="fullscreen; autoplay" allowfullscreen loading="lazy"></iframe>
+                        </div>
+                        <p class="course-note"><a href="../work/midnight-minigames/timber-lanes.html" target="_blank" rel="noopener">Open in its own tab</a></p>
+                    </section>
+                </div>
+
+                <h2>What you do</h2>
+                <ul>
+                    <li><strong>Be anyone.</strong> Pick an age from 14 to 30, seven stats, a clique (Goths, Jocks, Mallrats, Churchies,
+                        Oldheads, and more), up to three hobbies, and the skills they unlock. A 15-year-old Mallrat who can talk their way past
+                        any manager and a 29-year-old Oldhead who can fix a jammed projector in the dark live completely different summers,
+                        with different people in their corner.</li>
+                    <li><strong>Survive the shift.</strong> Dust-mopping the lobby, leaf-blowing the theaters, threading projectors, and
+                        upselling combo deals all turn into minigames and contests, because that's how anybody gets through a double.</li>
+                    <li><strong>Make the money last.</strong> Minimum wage has to cover rent, gas, bus fare, and whatever you actually want.
+                        A kid living at home and a twenty-something with a lease are playing two different games.</li>
+                    <li><strong>Make friends (and trouble).</strong> Friendships, rivalries, romance, and rumors, with the best and worst of
+                        it at Thursday Night Previews, when the mall is locked and the staff has the whole building to themselves.</li>
+                    <li><strong>Type or move.</strong> It plays like a classic text adventure and a small 3D game at once: type commands, or
+                        walk the isometric rooms, climb between floors, and sneak past whoever's watching.</li>
+                </ul>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Life sim</li><li>Character creation</li></ul>
+
+                <h2>The Horrors</h2>
+                <p>Under the day-to-day runs a second layer. The story drops a <strong>Big Bad</strong> into town (a cryptid, a
+                   cover-up, or an urban legend), plus smaller horrors like sabotage and petty crime, and all of it builds toward the
+                   finale: the end of the millennium itself, when whichever threat you've been circling comes to a head.
+                   Stress and exhaustion lower the veil, so a rough week makes a strange night more likely, and how you face it depends
+                   on who you've become and who you can trust. Of course, some nights the scariest thing isn't whatever is scratching
+                   at the projection booth door. It's the rent, the breakup, or the schedule that just came out with your hours cut.</p>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Storytelling</li><li>Mystery</li></ul>
+
+                <h2>A real 1999, or your own</h2>
+                <ul>
+                    <li><strong>A true-to-1999 campaign.</strong> One continuous story on a 5-minute clock, from the last day of school
+                        and the first day of summer 1999 all the way to the Y2K countdown. The weather is historically accurate, day by day, and the
+                        real release calendar decides what's on each screen and who lines up to see it. (Funny thing about clocks around here:
+                        they get a little strange when one reads 11:59 on the last night of 1999.)</li>
+                    <li><strong>Built to be modded.</strong> The rooms, town, characters, dialogue, movies, weather, and rules are all data.
+                        The same friendly tools I build the game with (a room editor, a town map editor, and
+                        <a href="project-scenemaker.html">Scenemaker</a> for dialogue) let anyone make a custom campaign of their own.</li>
+                </ul>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>1999</li><li>Moddable</li></ul>
+
+                <h2>How I'm building it</h2>
+                <ul>
+                    <li>Plain JavaScript with three.js for the 3D rooms; no game engine, and it runs straight from a web page.</li>
+                    <li>Original pixel art, an animated title screen, lighting, weather, and music.</li>
+                </ul>
+                <p><strong>Status:</strong> in development. The demo is the finished opening; the rest of the story, the town, and the
+                   minigames are still being built.</p>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>JavaScript</li><li>three.js</li><li>Pixel art</li></ul>
+                <h2>In motion</h2>
+                <div class="motion">
+                    <figure><video poster="../images/projects/midnight/title-screen-animated-poster.jpg" autoplay muted loop playsinline preload="metadata" title="Click to pause or play" aria-label="Animated title screen: marquee lights chase, popcorn pops, and an usher sweeps the lobby"><source src="../images/projects/midnight/title-screen-animated.webm" type="video/webm"><source src="../images/projects/midnight/title-screen-animated.mp4" type="video/mp4"></video>
+                        <figcaption>The title screen, animated: marquee lights, popping popcorn, and an usher sweeping up after the last show.</figcaption></figure>
+                    <figure><video poster="../images/projects/midnight/room-editor-3d-poster.jpg" autoplay muted loop playsinline preload="metadata" title="Click to pause or play" aria-label="A room laid out on the editor grid, then previewed in 3D and turned around"><source src="../images/projects/midnight/room-editor-3d.webm" type="video/webm"><source src="../images/projects/midnight/room-editor-3d.mp4" type="video/mp4"></video>
+                        <figcaption>From grid to room: a layout from my room editor, previewed in 3D and turned to check every wall.</figcaption></figure>
+                </div>
+                <h2>First looks</h2>
+                <p class="course-note">Click a picture to see it full size.</p>
+                <div class="shots">
+                    <figure><a class="zoom" href="../images/projects/midnight/title-screen.webp" data-caption="Title screen: the main menu, set above the concession stand."><img src="../images/projects/midnight/thumbs/title-screen.jpg" alt="Pixel-art title screen with a lit marquee over a concession stand" loading="lazy"></a><figcaption>Title screen: the main menu, set above the concession stand.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/midnight/debug-room.webp" data-caption="The isometric view inside the text-adventure layout: time, weather, stats, relationships, and a running log around the scene."><img src="../images/projects/midnight/thumbs/debug-room.jpg" alt="Isometric room with staff characters, framed by text panels for stats and a log" loading="lazy"></a><figcaption>The isometric view inside the text-adventure layout: time, weather, stats, relationships, and a running log around the scene.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/midnight/dialogue-trait-gated.png" data-caption="Branching dialogue. Some choices only appear when your stats or traits qualify."><img src="../images/projects/midnight/thumbs/dialogue-trait-gated.jpg" alt="A dialogue box from Marquee Mae with choices, over the game screen" loading="lazy"></a><figcaption>Branching dialogue. Some choices only appear when your stats or traits qualify.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/midnight/room-editor.webp" data-caption="My room editor: walls, doors, counters, and floor tiles laid out on a grid, ready to test in game."><img src="../images/projects/midnight/thumbs/room-editor.jpg" alt="A grid-based room editor with colored tiles, walls, and doors" loading="lazy"></a><figcaption>My room editor: walls, doors, counters, and floor tiles laid out on a grid, ready to test in game.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/midnight/mall-first-floor-map.png" data-caption="An early plain-text map of the mall’s first floor, used to plan the world."><img src="../images/projects/midnight/thumbs/mall-first-floor-map.jpg" alt="A text-drawn floor plan of a mall with stores, a lobby, and a food court" loading="lazy"></a><figcaption>An early plain-text map of the mall’s first floor, used to plan the world.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/midnight/outside-the-grande.webp" data-caption="The text-adventure side: your first morning outside the Grande, with your stats, sleep, cash, and a running log around the story."><img src="../images/projects/midnight/thumbs/outside-the-grande.jpg" alt="A retro text screen describing arriving at the Grande Multiplex, with character stats on the right and typed commands" loading="lazy"></a><figcaption>The text-adventure side: your first morning outside the Grande, with your stats, sleep, cash, and a running log around the story.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/midnight/two-floors-tutorial.webp" data-caption="A tutorial stop in 3D: the theater has two floors, with a ladder, stairs, a ledge to jump from, and a directory kiosk for fast travel."><img src="../images/projects/midnight/thumbs/two-floors-tutorial.jpg" alt="An isometric 3D lobby with staff characters and a purple directory kiosk, framed by stat panels and tutorial text" loading="lazy"></a><figcaption>A tutorial stop in 3D: the theater has two floors, with a ladder, stairs, a ledge to jump from, and a directory kiosk for fast travel.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/midnight/leafblower-minigame.webp" data-caption="The leafblower minigame: pick how big a mess the last crowd left, then clear the auditorium row by row."><img src="../images/projects/midnight/thumbs/leafblower-minigame.jpg" alt="A top-down theater auditorium full of seats and litter, next to a menu for choosing the mess level" loading="lazy"></a><figcaption>The leafblower minigame: pick how big a mess the last crowd left, then clear the auditorium row by row.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/midnight/saymaker-dialogue-editor.webp" data-caption="Saymaker, my first dialogue editor: lines, speakers, player choices, and dice checks wired together as nodes. It grew into Scenemaker."><img src="../images/projects/midnight/thumbs/saymaker-dialogue-editor.jpg" alt="A node-based dialogue editor with speaker lines, player choices, and a stat check, connected by colored wires" loading="lazy"></a><figcaption>Saymaker, my first dialogue editor: lines, speakers, player choices, and dice checks wired together as nodes. It grew into <a href="project-scenemaker.html">Scenemaker</a>.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/midnight/early-town-grid-map.webp" data-caption="An early grid map of the town, lettered and numbered to plan where everything goes."><img src="../images/projects/midnight/thumbs/early-town-grid-map.jpg" alt="A lettered and numbered grid map with colored markers for buildings and places" loading="lazy"></a><figcaption>An early grid map of the town, lettered and numbered to plan where everything goes.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/midnight/atlasworks-town-editor.webp" data-caption="Atlasworks, an early town map editor: click a sector to see its coordinates and terrain."><img src="../images/projects/midnight/thumbs/atlasworks-town-editor.jpg" alt="A pixel town map with a river, roads, neighborhoods, and lettered map markers" loading="lazy"></a><figcaption>Atlasworks, an early town map editor: click a sector to see its coordinates and terrain.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/midnight/isometric-wall-test.webp" data-caption="An early isometric test of the mall and theater, checking how walls join up at corners and doorways."><img src="../images/projects/midnight/thumbs/isometric-wall-test.jpg" alt="An isometric floor plan with pale teal walls on a pink checkered floor and a purple carpeted theater section" loading="lazy"></a><figcaption>An early isometric test of the mall and theater, checking how walls join up at corners and doorways.</figcaption></figure>
+                </div>
+                <ul class="tags"><li>Life sim</li><li>Adventure</li><li>Mystery</li><li>1999</li><li>Retro style</li><li>Storytelling</li><li>Playable demo</li><li>three.js</li><li>Level editor</li><li>Branching dialogue</li><li>Moddable</li></ul>
+                <div class="btn-row">
+                    <a class="btn" href="my-projects.html">&larr; Back to Projects</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

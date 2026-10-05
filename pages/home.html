@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<!--
+    PAGES/HOME.HTML - Portfolio page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="18f51e7e">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <meta name="description" content="Joseph VanWagner: educator, instructional designer, and writer.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/share.js?v=1caee827"></script>
+    <script src="js/showcase.js?v=e5d2b131"></script>
+    <script src="js/ticker.js?v=d5167092"></script>
+</head>
+<body data-title="Home">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <!-- Name + tagline come from config/site-config.js -->
+                <div class="hero">
+                <div class="hero-text">
+                <h1>Hi, I'm Joe VanWagner.</h1>
+                <p class="tagline" data-tagline></p>   <!-- text: config/site-config.js (tagline) -->
+                <p class="lede">
+                    Instructional designer, trainer, and former teacher. I design training people actually
+                    finish, and build the experiences that make them want to keep going.
+                </p>
+                <div class="btn-row">
+                    <a class="btn primary" href="resume.html">View my resume</a>
+                    <a class="btn" href="projects.html">Portfolio</a>
+                    <a class="btn" href="about.html">About me</a>
+                    <a class="btn btn-mail" href="contact.html">Get in touch</a>
+                </div>
+                </div>
+                <img class="hero-photo" src="../images/portfolio/teaching-training.jpg" alt="Joseph teaching a lesson at the whiteboard">
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-body">
+                <!-- The stat boxes live in config/shared-content.js (SharedContent.stats) -->
+                <div class="stats" data-shared="stats"></div>
+
+                <h2>What I bring</h2>
+                <!-- Four roles: the colored header is the link (styles: .roles in css/classic.css + css/modern.css) -->
+                <div class="grid roles">
+                    <article class="card">
+                        <a class="thumb" href="projects.html#leader" title="See my work as a leader"><h3>LEADER</h3></a>
+                        <div class="content">
+                            <p>As an educator, trainer, and coach, I am a passionate and empathetic leader with a focus on growth.</p>
+                            <div class="links"><a href="projects.html#leader">See this work</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <a class="thumb alt1" href="projects.html#writer" title="See my work as a writer"><h3>WRITER</h3></a>
+                        <div class="content">
+                            <p>Stories, lessons, presentations, news, briefs, and more, using tools like SEO to make sure the message is seen.</p>
+                            <div class="links"><a href="projects.html#writer">See this work</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <a class="thumb alt2" href="projects.html#collaborator" title="See my work as a collaborator"><h3>COLLABORATOR</h3></a>
+                        <div class="content">
+                            <p>Whether presenting proposals or engaging in creative pursuits, we can do more together.</p>
+                            <div class="links"><a href="projects.html#collaborator">See this work</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <a class="thumb alt3" href="projects.html#advocate" title="See my work as a advocate"><h3>ADVOCATE</h3></a>
+                        <div class="content">
+                            <p>Amplifying voices and providing safe circles of trust for causes of equity and justice.</p>
+                            <div class="links"><a href="projects.html#advocate">See this work</a></div>
+                        </div>
+                    </article>
+                </div>
+
+                <h2>Try something I built</h2>
+                <p class="media-note"></p>
+                <p>I build courses and arcade-style quiz games that people actually want to replay. Play a learning game or try
+                one of my tools right in your browser, or explore my sample e-learning courses:</p>
+                <!-- Tiles come from the #games and #courses cards on projects.html (js/showcase.js): add a game or course
+                     THERE and it shows up here too. data-extra tiles (Midnight, Scenemaker) join the games row here only. -->
+                <div class="strip-head"><h3>Games &amp; tools</h3><a href="games.html" title="Every learning game on one page">View all games &rarr;</a></div>
+                <div class="game-strip" data-showcase="games" data-count="4" aria-label="Games and tools">
+                    <a class="game-tile" href="project-midnight-multiplex.html" data-extra><img src="../images/projects/midnight/thumbs/title-screen.jpg" alt="" loading="lazy"><span>Midnight at the Multiplex (demo)</span></a>
+                    <a class="game-tile" href="project-scenemaker.html" data-extra><img src="../work/scenemaker/shots/stage-graph.png" alt="" loading="lazy"><span>Scenemaker (story tool)</span></a>
+                </div>
+                <div class="strip-head strip-sep"><h3>Sample e-learning courses</h3><a href="courses.html" title="Every sample course on one page">View all courses &rarr;</a></div>
+                <div class="game-strip course-strip" data-showcase="courses" data-count="4" aria-label="Sample courses"></div>
+                <p class="btn-row retro-only">
+                    <!-- Retro Desktop only: opens the desktop's Games folder -->
+                    <button class="btn" type="button" onclick="parent.GamesApp.openFolder()" title="Open the Games folder on the desktop">Open the Games folder</button>
+                </p>
+
+                <h2>Services</h2>
+                <p>
+                    I offer a range of services catering to clients in many fields. With my extensive background
+                    and versatile expertise, I am dedicated to providing exceptional support and empowering
+                    individuals to succeed in their professional, educational, and personal endeavors.
+                </p>
+                <div class="services">
+                    <div class="service">
+                        <img class="service-icon" src="../images/services/training.jpg" alt="Teacher at a chalkboard">
+                        <h3>Training and Orientation</h3>
+                        <p>Whether you're in the corporate world, academia, or any other field, my diverse skill set
+                        ensures that I cater to the unique needs of a broad range of clients and provide them with
+                        comprehensive and engaging learning experiences.</p>
+                    </div>
+                    <div class="service">
+                        <img class="service-icon" src="../images/services/writing.jpg" alt="Hand writing on paper">
+                        <h3>Writing and Editing</h3>
+                        <p>Comprehensive writing and editing services for any industry. Whether you need captivating
+                        news articles, persuasive marketing copy infused with SEO strategies, or meticulous
+                        proofreading to ensure flawless work, my expertise can help convey your message, enhance your
+                        brand, and leave a lasting impact on your audience.</p>
+                    </div>
+                    <div class="service">
+                        <img class="service-icon" src="../images/services/speaking.jpg" alt="Joseph speaking into a microphone">
+                        <h3>Speaking and Advocacy</h3>
+                        <p>Whether you need a dynamic event speaker, assistance with crafting impactful presentations,
+                        or effective communication guidance, I am dedicated to empowering you to articulate your ideas
+                        with confidence. Let's amplify your voice and advocate for your cause, making a lasting
+                        impression on audiences and driving meaningful change.</p>
+                    </div>
+                </div>
+
+                <!-- Excerpts from LinkedIn recommendations (full list on about.html#recommendations) -->
+                <h2>What colleagues say</h2>
+                <!-- Carousel: 3 at a time, < > loop both ways, steps every 30 s (pages/js/ticker.js) -->
+                <div class="quotes" data-ticker data-per-view="3" data-interval="30000" data-shared="colleague-quotes"></div>   <!-- quotes: config/shared-content.js -->
+                <!-- Student quotes: 1 at a time in a random order, rotates every 7 seconds, < > on either side loop both ways (pages/js/ticker.js) -->
+                <h3 class="ticker-title">From my students <small>(and a few parents and colleagues)</small></h3>
+                <div class="ticker" data-ticker data-shuffle data-interval="7000" data-shared="student-quotes"></div>   <!-- quotes: config/shared-content.js -->
+
+                <p><a href="about.html#recommendations">More recommendations</a> &middot;
+                <a href="https://linkedin.com/in/jpvanwagner" target="_blank" rel="noopener">Read them in full on LinkedIn</a></p>
+
+                <p><strong>Interested in my services and expertise?</strong> <a href="contact.html">Reach out!</a></p>
+            </div>
+        </section>
+
+        <!-- "Why the strange layout?": a short note at the very bottom (styles: .why-layout in css/classic.css) -->
+        <section class="panel why-layout">
+            <div class="panel-body" data-shared="why-layout"></div>   <!-- text: config/shared-content.js (whyLayout) -->
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

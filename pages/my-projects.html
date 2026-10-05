@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-CTPAT-COURSE.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="f6f6010b">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects</title>
+    <meta name="description" content="What Joseph VanWagner is building now: Scenemaker, a branching-scenario authoring tool, and Midnight at the Multiplex, a retro life and work sim with a supernatural streak.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/share.js?v=1caee827"></script>
+</head>
+<body data-title="Projects" data-nav="my-projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <!-- PROJECTS: what I'm building now. (Past work, like sample courses and learning games, lives on the Portfolio page.) -->
+        <section class="panel">
+            <div class="panel-body">
+                <h1>Projects</h1>
+                <p class="lede">What I'm building right now.</p>
+                <p>Looking for finished work, like sample courses and learning games? That's in my <a href="projects.html">Portfolio</a>.</p>
+                <div class="grid project-grid" id="building">
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-scenemaker.html" tabindex="-1" aria-hidden="true" title="Open Scenemaker"><img src="../work/scenemaker/shots/stage-graph.png" alt="Scenemaker's node-graph editor with connected scenes" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Software · Try the live demo</p>
+                            <h3><a href="project-scenemaker.html">Scenemaker</a></h3>
+                            <p>A branching-scenario and visual-novel authoring tool: build a story as connected scenes, design the game screen, and export SCORM 1.2 for any LMS.</p>
+                            <div class="links"><a href="project-scenemaker.html">About &amp; demo</a><a href="../work/scenemaker/app/editor/editor.html" target="_blank" rel="noopener">Open the editor</a></div>
+                        </div>
+                    </article>
+                    <!-- id="midnight-card": games.html shows this same card too (js/collection.js), so edit it only here -->
+                    <article class="card" id="midnight-card">
+                        <div class="thumb"><a class="thumb-link" href="project-midnight-multiplex.html" tabindex="-1" aria-hidden="true" title="Open Midnight at the Multiplex"><video class="motion-thumb" poster="../images/projects/midnight/thumbs/title-screen.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Animated pixel-art title screen: a lit marquee reading Midnight at the Multiplex above a concession stand"><source src="../images/projects/midnight/title-screen-animated.webm" type="video/webm"><source src="../images/projects/midnight/title-screen-animated.mp4" type="video/mp4"></video></a></div>
+                        <div class="content">
+                            <p class="kicker">Game · Play the demo</p>
+                            <h3><a href="project-midnight-multiplex.html">Midnight at the Multiplex</a></h3>
+                            <p>A lo-fi life and work sim about the staff of a nine-screen movie theater in 1999, with something strange under the surface. The opening is playable right in your browser.</p>
+                            <div class="links"><a href="project-midnight-multiplex.html">About &amp; demo</a><a href="../work/midnight-multiplex/index.html" target="_blank" rel="noopener">Play the demo</a></div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+    <script src="js/lightbox.js?v=af09d593"></script>
+</body>
+</html>

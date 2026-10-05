@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<!--
+    PAGES/CONTACT.HTML - Portfolio page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="923d0db4">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search</title>
+    <meta name="description" content="Search the portfolio of Joseph VanWagner.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/share.js?v=1caee827"></script>
+    <script src="js/search-index.js?v=d7bd069e"></script>  <!-- built by tools/build-search-index.py -->
+</head>
+<body data-title="Search">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <h1>Search</h1>
+                <form id="search-page-form" class="search-page-form" role="search">
+                    <input id="search-page-input" type="search" name="q" placeholder="Search every page of this site" aria-label="Search every page of this site" autocomplete="off">
+                    <button class="btn primary" type="submit">Search</button>
+                </form>
+                <p id="search-status" class="search-status" aria-live="polite"></p>
+                <p class="search-web" hidden><a id="search-web" href="#" target="_blank" rel="noopener" title="Search the whole web with Google">Search the web for this with Google &rarr;</a></p>
+                <ol id="search-results" class="search-results"></ol>
+                <div id="search-tags"></div>
+                <noscript><p>Search needs JavaScript. Try the <a href="projects.html">Portfolio</a> page instead.</p></noscript>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!--
+    PAGES/NETWORK.HTML - "The Network", an old-school webring hub: what it is, every member site (titles and icons
+    fetched automatically), how to join, and the copy-and-paste HTML for member sites. Member sites' ring buttons link here
+    with ?go=prev|next|random|list&from=<their address>; js/network-page.js sends visitors on to the right neighbor.
+    To add a site: put its address in `network` in config/site-config.js (one per line).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="8090f79c">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Network</title>
+    <meta name="description" content="The Network: an old-school webring of websites and portfolios from instructional designers, trainers, educators, and other professionals. Browse the ring or join it.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/share.js?v=1caee827"></script>
+    <script src="../shared/network-ring.js?v=85cbc1f1"></script>   <!-- the webring: members, neighbors, titles + icons -->
+    <script src="js/network-page.js?v=1f3b424b"></script>        <!-- this page: ring redirects, list, join code -->
+</head>
+<body data-title="The Network" class="network-page">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <!-- Shown only while sending a visitor on to the next / previous / random site (js/network-page.js) -->
+    <div class="net-hop" id="net-hop" hidden>
+        <img src="../images/network/the-network-badge.png" width="88" height="31" alt="The Network">
+        <p id="net-hop-text">Hopping to the next site in The Network&hellip;</p>
+    </div>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <h1 class="net-h1"><img src="../images/network/the-network-logo.png" width="32" height="32" alt=""> The Network</h1>
+                <p class="lede">An old-school webring of websites and portfolios from instructional designers, trainers, educators,
+                   and other professionals I know.</p>
+                <p>Remember webrings? Here's how this one works: <strong>you share your page with me, I add it to The Network,
+                   and it gets listed here.</strong> Every site in the ring carries the same little Network buttons, so visitors can
+                   hop <strong>back and forth</strong> from one member site to the next, jump to a <strong>random</strong> one, or
+                   see the <strong>full list</strong> of sites. It's a small, friendly way to send people to each other's work.</p>
+                <div class="net-ringbar" aria-label="Travel around The Network">
+                    <a id="ring-prev" href="network.html?go=prev" target="_blank" rel="noopener" title="The previous site in The Network (opens in a new tab)"><img src="../images/network/the-network-prev.png" width="31" height="31" alt="Previous site"></a>
+                    <a href="#members" data-open-list title="Every site in The Network"><img src="../images/network/the-network-list.png" width="31" height="31" alt="Full list"></a>
+                    <a id="ring-random" href="network.html?go=random" target="_blank" rel="noopener" title="A random site in The Network (opens in a new tab)"><img src="../images/network/the-network-random.png" width="31" height="31" alt="Random site"></a>
+                    <a id="ring-next" href="network.html?go=next" target="_blank" rel="noopener" title="The next site in The Network (opens in a new tab)"><img src="../images/network/the-network-next.png" width="31" height="31" alt="Next site"></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" id="join">
+            <div class="panel-body">
+                <h2>Join The Network</h2>
+                <ol class="net-steps">
+                    <li><strong>Send me your page.</strong> <a href="#email" data-email title="Opens a new email in your mail app">Email me</a>
+                        (or use the <a href="contact.html">Contact</a> page) with the address of your site or portfolio.</li>
+                    <li><strong>I add it to the ring.</strong> Your site shows up in the list below, with its title and icon.</li>
+                    <li><strong>Paste the buttons onto your page.</strong> Type your address below, then copy the code and paste it
+                        anywhere in your page's HTML (a footer works great). That's it.</li>
+                </ol>
+                <label class="net-field" for="net-your-url">Your site's address
+                    <input type="url" id="net-your-url" placeholder="https://your-site.com/" autocomplete="url" spellcheck="false"
+                           title="The address of your page, so the Prev and Next buttons know where you are on the ring">
+                </label>
+                <div class="net-preview" id="net-preview" aria-label="Preview of the buttons"></div>
+                <textarea class="net-code" id="net-code" rows="9" readonly spellcheck="false" aria-label="HTML to paste onto your page"></textarea>
+                <div class="btn-row">
+                    <button class="btn primary" type="button" id="net-copy" title="Copy the HTML so you can paste it onto your page">Copy the code</button>
+                    <span class="net-copied" id="net-copied" role="status"></span>
+                </div>
+                <h3>The graphics</h3>
+                <p class="course-note">The code above loads these straight from this site, so there's nothing to download. If you'd rather
+                   host them yourself, right-click and save them (they're tiny pixel-art PNGs).</p>
+                <div class="net-gfx">
+                    <figure><img src="../images/network/the-network-badge.png" width="88" height="31" alt="The Network 88 by 31 badge"><figcaption>Badge, 88&times;31</figcaption></figure>
+                    <figure><img src="../images/network/the-network-prev.png" width="31" height="31" alt="Prev button"><figcaption>Prev</figcaption></figure>
+                    <figure><img src="../images/network/the-network-list.png" width="31" height="31" alt="List button"><figcaption>List</figcaption></figure>
+                    <figure><img src="../images/network/the-network-random.png" width="31" height="31" alt="Random button"><figcaption>Random</figcaption></figure>
+                    <figure><img src="../images/network/the-network-next.png" width="31" height="31" alt="Next button"><figcaption>Next</figcaption></figure>
+                    <figure><img src="../images/network/the-network-logo.png" width="32" height="32" alt="The Network icon"><figcaption>Icon, 32&times;32</figcaption></figure>
+                </div>
+            </div>
+        </section>
+        <!-- Every member site: a collapsible section at the bottom (the List button opens it) -->
+        <section class="panel" id="members">
+            <div class="panel-body">
+                <details class="net-index" id="net-index" open>
+                    <summary title="Show or hide the full list of sites"><h2>Every site in The Network <span class="net-count" id="net-count"></span></h2></summary>
+                    <ul class="net-list" id="net-list"></ul>
+                    <p class="course-note" id="net-empty-note" hidden>The Network is just getting started. Yours could be the next site on it!</p>
+                </details>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

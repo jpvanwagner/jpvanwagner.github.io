@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-CTPAT-COURSE.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="f7f8ddd4">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizaga: learning game</title>
+    <meta name="description" content="Quizaga, a playable HTML/JavaScript learning game by Joseph VanWagner.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/game-frame.js?v=9300be14"></script>   <!-- fits the game frame to the game -->
+    <script src="js/quiz-builder.js?v=d1964de3"></script>   <!-- "Make your own quiz game!" -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=1d028047"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=1caee827"></script>
+</head>
+<body data-title="Quizaga" data-nav="projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="projects.html#games">&larr; Back to Portfolio</a></p>
+                <p class="kicker">Learning game · HTML / JavaScript</p>
+                <h1>Quizaga</h1>
+                <p class="lede">A space-shooter quiz, built to turn software training review into something people want to replay.</p>
+                <p>A fixed-shooter game in the style of classic arcade space shooters. Between waves, players answer a quick question.</p>
+                <p><strong>This demo:</strong> easy general trivia (geography, science, animals, history, and more). In training, it reviewed workforce-management reports and dashboards.<br><strong>Controls:</strong> Arrow keys to move, Space to fire.</p>
+                <p class="media-note"></p>
+                <div class="btn-row">
+                    <a class="btn primary" href="../games/quizaga/index.html" target="_blank" rel="noopener">Play full screen</a>
+                    <!-- Retro Desktop only: open the game in its own desktop window -->
+                    <button class="btn retro-only" type="button" onclick="parent.GamesApp.open('quizaga')" title="Opens the game as its own program on the desktop, with a full-screen button">Open as a desktop program</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- The game itself is a single self-contained file: /games/quizaga/index.html -->
+        <section class="panel">
+            <div class="panel-body course-panel">
+                <div class="course-frame game-frame">
+                    <iframe data-demo src="../games/quizaga/index.html" title="Quizaga (playable game)" loading="lazy" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe>
+                </div>
+                <p class="course-note">Tip: click inside the game first so it can hear your keyboard. On a small screen, try the
+                <a href="../games/quizaga/index.html" target="_blank" rel="noopener">full-screen version</a>.</p>
+                <h2>Design features</h2>
+                <ul class="tags"><li>Gamified learning</li><li>Knowledge checks</li><li>JavaScript</li><li>Arcade style</li><li>Difficulty settings</li><li>Keyboard controls</li></ul>
+                <div class="btn-row">
+                    <a class="btn" href="projects.html#games">&larr; Back to Portfolio</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- "Make your own quiz game!": pages/js/quiz-builder.js builds the form and the downloadable copy -->
+        <section class="panel" id="make-your-own">
+            <div class="panel-body">
+                <h2>Make your own quiz game!</h2>
+                <p>Type in your own multiple-choice questions and get a copy of Quizaga that asks them instead. Save it to your
+                   desktop and double-click to play, send it to your students or team, or put it on your own website.
+                   Each question can have 2 to 4 answer choices; click the circle next to the right one.</p>
+                <div data-quiz-builder="quizaga" data-title="Quizaga"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

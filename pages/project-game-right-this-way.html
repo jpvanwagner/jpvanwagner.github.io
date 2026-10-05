@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-GAME-SECURITY-ESCORT.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="a632d620">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Right This Way, Please: learning game</title>
+    <meta name="description" content="Right This Way, Please, a playable learning game by Joseph VanWagner: an entry-control game about badges, escorts, and incident response.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/lightbox.js?v=af09d593">        </script>   <!-- click the sketch to see it full size -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=1d028047"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=1caee827"></script>
+</head>
+<body data-title="Right This Way, Please" data-nav="projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="projects.html#games">&larr; Back to Portfolio</a></p>
+                <p class="kicker">Learning game · An access control management simulator · HTML / JavaScript / 3D</p>
+                <h1>Right This Way, Please</h1>
+                <p class="lede">A fast entry-control game: check every badge, decide who gets in, and keep an eye on the
+                   people you already let through.</p>
+                <p>Security officers make dozens of small access decisions every shift, and most of the risk lives in the
+                   ones made in a hurry. This game turns that into a few frantic minutes of play, so the habits (check the
+                   badge, escort every guest, respond to every incident) get practiced under a little pressure instead of
+                   just read about. You run the access desk of a small office building, with a live floor map, security
+                   cameras you can click into for a 3D view, and three shifts that get harder as you go.</p>
+                <p><strong>Controls:</strong> <kbd>A</kbd> allow, <kbd>D</kbd> deny, <kbd>E</kbd> call an escort,
+                   <kbd>W</kbd> send someone to the waiting area, <kbd>B</kbd> check a staff ID, <kbd>V</kbd> verify a visitor's appointment, <kbd>T</kbd> print a temp pass,
+                   <kbd>O</kbd> have an officer verify a visitor (not on the list, or late), <kbd>P</kbd> print a guest pass,
+                   <kbd>1</kbd>&ndash;<kbd>3</kbd> answer incidents, <kbd>[</kbd> <kbd>]</kbd> cycle cameras, <kbd>N</kbd> name tags, <kbd>,</kbd> <kbd>.</kbd> slower or faster (&frac12;&times; to 3&times;), <kbd>Space</kbd> pause;
+                   or just click (or tap) the buttons. Best on a computer, but it works on a phone or tablet too.</p>
+                <div class="btn-row">
+                    <a class="btn primary" href="../games/right-this-way/index.html" target="_blank" rel="noopener">Play full screen</a>
+                    <!-- Retro Desktop only: open the game in its own desktop window -->
+                    <button class="btn retro-only" type="button" onclick="parent.GamesApp.open('right-this-way')" title="Opens the game as its own program on the desktop, with a full-screen button">Open as a desktop program</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- The game itself is one self-contained file: /games/right-this-way/index.html -->
+        <section class="panel">
+            <div class="panel-body course-panel">
+                <div class="course-frame" style="aspect-ratio: 4 / 3; height: auto; max-height: 90vh;">
+                    <iframe data-demo src="../games/right-this-way/index.html" title="Right This Way, Please (playable game)" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
+                </div>
+                <p class="course-note">Tip: click inside the game first so it can hear your keyboard. On a small screen, try the
+                <a href="../games/right-this-way/index.html" target="_blank" rel="noopener">full-screen version</a>.</p>
+
+                <h2>Screenshots</h2>
+                <div class="shots">
+                    <figure><a class="zoom" href="../images/games/right-this-way/v2-start-screen.webp" data-caption="The start screen: pick one of eight fictional employers, learn the calls at the desk, and choose a shift or the optional Training Day tutorial."><img src="../images/games/right-this-way/thumbs/v2-start-screen.jpg" alt="The start screen with an employer picker, a how-to-play table of desk calls, and four shift choices" loading="lazy"></a><figcaption>Pick an employer and a shift</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/right-this-way/v2-training-day.webp" data-caption="Training Day walks through every mechanic one step at a time, and any step can be skipped."><img src="../images/games/right-this-way/thumbs/v2-training-day.jpg" alt="The tutorial overlay on the floor map explaining the first step" loading="lazy"></a><figcaption>Training Day, the optional tutorial</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/right-this-way/v2-morning-rush.webp" data-caption="Morning Rush: staff line up at the access desk while the clock runs and the waiting area and incident log stay ready."><img src="../images/games/right-this-way/thumbs/v2-morning-rush.jpg" alt="The floor map with a line of staff at the visitor center and the access desk panel on the right" loading="lazy"></a><figcaption>Morning Rush at the access desk</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/right-this-way/v2-id-check.webp" data-caption="Check ID compares the person at the desk with their badge photo, and the badge dates with today."><img src="../images/games/right-this-way/thumbs/v2-id-check.jpg" alt="An identity verification dialog comparing a face with a photo ID badge" loading="lazy"></a><figcaption>Checking an ID</figcaption></figure>
+                </div>
+                <h3>From an earlier beta</h3>
+                <div class="shots">
+                    <figure><a class="zoom" href="../images/games/right-this-way/how-to-play.webp" data-caption="The briefing: how arrivals, escorts, and incidents work, three shifts to choose from, and the keyboard controls. (Earlier beta.)"><img src="../images/games/right-this-way/thumbs/how-to-play.jpg" alt="The game's briefing screen with rules, three shifts, and a list of controls" loading="lazy"></a><figcaption>The briefing and the three shifts (earlier beta)</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/right-this-way/floor-map.webp" data-caption="The live floor map: visitors, employees, and officers moving through the building, with the access desk, waiting area, and incident log below. (Earlier beta.)"><img src="../images/games/right-this-way/thumbs/floor-map.jpg" alt="A top-down office floor plan with colored dots for people and three panels below for the desk, waiting area, and incident log" loading="lazy"></a><figcaption>The live floor map and access desk (earlier beta)</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/right-this-way/camera-3d.webp" data-caption="Click a camera tag for a 3D view of any room. Visitors on camera behave, but only an officer can resolve an incident. (Earlier beta.)"><img src="../images/games/right-this-way/thumbs/camera-3d.jpg" alt="A 3D view of the visitor center with a waiting line, an officer, and visitors" loading="lazy"></a><figcaption>Security cameras in 3D (earlier beta)</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/right-this-way/guest-passes.webp" data-caption="Level 2, Guest Passes: visitors need a printed pass, and the incident log records every slip. (Earlier beta.)"><img src="../images/games/right-this-way/thumbs/guest-passes.jpg" alt="The floor map with escorts walking visitors to offices and notices in the incident log" loading="lazy"></a><figcaption>Level 2: guest passes and the incident log (earlier beta)</figcaption></figure>
+                </div>
+
+                <h3>Where it started</h3>
+                <figure class="side-photo wide">
+                    <a class="zoom" href="../images/games/right-this-way-sketch.jpg" data-caption="My hand-drawn design sketch for Right This Way, Please: the play area, the badge check, the response timers, and the incident log.">
+                        <img src="../images/games/right-this-way-sketch.jpg" alt="A hand-drawn game layout: a score area, a badge card with Deny, Allow, and Call Escort options, a line of colored dots for guests, employees and officers, response timer bars, and an incident log" loading="lazy"></a>
+                    <figcaption>The original design sketch (click to enlarge)</figcaption>
+                </figure>
+
+                <h2>How it plays</h2>
+                <ul>
+                    <li><strong>The line.</strong> Visitors, employees, and fellow officers arrive one at a time or in pairs. You
+                        run the access desk and decide: <strong>allow</strong>, <strong>deny</strong>, or <strong>call an
+                        escort</strong>. The entry window starts relaxed and tightens as the line and the waiting area fill up.</li>
+                    <li><strong>Check before you decide.</strong> Staff hand you their ID: compare the photo with the person
+                        and check the expiry date (an expired badge gets a printed temp pass). Visitors give their name: find it on
+                        the desk computer's list of today's appointments, or have an officer verify anyone who isn't on it.</li>
+                    <li><strong>Pick your employer.</strong> Choose which (fictional, and slightly suspicious) company you guard,
+                        from Parasol Org to Iris Science; picking one starts you over on day 1. Every shift opens with a briefing.</li>
+                    <li><strong>Escorts matter.</strong> Staff may enter, and an employee or officer arriving with a visitor
+                        escorts them. Every unaccompanied visitor you let in doubles the incident multiplier.</li>
+                    <li><strong>No free officer?</strong> Visitors wait in the waiting area (nine seats at most) until you
+                        dispatch one, but they lose patience.</li>
+                    <li><strong>The incident log.</strong> Incidents must be answered within 3 seconds or they cost points.
+                        Unescorted visitors cause one every few seconds; employees run the occasional drill to keep you honest.</li>
+                    <li><strong>Patrols.</strong> Every hour on the hour a free officer walks a patrol; if nobody's free within
+                        15 minutes, the client is upset. Free officers also wander and check on the waiting area.</li>
+                    <li><strong>Security cameras.</strong> Click a camera tag to zoom into any room in 3D. Visitors on camera
+                        behave and their incident timers pause, but only an officer can resolve an incident.</li>
+                    <li><strong>Training Day.</strong> An optional tutorial walks through every mechanic one step at a time;
+                        skip any step, or skip straight to the real game.</li>
+                    <li><strong>Three shifts.</strong> <em>Morning Rush</em> (a 4-hour shift: check IDs, look up visitors, and keep every
+                        visitor escorted), <em>Guest Passes</em> (6 hours, and visitors also need a printed pass before their escort
+                        arrives), and <em>Propped Doors</em> (8 hours of everything at once, faster arrivals, and staff who prop doors open).</li>
+                </ul>
+
+                <h2>What it trains</h2>
+                <ul class="tags"><li>Access control</li><li>Visitor escorts</li><li>Incident response</li><li>Decision-making under time pressure</li><li>Gamified learning</li><li>Scenario practice</li></ul>
+                <p>Like my other <a href="games.html">learning games</a>, it'll be plain HTML and JavaScript that drops right
+                   into a course.</p>
+
+                <div class="btn-row">
+                    <a class="btn" href="projects.html#games">&larr; Back to Portfolio</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

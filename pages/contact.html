@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!--
+    PAGES/CONTACT.HTML - Portfolio page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="5e0fc977">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact</title>
+    <meta name="description" content="Contact Joseph VanWagner.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/share.js?v=1caee827"></script>
+</head>
+<body data-title="Contact">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <h1>Contact</h1>
+                <p class="lede">Looking for an instructional designer, trainer, or writer? I'd like to hear about it.</p>
+                <!-- Three ways to reach me, side by side (styles: .contact-ways in css/classic.css).
+                     The email address is obfuscated in config/site-config.js and never written into the page;
+                     the LinkedIn address comes from the "links" list there (data-link="LinkedIn"). -->
+                <div class="contact-ways">
+                    <div class="contact-way">
+                        <h2><img src="../images/icons/default/letter.png" alt="" class="cw-icon">Email</h2>
+                        <p>The fastest way to reach me. Opens a new message in your mail app, already addressed to me.</p>
+                        <a class="btn primary btn-mail" href="#email" data-email title="Opens a new email in your mail app">Email me</a>
+                    </div>
+                    <div class="contact-way">
+                        <h2><img src="../images/icons/os/socials.png" alt="" class="cw-icon">LinkedIn</h2>
+                        <p>Connect with me, or read what colleagues have to say.</p>
+                        <a class="btn" href="https://linkedin.com/in/jpvanwagner" data-link="LinkedIn" target="_blank" rel="noopener" title="Opens my LinkedIn profile in a new tab">Visit my LinkedIn</a>
+                    </div>
+                    <div class="contact-way">
+                        <h2><img src="../images/icons/default/helpsheet.png" alt="" class="cw-icon">Resume</h2>
+                        <p>My latest resume, to read online or download as a PDF.</p>
+                        <span data-resume-doc></span>   <!-- link: config/site-config.js (resumeDocId) -->
+                    </div>
+                </div>
+
+                <h2 class="contact-share-title">Know someone who's hiring?</h2>
+                <div class="btn-row">
+                    <button class="btn" type="button" data-share title="Share this portfolio on LinkedIn, Facebook, email, and more">Share this portfolio</button>
+                    <button class="btn" type="button" data-bookmark title="Save this portfolio in your browser's favorites">Add to favorites</button>
+                </div>
+
+                <p><small>References available on request.</small></p>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

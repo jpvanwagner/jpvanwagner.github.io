@@ -1,0 +1,18 @@
+<!-- "Projects" icon: a pixel-art lightbulb (ideas in progress), 32x32 grid -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges">
+  <rect x="11" y="2" width="10" height="2" fill="#000"/>
+  <rect x="8" y="4" width="3" height="2" fill="#000"/><rect x="21" y="4" width="3" height="2" fill="#000"/>
+  <rect x="6" y="6" width="2" height="9" fill="#000"/><rect x="24" y="6" width="2" height="9" fill="#000"/>
+  <rect x="8" y="15" width="3" height="3" fill="#000"/><rect x="21" y="15" width="3" height="3" fill="#000"/>
+  <rect x="11" y="18" width="2" height="3" fill="#000"/><rect x="19" y="18" width="2" height="3" fill="#000"/>
+  <rect x="11" y="4" width="10" height="2" fill="#fff7b0"/>
+  <rect x="8" y="6" width="16" height="9" fill="#ffe14d"/>
+  <rect x="11" y="15" width="10" height="3" fill="#ffd400"/>
+  <rect x="13" y="18" width="6" height="3" fill="#f2c200"/>
+  <rect x="10" y="7" width="3" height="2" fill="#ffffff"/><rect x="9" y="9" width="2" height="3" fill="#fffbe0"/>
+  <rect x="14" y="10" width="1" height="8" fill="#b8860b"/><rect x="17" y="10" width="1" height="8" fill="#b8860b"/><rect x="15" y="10" width="2" height="1" fill="#b8860b"/>
+  <rect x="11" y="21" width="10" height="2" fill="#9aa3b5"/><rect x="11" y="23" width="10" height="2" fill="#6b7385"/>
+  <rect x="12" y="25" width="8" height="2" fill="#9aa3b5"/><rect x="13" y="27" width="6" height="2" fill="#000"/>
+  <rect x="2" y="7" width="3" height="1" fill="#ffd400"/><rect x="27" y="7" width="3" height="1" fill="#ffd400"/>
+  <rect x="3" y="2" width="1" height="3" fill="#ffd400"/><rect x="28" y="2" width="1" height="3" fill="#ffd400"/>
+</svg>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<!--
+    PAGES/CONTACT.HTML - Portfolio page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="a81c5b09">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opened in a new tab</title>
+    <meta name="description" content="This website opened in a new browser tab."><meta name="robots" content="noindex">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=74d996dd"></script>
+    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/share.js?v=1caee827"></script>
+</head>
+<body data-title="Opened in a new tab">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <!-- Shown inside the retro desktop's NetCrawler browser when a website refuses to be shown
+             inside other pages (desktop/js/apps/browser.js opens it in a real tab instead). -->
+        <section class="panel">
+            <div class="panel-body blocked-page">
+                <h1>Opened in a new tab</h1>
+                <p class="lede"><b id="blocked-host">That website</b> doesn't allow itself to be shown inside other web pages,
+                so NetCrawler opened it in a real browser tab for you.</p>
+                <p>Don't see it? Your browser may have blocked the pop-up.</p>
+                <div class="btn-row">
+                    <a class="btn primary" id="blocked-open" href="#" target="_blank" rel="noopener">Open it in a new tab</a>
+                    <a class="btn" href="home.html">Back to my portfolio</a>
+                </div>
+                <p class="blocked-tip"><small>Tip: Google, Wikipedia, and many smaller sites work right here in NetCrawler.</small></p>
+            </div>
+        </section>
+        <script>
+            // Fill in the site's name and link (only http/https addresses are allowed)
+            (function () {
+                var raw = new URLSearchParams(location.search).get('url') || '';
+                try {
+                    var u = new URL(raw);
+                    if (!/^https?:$/.test(u.protocol)) return;
+                    document.getElementById('blocked-host').textContent = u.hostname.replace(/^www\./, '');
+                    document.getElementById('blocked-open').href = u.href;
+                } catch (e) {}
+            })();
+        </script>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

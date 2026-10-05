@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scenemaker; branching-scenario authoring tool</title>
+<meta name="description" content="Scenemaker is a node-graph branching-scenario and visual-novel authoring tool that exports SCORM 1.2 packages for e-learning. Try the full editor live, no install needed.">
+<style>
+  /* house style: dark slate base + fuchsia accent, per project convention */
+  :root{
+    --bg:#0b0c12; --bg2:#12141d; --panel:#171923; --panel2:#1d1f2c;
+    --line:#2a2d3d; --ink:#f1f0f5; --mut:#9a9db3; --accent:#e879f9; --accent2:#c026d3;
+    --good:#34d399; --warn:#fbbf24;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;}
+  a{color:var(--accent)}
+  a:hover{color:var(--accent2)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+
+  /* top nav */
+  nav{position:sticky;top:0;z-index:10;background:rgba(11,12,18,.9);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;}
+  .brand{font-weight:800;letter-spacing:1px;font-size:18px;color:var(--ink);text-decoration:none;}
+  .brand span{color:var(--accent)}
+  nav .links a{margin-left:22px;font-size:14px;font-weight:600;text-decoration:none;color:var(--mut);}
+  nav .links a:hover{color:var(--ink)}
+
+  /* hero */
+  header.hero{padding:70px 0 40px;background:radial-gradient(ellipse at 50% -10%, rgba(232,121,249,.14), transparent 60%);}
+  header.hero h1{font-size:44px;line-height:1.15;margin:0 0 14px;letter-spacing:-.5px;}
+  header.hero h1 span{color:var(--accent)}
+  header.hero p.lead{font-size:19px;color:var(--mut);max-width:640px;margin:0 0 30px;}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:46px;}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:9px;font-weight:700;
+    text-decoration:none;font-size:15px;border:1px solid transparent;cursor:pointer;transition:transform .12s ease;}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#180019;}
+  .btn-ghost{background:var(--panel);border-color:var(--line);color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--accent)}
+  .shot{width:100%;border-radius:10px;border:1px solid var(--line);box-shadow:0 20px 60px -20px rgba(0,0,0,.6);display:block;}
+  .shot-cap{color:var(--mut);font-size:13px;text-align:center;margin-top:10px;}
+
+  /* generic section */
+  section{padding:60px 0;border-top:1px solid var(--line);}
+  section h2{font-size:28px;margin:0 0 8px;}
+  section p.sub{color:var(--mut);margin:0 0 34px;max-width:640px;}
+
+  /* feature grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;}
+  .card .ico{font-size:22px;margin-bottom:10px;display:block;}
+  .card h3{margin:0 0 8px;font-size:16px;}
+  .card p{margin:0;color:var(--mut);font-size:14px;}
+
+  /* downloads */
+  .dl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;}
+  .dl-card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:24px;}
+  .dl-card h3{margin:0 0 6px;font-size:18px;}
+  .dl-card p{color:var(--mut);font-size:14px;margin:0 0 18px;}
+  .dl-card .btn{width:100%;justify-content:center;}
+  .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+    background:rgba(232,121,249,.14);color:var(--accent);border:1px solid rgba(232,121,249,.3);
+    border-radius:5px;padding:3px 8px;margin-bottom:12px;}
+
+  /* two-col shots */
+  .shots2{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+  @media(max-width:720px){.shots2{grid-template-columns:1fr}}
+
+  footer{padding:40px 0 60px;color:var(--mut);font-size:13px;text-align:center;}
+  footer a{color:var(--mut);text-decoration:underline;}
+  code{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:13px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top">SCENE<span>MAKER</span></a>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#downloads">Sample project</a>
+      <a href="app/editor/editor.html">Launch demo</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <h1>Build branching stories.<br>Ship them as <span>SCORM</span>.</h1>
+    <p class="lead">
+      Scenemaker is a node-graph branching-scenario and visual-novel authoring tool: lay out scenes on a
+      canvas, wire up choices with variables and conditions, design the game screen, and export a
+      SCORM 1.2 package your LMS already understands. This page runs the real editor, no install, no
+      account, nothing saved anywhere but your own downloads folder.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="app/editor/editor.html">&#9654; Launch the live demo</a>
+      <a class="btn btn-ghost" href="#downloads">Download a sample project</a>
+    </div>
+    <img class="shot" src="shots/stage-graph.png" alt="Scenemaker's node-graph scene editor, showing a branching sample story with connected scene boxes, choices and multiple endings">
+    <p class="shot-cap">The Stage: every scene as a node, wired together with choices, conditions and endings</p>
+  </div>
+</header>
+
+<section id="features">
+  <div class="wrap">
+    <h2>What's actually in this demo</h2>
+    <p class="sub">
+      This is not a cut-down preview; it is the real editor, the same one used to build the sample story
+      below. A couple of things that need a local backend (saving straight to disk, native SCORM export)
+      fall back to plain browser downloads here instead, everything else works exactly as it does in the
+      full desktop app.
+    </p>
+    <div class="grid">
+      <div class="card">
+        <span class="ico">&#128279;</span>
+        <h3>Node-graph branching</h3>
+        <p>Drag out scenes, wire choices between them, and see your whole story's shape at a glance. Zoom to fit, group related scenes, and route conditionally on variables, dice rolls or multi-branch logic.</p>
+      </div>
+      <div class="card">
+        <span class="ico">&#127917;</span>
+        <h3>Canvas screen editor</h3>
+        <p>Lay out the actual game screen like a slide: drag the dialogue box, portraits and choices anywhere, stack entrance effects, and save your own reusable layout templates.</p>
+      </div>
+      <div class="card">
+        <span class="ico">&#128100;</span>
+        <h3>Characters &amp; variables</h3>
+        <p>Portraits with swappable face states and stacked visual effects, plus a full variable system: numbers, flags or text that choices can require, change, or branch on.</p>
+      </div>
+      <div class="card">
+        <span class="ico">&#127925;</span>
+        <h3>Sound Studio</h3>
+        <p>Record narration straight from your microphone with a live countdown, trim it on a visual waveform, and drop it onto any line.</p>
+      </div>
+      <div class="card">
+        <span class="ico">&#128209;</span>
+        <h3>Layers</h3>
+        <p>A layer is a second full stage inside the same project; link a choice to another layer with a portal to split up a big branching story without losing the overview.</p>
+      </div>
+      <div class="card">
+        <span class="ico">&#128230;</span>
+        <h3>SCORM 1.2 export</h3>
+        <p>One click builds a real SCORM 1.2 .zip with scoring and mastery options, ready to upload to any SCORM-compatible LMS. Also exports a single self-contained HTML file, or a printable PDF storyboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="downloads">
+  <div class="wrap">
+    <h2>Try a sample story, no editor needed</h2>
+    <p class="sub">
+      "The Whistleblower" is Scenemaker's built-in sample story: seven scenes, branching choices, tracked
+      variables and three different endings. Both files below are the exact same story exported in two
+      different formats, pick whichever fits what you want to test.
+    </p>
+    <div class="dl-grid">
+      <div class="dl-card">
+        <span class="tag">No install</span>
+        <h3>Single HTML file</h3>
+        <p>One self-contained file with everything embedded (art, audio, code). Double-click it and it plays straight in your browser, works completely offline once downloaded.</p>
+        <a class="btn btn-primary" href="downloads/whistleblower-sample.html" download>&#8595; Download whistleblower-sample.html</a>
+      </div>
+      <div class="dl-card">
+        <span class="tag">For an LMS</span>
+        <h3>SCORM 1.2 package</h3>
+        <p>A real SCORM .zip, exactly what you'd upload to Moodle, Canvas, or any other SCORM-compatible learning platform. Unzip it to preview locally, or upload the zip as-is.</p>
+        <a class="btn btn-primary" href="downloads/whistleblower-scorm.zip" download>&#8595; Download whistleblower-scorm.zip</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Two ways to see it in action</h2>
+    <p class="sub">Screenshots from this exact build: the editor's start screen, and the sample story playing back from the single-file export above.</p>
+    <div class="shots2">
+      <div>
+        <img class="shot" src="shots/start-screen.png" alt="Scenemaker's start screen offering New project, Open a file, and a Sample story tour, with a small demo badge in the corner">
+        <p class="shot-cap">Start screen: new project, open a file, or take the guided sample tour</p>
+      </div>
+      <div>
+        <img class="shot" src="shots/sample-player.png" alt="The Whistleblower sample story playing in a browser, showing typewriter dialogue text and a mute/log control bar">
+        <p class="shot-cap">The exported sample story, playing back as a single HTML file</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>
+      &copy; Joseph VanWagner. All rights reserved. This page is a browser-only demo of Scenemaker for
+      portfolio viewing; the full desktop app (native saves, in-app SCORM/EXE export and more) is
+      available for testing by request.
+      <a href="../../pages/contact.html">Contact me for access</a>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
