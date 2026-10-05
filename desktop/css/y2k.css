@@ -1,0 +1,123 @@
+/* ==========================================================================
+   Y2K.CSS - The "millennium bug" Easter egg (desktop/js/customize/y2k.js): shaking, warping,
+   color glitches, scanlines, a blinking "12:00 / CLICK TO STOP" tray clock and fake error boxes. body.y2k-calm (reduced motion)
+   keeps the colors and boxes but drops the shaking and flicker.
+   ========================================================================== */
+body.y2k-glitch > *:not(#y2k-layer) { animation: y2k-shake .18s steps(2) infinite, y2k-colors 1.6s steps(6) infinite; }
+body.y2k-calm > *:not(#y2k-layer) { animation: none; filter: invert(1) hue-rotate(180deg) saturate(2.5); }
+@keyframes y2k-shake {
+    0%   { transform: translate(0, 0) skewX(0); }
+    25%  { transform: translate(-4px, 2px) skewX(1deg); }
+    50%  { transform: translate(3px, -3px) skewX(-2deg); }
+    75%  { transform: translate(-2px, 4px) skewX(1deg); }
+    100% { transform: translate(2px, -1px) skewX(0); }
+}
+@keyframes y2k-colors {
+    0%   { filter: none; }
+    20%  { filter: hue-rotate(90deg) saturate(3); }
+    40%  { filter: invert(1); }
+    60%  { filter: hue-rotate(200deg) contrast(1.8); }
+    80%  { filter: grayscale(1) contrast(2); }
+    100% { filter: none; }
+}
+#y2k-layer { position: fixed; inset: 0; z-index: 10000000; pointer-events: none; font-family: 'Courier New', monospace; }
+body:not(.y2k-calm) #y2k-layer::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(0,255,0,.12) 0 2px, transparent 2px 5px);
+    animation: y2k-roll 1s linear infinite;
+}
+@keyframes y2k-roll { from { background-position: 0 0; } to { background-position: 0 50px; } }
+.y2k-banner {
+    position: absolute; left: 50%; top: 12%; transform: translateX(-50%);
+    background: #000; color: #39ff14; border: 3px solid #39ff14; padding: 10px 18px; text-align: center;
+    font-size: 34px; font-weight: bold; letter-spacing: 3px; text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff;
+}
+.y2k-banner small { display: block; font-size: 13px; letter-spacing: 0; margin-top: 4px; color: #fff; text-shadow: none; }
+.y2k-error {
+    position: absolute; width: 280px; pointer-events: auto; cursor: pointer;
+    background: #c0c0c0; color: #000; font: 12px Tahoma, 'MS Sans Serif', sans-serif;
+    border: 2px solid; border-color: #fff #000 #000 #fff; box-shadow: 2px 2px 0 #000;
+}
+.y2k-title { display: flex; justify-content: space-between; background: #000080; color: #fff; font-weight: bold; padding: 2px 4px; }
+.y2k-title span { background: #c0c0c0; color: #000; padding: 0 4px; border: 1px solid #fff; }
+.y2k-body { display: flex; gap: 10px; align-items: center; padding: 10px; }
+.y2k-body p { margin: 0; }
+.y2k-icon { flex: none; width: 30px; height: 30px; border-radius: 50%; background: #ff0; border: 2px solid #000; text-align: center; font: bold 20px/26px Arial, sans-serif; }
+.y2k-ok { text-align: center; padding-bottom: 8px; }
+.y2k-ok button { min-width: 70px; font: inherit; background: #c0c0c0; border: 2px solid; border-color: #fff #000 #000 #fff; }
+
+/* Date/Time Properties window (desktop/js/core/sys-clock.js) */
+.dt-props { padding: 8px; font-size: 12px; display: flex; flex-direction: column; gap: 8px; }
+.dt-props fieldset { border: 2px groove var(--ui-light, #fff); padding: 6px 8px 8px; margin: 0; }
+.dt-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 4px 0; }
+.dt-row input, .dt-props select { font: 12px var(--user-font, Tahoma, sans-serif); }
+.dt-props select { width: 100%; }
+.dt-note { margin: 0; font-style: italic; opacity: .8; }
+.dt-buttons { display: flex; gap: 6px; }
+.dt-buttons button { flex: 1; padding: 4px; font-size: 12px; cursor: pointer; }
+.dt-main { justify-content: flex-end; }
+.dt-main button { flex: 0 0 70px; }
+
+/* Screen-tearing bars (y2k.js tear()) */
+.y2k-tear {
+    position: absolute; left: 0; right: 0;
+    background: repeating-linear-gradient(90deg, rgba(255,0,255,.35) 0 7px, rgba(0,255,255,.35) 7px 13px, rgba(0,0,0,.5) 13px 19px);
+    mix-blend-mode: difference; transform: translateX(var(--shift, 0));
+    backdrop-filter: invert(1) hue-rotate(90deg);
+}
+
+/* Warps (y2k.js warp()): the screen briefly stretches, squashes or waves, then snaps back */
+body.y2k-warp-a > *:not(#y2k-layer) { animation: y2k-warp-a .55s ease-in-out, y2k-colors 1.6s steps(6) infinite; }
+body.y2k-warp-b > *:not(#y2k-layer) { animation: y2k-warp-b .45s steps(5), y2k-colors 1.6s steps(6) infinite; }
+body.y2k-warp-c > *:not(#y2k-layer) { animation: y2k-warp-c .7s ease-in-out, y2k-colors 1.6s steps(6) infinite; }
+body.y2k-calm.y2k-warp-a > *, body.y2k-calm.y2k-warp-b > *, body.y2k-calm.y2k-warp-c > * { animation: none; }
+@keyframes y2k-warp-a {          /* rubbery stretch */
+    0% { transform: none; } 30% { transform: scale(1.06, .9) skewX(4deg); } 60% { transform: scale(.95, 1.08) skewX(-3deg); } 100% { transform: none; }
+}
+@keyframes y2k-warp-b {          /* the picture rolls, like a TV losing its vertical hold */
+    0% { transform: translateY(0); } 40% { transform: translateY(-14%) skewY(1deg); } 41% { transform: translateY(12%); } 100% { transform: translateY(0); }
+}
+@keyframes y2k-warp-c {          /* a slow 3D wobble, like a warped tape */
+    0% { transform: perspective(900px) rotateX(0) rotateY(0); }
+    35% { transform: perspective(900px) rotateX(9deg) rotateY(-6deg) scale(.97); }
+    70% { transform: perspective(900px) rotateX(-5deg) rotateY(5deg); }
+    100% { transform: perspective(900px) rotateX(0) rotateY(0); }
+}
+/* Drifting blotches of wrong color (discoloration), on top of everything but the error boxes */
+.y2k-blot { position: absolute; width: 55vmax; height: 40vmax; left: -10vmax; top: -10vmax; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255,0,200,.55), transparent); mix-blend-mode: color;
+    animation: y2k-drift 5s ease-in-out infinite alternate; }
+.y2k-blot.b2 { left: auto; top: auto; right: -12vmax; bottom: -12vmax; background: radial-gradient(closest-side, rgba(0,255,120,.5), transparent);
+    animation-duration: 3.7s; animation-direction: alternate-reverse; }
+@keyframes y2k-drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(35vw, 30vh) scale(1.3); } }
+body.y2k-calm .y2k-blot { animation: none; }
+/* Thin bright line glitches that zip across with the tearing bars */
+.y2k-tear:nth-child(3n) { height: 2px !important; background: #fff; mix-blend-mode: difference; backdrop-filter: none; }
+
+/* The tray clock during the bug: a small, sunken LCD readout that blinks and is clickable. A fixed
+   monospace width keeps "12:00" and "CLICK TO STOP" the same size, so the tray never jumps. */
+#tray-clock.y2k-clock { cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+    width: calc(13ch + 12px); height: 20px; padding: 0 5px; margin: 0 2px 0 0; vertical-align: middle;
+    font: bold 10px/1 'Courier New', Courier, monospace; letter-spacing: 0; color: #ff2a2a !important;
+    background: #000; border: 1px solid; border-color: var(--ui-dark, #808080) var(--ui-light, #fff) var(--ui-light, #fff) var(--ui-dark, #808080);
+    text-shadow: 0 0 4px #ff2a2a; animation: none !important; overflow: hidden; }
+#tray-clock.y2k-clock-alt { color: #39ff14 !important; text-shadow: 0 0 4px #39ff14; }
+
+/* "I can fix this!": Joe's pixel head peeks in from a screen edge with a word bubble (y2k.js peek()).
+   Clicking the head or the bubble ends the bug. */
+.y2k-peek { position: fixed; z-index: 2; display: flex; align-items: center; gap: 8px; pointer-events: auto; cursor: pointer;
+    transition: transform .45s cubic-bezier(.2, 1.4, .4, 1); font-family: Tahoma, Verdana, sans-serif; }
+.y2k-peek.left { left: 0; flex-direction: row; transform: translateX(-110%); }
+.y2k-peek.right { right: 0; flex-direction: row-reverse; transform: translateX(110%); }
+.y2k-peek.in.left { transform: translateX(-28px) rotate(12deg); }
+.y2k-peek.in.right { transform: translateX(28px) rotate(-12deg); }
+.y2k-peek img { width: 96px; height: 96px; image-rendering: pixelated; filter: drop-shadow(0 0 8px rgba(57, 255, 20, .7)); }
+.y2k-bubble { position: relative; max-width: 220px; padding: 8px 11px; background: #fffbe6; color: #111; font-size: 14px; font-weight: bold;
+    line-height: 1.3; border: 2px solid #111; border-radius: 12px; box-shadow: 3px 3px 0 rgba(0, 0, 0, .55); }
+.y2k-bubble small { display: block; margin-top: 3px; font-size: 11px; font-weight: normal; color: #444; }
+.y2k-bubble::before { content: ""; position: absolute; top: 50%; width: 12px; height: 12px; background: #fffbe6; border: solid #111;
+    transform: translateY(-50%) rotate(45deg); }
+.y2k-peek.left .y2k-bubble::before { left: -8px; border-width: 0 0 2px 2px; }
+.y2k-peek.right .y2k-bubble::before { right: -8px; border-width: 2px 2px 0 0; }
+.y2k-peek:hover .y2k-bubble { background: #fff; }
+body.y2k-calm .y2k-peek { transition: none; }

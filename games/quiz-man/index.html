@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quiz-Man Quiz</title>
+    <!-- Import a classic retro arcade font -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        /* ========================================================
+           VISUAL STYLES & RESPONSIVE LAYOUT
+           ======================================================== */
+        :root {
+            --brand-blue: #3232FF; 
+        }
+
+        /* html only fills the window; the page padding and min-height live on body alone
+           (on both, the page came out 20px taller than the window and always scrolled) */
+        html { margin: 0; padding: 0; background-color: #111; }
+        body {
+            margin: 0;
+            padding: 10px;
+            background-color: #111; 
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overscroll-behavior-y: contain; 
+        }
+
+        .retro-text {
+            font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
+        }
+
+        :fullscreen {
+            background-color: #111;
+        }
+
+        #game-wrapper {
+            width: 100%;
+            max-width: 950px; 
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { 
+            margin: 0 0 15px 0; 
+            flex-shrink: 0;
+            font-size: clamp(16px, 4vw, 24px); 
+            color: #f1c40f; 
+            text-align: center; 
+            text-shadow: 2px 2px 0 var(--brand-blue);
+        }
+
+        /* Flex container for the game and sidebar */
+        #main-content {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: stretch;
+            justify-content: center;
+        }
+
+        /* The left column containing the maze and HUD */
+        #game-column {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 300px; 
+        }
+
+        #ui-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: clamp(8px, 1.5vw, 12px);
+            background: #222;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 2px solid #555;
+            text-transform: uppercase;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 560px;
+            box-shadow: 0 0 0 4px #444;
+            background-color: #000;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            /* Prevents squishing by mathematically locking aspect ratio */
+            aspect-ratio: 560 / 440; 
+            object-fit: contain;
+            image-rendering: pixelated; 
+        }
+
+        /* Constant control display */
+        #active-controls-hud {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 10px;
+            color: #ccc;
+            background: #222;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            line-height: 1.4;
+            width: 100%;
+            max-width: 560px;
+            box-sizing: border-box;
+        }
+
+        /* --- In-Game Fullscreen Button --- */
+        #fs-toggle-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: 2px solid #fff;
+            border-radius: 5px;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            transition: background 0.2s, transform 0.1s;
+        }
+        #fs-toggle-btn:hover { background: rgba(255, 255, 255, 0.3); }
+        #fs-toggle-btn:active { transform: scale(0.9); }
+
+        #red-flash, #green-flash {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 5;
+        }
+        #red-flash { background-color: rgba(255, 0, 0, 0.6); }
+        #green-flash { background-color: rgba(46, 204, 113, 0.6); }
+
+        /* Modal Styles */
+        .modal {
+            display: none; 
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 5%;
+            box-sizing: border-box;
+            z-index: 10;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .modal h2 { 
+            margin-top: 0; 
+            color: #f1c40f; 
+            font-size: clamp(20px, 4vw, 30px); 
+            line-height: 1.6; 
+            text-shadow: 2px 2px 0 var(--brand-blue);
+        }
+        
+        #title-modal h2 { margin-bottom: 10px; }
+
+        /* Settings UI */
+        .settings-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 10px;
+            color: #ccc;
+        }
+        .toggle-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .toggle-btn {
+            background: #222;
+            color: #777;
+            border: 2px solid #444;
+            padding: 10px 15px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toggle-btn.active {
+            background: var(--brand-blue);
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .action-btn {
+            background: var(--brand-blue);
+            color: white;
+            border: 4px solid #fff;
+            padding: 15px 20px;
+            font-size: clamp(12px, 3vw, 16px);
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 350px;
+        }
+        .action-btn:hover { background: #fff; color: var(--brand-blue); border-color: var(--brand-blue); }
+        .action-btn:active { transform: scale(0.95); }
+
+        /* Sidebar UI */
+        #sidebar {
+            flex: 1;
+            min-width: 250px;
+            background-color: #000;
+            padding: 20px;
+            box-sizing: border-box;
+            display: none; 
+            flex-direction: column;
+            box-shadow: 0 0 0 4px #444, inset 0 0 0 2px #fff;
+        }
+        #question-panel { flex-grow: 1; display: flex; flex-direction: column; }
+        #question-text {
+            font-size: 16px;
+            color: #f1c40f;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+        .option-btn {
+            background: #111;
+            color: white;
+            border: 2px solid #444;
+            padding: 15px;
+            margin-bottom: 12px;
+            text-align: left;
+            font-size: 12px;
+            line-height: 1.6;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 500;
+            width: 100%;
+        }
+        .option-btn:hover { background: #333; border-color: #fff; }
+        .option-btn.correct { background: #27ae60 !important; border-color: #2ecc71 !important; color: #000; }
+        .option-btn.wrong { background: #c0392b !important; border-color: #e74c3c !important; }
+
+        /* Demo Overlay */
+        #demo-ui {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 15;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end; 
+            padding: 40px 20px;
+            box-sizing: border-box;
+            pointer-events: auto; /* Catch clicks during demo to prevent pathfinding */
+        }
+        #demo-text {
+            background: rgba(0,0,0,0.95);
+            color: #f1c40f;
+            padding: 20px;
+            border: 2px solid #f1c40f;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 5px;
+            width: 90%;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .demo-btn-row {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+        }
+        .demo-btn {
+            background: #e74c3c;
+            color: white;
+            border: 2px solid #fff;
+            padding: 12px 25px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #next-demo-btn { 
+            background: #2ecc71; 
+            color: #000; 
+            animation: pulseBtn 1.5s infinite;
+        }
+        @keyframes pulseBtn {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 800px) {
+            #main-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            #game-column, #sidebar {
+                width: 100%;
+                max-width: 560px;
+            }
+        }
+
+        /* --- Mobile Controls --- */
+        #mobile-controls {
+            display: none;
+            grid-template-columns: 60px 60px 60px;
+            grid-template-rows: 60px 60px 60px;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .dpad-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 4px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        .dpad-btn:active { background-color: var(--brand-blue); border-color: #fff; }
+        #btn-up { grid-column: 2; grid-row: 1; }
+        #btn-left { grid-column: 1; grid-row: 2; }
+        #btn-right { grid-column: 3; grid-row: 2; }
+        #btn-down { grid-column: 2; grid-row: 3; }
+        /* Credit line on the title screen */
+        .jv-credit { margin-top: 12px; font-size: 8px; color: #aaa; text-align: center; letter-spacing: 1px; }
+        .jv-credit a { color: #f1c40f; text-decoration: none; }
+        .jv-credit a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+        <h1 class="retro-text">QUIZ-MAN</h1>
+        
+        <div id="main-content">
+            <!-- Left Game Board Column -->
+            <div id="game-column">
+                <div id="ui-bar" class="retro-text">
+                    <div>SCORE<br><span id="score-display" style="color:#f1c40f">000000</span></div>
+                    <div>LEVEL<br><span id="level-display" style="color:#f1c40f">01 (0/5)</span></div>
+                    <div>LIVES<br><span id="lives-display">❤️❤️❤️</span></div>
+                </div>
+
+                <div id="game-container">
+                    <canvas id="gameCanvas" width="560" height="440"></canvas>
+                    <button id="fs-toggle-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
+                    <div id="red-flash"></div>
+                    <div id="green-flash"></div>
+
+                    <!-- DEMO UI OVERLAY -->
+                    <div id="demo-ui">
+                        <div id="demo-text">STEP 1</div>
+                        <div class="demo-btn-row">
+                            <button id="skip-demo-btn" class="retro-text demo-btn" onclick="skipDemo()">SKIP</button>
+                            <button id="next-demo-btn" class="retro-text demo-btn" onclick="advanceDemo()">NEXT ➡</button>
+                        </div>
+                    </div>
+
+                    <!-- TITLE SCREEN MODAL -->
+                    <div id="title-modal" class="modal" style="display: flex;">
+                        <h2 class="retro-text">QUIZ-MAN</h2>
+                        
+                        <div class="settings-row">
+                            <div class="retro-text">CHARACTER</div>
+                            <div class="toggle-group" id="char-group">
+                                <button class="toggle-btn retro-text active" onclick="setCharacter(false, this)">
+                                    <canvas id="canvas-specman" width="16" height="16" style="width: 16px; height: 16px;"></canvas> QUIZ-MAN
+                                </button>
+                                <button class="toggle-btn retro-text" onclick="setCharacter(true, this)">
+                                    <canvas id="canvas-msspecman" width="16" height="16" style="width: 16px; height: 16px;"></canvas> MS. QUIZ
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="settings-row" id="controls-setting">
+                            <div class="retro-text">CONTROLS</div>
+                            <div class="toggle-group" id="controls-group">
+                                <button class="title-control-btn toggle-btn retro-text" onclick="setControlMode('mouse')">MOUSE</button>
+                                <button class="title-control-btn toggle-btn retro-text" onclick="setControlMode('keyboard')">KEYS</button>
+                                <button class="title-control-btn toggle-btn retro-text active" onclick="setControlMode('both')">BOTH</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="retro-text">LIVES</div>
+                            <div class="toggle-group" id="lives-group">
+                                <button class="toggle-btn retro-text" onclick="setLives(1, this)">1</button>
+                                <button class="toggle-btn retro-text active" onclick="setLives(3, this)">3</button>
+                                <button class="toggle-btn retro-text" onclick="setLives(5, this)">5</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="retro-text">QUESTIONS/LEVEL</div>
+                            <div class="toggle-group" id="questions-group">
+                                <button class="toggle-btn retro-text" onclick="setQPL(3, this)">3</button>
+                                <button class="toggle-btn retro-text active" onclick="setQPL(5, this)">5</button>
+                                <button class="toggle-btn retro-text" onclick="setQPL(10, this)">10</button>
+                            </div>
+                        </div>
+                        
+                        <button class="action-btn retro-text" onclick="startDemo()">START GAME</button>
+                        <div class="jv-credit retro-text">&copy; 2026 <a href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">Joe VanWagner</a></div>
+                    </div>
+
+                    <!-- QUIZ MODAL (Mobile Fallback) -->
+                    <div id="quiz-modal" class="modal">
+                        <h2 id="question-text-mobile" style="color:#f1c40f; font-family:'Segoe UI', sans-serif;">Question?</h2>
+                        <div id="options-container-mobile" style="width: 100%; max-width: 500px;"></div>
+                    </div>
+
+                    <!-- GAME OVER MODAL -->
+                    <div id="game-over-modal" class="modal">
+                        <h2 id="game-over-title" class="retro-text" style="color: #e74c3c; text-shadow: 2px 2px 0 #fff;">GAME OVER</h2>
+                        <p class="retro-text" style="font-size: 10px; margin-top: 20px;">FINAL SCORE:<br><br><span id="final-score" style="font-size: 20px; color: #f1c40f;">0</span></p>
+                        <button class="action-btn retro-text" onclick="resetGame(true)">PLAY AGAIN</button>
+                    </div>
+                </div>
+                
+                <!-- Constant Controls Display -->
+                <div id="active-controls-hud" class="retro-text">CONTROLS: MOUSE & KEYBOARD</div>
+                
+                <!-- Mobile Controls (D-Pad) -->
+                <div id="mobile-controls">
+                    <div id="btn-up" class="dpad-btn">⬆️</div>
+                    <div id="btn-left" class="dpad-btn">⬅️</div>
+                    <div id="btn-right" class="dpad-btn">➡️</div>
+                    <div id="btn-down" class="dpad-btn">⬇️</div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar UI Area (Shows only during gameplay) -->
+            <div id="sidebar">
+                <div id="question-panel">
+                    <div id="question-text">FIND A GLOWING BLOCK!</div>
+                    <div id="options-container">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Persistent Editable Controls HUD -->
+                <div id="sidebar-controls" style="margin-top: 20px; padding-top: 20px; border-top: 2px dashed #444; text-align: center;">
+                    <div class="retro-text" style="font-size:8px; margin-bottom:10px; color:#aaa;">ACTIVE CONTROLS</div>
+                    <div class="toggle-group" id="sidebar-controls-group">
+                        <button class="sidebar-control-btn toggle-btn retro-text" onclick="setControlMode('mouse')">MOUSE</button>
+                        <button class="sidebar-control-btn toggle-btn retro-text" onclick="setControlMode('keyboard')">KEYS</button>
+                        <button class="sidebar-control-btn toggle-btn retro-text active" onclick="setControlMode('both')">BOTH</button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; font-size: 12px; font-weight:bold; text-align: center; padding-top: 20px; border-top: 2px dashed #444;">
+                    <span style="color:#2ecc71;">EXTRA LIFE EVERY 2000 POINTS</span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+<script>
+    /* =========================================================================
+       GLOBAL VARIABLES & CONFIGURATION
+       ========================================================================= */
+    const CONFIG = {
+        powerupsPerLevel: 6,
+        powerDuration: 6000,
+        pacmanSpeed: 2,           
+        ghostSpeed: 1, // Must cleanly divide into TileSize to prevent clipping bugs
+        cols: 28,
+        rows: 22,
+        tileSize: 20
+    };
+
+    let selectedLives = 3;
+    let selectedQPL = 5;
+    let isMsSpecMan = false;
+    let currentControlMode = 'both'; // Defaults to BOTH
+    let isDemoMode = false;
+    const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const TS = CONFIG.tileSize; 
+
+    let map = [];
+    let state = 'TITLE'; 
+    let score = 0;
+    let lives = 3;
+    let level = 1;
+    let questionsAnsweredThisLevel = 0;
+    let nextExtraLife = 2000;
+    
+    let levelQuestions = [];
+    let currentQuizGhostEatable = false;
+    let powerTimer = null;
+    let dotsRemaining = 0;
+    
+    let deathFrame = 0; 
+    let demoStep = 0;
+    let demoSubFrame = 0;
+
+    let pacman = { x: 0, y: 0, vx: 0, vy: 0, reqVx: 0, reqVy: 0, rad: 8, startX: 13*TS, startY: 16*TS, path: [] };
+    let ghosts = [];
+    const ghostColors = ['#FF0000', '#FFB8FF', '#00FFFF', '#FFB852'];
+
+    const masterQuestionPool = [   // easy general trivia across many categories
+        { q: "What is the capital of France?", opts: ["Madrid", "Paris", "Berlin", "Rome"], ans: 1 },
+        { q: "Which planet is known as the Red Planet?", opts: ["Saturn", "Venus", "Jupiter", "Mars"], ans: 3 },
+        { q: "How many continents are there?", opts: ["7", "5", "6", "8"], ans: 0 },
+        { q: "What gas do plants take in from the air?", opts: ["Helium", "Carbon dioxide", "Nitrogen", "Oxygen"], ans: 1 },
+        { q: "What is the largest ocean on Earth?", opts: ["Pacific", "Arctic", "Atlantic", "Indian"], ans: 0 },
+        { q: "How many legs does a spider have?", opts: ["8", "12", "10", "6"], ans: 0 },
+        { q: "At what temperature does water freeze in Fahrenheit?", opts: ["50°F", "32°F", "100°F", "0°F"], ans: 1 },
+        { q: "Which animal is called the \"King of the Jungle\"?", opts: ["Elephant", "Tiger", "Lion", "Gorilla"], ans: 2 },
+        { q: "What color do you get when you mix blue and yellow?", opts: ["Purple", "Brown", "Green", "Orange"], ans: 2 },
+        { q: "Who painted the Mona Lisa?", opts: ["Leonardo da Vinci", "Vincent van Gogh", "Pablo Picasso", "Claude Monet"], ans: 0 },
+        { q: "What is the tallest animal in the world?", opts: ["Giraffe", "Horse", "Elephant", "Ostrich"], ans: 0 },
+        { q: "How many days are in a leap year?", opts: ["364", "366", "365", "367"], ans: 1 },
+        { q: "Which instrument has 88 keys?", opts: ["Violin", "Piano", "Trumpet", "Guitar"], ans: 1 },
+        { q: "In which sport do you score a touchdown?", opts: ["Basketball", "American football", "Soccer", "Tennis"], ans: 1 },
+        { q: "What is the largest planet in our solar system?", opts: ["Earth", "Jupiter", "Saturn", "Neptune"], ans: 1 },
+        { q: "What do bees make?", opts: ["Butter", "Syrup", "Jam", "Honey"], ans: 3 },
+        { q: "How many sides does a hexagon have?", opts: ["6", "7", "5", "8"], ans: 0 },
+        { q: "Which country is home to the kangaroo?", opts: ["Brazil", "Australia", "Canada", "India"], ans: 1 },
+        { q: "What is H2O more commonly called?", opts: ["Water", "Sugar", "Salt", "Oxygen"], ans: 0 },
+        { q: "Which fruit \"keeps the doctor away,\" according to the saying?", opts: ["An apple", "A grape", "An orange", "A banana"], ans: 0 },
+        { q: "What is the closest star to Earth?", opts: ["Sirius", "The Sun", "Polaris", "Alpha Centauri"], ans: 1 },
+        { q: "How many minutes are in an hour?", opts: ["90", "60", "100", "30"], ans: 1 },
+        { q: "What is the main ingredient in guacamole?", opts: ["Tomato", "Avocado", "Lime", "Pepper"], ans: 1 },
+        { q: "Which of these animals is a mammal?", opts: ["Shark", "Trout", "Dolphin", "Octopus"], ans: 2 },
+        { q: "Which famous ship sank on its first voyage in 1912?", opts: ["Titanic", "Lusitania", "Santa Maria", "Mayflower"], ans: 0 },
+        { q: "What shape has three sides?", opts: ["Circle", "Square", "Triangle", "Pentagon"], ans: 2 },
+        { q: "What is the longest river in South America?", opts: ["Mississippi", "Nile", "Amazon", "Danube"], ans: 2 },
+        { q: "What does a thermometer measure?", opts: ["Time", "Speed", "Weight", "Temperature"], ans: 3 },
+        { q: "How many players does one soccer team have on the field?", opts: ["11", "12", "10", "9"], ans: 0 },
+        { q: "What is 7 × 8?", opts: ["48", "56", "64", "54"], ans: 1 },
+        { q: "What is the smallest US state by area?", opts: ["Rhode Island", "Vermont", "Connecticut", "Delaware"], ans: 0 },
+        { q: "What does a caterpillar turn into?", opts: ["A spider", "A bee", "A beetle", "A butterfly or moth"], ans: 3 },
+        { q: "Which month has the fewest days?", opts: ["January", "April", "February", "November"], ans: 2 },
+        { q: "Who wrote \"Romeo and Juliet\"?", opts: ["William Shakespeare", "Mark Twain", "Jane Austen", "Charles Dickens"], ans: 0 },
+        { q: "What is the hardest natural substance?", opts: ["Diamond", "Iron", "Quartz", "Gold"], ans: 0 },
+        { q: "Which of these is a primary color of paint?", opts: ["Orange", "Red", "Green", "Purple"], ans: 1 },
+        { q: "In which country are the Great Pyramids of Giza?", opts: ["Mexico", "India", "Peru", "Egypt"], ans: 3 },
+        { q: "What is a baby cat called?", opts: ["A kitten", "A foal", "A cub", "A puppy"], ans: 0 },
+        { q: "How many strings does a standard guitar have?", opts: ["5", "8", "6", "4"], ans: 2 },
+        { q: "Which planet is famous for its rings?", opts: ["Saturn", "Venus", "Mercury", "Mars"], ans: 0 }
+    ];
+
+    const baseMap = [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+        [1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,0,1,1,1,1,1,2,1,1,2,1,1,1,1,1,0,1,1,1,1,1,1],
+        [2,2,2,2,2,1,0,1,1,2,2,2,2,2,2,2,2,2,2,1,1,0,1,2,2,2,2,2],
+        [1,1,1,1,1,1,0,1,1,2,1,1,1,3,3,1,1,1,2,1,1,0,1,1,1,1,1,1],
+        [2,2,2,2,2,2,0,2,2,2,1,2,2,2,2,2,2,1,2,2,2,0,2,2,2,2,2,2],
+        [1,1,1,1,1,1,0,1,1,2,1,1,1,1,1,1,1,1,2,1,1,0,1,1,1,1,1,1],
+        [2,2,2,2,2,1,0,1,1,2,2,2,2,2,2,2,2,2,2,1,1,0,1,2,2,2,2,2],
+        [1,1,1,1,1,1,0,1,1,2,1,1,1,1,1,1,1,1,2,1,1,0,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+        [1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1],
+        [1,1,1,0,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,0,1,1,1],
+        [1,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
+
+    // ==========================================
+    // UI SETUP & LOGIC
+    // ==========================================
+    function updateControlHUD() {
+        const hud = document.getElementById('active-controls-hud');
+        if(currentControlMode === 'mobile') hud.innerHTML = "<b>CONTROLS:</b> TOUCH MAZE TO AUTO-PATHFIND OR USE D-PAD";
+        else if(currentControlMode === 'mouse') hud.innerHTML = "<b>CONTROLS:</b> MOUSE (CLICK MAZE TO AUTO-PATHFIND)";
+        else if(currentControlMode === 'keyboard') hud.innerHTML = "<b>CONTROLS:</b> WASD / ARROWS";
+        else hud.innerHTML = "<b>CONTROLS:</b> CLICK MAZE TO AUTO-PATHFIND OR USE KEYBOARD";
+    }
+
+    function setControlMode(mode) {
+        currentControlMode = mode;
+        
+        let allBtns = document.querySelectorAll('.toggle-btn');
+        allBtns.forEach(b => {
+            if (b.innerText === 'MOUSE' || b.innerText === 'KEYS' || b.innerText === 'BOTH') {
+                b.classList.remove('active');
+                if (b.innerText.toLowerCase().includes(mode.substring(0,3))) b.classList.add('active');
+                if (mode === 'both' && b.innerText === 'BOTH') b.classList.add('active');
+            }
+        });
+        updateControlHUD();
+    }
+
+    if (isMobile) {
+        document.getElementById('controls-setting').style.display = 'none';
+        document.getElementById('sidebar-controls').style.display = 'none';
+        currentControlMode = 'mobile';
+        updateControlHUD();
+    } else {
+        updateControlHUD();
+    }
+
+    function setCharacter(isMs, btnElement) {
+        isMsSpecMan = isMs;
+        let btns = document.getElementById('char-group').getElementsByTagName('button');
+        for(let b of btns) b.classList.remove('active');
+        btnElement.classList.add('active');
+    }
+
+    function setLives(val, btnElement) {
+        selectedLives = val;
+        let btns = document.getElementById('lives-group').getElementsByTagName('button');
+        for(let b of btns) b.classList.remove('active');
+        btnElement.classList.add('active');
+    }
+
+    function setQPL(val, btnElement) {
+        selectedQPL = val;
+        let btns = document.getElementById('questions-group').getElementsByTagName('button');
+        for(let b of btns) b.classList.remove('active');
+        btnElement.classList.add('active');
+    }
+
+    function toggleFullscreen() {
+        try {
+            if (!document.fullscreenElement) {
+                let elem = document.documentElement;
+                let p = elem.requestFullscreen ? elem.requestFullscreen() : undefined;
+                if (p) p.catch(()=>{});
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        } catch(e) { console.log("Fullscreen toggle blocked by browser or iframe constraints."); }
+    }
+
+    function drawMenuSprites() {
+        let c1_el = document.getElementById('canvas-specman');
+        let c2_el = document.getElementById('canvas-msspecman');
+        
+        if (c1_el) {
+            let c1 = c1_el.getContext('2d');
+            c1.translate(8, 8);
+            c1.fillStyle = '#FFFF00';
+            c1.beginPath(); c1.arc(0, 0, 7, 0.15 * Math.PI, 1.85 * Math.PI); c1.lineTo(0, 0); c1.fill();
+        }
+
+        if (c2_el) {
+            let c2 = c2_el.getContext('2d');
+            c2.translate(8, 8);
+            c2.fillStyle = '#FFFF00';
+            c2.beginPath(); c2.arc(0, 0, 7, 0.15 * Math.PI, 1.85 * Math.PI); c2.lineTo(0, 0); c2.fill();
+            c2.translate(-3, -5); 
+            c2.fillStyle = '#e74c3c';
+            c2.beginPath(); c2.moveTo(0,0); c2.lineTo(-3, -3); c2.lineTo(-3, 3); c2.fill();
+            c2.beginPath(); c2.moveTo(0,0); c2.lineTo(3, -3); c2.lineTo(3, 3); c2.fill();
+            c2.fillStyle = '#3498db'; 
+            c2.beginPath(); c2.arc(0,0, 1.5, 0, Math.PI*2); c2.fill();
+        }
+    }
+
+    /* =========================================================================
+       INPUT HANDLING & PATHFINDING
+       ========================================================================= */
+    function clearPath() { pacman.path = []; }
+
+    document.addEventListener('keydown', (e) => {
+        if (currentControlMode === 'mouse' || currentControlMode === 'mobile') return;
+        const key = e.key.toLowerCase();
+        if(["arrowup","arrowdown","arrowleft","arrowright"].includes(key)) {
+            e.preventDefault();
+            clearPath(); 
+        }
+        
+        if (key === 'arrowleft' || key === 'a')  { pacman.reqVx = -CONFIG.pacmanSpeed; pacman.reqVy = 0; }
+        if (key === 'arrowright'|| key === 'd') { pacman.reqVx = CONFIG.pacmanSpeed; pacman.reqVy = 0; }
+        if (key === 'arrowup'   || key === 'w')  { pacman.reqVx = 0; pacman.reqVy = -CONFIG.pacmanSpeed; }
+        if (key === 'arrowdown' || key === 's')  { pacman.reqVx = 0; pacman.reqVy = CONFIG.pacmanSpeed; }
+    });
+
+    function isWalkable(r, c, isGhost = false) {
+        if(r < 0 || r >= CONFIG.rows || c < 0 || c >= CONFIG.cols) return true; // Tunnels wrap
+        let tile = map[r][c];
+        if (tile === 1) return false;
+        if (tile === 3 && !isGhost) return false;
+        return true; 
+    }
+
+    function getNearestWalkable(r, c) {
+        if (isWalkable(r, c, false)) return {r, c};
+        let dirs = [{r:-1,c:0}, {r:1,c:0}, {r:0,c:-1}, {r:0,c:1}, {r:-1,c:-1}, {r:-1,c:1}, {r:1,c:-1}, {r:1,c:1}];
+        for (let d of dirs) {
+            if (isWalkable(r+d.r, c+d.c, false)) return {r: r+d.r, c: c+d.c};
+        }
+        return null;
+    }
+
+    function findPath(startR, startC, endR, endC) {
+        let queue = [{r: startR, c: startC, path: []}];
+        let visited = new Set();
+        visited.add(`${startR},${startC}`);
+        let dirs = [{r:-1,c:0}, {r:1,c:0}, {r:0,c:-1}, {r:0,c:1}];
+        let iterations = 0;
+
+        while(queue.length > 0 && iterations < 2000) {
+            iterations++;
+            let curr = queue.shift();
+            
+            if (curr.r === endR && curr.c === endC) return curr.path;
+
+            for (let d of dirs) {
+                let nr = curr.r + d.r;
+                let nc = curr.c + d.c;
+                
+                if (nc < 0) nc = CONFIG.cols - 1;
+                if (nc >= CONFIG.cols) nc = 0;
+
+                let key = `${nr},${nc}`;
+                if (!visited.has(key) && isWalkable(nr, nc, false)) {
+                    visited.add(key);
+                    queue.push({r: nr, c: nc, path: [...curr.path, {r: nr, c: nc}]});
+                }
+            }
+        }
+        return [];
+    }
+
+    function handleCanvasClick(e) {
+        if (state !== 'PLAY') return;
+        if (currentControlMode === 'keyboard') return;
+
+        let clientX, clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        
+        const mx = (clientX - rect.left) * scaleX;
+        const my = (clientY - rect.top) * scaleY;
+
+        let targetC = Math.floor(mx / TS);
+        let targetR = Math.floor(my / TS);
+
+        if (!isWalkable(targetR, targetC, false)) {
+            let nearest = getNearestWalkable(targetR, targetC);
+            if (nearest) {
+                targetR = nearest.r;
+                targetC = nearest.c;
+            } else { return; }
+        }
+
+        let startC = Math.round(pacman.x / TS);
+        let startR = Math.round(pacman.y / TS);
+
+        let newPath = findPath(startR, startC, targetR, targetC);
+        if (newPath && newPath.length > 0) {
+            pacman.path = newPath;
+        }
+    }
+
+    canvas.addEventListener('mousedown', handleCanvasClick);
+    canvas.addEventListener('touchstart', (e) => { handleCanvasClick(e); }, {passive: false});
+
+    function setupMobileControls() {
+        if (isMobile) {
+            document.getElementById('mobile-controls').style.display = 'grid';
+            const bindBtn = (id, dx, dy) => {
+                const btn = document.getElementById(id);
+                btn.addEventListener('touchstart', (e) => { e.preventDefault(); clearPath(); pacman.reqVx = dx; pacman.reqVy = dy; });
+                btn.addEventListener('mousedown', (e) => { e.preventDefault(); clearPath(); pacman.reqVx = dx; pacman.reqVy = dy; });
+            };
+            bindBtn('btn-up', 0, -CONFIG.pacmanSpeed);
+            bindBtn('btn-down', 0, CONFIG.pacmanSpeed);
+            bindBtn('btn-left', -CONFIG.pacmanSpeed, 0);
+            bindBtn('btn-right', CONFIG.pacmanSpeed, 0);
+        }
+    }
+
+    /* =========================================================================
+       DEMO LOGIC (STEP-BY-STEP ANIMATED)
+       ========================================================================= */
+    function resetDemoScene(step) {
+        demoSubFrame = 0;
+        map = baseMap.map(row => [...row]); 
+        
+        pacman.vx = 0; pacman.vy = 0;
+        pacman.reqVx = 0; pacman.reqVy = 0;
+        pacman.path = [];
+        ghosts = [];
+
+        if (step === 0) {
+            // Setup Hallway of Dots on Row 4 (Top Half)
+            for(let c=6; c<14; c++) map[4][c] = 0;
+            pacman.x = 13 * TS;
+            pacman.y = 4 * TS;
+        }
+        else if (step === 1) {
+            // Setup Ghost Chase
+            pacman.x = 13 * TS;
+            pacman.y = 4 * TS;
+            ghosts.push({ x: 20 * TS, y: 4 * TS, vx: 0, vy: 0, color: '#FF0000', scared: false, dead: false, animFrame: 0, speed: CONFIG.ghostSpeed });
+        }
+        else if (step === 2) {
+            // Setup Powerup Scenario
+            map[4][6] = 4; // powerup near pacman
+            pacman.x = 10 * TS;
+            pacman.y = 4 * TS;
+            ghosts.push({ x: 2 * TS, y: 4 * TS, vx: 0, vy: 0, color: '#00FFFF', scared: false, dead: false, animFrame: 0, speed: CONFIG.ghostSpeed });
+        }
+    }
+
+    function startDemo() {
+        try {
+            if (!document.fullscreenElement) {
+                let elem = document.documentElement;
+                let p = elem.requestFullscreen ? elem.requestFullscreen() : undefined;
+                if(p) p.catch(()=>{});
+            }
+        } catch(e) {}
+
+        document.getElementById('title-modal').style.display = 'none';
+        document.getElementById('demo-ui').style.display = 'flex';
+        isDemoMode = true;
+        demoStep = 0;
+        state = 'DEMO';
+        deathFrame = 0;
+        resetDemoScene(0);
+        updateDemoUI();
+    }
+
+    function skipDemo() {
+        document.getElementById('demo-ui').style.display = 'none';
+        isDemoMode = false;
+        resetGame(true); 
+    }
+
+    function advanceDemo() {
+        demoStep++;
+        if (demoStep > 2) {
+            skipDemo();
+        } else {
+            state = 'DEMO'; // Ensure we un-pause if we were dying
+            resetDemoScene(demoStep);
+            updateDemoUI();
+        }
+    }
+
+    function updateDemoUI() {
+        const dt = document.getElementById('demo-text');
+        if (demoStep === 0) {
+            dt.innerHTML = "STEP 1:<br><br>Navigate the maze and eat the dots to score points!";
+        } else if (demoStep === 1) {
+            dt.innerHTML = "STEP 2:<br><br>Avoid the roaming ghosts, or you will lose a life!";
+        } else if (demoStep === 2) {
+            dt.innerHTML = "STEP 3:<br><br>Eat glowing round blocks to answer questions. Answer right to power up and eat ghosts!";
+        }
+    }
+
+    function processDemoLogic() {
+        demoSubFrame++;
+        
+        if (demoStep === 0) {
+            if (demoSubFrame === 1) { pacman.reqVx = -CONFIG.pacmanSpeed; pacman.reqVy = 0; }
+            if (demoSubFrame > 100) resetDemoScene(0); // loop demonstration
+        } 
+        else if (demoStep === 1) {
+            if (demoSubFrame === 1) {
+                pacman.reqVx = 0; pacman.reqVy = 0; 
+                ghosts[0].vx = -CONFIG.ghostSpeed; 
+            }
+            // Dying handles itself in game loop
+        } 
+        else if (demoStep === 2) {
+            if (demoSubFrame === 1) {
+                pacman.reqVx = -CONFIG.pacmanSpeed; pacman.reqVy = 0;
+                ghosts[0].vx = CONFIG.ghostSpeed; 
+            }
+            if (demoSubFrame > 150) resetDemoScene(2);
+        }
+    }
+
+    function drawDemoHighlights() {
+        ctx.save();
+        ctx.strokeStyle = '#f1c40f';
+        ctx.lineWidth = 4;
+        let pulse = (Math.sin(Date.now() / 150) + 1) / 2 * 4;
+
+        if (demoStep === 0) {
+            ctx.strokeRect(pacman.x - pulse/2, pacman.y - pulse/2, TS + pulse, TS + pulse);
+        } else if (demoStep === 1) {
+            if(ghosts[0]) ctx.strokeRect(ghosts[0].x - pulse/2, ghosts[0].y - pulse/2, TS + pulse, TS + pulse);
+        } else if (demoStep === 2) {
+            ctx.strokeRect(6*TS - pulse/2, 4*TS - pulse/2, TS + pulse, TS + pulse);
+        }
+        ctx.restore();
+    }
+
+    /* =========================================================================
+       GAME SYSTEMS
+       ========================================================================= */
+    function shuffle(array) {
+        let cur = array.length, rand;
+        while (cur != 0) {
+            rand = Math.floor(Math.random() * cur);
+            cur--;
+            [array[cur], array[rand]] = [array[rand], array[cur]];
+        }
+        return array;
+    }
+
+    function initLevel() {
+        levelQuestions = shuffle([...masterQuestionPool]); 
+        map = baseMap.map(row => [...row]); 
+        dotsRemaining = 0;
+        let possibleSpots = [];
+
+        // Collect open spots
+        for(let r = 3; r < CONFIG.rows-3; r++) {
+            for(let c = 2; c < CONFIG.cols-2; c++) {
+                if(map[r][c] === 0) possibleSpots.push({r, c});
+            }
+        }
+
+        // Distance-checked random powerup placement
+        let pickedSpots = [];
+        let numPowerups = Math.max(1, Math.min(CONFIG.powerupsPerLevel, 10)); 
+        for(let i=0; i<numPowerups; i++) {
+            let bestSpot = null;
+            for (let attempts = 0; attempts < 50; attempts++) {
+                let candidate = possibleSpots[Math.floor(Math.random() * possibleSpots.length)];
+                let tooClose = false;
+                for (let p of pickedSpots) {
+                    let dist = Math.hypot(p.c - candidate.c, p.r - candidate.r);
+                    if (dist < 8) { tooClose = true; break; } 
+                }
+                if (!tooClose) { bestSpot = candidate; break; }
+            }
+            if (!bestSpot && possibleSpots.length > 0) {
+                bestSpot = possibleSpots[Math.floor(Math.random() * possibleSpots.length)]; 
+            }
+            
+            if (bestSpot) {
+                pickedSpots.push(bestSpot);
+                map[bestSpot.r][bestSpot.c] = 4; 
+                possibleSpots = possibleSpots.filter(s => s.r !== bestSpot.r || s.c !== bestSpot.c);
+            }
+        }
+
+        for(let r = 0; r < map.length; r++) {
+            for(let c = 0; c < map[r].length; c++) {
+                if(map[r][c] === 0) dotsRemaining++;
+            }
+        }
+        
+        resetPositions();
+    }
+
+    function resetPositions() {
+        pacman.x = pacman.startX;
+        pacman.y = pacman.startY;
+        pacman.vx = 0;
+        pacman.vy = 0;
+        pacman.reqVx = 0;
+        pacman.reqVy = 0;
+        pacman.path = [];
+
+        ghosts = ghostColors.map((color, i) => ({
+            x: (12 + i) * TS,
+            y: 10 * TS,
+            vx: CONFIG.ghostSpeed, 
+            vy: 0,
+            color: color,
+            scared: false,
+            dead: false,
+            animFrame: 0, 
+            speed: CONFIG.ghostSpeed
+        }));
+        
+        currentQuizGhostEatable = false;
+        if(powerTimer) clearTimeout(powerTimer);
+    }
+
+    function resetGame(fullReset = false) {
+        if(fullReset) {
+            score = 0;
+            level = 1;
+            questionsAnsweredThisLevel = 0;
+            nextExtraLife = 2000;
+            lives = selectedLives;
+            document.getElementById('game-over-modal').style.display = 'none';
+            
+            if (!isMobile) {
+                document.getElementById('sidebar').style.display = 'flex';
+                document.getElementById('question-text').innerText = "FIND A GLOWING BLOCK!";
+                document.getElementById('options-container').innerHTML = "";
+            }
+        }
+        state = 'PLAY'; 
+        updateUI();
+        initLevel();
+    }
+
+    function addScore(pts) {
+        score += pts;
+        if (score >= nextExtraLife) {
+            lives++;
+            nextExtraLife += 2000;
+            let livesEl = document.getElementById('lives-display');
+            livesEl.style.transform = "scale(1.5)";
+            setTimeout(() => livesEl.style.transform = "scale(1)", 300);
+        }
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('score-display').innerText = String(score).padStart(6, '0');
+        document.getElementById('level-display').innerText = `${String(level).padStart(2, '0')} (${questionsAnsweredThisLevel}/${selectedQPL})`;
+        document.getElementById('lives-display').innerText = '❤️'.repeat(lives);
+    }
+
+    function handlePlayerMovement() {
+        const onGridX = (pacman.x % TS === 0);
+        const onGridY = (pacman.y % TS === 0);
+
+        if (onGridX && onGridY) {
+            let tileC = Math.round(pacman.x / TS);
+            let tileR = Math.round(pacman.y / TS);
+
+            if (pacman.path && pacman.path.length > 0) {
+                let nextStep = pacman.path[0];
+                if (tileC === nextStep.c && tileR === nextStep.r) {
+                    pacman.path.shift();
+                    if (pacman.path.length > 0) {
+                        nextStep = pacman.path[0];
+                    } else {
+                        pacman.reqVx = 0; pacman.reqVy = 0;
+                        pacman.vx = 0; pacman.vy = 0;
+                        nextStep = null;
+                    }
+                }
+
+                if (nextStep) {
+                    let dc = nextStep.c - tileC;
+                    let dr = nextStep.r - tileR;
+                    if (dc > 1) dc = -1; 
+                    if (dc < -1) dc = 1; 
+                    pacman.reqVx = dc * CONFIG.pacmanSpeed;
+                    pacman.reqVy = dr * CONFIG.pacmanSpeed;
+                }
+            }
+
+            let nextReqC = tileC + (pacman.reqVx > 0 ? 1 : pacman.reqVx < 0 ? -1 : 0);
+            let nextReqR = tileR + (pacman.reqVy > 0 ? 1 : pacman.reqVy < 0 ? -1 : 0);
+            
+            if (nextReqC < 0) nextReqC = CONFIG.cols - 1;
+            if (nextReqC >= CONFIG.cols) nextReqC = 0;
+
+            if (isWalkable(nextReqR, nextReqC, false)) {
+                pacman.vx = pacman.reqVx;
+                pacman.vy = pacman.reqVy;
+            }
+            
+            let nextC = tileC + (pacman.vx > 0 ? 1 : pacman.vx < 0 ? -1 : 0);
+            let nextR = tileR + (pacman.vy > 0 ? 1 : pacman.vy < 0 ? -1 : 0);
+            if (nextC < 0) nextC = CONFIG.cols - 1;
+            if (nextC >= CONFIG.cols) nextC = 0;
+
+            if (!isWalkable(nextR, nextC, false)) {
+                pacman.vx = 0;
+                pacman.vy = 0;
+            }
+        }
+
+        pacman.x += pacman.vx;
+        pacman.y += pacman.vy;
+
+        if (pacman.x < 0) pacman.x = canvas.width - TS;
+        if (pacman.x >= canvas.width) pacman.x = 0;
+
+        if (pacman.x % TS === 0 && pacman.y % TS === 0) {
+            let tc = Math.floor(pacman.x / TS);
+            let tr = Math.floor(pacman.y / TS);
+            let tile = map[tr][tc];
+
+            if (tile === 0) { 
+                map[tr][tc] = 2; 
+                if (!isDemoMode) {
+                    addScore(10);
+                    dotsRemaining--;
+                    updateUI();
+                    if(state === 'PLAY') checkWinCondition();
+                }
+            } else if (tile === 4) { 
+                map[tr][tc] = 2; 
+                if (!isDemoMode) {
+                    dotsRemaining--;
+                    if(state === 'PLAY') triggerQuiz(); 
+                } else {
+                    ghosts.forEach(g => {
+                        if(!g.dead) { g.scared = true; g.vx = -g.vx; g.vy = -g.vy; }
+                    });
+                }
+            }
+        }
+    }
+
+    function handleEnemyMovement(ent) {
+        let speed = ent.dead ? 4 : ent.speed;
+        
+        const onGridX = (ent.x % TS === 0);
+        const onGridY = (ent.y % TS === 0);
+        
+        ent.animFrame += 0.1; 
+
+        if (onGridX && onGridY) {
+            const tileC = Math.round(ent.x / TS);
+            const tileR = Math.round(ent.y / TS);
+
+            // Ghost revive check
+            if (ent.dead && tileR === 10 && (tileC >= 12 && tileC <= 15)) {
+                ent.dead = false;
+                ent.scared = false;
+                speed = ent.speed;
+                ent.vx = 0;
+                ent.vy = -speed;
+            } else {
+                let validMoves = [];
+                const dirs = [
+                    {x: speed, y: 0}, {x: -speed, y: 0}, 
+                    {x: 0, y: speed}, {x: 0, y: -speed}
+                ];
+                
+                dirs.forEach(d => {
+                    if(d.x === -ent.vx && d.y === -ent.vy && (ent.vx !== 0 || ent.vy !== 0)) return; 
+                    
+                    let dirC = tileC + (d.x > 0 ? 1 : d.x < 0 ? -1 : 0);
+                    let dirR = tileR + (d.y > 0 ? 1 : d.y < 0 ? -1 : 0);
+                    
+                    if (dirC < 0) dirC = CONFIG.cols - 1;
+                    if (dirC >= CONFIG.cols) dirC = 0;
+
+                    if(isWalkable(dirR, dirC, true)) validMoves.push(d);
+                });
+
+                if(validMoves.length > 0) {
+                    let bestMove = validMoves[0];
+                    let bestDist = ent.scared ? -1 : Infinity;
+
+                    validMoves.forEach(m => {
+                        let projX = ent.x + m.x * (TS / speed);
+                        let projY = ent.y + m.y * (TS / speed);
+                        
+                        let targetX = pacman.x;
+                        let targetY = pacman.y;
+                        
+                        if (ent.dead) {
+                            targetX = 13.5 * TS;
+                            targetY = 10 * TS;
+                        }
+
+                        let dist = Math.hypot(projX - targetX, projY - targetY);
+                        
+                        if(ent.scared && !ent.dead) {
+                            if(dist > bestDist) { bestDist = dist; bestMove = m; }
+                        } else {
+                            if(dist < bestDist) { bestDist = dist; bestMove = m; }
+                        }
+                    });
+
+                    ent.vx = bestMove.x;
+                    ent.vy = bestMove.y;
+                } else {
+                    ent.vx = -ent.vx;
+                    ent.vy = -ent.vy;
+                }
+            }
+        }
+        ent.x += ent.vx;
+        ent.y += ent.vy;
+
+        if (ent.x < 0) ent.x = canvas.width - TS;
+        if (ent.x >= canvas.width) ent.x = 0;
+    }
+
+    function triggerQuiz() {
+        state = 'PAUSED'; 
+        clearPath(); 
+        if (levelQuestions.length === 0) levelQuestions = shuffle([...masterQuestionPool]); 
+        const qObj = levelQuestions.pop();
+        
+        let labels = ["A", "B", "C", "D"];
+        let cssClasses = ["lbl-a", "lbl-b", "lbl-c", "lbl-d"];
+
+        if (isMobile) {
+            document.getElementById('quiz-modal').style.display = 'flex';
+            document.getElementById('question-text-mobile').innerText = qObj.q;
+            const container = document.getElementById('options-container-mobile');
+            container.innerHTML = '';
+            
+            qObj.opts.forEach((optText, index) => {
+                const btn = document.createElement('button');
+                btn.className = `option-btn ${cssClasses[index]}`;
+                btn.innerHTML = `<strong>[${labels[index]}]</strong> <span>${optText}</span>`;
+                btn.onclick = () => handleAnswer(index, qObj.ans, btn);
+                container.appendChild(btn);
+            });
+        } else {
+            document.getElementById('question-text').innerText = qObj.q;
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            qObj.opts.forEach((optText, index) => {
+                const btn = document.createElement('button');
+                btn.className = `option-btn ${cssClasses[index]}`;
+                btn.innerHTML = `<strong>[${labels[index]}]</strong> <span>${optText}</span>`;
+                btn.onclick = () => handleAnswer(index, qObj.ans, btn);
+                container.appendChild(btn);
+            });
+        }
+    }
+
+    function handleAnswer(selectedIndex, correctIndex, btnElement) {
+        const btns = document.querySelectorAll('.option-btn');
+        btns.forEach(b => b.disabled = true);
+
+        if (selectedIndex === correctIndex) {
+            btnElement.classList.add('correct');
+            addScore(500);
+            questionsAnsweredThisLevel++;
+            
+            currentQuizGhostEatable = true;
+            ghosts.forEach(g => {
+                if(!g.dead) {
+                    g.scared = true;
+                    // Snap to grid to reverse properly
+                    g.x = Math.round(g.x / TS) * TS;
+                    g.y = Math.round(g.y / TS) * TS;
+                    g.vx = -g.vx; 
+                    g.vy = -g.vy;
+                }
+            });
+            
+            if(powerTimer) clearTimeout(powerTimer);
+            powerTimer = setTimeout(() => {
+                ghosts.forEach(g => g.scared = false);
+                currentQuizGhostEatable = false;
+            }, CONFIG.powerDuration);
+
+            setTimeout(() => {
+                document.getElementById('quiz-modal').style.display = 'none';
+                if(!isMobile) {
+                    document.getElementById('question-text').innerText = "KEEP EATING!";
+                    document.getElementById('options-container').innerHTML = "";
+                }
+                
+                if (questionsAnsweredThisLevel >= selectedQPL) {
+                    level++;
+                    questionsAnsweredThisLevel = 0;
+                    initLevel();
+                }
+                updateUI();
+                state = 'PLAY';
+                checkWinCondition();
+            }, 1000);
+            
+        } else {
+            btnElement.classList.add('wrong');
+            btns[correctIndex].classList.add('correct'); 
+            
+            setTimeout(() => {
+                document.getElementById('quiz-modal').style.display = 'none';
+                if(!isMobile) {
+                    document.getElementById('question-text').innerText = "KEEP EATING!";
+                    document.getElementById('options-container').innerHTML = "";
+                }
+                startDeathSequence(true); 
+            }, 2000);
+        }
+    }
+
+    function startDeathSequence(flashRed = false) {
+        state = 'DYING';
+        deathFrame = 0;
+        clearPath();
+        
+        if (flashRed) {
+            redFlashElement.style.opacity = '1';
+            setTimeout(() => { redFlashElement.style.opacity = '0'; }, 400);
+        }
+    }
+
+    function finishDeath() {
+        if (isDemoMode) {
+            resetDemoScene(demoStep);
+            state = 'DEMO'; 
+            return;
+        }
+
+        lives--;
+        updateUI();
+        if(lives <= 0) {
+            state = 'GAMEOVER';
+            document.getElementById('final-score').innerText = String(score).padStart(6, '0');
+            document.getElementById('game-over-modal').style.display = 'flex';
+        } else {
+            resetPositions();
+            state = 'PLAY';
+        }
+    }
+
+    function checkWinCondition() {
+        if(dotsRemaining === 0) {
+            state = 'WIN';
+            level++;
+            setTimeout(() => {
+                initLevel();
+                updateUI();
+            }, 1000);
+        }
+    }
+
+    // ==========================================
+    // RENDERING
+    // ==========================================
+    function drawMap() {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let r = 0; r < map.length; r++) {
+            for (let c = 0; c < map[r].length; c++) {
+                let x = c * TS;
+                let y = r * TS;
+                let val = map[r][c];
+
+                if (val === 1) { 
+                    ctx.fillStyle = '#3498db'; 
+                    ctx.fillRect(x, y, TS, TS);
+                    ctx.fillStyle = '#111144'; 
+                    ctx.fillRect(x + 3, y + 3, TS - 6, TS - 6);
+                } else if (val === 3) { 
+                    ctx.fillStyle = '#FFB8FF'; 
+                    ctx.fillRect(x, y + TS/2 - 2, TS, 4);
+                } else if (val === 0) { 
+                    ctx.fillStyle = '#FFB8AE';
+                    ctx.fillRect(x + TS/2 - 2, y + TS/2 - 2, 4, 4); 
+                } else if (val === 4) { 
+                    ctx.fillStyle = (Math.floor(Date.now() / 200) % 2 === 0) ? '#fff' : '#f1c40f';
+                    ctx.beginPath();
+                    ctx.arc(x + TS/2, y + TS/2, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        if (pacman.path && pacman.path.length > 0) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            pacman.path.forEach(p => {
+                ctx.fillRect(p.c * TS + TS/2 - 2, p.r * TS + TS/2 - 2, 4, 4);
+            });
+        }
+    }
+
+    function drawHardcodedLogoPlayer(ctx, x, y, size) {
+        const pz = size / 8; 
+        ctx.fillStyle = 'var(--brand-blue)';
+        
+        const sGrid = [
+            [0,1,1,1,1,1,0,0],
+            [1,1,0,0,0,1,1,0],
+            [1,1,0,0,0,0,0,0],
+            [0,1,1,1,1,1,0,0],
+            [0,0,0,0,0,1,1,0],
+            [1,1,0,0,0,1,1,0],
+            [0,1,1,1,1,1,0,0],
+        ];
+
+        ctx.save();
+        ctx.translate(x, y);
+        for(let r=0; r<7; r++) {
+            for(let c=0; c<8; c++) {
+                if(sGrid[r][c] === 1) {
+                    ctx.fillRect(c * pz, r * pz, pz + 0.5, pz + 0.5); 
+                }
+            }
+        }
+        ctx.restore();
+    }
+
+    function drawBow(pmX, pmY, pmVX, pmVY) {
+        if (!isMsSpecMan) return;
+        ctx.save();
+        
+        let bx = 0;
+        let by = -6; 
+        
+        if (pmVX < 0) bx = 4; 
+        else if (pmVX > 0) bx = -4; 
+        else if (pmVY < 0) { bx = 4; by = 4; } 
+        else if (pmVY > 0) { bx = 4; by = -6; } 
+
+        if (pmVX === 0 && pmVY === 0) bx = -4; 
+
+        ctx.translate(pmX + TS/2 + bx, pmY + TS/2 + by);
+
+        ctx.fillStyle = '#e74c3c';
+        ctx.beginPath();
+        ctx.moveTo(0,0); ctx.lineTo(-4, -4); ctx.lineTo(-4, 4); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(0,0); ctx.lineTo(4, -4); ctx.lineTo(4, 4); ctx.fill();
+        
+        ctx.fillStyle = '#3498db'; 
+        ctx.beginPath(); ctx.arc(0,0, 2.5, 0, Math.PI*2); ctx.fill();
+        
+        ctx.restore();
+    }
+
+    function drawPacman() {
+        ctx.save();
+        ctx.translate(pacman.x + TS/2, pacman.y + TS/2);
+        
+        let angle = 0;
+        if (pacman.vx > 0) angle = 0; 
+        if (pacman.vx < 0) angle = Math.PI; 
+        if (pacman.vy > 0) angle = Math.PI / 2; 
+        if (pacman.vy < 0) angle = -Math.PI / 2; 
+        
+        ctx.save();
+        ctx.rotate(angle);
+        let mouthOpen = (Math.floor(Date.now() / 150) % 2 === 0) ? 0.2 : 0;
+        ctx.fillStyle = '#FFFF00';
+        ctx.beginPath();
+        ctx.arc(0, 0, pacman.rad, mouthOpen * Math.PI, (2 - mouthOpen) * Math.PI);
+        ctx.lineTo(0, 0);
+        ctx.fill();
+        ctx.restore(); 
+        ctx.restore();
+
+        drawBow(pacman.x, pacman.y, pacman.vx, pacman.vy);
+    }
+
+    function drawPacmanDying() {
+        if (deathFrame > 60) return; 
+        
+        ctx.save();
+        ctx.translate(pacman.x + TS/2, pacman.y + TS/2);
+        
+        ctx.rotate(-Math.PI / 2);
+        let openProgress = (deathFrame / 60) * Math.PI;
+        ctx.fillStyle = '#FFFF00';
+        ctx.beginPath();
+        ctx.arc(0, 0, pacman.rad, openProgress, (2 * Math.PI) - openProgress);
+        ctx.lineTo(0, 0);
+        ctx.fill();
+        ctx.restore();
+
+        if (deathFrame < 50) drawBow(pacman.x, pacman.y, pacman.vx, pacman.vy);
+    }
+
+    function drawGhosts() {
+        ghosts.forEach(g => {
+            let gx = g.x + TS/2;
+            let gy = g.y + TS/2;
+
+            if (g.dead) {
+                // Return to base eyes only
+                ctx.fillStyle = '#fff';
+                ctx.beginPath(); ctx.arc(gx - 3, gy - 2, 2.5, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(gx + 3, gy - 2, 2.5, 0, Math.PI*2); ctx.fill();
+                
+                ctx.fillStyle = '#000'; 
+                let ex = g.vx > 0 ? 1 : g.vx < 0 ? -1 : 0;
+                let ey = g.vy > 0 ? 1 : g.vy < 0 ? -1 : 0;
+                ctx.fillRect(gx - 3.5 + ex, gy - 2.5 + ey, 2, 2);
+                ctx.fillRect(gx + 2.5 + ex, gy - 2.5 + ey, 2, 2);
+                return;
+            }
+
+            ctx.fillStyle = g.scared ? (Math.floor(Date.now() / 250) % 2 === 0 ? '#2980b9' : '#ecf0f1') : g.color;
+            ctx.beginPath();
+            ctx.arc(gx, gy, 8, Math.PI, 0);
+            ctx.lineTo(gx + 8, gy + 8);
+            ctx.lineTo(gx + 4, gy + 5);
+            ctx.lineTo(gx, gy + 8);
+            ctx.lineTo(gx - 4, gy + 5);
+            ctx.lineTo(gx - 8, gy + 8);
+            ctx.fill();
+            
+            if(!g.scared) {
+                ctx.fillStyle = '#fff';
+                ctx.beginPath(); ctx.arc(gx - 3, gy - 2, 2.5, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(gx + 3, gy - 2, 2.5, 0, Math.PI*2); ctx.fill();
+                
+                ctx.fillStyle = '#000'; 
+                let ex = g.vx > 0 ? 1 : g.vx < 0 ? -1 : 0;
+                let ey = g.vy > 0 ? 1 : g.vy < 0 ? -1 : 0;
+                ctx.fillRect(gx - 3.5 + ex, gy - 2.5 + ey, 2, 2);
+                ctx.fillRect(gx + 2.5 + ex, gy - 2.5 + ey, 2, 2);
+            } else {
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(gx - 4, gy - 2, 2, 2);
+                ctx.fillRect(gx + 2, gy - 2, 2, 2);
+            }
+        });
+    }
+
+    // ==========================================
+    // MAIN GAME LOOP
+    // ==========================================
+    function gameLoop() {
+        if(state === 'PLAY' || state === 'DEMO') {
+            
+            if (state === 'DEMO') processDemoLogic();
+
+            handlePlayerMovement();
+            ghosts.forEach(g => handleEnemyMovement(g));
+
+            const hitDist = TS * 0.7; 
+            ghosts.forEach(g => {
+                let dist = Math.hypot(g.x - pacman.x, g.y - pacman.y);
+                if(dist < hitDist) {
+                    if(g.scared && !g.dead) {
+                        g.dead = true;
+                        g.scared = false;
+                        if (!isDemoMode) addScore(200);
+                        
+                        // Snap to grid for return trip
+                        g.x = Math.round(g.x / TS) * TS;
+                        g.y = Math.round(g.y / TS) * TS;
+                        g.vx = 0; g.vy = 0;
+                    } else if (!g.dead) {
+                        startDeathSequence();
+                    }
+                }
+            });
+            
+            drawMap();
+            drawPacman();
+            drawGhosts();
+
+            if (state === 'DEMO') drawDemoHighlights();
+            
+        } else if (state === 'DYING') {
+            deathFrame++;
+            drawMap();
+            if (deathFrame < 20) {
+                drawPacman();
+                drawGhosts();
+            } else {
+                drawPacmanDying();
+            }
+            if (deathFrame > 90) {
+                finishDeath();
+            }
+        } else {
+            drawMap();
+            drawPacman();
+            drawGhosts();
+        }
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Boot Sequence
+    if (!isMobile) document.getElementById('controls-setting').style.display = 'flex';
+    drawMenuSprites();
+    setupMobileControls();
+    document.getElementById('title-modal').style.display = 'flex'; 
+    initLevel(); 
+    requestAnimationFrame(gameLoop); 
+
+</script>
+<script>
+/* FIT TO WINDOW: shrinks the game (never below 300px wide) so the whole thing fits the window's height,
+   with no scrollbars, whether it's on a page, in a small window, full screen or saved to your desktop. */
+(function () {
+    function fit() {
+        var w = document.getElementById('game-wrapper');
+        if (!w) return;
+        var cs = getComputedStyle(document.body);
+        var avail = window.innerHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
+        w.style.maxWidth = '';
+        if (w.offsetHeight <= avail) return;
+        var lo = 300, hi = w.offsetWidth;
+        for (var i = 0; i < 12; i++) {
+            var mid = (lo + hi) / 2;
+            w.style.maxWidth = mid + 'px';
+            if (w.offsetHeight > avail) hi = mid; else lo = mid;
+        }
+        w.style.maxWidth = Math.floor(lo) + 'px';
+    }
+    var t;
+    window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(fit, 60); });
+    window.addEventListener('load', fit);
+    document.addEventListener('fullscreenchange', function () { setTimeout(fit, 120); });
+    [0, 300, 1200].forEach(function (ms) { setTimeout(fit, ms); });
+})();
+</script>
+</body>
+</html>

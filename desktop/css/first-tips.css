@@ -1,0 +1,35 @@
+/*
+ * FIRST-TIPS.CSS - The yellow help balloons: first-visit tips (js/core/first-tips.js) and
+ * first-use feature hints (js/core/feature-hints.js). Both use class="tip-balloon".
+ * data-side on the balloon says where its arrow goes: down (target below), left, right, none.
+ */
+.tip-balloon {
+    position: fixed; z-index: 1000001; width: min(300px, calc(100vw - 12px));
+    background: #ffffe1; color: #000; border: 1px solid #000; border-radius: 6px;
+    padding: 8px 12px 10px; box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+    font: 12px/1.45 Verdana, Tahoma, sans-serif;
+}
+.tip-balloon p { margin: 6px 0 8px; }
+.ft-head { display: flex; align-items: center; gap: 8px; }
+.ft-head strong { margin-right: auto; }
+.ft-count { font-size: 10px; opacity: 0.6; }
+.ft-x { border: 1px solid #000; background: #ffffe1; cursor: pointer; font-size: 10px; padding: 0 4px; line-height: 14px; }
+.ft-off { display: flex; align-items: center; gap: 5px; font-size: 11px; cursor: pointer; }
+.ft-off input { margin: 0; }
+.ft-buttons { display: flex; gap: 6px; margin-top: 8px; }
+.ft-buttons button { flex: 1; padding: 4px; cursor: pointer; font-size: 11px; }
+.ft-next { font-weight: bold; }
+
+/* The pointer arrow (a black triangle with a yellow one inside, drawn with borders) */
+.ft-arrow { position: absolute; width: 0; height: 0; }
+.tip-balloon[data-side="none"] .ft-arrow { display: none; }
+.tip-balloon[data-side="down"] .ft-arrow {
+    bottom: -9px; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 9px solid #000;
+}
+.tip-balloon[data-side="left"] .ft-arrow {
+    left: -9px; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-right: 9px solid #000;
+}
+.tip-balloon[data-side="right"] .ft-arrow {
+    right: -9px; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 9px solid #000;
+}
+.ft-updated { margin: 2px 0 6px; font-size: 10px; opacity: .7; font-style: italic; }

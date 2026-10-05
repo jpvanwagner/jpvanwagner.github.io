@@ -1,0 +1,202 @@
+/*
+ * TASKBRICKS.CSS - The "taskbricks": a Win95 taskbar reimagined as stackable, draggable bricks.
+ * Positions are calculated in js/core/taskbricks.js; this file only handles the look,
+ * the drop-in animation, the drag wobble, and the auto-hide slide.
+ */
+
+/* --- THE BRICK LAYER --- */
+#brick-layer {
+    position: fixed;
+    bottom: 0;
+    left: 2px;
+    right: 2px;
+    height: 300px;
+    display: flex;
+    flex-wrap: wrap-reverse;
+    align-items: flex-start; 
+    align-content: flex-start;
+    gap: 2px; 
+    pointer-events: none;
+    z-index: 5000;   /* above every window (they live in #window-container), below drawers/menus */
+    padding-bottom: 2px;
+}
+
+/* The bricks themselves */
+.brick {
+    pointer-events: auto;
+    height: 36px;
+    min-width: 40px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    
+    background-color: var(--ui-face);
+    background-image: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent);
+    background-size: 4px 4px;
+    color: var(--ui-text);
+    
+    border-top: 2px solid var(--ui-light);
+    border-left: 2px solid var(--ui-light);
+    border-right: 2px solid var(--ui-dark);
+    border-bottom: 2px solid var(--ui-dark);
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+    
+    font-weight: bold;
+    cursor: grab;
+    user-select: none;
+    
+    /* MOBILE FIX: Prevents dragging the whole screen */
+    touch-action: none; 
+    
+    position: relative;
+    flex-shrink: 0;
+    
+    animation: fallIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.brick { 
+    position: absolute !important; 
+    pointer-events: auto !important; 
+    display: flex; align-items: center; white-space: nowrap;
+    box-sizing: border-box; user-select: none;
+
+    /* Strict Height to Guarantee Zero Vertical Overlap */
+    height: 32px; 
+    min-height: 32px;
+    max-height: 32px; 
+
+    font-family: var(--user-font, 'Press Start 2P', monospace);
+    font-size: var(--user-font-size, 12px);
+
+    transition: left 0.15s ease-out, top 0.15s ease-out; 
+}
+.brick.dragging-wobble { 
+    transition: none !important; z-index: 10000; opacity: 0.8;
+    animation: brick-wobble 0.2s infinite alternate linear; 
+}
+@keyframes brick-wobble {
+    0% { transform: rotate(-2deg); }
+    100% { transform: rotate(2deg); }
+}
+
+/* Drop-in animation for new bricks */
+@keyframes fallIn {
+    0% { transform: translateY(-300px); opacity: 0; }
+    60% { opacity: 1; }
+    70% { transform: translateY(0); }
+    85% { transform: translateY(-15px); }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Auto-hide (Start > Settings > Hide taskbricks): slides the whole layer off-screen */
+body.autohide-bricks #brick-layer {
+    transform: translateY(calc(100% + 50px));
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 99995 !important; 
+}
+body.autohide-bricks.show-bricks #brick-layer {
+    transform: translateY(0);
+}
+
+/* Small icons inside bricks */
+.brick img {
+    filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 0.5));
+    image-rendering: pixelated;
+}
+
+/* --- TRAY: full screen button (js/core/taskbricks-parts.js) --- */
+#tray-fullscreen {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; margin-right: 8px; padding: 0; cursor: pointer;
+    background: transparent; color: var(--ui-text); border: 1px solid transparent;
+}
+#tray-fullscreen:hover { border-color: var(--ui-light) var(--ui-dark) var(--ui-dark) var(--ui-light); }
+#tray-fullscreen:active { border-color: var(--ui-dark) var(--ui-light) var(--ui-light) var(--ui-dark); }
+#tray-fullscreen .fs-exit { display: none; }
+#tray-fullscreen.is-full .fs-enter { display: none; }
+#tray-fullscreen.is-full .fs-exit { display: inline; }
+
+/* The brick for the window in front looks pushed in, like the taskbar button of the active
+   window on real 90s desktops (set by TaskBricks.setActive) */
+.brick.window-brick.active {
+    border-top-color: var(--ui-dark) !important; border-left-color: var(--ui-dark) !important;
+    border-right-color: var(--ui-light) !important; border-bottom-color: var(--ui-light) !important;
+    background-color: var(--ui-light);
+    background-image: repeating-conic-gradient(var(--ui-face) 0 25%, var(--ui-light) 0 50%);
+    background-size: 2px 2px;
+    font-weight: bold;
+}
+.brick.window-brick.active > * { transform: translate(1px, 1px); }
+
+/* --- VOLUME: tray speaker button + pop-up slider (js/core/volume.js) --- */
+#tray-volume, #tray-share {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; margin-right: 4px; padding: 0; cursor: pointer;
+    background: transparent; color: var(--ui-text); border: 1px solid transparent;
+}
+#tray-volume:hover, #tray-share:hover { border-color: var(--ui-light) var(--ui-dark) var(--ui-dark) var(--ui-light); }
+#volume-popup {
+    display: none; position: fixed; z-index: 1000002; width: 86px; padding: 6px 8px 8px; text-align: center;
+    background: var(--ui-face); color: var(--ui-text); font: 11px var(--user-font, Tahoma, sans-serif);
+    border: 2px solid; border-color: var(--ui-light) var(--ui-dark) var(--ui-dark) var(--ui-light);
+    box-shadow: 2px 2px 0 rgba(0,0,0,.5);
+}
+#volume-popup .vol-title { font-weight: bold; margin-bottom: 4px; }
+/* a vertical slider, like the Windows 95 volume control */
+/* A horizontal slider turned upright inside a 26x116 box (works the same in every browser),
+   drawn like the Windows 95 control: a sunken groove and a raised grey knob */
+#volume-popup .vol-track-box { position: relative; width: 26px; height: 116px; margin: 2px auto; }
+#volume-slider {
+    -webkit-appearance: none; appearance: none; position: absolute; left: 50%; top: 50%;
+    width: 110px; height: 22px; margin: 0; transform: translate(-50%, -50%) rotate(-90deg);
+    background: transparent; cursor: pointer;
+}
+#volume-slider::-webkit-slider-runnable-track {
+    height: 6px; background: #000; border: 2px solid; border-color: var(--ui-dark, #808080) var(--ui-light, #fff) var(--ui-light, #fff) var(--ui-dark, #808080);
+}
+#volume-slider::-moz-range-track {
+    height: 4px; background: #000; border: 2px solid; border-color: var(--ui-dark, #808080) var(--ui-light, #fff) var(--ui-light, #fff) var(--ui-dark, #808080);
+}
+#volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 11px; height: 20px; margin-top: -9px;
+    background: var(--ui-face, #c0c0c0); border: 2px solid; border-color: var(--ui-light, #fff) #000 #000 var(--ui-light, #fff);
+    box-shadow: inset -1px -1px 0 var(--ui-dark, #808080);
+}
+#volume-slider::-moz-range-thumb {
+    width: 7px; height: 16px; border-radius: 0;
+    background: var(--ui-face, #c0c0c0); border: 2px solid; border-color: var(--ui-light, #fff) #000 #000 var(--ui-light, #fff);
+}
+#volume-slider:focus-visible { outline: 1px dotted var(--ui-text, #000); outline-offset: 2px; }
+#volume-pct { margin: 3px 0; }
+#volume-popup .vol-mute { display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
+#volume-popup .vol-note { margin-top: 4px; opacity: .7; font-size: 10px; }
+
+/* ---------- Tray clock: date | time (desktop/js/core/sys-clock.js) ---------- */
+#tray-clock { display: inline-flex; align-items: center; white-space: nowrap; }
+#tray-clock .tc-date { opacity: .85; }
+#tray-clock .tc-sep {
+    display: inline-block; width: 2px; height: 14px; margin: 0 7px;
+    border-left: 1px solid var(--ui-dark, #808080); border-right: 1px solid var(--ui-light, #fff);
+}
+#tray-clock .tc-time { font-weight: bold; }
+
+/* --- TRAY ICON COLORS: each tray icon gets its own classic-palette color (with a thin dark
+   edge so it stays readable on light and dark themes) --- */
+#tray-share svg, #tray-volume svg, #tray-fullscreen svg { filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, .45)); }
+#tray-share { color: #d0209f; }                 /* share: magenta */
+#tray-volume { color: #1e6fd9; }                /* speaker: blue */
+#tray-volume svg path:first-child { fill: #3a4150; }   /* the speaker body stays dark; the waves are blue */
+#tray-fullscreen { color: #1f9d4c; }            /* full screen: green */
+
+/* The MENU brick looks pushed in while the menu is open (start-menu.js) */
+#start-brick.active, #start-brick:active {
+    border-top-color: var(--ui-dark) !important; border-left-color: var(--ui-dark) !important;
+    border-right-color: var(--ui-light) !important; border-bottom-color: var(--ui-light) !important;
+    box-shadow: inset 1px 1px 0 var(--ui-darker, #404040) !important;
+    background-color: var(--ui-light);
+    background-image: repeating-conic-gradient(var(--ui-face) 0 25%, var(--ui-light) 0 50%);
+    background-size: 2px 2px;
+}
+#start-brick.active > *, #start-brick:active > * { transform: translate(1px, 1px); }

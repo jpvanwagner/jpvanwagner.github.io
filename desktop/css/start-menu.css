@@ -1,0 +1,32 @@
+/*
+ * START-MENU.CSS - Items and flyout submenus of the Start menu (js/core/start-menu.js).
+ * The menu panel itself is positioned with inline styles in that script.
+ */
+
+.os-menu-item { padding: 8px 12px; cursor: pointer; display: flex; gap: 12px; align-items: center; color: var(--ui-text, black); position: relative; white-space: nowrap; }
+.os-menu-item:hover { background: var(--title-grad-1, #000080); color: var(--title-text, #fff); }
+.os-submenu-wrapper:hover > .os-submenu-content { display: flex !important; }
+.os-submenu-content {
+    position: absolute;
+    bottom: -2px;
+    left: 100%;
+    min-width: 180px;
+    background: var(--ui-face, #c0c0c0);
+    color: var(--ui-text, black);
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #000;
+    border-right: 2px solid #000;
+    display: none;
+    flex-direction: column;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+    z-index: 100002;
+    padding: 2px;
+}
+
+/* MENU slides up from the MENU brick when it opens (start-menu.js adds .menu-anim), and each
+   flyout submenu slides out sideways when it appears */
+#start-menu-container.menu-anim { animation: menu-slide-up .16s ease-out; transform-origin: bottom left; }
+@keyframes menu-slide-up { from { transform: translateY(14px); opacity: 0; clip-path: inset(100% 0 0 0); } to { transform: none; opacity: 1; clip-path: inset(0 0 0 0); } }
+.os-submenu-wrapper:hover > .os-submenu-content { animation: submenu-slide-out .14s ease-out; }
+@keyframes submenu-slide-out { from { transform: translateX(-10px); opacity: 0; clip-path: inset(0 100% 0 0); } to { transform: none; opacity: 1; clip-path: inset(0 0 0 0); } }

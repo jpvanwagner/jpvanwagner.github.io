@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quizaga Quiz</title>
+    <!-- Import a classic retro arcade font -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        /* ========================================================
+           VISUAL STYLES & RESPONSIVE LAYOUT
+           ======================================================== */
+        :root {
+            --brand-blue: #3232FF; 
+        }
+
+        /* html only fills the window; the page padding and min-height live on body alone
+           (on both, the page came out 20px taller than the window and always scrolled) */
+        html { margin: 0; padding: 0; background-color: #111; }
+        body {
+            margin: 0;
+            padding: 10px;
+            background-color: #111; 
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overscroll-behavior-y: contain; 
+        }
+
+        .retro-text {
+            font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
+        }
+
+        :fullscreen {
+            background-color: #111;
+        }
+
+        #game-wrapper {
+            width: 100%;
+            max-width: 950px; 
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { 
+            margin: 0 0 15px 0; 
+            flex-shrink: 0;
+            font-size: clamp(16px, 4vw, 24px); 
+            color: #f1c40f; 
+            text-align: center; 
+            text-shadow: 2px 2px 0 var(--brand-blue);
+        }
+
+        /* Flex container for the game and sidebar */
+        #main-content {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: stretch;
+            justify-content: center;
+        }
+
+        /* The left column containing the maze and HUD */
+        #game-column {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 300px; 
+        }
+
+        #ui-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: clamp(8px, 1.5vw, 12px);
+            background: #222;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 2px solid #555;
+            text-transform: uppercase;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 560px;
+            box-shadow: 0 0 0 4px #444;
+            background-color: #000;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            /* Vertical Arcade Cabinet Ratio */
+            aspect-ratio: 560 / 640; 
+            object-fit: contain;
+            image-rendering: pixelated; 
+            cursor: crosshair;
+        }
+
+        /* Constant control display */
+        #active-controls-hud {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 10px;
+            color: #ccc;
+            background: #222;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            line-height: 1.4;
+            width: 100%;
+            max-width: 560px;
+            box-sizing: border-box;
+        }
+
+        /* --- In-Game Fullscreen Button --- */
+        #fs-toggle-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: 2px solid #fff;
+            border-radius: 5px;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            transition: background 0.2s, transform 0.1s;
+        }
+        #fs-toggle-btn:hover { background: rgba(255, 255, 255, 0.3); }
+        #fs-toggle-btn:active { transform: scale(0.9); }
+
+        #red-flash, #green-flash {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 5;
+        }
+        #red-flash { background-color: rgba(255, 0, 0, 0.6); }
+        #green-flash { background-color: rgba(46, 204, 113, 0.6); }
+
+        /* Modal Styles */
+        .modal {
+            display: none; 
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 5%;
+            box-sizing: border-box;
+            z-index: 10;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .modal h2 { 
+            margin-top: 0; 
+            color: #f1c40f; 
+            font-size: clamp(20px, 4vw, 30px); 
+            line-height: 1.6; 
+            text-shadow: 2px 2px 0 var(--brand-blue);
+        }
+        
+        #title-modal h2 { margin-bottom: 10px; }
+
+        /* Settings UI */
+        .settings-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 10px;
+            color: #ccc;
+        }
+        .toggle-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .toggle-btn {
+            background: #222;
+            color: #777;
+            border: 2px solid #444;
+            padding: 10px 15px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toggle-btn.active {
+            background: var(--brand-blue);
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .action-btn {
+            background: var(--brand-blue);
+            color: white;
+            border: 4px solid #fff;
+            padding: 15px 20px;
+            font-size: clamp(12px, 3vw, 16px);
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 350px;
+        }
+        .action-btn:hover { background: #fff; color: var(--brand-blue); border-color: var(--brand-blue); }
+        .action-btn:active { transform: scale(0.95); }
+
+        /* Sidebar UI */
+        #sidebar {
+            flex: 1;
+            min-width: 250px;
+            background-color: #000;
+            padding: 20px;
+            box-sizing: border-box;
+            display: none; 
+            flex-direction: column;
+            box-shadow: 0 0 0 4px #444, inset 0 0 0 2px #fff;
+        }
+        #question-panel { flex-grow: 1; display: flex; flex-direction: column; }
+        #question-text {
+            font-size: 16px;
+            color: #f1c40f;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+        .option-btn {
+            background: #111;
+            color: white;
+            border: 2px solid #444;
+            padding: 15px;
+            margin-bottom: 12px;
+            text-align: left;
+            font-size: 12px;
+            line-height: 1.6;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 500;
+            width: 100%;
+        }
+        .option-btn:hover { background: #333; border-color: #fff; }
+        .option-btn.correct { background: #27ae60 !important; border-color: #2ecc71 !important; color: #000; }
+        .option-btn.wrong { background: #c0392b !important; border-color: #e74c3c !important; }
+
+        /* Demo Overlay */
+        #demo-ui {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 15;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end; 
+            padding: 40px 20px;
+            box-sizing: border-box;
+            pointer-events: auto; /* Catch clicks during demo */
+        }
+        #demo-text {
+            background: rgba(0,0,0,0.95);
+            color: #f1c40f;
+            padding: 20px;
+            border: 2px solid #f1c40f;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 5px;
+            width: 90%;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .demo-btn-row {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+        }
+        .demo-btn {
+            background: #e74c3c;
+            color: white;
+            border: 2px solid #fff;
+            padding: 12px 25px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            text-transform: uppercase;
+        }
+        #next-demo-btn { 
+            background: #2ecc71; 
+            color: #000; 
+            animation: pulseBtn 1.5s infinite;
+        }
+        @keyframes pulseBtn {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 800px) {
+            #main-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            #game-column, #sidebar {
+                width: 100%;
+                max-width: 560px;
+            }
+        }
+
+        /* --- Mobile Controls --- */
+        #mobile-controls {
+            display: none;
+            grid-template-columns: 60px 60px 60px 80px;
+            grid-template-rows: 60px 60px 60px;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .dpad-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 4px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        .dpad-btn:active { background-color: var(--brand-blue); border-color: #fff; }
+        #btn-up { grid-column: 2; grid-row: 1; opacity: 0.3; } 
+        #btn-left { grid-column: 1; grid-row: 2; }
+        #btn-right { grid-column: 3; grid-row: 2; }
+        #btn-down { grid-column: 2; grid-row: 3; opacity: 0.3; } 
+        #btn-action { 
+            grid-column: 4; 
+            grid-row: 2; 
+            background-color: #e74c3c; 
+            border-radius: 5px; 
+            font-size: 14px; 
+            font-weight: bold;
+        }
+        #btn-action:active { background-color: #c0392b; }
+        /* Credit line on the title screen */
+        .jv-credit { margin-top: 12px; font-size: 8px; color: #aaa; text-align: center; letter-spacing: 1px; }
+        .jv-credit a { color: #f1c40f; text-decoration: none; }
+        .jv-credit a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+        <h1 class="retro-text">QUIZAGA</h1>
+        
+        <div id="main-content">
+            <!-- Left Game Board Column -->
+            <div id="game-column">
+                <div id="ui-bar" class="retro-text">
+                    <div>SCORE<br><span id="score-display" style="color:#f1c40f">000000</span></div>
+                    <div>LEVEL<br><span id="level-display" style="color:#f1c40f">01 (0/5)</span></div>
+                    <div>LIVES<br><span id="lives-display">❤️❤️❤️</span></div>
+                </div>
+
+                <div id="game-container">
+                    <!-- Vertical Arcade Screen -->
+                    <canvas id="gameCanvas" width="560" height="640"></canvas>
+                    <button id="fs-toggle-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
+                    <div id="red-flash"></div>
+                    <div id="green-flash"></div>
+
+                    <!-- DEMO UI OVERLAY -->
+                    <div id="demo-ui">
+                        <div id="demo-text">STEP 1</div>
+                        <div class="demo-btn-row">
+                            <button id="skip-demo-btn" class="retro-text demo-btn" onclick="skipDemo()">SKIP</button>
+                            <button id="next-demo-btn" class="retro-text demo-btn" onclick="advanceDemo()">NEXT ➡</button>
+                        </div>
+                    </div>
+
+                    <!-- TITLE SCREEN MODAL -->
+                    <div id="title-modal" class="modal" style="display: flex;">
+                        <h2 class="retro-text">QUIZAGA</h2>
+
+                        <div class="settings-row" id="difficulty-setting">
+                            <div class="retro-text">DIFFICULTY</div>
+                            <div class="toggle-group" id="diff-group">
+                                <button class="toggle-btn retro-text active" onclick="setDifficulty(false, this)">NORMAL</button>
+                                <button class="toggle-btn retro-text" onclick="setDifficulty(true, this)" style="color:#e74c3c;">HARD MODE</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-row" id="controls-setting">
+                            <div class="retro-text">CONTROLS</div>
+                            <div class="toggle-group" id="controls-group">
+                                <button class="title-control-btn toggle-btn retro-text" onclick="setControlMode('mouse')">MOUSE</button>
+                                <button class="title-control-btn toggle-btn retro-text" onclick="setControlMode('keyboard')">KEYS</button>
+                                <button class="title-control-btn toggle-btn retro-text active" onclick="setControlMode('both')">BOTH</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="retro-text">LIVES</div>
+                            <div class="toggle-group" id="lives-group">
+                                <button class="toggle-btn retro-text" onclick="setLives(1, this)">1</button>
+                                <button class="toggle-btn retro-text active" onclick="setLives(3, this)">3</button>
+                                <button class="toggle-btn retro-text" onclick="setLives(5, this)">5</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="retro-text">QUESTIONS/LEVEL</div>
+                            <div class="toggle-group" id="questions-group">
+                                <button class="toggle-btn retro-text" onclick="setQPL(3, this)">3</button>
+                                <button class="toggle-btn retro-text active" onclick="setQPL(5, this)">5</button>
+                                <button class="toggle-btn retro-text" onclick="setQPL(10, this)">10</button>
+                            </div>
+                        </div>
+                        
+                        <button class="action-btn retro-text" onclick="startDemo()">START GAME</button>
+                        <div class="jv-credit retro-text">&copy; 2026 <a href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">Joe VanWagner</a></div>
+                    </div>
+
+                    <!-- QUIZ MODAL (Mobile Fallback) -->
+                    <div id="quiz-modal" class="modal">
+                        <h2 id="question-text-mobile" style="color:#f1c40f; font-family:'Segoe UI', sans-serif;">Question?</h2>
+                        <div id="options-container-mobile" style="width: 100%; max-width: 500px;"></div>
+                    </div>
+
+                    <!-- GAME OVER MODAL -->
+                    <div id="game-over-modal" class="modal">
+                        <h2 id="game-over-title" class="retro-text" style="color: #e74c3c; text-shadow: 2px 2px 0 #fff;">GAME OVER</h2>
+                        <p class="retro-text" style="font-size: 10px; margin-top: 20px;">FINAL SCORE:<br><br><span id="final-score" style="font-size: 20px; color: #f1c40f;">0</span></p>
+                        <button class="action-btn retro-text" onclick="resetGame(true)">PLAY AGAIN</button>
+                    </div>
+                </div>
+                
+                <!-- Constant Controls Display -->
+                <div id="active-controls-hud" class="retro-text">CONTROLS: MOUSE & KEYBOARD</div>
+                
+                <!-- Mobile Controls (D-Pad) -->
+                <div id="mobile-controls">
+                    <div id="btn-up" class="dpad-btn">⬆️</div>
+                    <div id="btn-left" class="dpad-btn">⬅️</div>
+                    <div id="btn-right" class="dpad-btn">➡️</div>
+                    <div id="btn-down" class="dpad-btn">⬇️</div>
+                    <div id="btn-action" class="dpad-btn">FIRE</div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar UI Area (Shows only during gameplay) -->
+            <div id="sidebar">
+                <div id="question-panel">
+                    <div id="question-text">SHOOT THE CORRECT BUG!</div>
+                    <div id="options-container">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Persistent Editable Controls HUD -->
+                <div id="sidebar-controls" style="margin-top: 20px; padding-top: 20px; border-top: 2px dashed #444; text-align: center;">
+                    <div class="retro-text" style="font-size:8px; margin-bottom:10px; color:#aaa;">ACTIVE CONTROLS</div>
+                    <div class="toggle-group" id="sidebar-controls-group">
+                        <button class="sidebar-control-btn toggle-btn retro-text" onclick="setControlMode('mouse')">MOUSE</button>
+                        <button class="sidebar-control-btn toggle-btn retro-text" onclick="setControlMode('keyboard')">KEYS</button>
+                        <button class="sidebar-control-btn toggle-btn retro-text active" onclick="setControlMode('both')">BOTH</button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; font-size: 12px; font-weight:bold; text-align: center; padding-top: 20px; border-top: 2px dashed #444;">
+                    <span style="color:#2ecc71;">EXTRA LIFE EVERY 2000 POINTS</span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+<script>
+    /* =========================================================================
+       GLOBAL VARIABLES & CONFIGURATION
+       ========================================================================= */
+    const CONFIG = {
+        playerSpeed: 4,        
+        bulletSpeed: 13,
+        enemyBulletSpeed: 3.5 
+    };
+
+    let selectedLives = 3;
+    let selectedQPL = 5;
+    let isHardMode = false;
+    let currentControlMode = 'both'; 
+    let isDemoMode = false;
+    const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const GW = canvas.width;
+    const GH = canvas.height;
+
+    let state = 'TITLE'; 
+    let score = 0;
+    let lives = 3;
+    let level = 1;
+    let questionsAnsweredThisLevel = 0;
+    let nextExtraLife = 2000;
+    
+    let levelQuestions = [];
+    let currentQuestion = null;
+    let deathFrame = 0; 
+    let demoStep = 0;
+    let demoSubFrame = 0;
+    let formationTick = 0; 
+
+    let player = { x: GW/2, y: GH - 60, tx: GW/2, invincTick: 0 };
+    let bullets = [], enemyBullets = [], enemies = [], particles = [];
+    let shootCool = 0;
+
+    let stars = [];
+    for(let i=0; i<160; i++) {
+        stars.push({
+            x: Math.random()*GW, y: Math.random()*GH,
+            spd: 0.2 + Math.random()*0.9, sz: Math.random()<0.12 ? 2 : 1, a: 0.3+Math.random()*0.7
+        });
+    }
+
+    const ELABELS = ["A","B","C","D"];
+    const ECOLORS = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f']; // Perfectly matched!
+
+    // Question pool (easy general trivia)
+    const masterQuestionPool = [   // easy general trivia across many categories
+        { q: "What is the capital of France?", opts: ["Rome", "Berlin", "Paris", "Madrid"], ans: 2 },
+        { q: "Which planet is known as the Red Planet?", opts: ["Mars", "Saturn", "Venus", "Jupiter"], ans: 0 },
+        { q: "How many continents are there?", opts: ["6", "7", "8", "5"], ans: 1 },
+        { q: "What gas do plants take in from the air?", opts: ["Nitrogen", "Oxygen", "Helium", "Carbon dioxide"], ans: 3 },
+        { q: "What is the largest ocean on Earth?", opts: ["Pacific", "Indian", "Arctic", "Atlantic"], ans: 0 },
+        { q: "How many legs does a spider have?", opts: ["6", "10", "8", "12"], ans: 2 },
+        { q: "At what temperature does water freeze in Fahrenheit?", opts: ["100°F", "32°F", "0°F", "50°F"], ans: 1 },
+        { q: "Which animal is called the \"King of the Jungle\"?", opts: ["Elephant", "Gorilla", "Lion", "Tiger"], ans: 2 },
+        { q: "What color do you get when you mix blue and yellow?", opts: ["Purple", "Orange", "Green", "Brown"], ans: 2 },
+        { q: "Who painted the Mona Lisa?", opts: ["Pablo Picasso", "Claude Monet", "Vincent van Gogh", "Leonardo da Vinci"], ans: 3 },
+        { q: "What is the tallest animal in the world?", opts: ["Ostrich", "Elephant", "Horse", "Giraffe"], ans: 3 },
+        { q: "How many days are in a leap year?", opts: ["366", "364", "365", "367"], ans: 0 },
+        { q: "Which instrument has 88 keys?", opts: ["Violin", "Piano", "Guitar", "Trumpet"], ans: 1 },
+        { q: "In which sport do you score a touchdown?", opts: ["Soccer", "American football", "Tennis", "Basketball"], ans: 1 },
+        { q: "What is the largest planet in our solar system?", opts: ["Neptune", "Saturn", "Jupiter", "Earth"], ans: 2 },
+        { q: "What do bees make?", opts: ["Syrup", "Jam", "Butter", "Honey"], ans: 3 },
+        { q: "How many sides does a hexagon have?", opts: ["6", "7", "5", "8"], ans: 0 },
+        { q: "Which country is home to the kangaroo?", opts: ["India", "Brazil", "Canada", "Australia"], ans: 3 },
+        { q: "What is H2O more commonly called?", opts: ["Water", "Oxygen", "Sugar", "Salt"], ans: 0 },
+        { q: "Which fruit \"keeps the doctor away,\" according to the saying?", opts: ["A banana", "An orange", "A grape", "An apple"], ans: 3 },
+        { q: "What is the closest star to Earth?", opts: ["The Sun", "Sirius", "Polaris", "Alpha Centauri"], ans: 0 },
+        { q: "How many minutes are in an hour?", opts: ["30", "100", "60", "90"], ans: 2 },
+        { q: "What is the main ingredient in guacamole?", opts: ["Lime", "Tomato", "Avocado", "Pepper"], ans: 2 },
+        { q: "Which of these animals is a mammal?", opts: ["Shark", "Trout", "Dolphin", "Octopus"], ans: 2 },
+        { q: "Which famous ship sank on its first voyage in 1912?", opts: ["Santa Maria", "Titanic", "Lusitania", "Mayflower"], ans: 1 },
+        { q: "What shape has three sides?", opts: ["Square", "Circle", "Triangle", "Pentagon"], ans: 2 },
+        { q: "What is the longest river in South America?", opts: ["Danube", "Amazon", "Nile", "Mississippi"], ans: 1 },
+        { q: "What does a thermometer measure?", opts: ["Speed", "Temperature", "Time", "Weight"], ans: 1 },
+        { q: "How many players does one soccer team have on the field?", opts: ["11", "12", "9", "10"], ans: 0 },
+        { q: "What is 7 × 8?", opts: ["56", "48", "54", "64"], ans: 0 },
+        { q: "What is the smallest US state by area?", opts: ["Delaware", "Vermont", "Rhode Island", "Connecticut"], ans: 2 },
+        { q: "What does a caterpillar turn into?", opts: ["A butterfly or moth", "A beetle", "A bee", "A spider"], ans: 0 },
+        { q: "Which month has the fewest days?", opts: ["April", "November", "February", "January"], ans: 2 },
+        { q: "Who wrote \"Romeo and Juliet\"?", opts: ["Charles Dickens", "Mark Twain", "William Shakespeare", "Jane Austen"], ans: 2 },
+        { q: "What is the hardest natural substance?", opts: ["Diamond", "Iron", "Gold", "Quartz"], ans: 0 },
+        { q: "Which of these is a primary color of paint?", opts: ["Purple", "Green", "Orange", "Red"], ans: 3 },
+        { q: "In which country are the Great Pyramids of Giza?", opts: ["India", "Egypt", "Mexico", "Peru"], ans: 1 },
+        { q: "What is a baby cat called?", opts: ["A kitten", "A foal", "A puppy", "A cub"], ans: 0 },
+        { q: "How many strings does a standard guitar have?", opts: ["4", "6", "5", "8"], ans: 1 },
+        { q: "Which planet is famous for its rings?", opts: ["Mars", "Saturn", "Venus", "Mercury"], ans: 1 }
+    ];
+
+    // ==========================================
+    // UI SETUP & LOGIC
+    // ==========================================
+    function updateControlHUD() {
+        const hud = document.getElementById('active-controls-hud');
+        if(currentControlMode === 'mobile') hud.innerHTML = "<b>CONTROLS:</b> USE D-PAD LEFT/RIGHT. TAP FIRE.";
+        else if(currentControlMode === 'mouse') hud.innerHTML = "<b>CONTROLS:</b> MOUSE (DRAG HORIZONTALLY. CLICK TO FIRE)";
+        else if(currentControlMode === 'keyboard') hud.innerHTML = "<b>CONTROLS:</b> A/D OR ARROWS TO MOVE. SPACEBAR TO FIRE.";
+        else hud.innerHTML = "<b>CONTROLS:</b> MOUSE OR KEYBOARD. CLICK/SPACE TO FIRE.";
+    }
+
+    function setControlMode(mode) {
+        currentControlMode = mode;
+        let allBtns = document.querySelectorAll('.toggle-btn');
+        allBtns.forEach(b => {
+            let txt = b.innerText.trim();
+            if (txt === 'MOUSE' || txt === 'KEYS' || txt === 'BOTH') {
+                b.classList.remove('active');
+                if (txt.toLowerCase().includes(mode.substring(0,3))) b.classList.add('active');
+                if (mode === 'both' && txt === 'BOTH') b.classList.add('active');
+            }
+        });
+        updateControlHUD();
+    }
+
+    function setDifficulty(isHard, btnElement) {
+        isHardMode = isHard;
+        let btns = document.getElementById('diff-group').getElementsByTagName('button');
+        for(let b of btns) b.classList.remove('active');
+        btnElement.classList.add('active');
+    }
+
+    if (isMobile) {
+        document.getElementById('controls-setting').style.display = 'none';
+        document.getElementById('sidebar-controls').style.display = 'none';
+        currentControlMode = 'mobile';
+        updateControlHUD();
+    } else {
+        updateControlHUD();
+    }
+
+    function setLives(val, btnElement) {
+        selectedLives = val;
+        let btns = document.getElementById('lives-group').getElementsByTagName('button');
+        for(let b of btns) b.classList.remove('active');
+        btnElement.classList.add('active');
+    }
+
+    function setQPL(val, btnElement) {
+        selectedQPL = val;
+        let btns = document.getElementById('questions-group').getElementsByTagName('button');
+        for(let b of btns) b.classList.remove('active');
+        btnElement.classList.add('active');
+    }
+
+    function toggleFullscreen() {
+        try {
+            if (!document.fullscreenElement) {
+                let elem = document.documentElement;
+                let p = elem.requestFullscreen ? elem.requestFullscreen() : undefined;
+                if (p) p.catch(()=>{});
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        } catch(e) { console.log("Fullscreen blocked."); }
+    }
+
+    // ==========================================
+    // INPUT HANDLING
+    // ==========================================
+    let keys = {};
+    document.addEventListener("keydown", (e) => {
+        if (currentControlMode === 'mouse' || currentControlMode === 'mobile') return;
+        keys[e.code] = true;
+        if (e.code === 'Space') {
+            e.preventDefault();
+            if(state === 'PLAY') fireBullet();
+        }
+        if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)) e.preventDefault(); 
+    });
+    document.addEventListener("keyup", (e) => { keys[e.code] = false; });
+
+    function handleCanvasInteraction(e, isClick) {
+        if (state !== 'PLAY' && state !== 'DEMO') return;
+        if (currentControlMode === 'keyboard') return;
+
+        let clientX;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+        } else {
+            clientX = e.clientX;
+        }
+
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        let mx = (clientX - rect.left) * scaleX;
+
+        player.tx = Math.max(30, Math.min(GW - 30, mx));
+
+        if (isClick && state === 'PLAY') fireBullet();
+    }
+
+    canvas.addEventListener('mousedown', (e) => { handleCanvasInteraction(e, true); });
+    canvas.addEventListener('mousemove', (e) => { handleCanvasInteraction(e, false); });
+    canvas.addEventListener('touchstart', (e) => { handleCanvasInteraction(e, true); }, {passive: false});
+    canvas.addEventListener('touchmove', (e) => { handleCanvasInteraction(e, false); }, {passive: false});
+
+    function setupMobileControls() {
+        if (isMobile) {
+            document.getElementById('mobile-controls').style.display = 'grid';
+            let leftActive = false;
+            let rightActive = false;
+
+            const bindHold = (id, isLeft) => {
+                const btn = document.getElementById(id);
+                btn.addEventListener('touchstart', (e) => { e.preventDefault(); if(isLeft) leftActive=true; else rightActive=true; });
+                btn.addEventListener('touchend', (e) => { e.preventDefault(); if(isLeft) leftActive=false; else rightActive=false; });
+                btn.addEventListener('mousedown', (e) => { e.preventDefault(); if(isLeft) leftActive=true; else rightActive=true; });
+                btn.addEventListener('mouseup', (e) => { e.preventDefault(); if(isLeft) leftActive=false; else rightActive=false; });
+            };
+            
+            bindHold('btn-left', true);
+            bindHold('btn-right', false);
+            
+            let actBtn = document.getElementById('btn-action');
+            actBtn.addEventListener('touchstart', (e) => { e.preventDefault(); if(state==='PLAY') fireBullet(); });
+            actBtn.addEventListener('mousedown', (e) => { e.preventDefault(); if(state==='PLAY') fireBullet(); });
+
+            setInterval(() => {
+                if(state === 'PLAY' && currentControlMode === 'mobile') {
+                    if (leftActive) player.tx = Math.max(30, player.tx - CONFIG.playerSpeed*2);
+                    if (rightActive) player.tx = Math.min(GW - 30, player.tx + CONFIG.playerSpeed*2);
+                }
+            }, 16);
+        }
+    }
+    setupMobileControls();
+
+    function fireBullet() {
+        if(shootCool > 0 || isDemoMode) return;
+        bullets.push({x: player.x, y: player.y - 20});
+        shootCool = 15; 
+    }
+
+    /* =========================================================================
+       DEMO LOGIC
+       ========================================================================= */
+    function resetDemoScene(step) {
+        demoSubFrame = 0;
+        player.x = GW/2;
+        player.tx = GW/2;
+        bullets = []; enemyBullets = []; enemies = []; particles = [];
+
+        if (step === 0) {
+            // Wait
+        }
+        else if (step === 1 || step === 2) {
+            for(let i=0; i<4; i++) {
+                let e = makeEnemy(i, 0);
+                e.y = e.homeY; 
+                e.state = 'FORMATION';
+                if (step === 2) e.isCorrect = (i === 1); 
+                enemies.push(e);
+            }
+        }
+    }
+
+    function startDemo() {
+        try {
+            if (!document.fullscreenElement) {
+                let elem = document.documentElement;
+                let p = elem.requestFullscreen ? elem.requestFullscreen() : undefined;
+                if(p) p.catch(()=>{});
+            }
+        } catch(e) {}
+
+        document.getElementById('title-modal').style.display = 'none';
+        document.getElementById('demo-ui').style.display = 'flex';
+        isDemoMode = true;
+        demoStep = 0;
+        state = 'DEMO';
+        resetDemoScene(0);
+        updateDemoUI();
+    }
+
+    function skipDemo() {
+        document.getElementById('demo-ui').style.display = 'none';
+        isDemoMode = false;
+        resetGame(true); 
+    }
+
+    function advanceDemo() {
+        demoStep++;
+        if (demoStep > 2) {
+            skipDemo();
+        } else {
+            state = 'DEMO'; 
+            resetDemoScene(demoStep);
+            updateDemoUI();
+        }
+    }
+
+    function updateDemoUI() {
+        const dt = document.getElementById('demo-text');
+        if (demoStep === 0) {
+            dt.innerHTML = "STEP 1:<br><br>Move left and right, and shoot your lasers!";
+        } else if (demoStep === 1) {
+            dt.innerHTML = "STEP 2:<br><br>Avoid the diving bugs and their counter-fire!";
+        } else if (demoStep === 2) {
+            dt.innerHTML = "STEP 3:<br><br>Shoot the bug holding the correct letter to answer questions!";
+        }
+    }
+
+    function processDemoLogic() {
+        demoSubFrame++;
+        
+        if (demoStep === 0) {
+            if (demoSubFrame === 10) player.tx = GW/2 - 100;
+            if (demoSubFrame === 40) bullets.push({x: player.x, y: player.y - 20});
+            if (demoSubFrame === 80) player.tx = GW/2 + 100;
+            if (demoSubFrame === 110) bullets.push({x: player.x, y: player.y - 20});
+            if (demoSubFrame > 160) resetDemoScene(0); 
+        } 
+        else if (demoStep === 1) {
+            if (demoSubFrame === 20) enemies[0].state = 'DIVE';
+            if (demoSubFrame === 40) player.tx = GW/2 - 150;
+            if (demoSubFrame === 80 && isHardMode) {
+                enemyBullets.push({x: enemies[0].x, y: enemies[0].y+20, vx: -1, vy: 3, col: enemies[0].col});
+            }
+            if (demoSubFrame === 120) player.tx = GW/2 + 150;
+            if (demoSubFrame > 250) resetDemoScene(1);
+        } 
+        else if (demoStep === 2) {
+            if (demoSubFrame === 40) player.tx = enemies[1].x; 
+            if (demoSubFrame === 80) bullets.push({x: player.x, y: player.y - 20}); 
+            if (demoSubFrame > 150) resetDemoScene(2);
+        }
+    }
+
+    function drawDemoHighlights() {
+        ctx.save();
+        ctx.strokeStyle = '#f1c40f';
+        ctx.lineWidth = 4;
+        let pulse = (Math.sin(Date.now() / 150) + 1) / 2 * 4;
+
+        if (demoStep === 0) {
+            ctx.strokeRect(player.x - 22 - pulse/2, player.y - 22 - pulse/2, 44 + pulse, 44 + pulse);
+        } else if (demoStep === 1) {
+            let diver = enemies.find(e => e.state === 'DIVE') || enemies[0];
+            if(diver) ctx.strokeRect(diver.x - 18 - pulse/2, diver.y - 18 - pulse/2, 36 + pulse, 36 + pulse);
+        } else if (demoStep === 2) {
+            if(enemies[1]) ctx.strokeRect(enemies[1].x - 18 - pulse/2, enemies[1].y - 18 - pulse/2, 36 + pulse, 36 + pulse);
+        }
+        ctx.restore();
+    }
+
+    /* =========================================================================
+       GAME SYSTEMS
+       ========================================================================= */
+    function shuffle(array) {
+        let cur = array.length, rand;
+        while (cur != 0) {
+            rand = Math.floor(Math.random() * cur);
+            cur--;
+            [array[cur], array[rand]] = [array[rand], array[cur]];
+        }
+        return array;
+    }
+
+    function makeEnemy(idx, spawnDelay) {
+        let spacing = 90;
+        let count = (currentQuestion && currentQuestion.opts) ? currentQuestion.opts.length : 4;   // 2 to 4 answer choices
+        let offsetX = (GW - ((count - 1) * spacing)) / 2;
+        let homeX = offsetX + idx * spacing;
+        let homeY = 120; 
+        
+        let shootT = isHardMode ? 60 + Math.random()*100 : Infinity;
+
+        return {
+            x: homeX, y: -60 - spawnDelay,
+            homeX: homeX, homeY: homeY,
+            state: 'ENTER', 
+            idx: idx,
+            isCorrect: currentQuestion ? idx === currentQuestion.ans : false,
+            alive: true,
+            col: ECOLORS[idx],
+            shootTimer: shootT,
+            divePhase: 0,
+            kamikaze: false,
+            startX: 0, startY: 0
+        };
+    }
+
+    function updateEnemy(e) {
+        if(!e.alive) return;
+
+        let breatheX = Math.sin(formationTick) * 30;
+        let breatheY = Math.cos(formationTick * 2) * 10;
+
+        if (e.state === 'ENTER') {
+            let targetX = e.homeX + breatheX;
+            let targetY = e.homeY + breatheY;
+            e.x += (targetX - e.x) * 0.05;
+            e.y += (targetY - e.y) * 0.05;
+            
+            if (Math.abs(e.x - targetX) < 5 && Math.abs(e.y - targetY) < 5) {
+                e.state = 'FORMATION';
+            }
+        }
+        else if (e.state === 'FORMATION') {
+            e.x = e.homeX + breatheX;
+            e.y = e.homeY + breatheY;
+
+            // Dive logic (Significantly rarer and slower to react to)
+            if (!isDemoMode && state === 'PLAY' && Math.random() < (isHardMode ? 0.002 : 0.0008)) {
+                let divingCount = enemies.filter(en => en.state === 'DIVE').length;
+                if (divingCount < 2) { 
+                    e.state = 'DIVE';
+                    e.divePhase = 0;
+                    e.kamikaze = Math.random() < 0.2; // 20% kamikaze chance
+                    e.startX = e.x;
+                    e.startY = e.y;
+                }
+            }
+        }
+        else if (e.state === 'DIVE') {
+            e.divePhase += 0.015; 
+            
+            if (e.kamikaze) {
+                e.x += (player.x - e.x) * 0.02; 
+            } else {
+                e.x = e.startX + Math.sin(e.divePhase * 2) * 80; 
+            }
+            
+            e.y += (isHardMode ? 2.2 : 1.5); // Slower, fairer dive
+
+            if (isHardMode && e.y > e.homeY + 50 && e.y < GH - 200 && Math.random() < 0.02) {
+                let ang = Math.atan2(player.y - e.y, player.x - e.x);
+                enemyBullets.push({x: e.x, y: e.y + 20, vx: Math.cos(ang) * CONFIG.enemyBulletSpeed, vy: Math.sin(ang) * CONFIG.enemyBulletSpeed, col: e.col});
+            }
+
+            if (e.y > GH + 50) {
+                e.state = 'RETURN';
+                e.y = -50;
+                e.x = e.homeX;
+            }
+        }
+        else if (e.state === 'RETURN') {
+            let targetX = e.homeX + breatheX;
+            let targetY = e.homeY + breatheY;
+            e.x += (targetX - e.x) * 0.05;
+            e.y += (targetY - e.y) * 0.05;
+            
+            if (Math.abs(e.x - targetX) < 5 && Math.abs(e.y - targetY) < 5) {
+                e.state = 'FORMATION';
+            }
+        }
+    }
+
+    function spawnEnemies() {
+        enemies = [];
+        let count = (currentQuestion && currentQuestion.opts) ? currentQuestion.opts.length : 4;   // one per answer choice
+        for(let i=0; i<count; i++) {
+            enemies.push(makeEnemy(i, i*30));
+        }
+    }
+
+    function initLevel() {
+        if (levelQuestions.length === 0) {
+            levelQuestions = shuffle([...masterQuestionPool]);
+        }
+        
+        currentQuestion = levelQuestions.pop();
+        
+        let optsHtml = "";
+        let labels = ["A", "B", "C", "D"];
+        let cssClasses = ["lbl-a", "lbl-b", "lbl-c", "lbl-d"];
+
+        if (isMobile) {
+            document.getElementById('question-text-mobile').innerText = currentQuestion.q;
+            const container = document.getElementById('options-container-mobile');
+            container.innerHTML = '';
+            currentQuestion.opts.forEach((optText, index) => {
+                optsHtml += `<div class="answer-option ${cssClasses[index]}">
+                                <span style="color:${ECOLORS[index]}; font-weight:bold;">[${labels[index]}]</span> <span>${optText}</span>
+                             </div>`;
+            });
+            container.innerHTML = optsHtml;
+        } else {
+            document.getElementById('question-text').innerText = currentQuestion.q;
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            currentQuestion.opts.forEach((optText, index) => {
+                optsHtml += `<div class="answer-option ${cssClasses[index]}">
+                                <span style="color:${ECOLORS[index]}; font-weight:bold;">[${labels[index]}]</span> <span>${optText}</span>
+                             </div>`;
+            });
+            container.innerHTML = optsHtml;
+        }
+
+        spawnEnemies();
+    }
+
+    function resetGame(fullReset = false) {
+        if(fullReset) {
+            score = 0;
+            level = 1;
+            questionsAnsweredThisLevel = 0;
+            nextExtraLife = 2000;
+            lives = selectedLives;
+            levelQuestions = []; 
+            document.getElementById('game-over-modal').style.display = 'none';
+            
+            if (!isMobile) {
+                document.getElementById('sidebar').style.display = 'flex';
+            }
+        }
+        player.x = GW/2;
+        player.tx = GW/2;
+        bullets = []; enemyBullets = []; particles = [];
+        state = 'PLAY'; 
+        updateUI();
+        initLevel();
+    }
+
+    function addScore(pts) {
+        score += pts;
+        if (score >= nextExtraLife) {
+            lives++;
+            nextExtraLife += 2000;
+            let livesEl = document.getElementById('lives-display');
+            livesEl.style.transform = "scale(1.5)";
+            setTimeout(() => livesEl.style.transform = "scale(1)", 300);
+        }
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('score-display').innerText = String(score).padStart(6, '0');
+        document.getElementById('level-display').innerText = `${String(level).padStart(2, '0')} (${questionsAnsweredThisLevel}/${selectedQPL})`;
+        document.getElementById('lives-display').innerText = '❤️'.repeat(lives);
+    }
+
+    function startDeathSequence() {
+        state = 'DYING';
+        deathFrame = 0;
+        let flash = document.getElementById('red-flash');
+        flash.style.opacity = '1';
+        setTimeout(() => { flash.style.opacity = '0'; }, 400);
+    }
+
+    function finishDeath() {
+        if (isDemoMode) {
+            resetDemoScene(demoStep);
+            state = 'DEMO'; 
+            return;
+        }
+
+        lives--;
+        updateUI();
+        if(lives <= 0) {
+            state = 'GAMEOVER';
+            document.getElementById('final-score').innerText = String(score).padStart(6, '0');
+            document.getElementById('game-over-modal').style.display = 'flex';
+        } else {
+            player.x = GW/2;
+            player.tx = GW/2;
+            bullets = []; enemyBullets = []; particles = [];
+            
+            // Send enemies back to start so they don't immediately dive kill you
+            enemies.forEach(e => {
+                if(e.alive) {
+                    e.state = 'ENTER';
+                    e.y = -60 - (Math.random() * 60);
+                    e.x = e.homeX;
+                }
+            });
+
+            state = 'PLAY';
+        }
+    }
+
+    function checkWinCondition() {
+        if (questionsAnsweredThisLevel >= selectedQPL) {
+            level++;
+            questionsAnsweredThisLevel = 0;
+        }
+        // ALWAYS trigger initLevel to grab the next question in the deck
+        initLevel();
+    }
+
+    function spawnParticles(x, y, col, n) {
+        for(let i=0; i<n; i++){
+            let a = Math.random()*Math.PI*2, s = 2+Math.random()*4;
+            particles.push({x:x, y:y, vx:Math.cos(a)*s, vy:Math.sin(a)*s, r:2+Math.random()*3, life:1, decay:0.03+Math.random()*0.02, col:col});
+        }
+    }
+
+    /* =========================================================================
+       RENDERING
+       ========================================================================= */
+    function drawStars() {
+        stars.forEach(s => {
+            s.y += s.spd;
+            if(s.y > GH) { s.y = -2; s.x = Math.random()*GW; }
+            ctx.fillStyle = `rgba(255,255,255,${s.a})`; 
+            ctx.fillRect(s.x, s.y, s.sz, s.sz);
+        });
+    }
+
+    function drawPixelShip(ctx, x, y, size) {
+        const pz = size / 13; 
+        const shipGrid = [
+            [0,0,0,0,0,0,1,0,0,0,0,0,0],
+            [0,0,0,0,0,1,1,1,0,0,0,0,0],
+            [0,0,0,0,0,1,2,1,0,0,0,0,0],
+            [0,0,0,0,1,1,2,1,1,0,0,0,0],
+            [0,0,0,0,1,1,1,1,1,0,0,0,0],
+            [0,0,0,1,1,3,1,3,1,1,0,0,0],
+            [0,0,1,1,1,3,1,3,1,1,1,0,0],
+            [0,1,1,1,1,1,1,1,1,1,1,1,0],
+            [1,1,1,4,1,1,1,1,1,4,1,1,1],
+            [1,1,1,4,1,0,1,0,1,4,1,1,1],
+            [1,1,0,0,0,0,1,0,0,0,0,1,1]
+        ];
+
+        const colors = ['transparent', '#ffffff', '#3498db', '#e74c3c', '#f1c40f'];
+
+        ctx.save();
+        ctx.translate(x - size/2, y - size/2);
+        for(let r=0; r<11; r++) {
+            for(let c=0; c<13; c++) {
+                if(shipGrid[r][c] !== 0) { 
+                    ctx.fillStyle = colors[shipGrid[r][c]];
+                    ctx.fillRect(c * pz, r * pz, pz + 0.5, pz + 0.5); 
+                }
+            }
+        }
+        ctx.restore();
+    }
+
+    function drawPixelEnemySprite(ctx, x, y, size, mainCol) {
+        const pz = size / 13; 
+        
+        // Galaga-style Goei (Butterfly/Moth)
+        const bugGrid = [
+            [0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,1,0,0,0,1,0,0,0,0],
+            [0,0,0,1,1,0,0,0,1,1,0,0,0],
+            [0,0,1,1,1,1,1,1,1,1,1,0,0],
+            [0,1,1,2,2,1,1,1,2,2,1,1,0], 
+            [1,1,1,2,2,1,1,1,2,2,1,1,1],
+            [1,1,1,1,1,3,3,3,1,1,1,1,1], 
+            [0,1,1,1,0,3,3,3,0,1,1,1,0],
+            [0,0,1,0,0,0,3,0,0,0,1,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0]
+        ];
+
+        const colors = ['transparent', mainCol, '#ffffff', '#3498db'];
+
+        ctx.save();
+        ctx.translate(x - size/2, y - size/2);
+        for(let r=0; r<10; r++) {
+            for(let c=0; c<13; c++) {
+                if(bugGrid[r][c] !== 0) { 
+                    ctx.fillStyle = colors[bugGrid[r][c]];
+                    ctx.fillRect(c * pz, r * pz, pz + 0.5, pz + 0.5); 
+                }
+            }
+        }
+        ctx.restore();
+    }
+
+    function drawPlayer(isDying = false) {
+        ctx.save();
+        ctx.translate(player.x, player.y);
+
+        if (isDying) {
+            let scale = Math.max(0, 1 - (deathFrame / 40)); 
+            ctx.scale(scale, scale);
+            ctx.rotate(deathFrame * 0.5);
+        } else if (player.invincTick > 0 && Math.floor(player.invincTick/4)%2 === 0) {
+            ctx.globalAlpha = 0.3;
+        }
+
+        drawPixelShip(ctx, 0, 0, 44);
+        ctx.restore();
+    }
+
+    function drawEnemies() {
+        enemies.forEach(e => {
+            if(!e.alive) return;
+            drawPixelEnemySprite(ctx, e.x, e.y, 36, e.col);
+            
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 16px 'Segoe UI', sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            ctx.fillText(ELABELS[e.idx], e.x, e.y + 20);
+        });
+    }
+
+    // ==========================================
+    // MAIN GAME LOOP
+    // ==========================================
+    function gameLoop() {
+        ctx.fillStyle = '#000810';
+        ctx.fillRect(0, 0, GW, GH);
+        drawStars();
+        formationTick += 0.02;
+
+        if(state === 'PLAY' || state === 'DEMO') {
+            
+            if (state === 'DEMO') processDemoLogic();
+
+            if (keys['ArrowLeft'] || keys['KeyA']) player.tx -= CONFIG.playerSpeed;
+            if (keys['ArrowRight'] || keys['KeyD']) player.tx += CONFIG.playerSpeed;
+            
+            player.x += (player.tx - player.x) * 0.2; 
+            player.x = Math.max(30, Math.min(GW - 30, player.x));
+            player.tx = Math.max(30, Math.min(GW - 30, player.tx));
+
+            if(shootCool > 0) shootCool--;
+            if(player.invincTick > 0) player.invincTick--;
+
+            for(let i=bullets.length-1; i>=0; i--){
+                bullets[i].y -= CONFIG.bulletSpeed;
+                if(bullets[i].y < -15) bullets.splice(i, 1);
+            }
+
+            for(let i=enemyBullets.length-1; i>=0; i--){
+                let eb = enemyBullets[i];
+                eb.x += eb.vx; eb.y += eb.vy;
+                if(eb.y > GH + 20) { enemyBullets.splice(i,1); continue; }
+                if(player.invincTick <= 0 && Math.abs(eb.x - player.x) < 18 && Math.abs(eb.y - player.y) < 20) {
+                    enemyBullets.splice(i,1);
+                    startDeathSequence();
+                }
+            }
+
+            enemies.forEach(e => updateEnemy(e));
+
+            // Collision: Player Bullet vs Enemy
+            outer:
+            for(let bi=bullets.length-1; bi>=0; bi--){
+                let b = bullets[bi];
+                for(let ei=0; ei<enemies.length; ei++){
+                    let en = enemies[ei];
+                    if(!en.alive) continue;
+                    if(Math.abs(b.x - en.x) < 26 && Math.abs(b.y - en.y) < 24) {
+                        bullets.splice(bi,1); 
+                        en.alive = false;
+                        spawnParticles(en.x, en.y, en.col, 18);
+
+                        if(en.isCorrect) {
+                            enemies.forEach(e2 => { if(e2.alive) { spawnParticles(e2.x, e2.y, e2.col, 10); e2.alive = false; } });
+                            enemyBullets = [];
+                            addScore(500);
+                            questionsAnsweredThisLevel++;
+                            
+                            let flash = document.getElementById('green-flash');
+                            flash.style.opacity = '1';
+
+                            state = 'PAUSED';
+                            setTimeout(() => {
+                                flash.style.opacity = '0';
+                                if(isMobile) document.getElementById('quiz-modal').style.display = 'none';
+                                checkWinCondition();
+                                state = 'PLAY';
+                            }, 1000);
+                        } else {
+                            startDeathSequence();
+                        }
+                        break outer;
+                    }
+                }
+            }
+
+            // Collision: Kamikaze Enemy vs Player
+            if(player.invincTick <= 0 && state === 'PLAY') {
+                for(let ei=0; ei<enemies.length; ei++){
+                    let en = enemies[ei];
+                    if(en.alive && Math.abs(en.x - player.x) < 26 && Math.abs(en.y - player.y) < 24) {
+                        startDeathSequence();
+                        break;
+                    }
+                }
+            }
+
+            drawEnemies();
+            
+            ctx.fillStyle = '#ffff66';
+            bullets.forEach(b => { ctx.fillRect(b.x-2, b.y-9, 4, 13); });
+
+            enemyBullets.forEach(b => {
+                ctx.fillStyle = b.col;
+                ctx.beginPath(); ctx.arc(b.x, b.y, 5, 0, Math.PI*2); ctx.fill();
+            });
+
+            drawPlayer();
+
+            for(let pi=particles.length-1; pi>=0; pi--){
+                let pp = particles[pi];
+                ctx.globalAlpha = pp.life;
+                ctx.fillStyle = pp.col; 
+                ctx.beginPath(); ctx.arc(pp.x, pp.y, pp.r*pp.life, 0, Math.PI*2); ctx.fill();
+                pp.x += pp.vx; pp.y += pp.vy; pp.vy += 0.08; pp.vx *= 0.97; pp.life -= pp.decay;
+                if(pp.life <= 0) particles.splice(pi,1);
+            }
+            ctx.globalAlpha = 1;
+
+            if (state === 'DEMO') drawDemoHighlights();
+
+        } else if (state === 'DYING') {
+            deathFrame++;
+            drawEnemies();
+            drawPlayer(true);
+            
+            for(let pi=particles.length-1; pi>=0; pi--){
+                let pp = particles[pi];
+                ctx.globalAlpha = pp.life;
+                ctx.fillStyle = pp.col; 
+                ctx.beginPath(); ctx.arc(pp.x, pp.y, pp.r*pp.life, 0, Math.PI*2); ctx.fill();
+                pp.x += pp.vx; pp.y += pp.vy; pp.vy += 0.08; pp.vx *= 0.97; pp.life -= pp.decay;
+                if(pp.life <= 0) particles.splice(pi,1);
+            }
+            ctx.globalAlpha = 1;
+
+            if (deathFrame > 60) finishDeath();
+
+        } else {
+            enemies.forEach(e => updateEnemy(e));
+            drawEnemies();
+            drawPlayer();
+        }
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Boot Sequence
+    if (!isMobile) document.getElementById('controls-setting').style.display = 'flex';
+    document.getElementById('title-modal').style.display = 'flex'; 
+    
+    spawnEnemies();
+    
+    requestAnimationFrame(gameLoop); 
+
+</script>
+<script>
+/* FIT TO WINDOW: shrinks the game (never below 300px wide) so the whole thing fits the window's height,
+   with no scrollbars, whether it's on a page, in a small window, full screen or saved to your desktop. */
+(function () {
+    function fit() {
+        var w = document.getElementById('game-wrapper');
+        if (!w) return;
+        var cs = getComputedStyle(document.body);
+        var avail = window.innerHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
+        w.style.maxWidth = '';
+        if (w.offsetHeight <= avail) return;
+        var lo = 300, hi = w.offsetWidth;
+        for (var i = 0; i < 12; i++) {
+            var mid = (lo + hi) / 2;
+            w.style.maxWidth = mid + 'px';
+            if (w.offsetHeight > avail) hi = mid; else lo = mid;
+        }
+        w.style.maxWidth = Math.floor(lo) + 'px';
+    }
+    var t;
+    window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(fit, 60); });
+    window.addEventListener('load', fit);
+    document.addEventListener('fullscreenchange', function () { setTimeout(fit, 120); });
+    [0, 300, 1200].forEach(function (ms) { setTimeout(fit, ms); });
+})();
+</script>
+</body>
+</html>

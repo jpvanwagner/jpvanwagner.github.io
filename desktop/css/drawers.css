@@ -1,0 +1,201 @@
+/*
+ * DRAWERS.CSS - The two slide-out drawers on the right edge of the screen:
+ *   TOOLS     (js/customize/tools-drawer.js)  colors, fonts, quick toggles
+ *   DOODLETOP (js/customize/doodletop*.js)    paint-on-the-screen drawer (layout set inline)
+ */
+
+/* --- THE MAIN DRAWER --- */
+#tools-drawer {
+    position: fixed;
+    top: 60px;
+    right: -160px;
+    width: 160px;
+    background: var(--ui-face);
+    color: var(--ui-text);
+    
+    /* 3D Bevel matched to the OS */
+    border-top: 2px solid var(--ui-light);
+    border-left: 2px solid var(--ui-light);
+    border-bottom: 2px solid var(--ui-dark);
+    border-right: 2px solid var(--ui-dark);
+    
+    box-shadow: -4px 4px 0px rgba(0,0,0,0.5);
+    transition: right 0.3s cubic-bezier(0, 0, 0.2, 1);
+    z-index: 6000;
+}
+
+#tools-drawer.open {
+    right: 0;
+}
+
+/* --- DRAWER TABS (Tools & Doodletop) --- */
+.drawer-tab, .drawer-handle, #tools-tab, #doodletop-tab, .tab {
+    position: absolute;
+    /* This exactly offsets the width, meaning the tab's background will 
+       perfectly overlap the drawer's left border to blend seamlessly! */
+    left: -32px;
+    top: 20px;
+    width: 32px !important;
+    height: auto !important;
+    min-height: 110px !important;
+    
+    background: var(--ui-face);
+    color: var(--ui-text);
+    
+    /* 3D Bevel matched to the drawer, with NO right border */
+    border-top: 2px solid var(--ui-light) !important;
+    border-left: 2px solid var(--ui-light) !important;
+    border-bottom: 2px solid var(--ui-dark) !important;
+    border-right: none !important;
+    
+    display: flex !important;
+    flex-direction: column !important; 
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 6px 2px !important;
+    box-sizing: border-box !important;
+    
+    /* Shadow adjusted so it doesn't bleed inside the drawer */
+    filter: drop-shadow(-3px 3px 4px rgba(0,0,0,0.6)) !important;
+    cursor: pointer;
+    writing-mode: horizontal-tb !important; 
+    transform: none !important;
+    z-index: 6001; /* Stay above the drawer */
+}
+
+/* The Icon */
+.drawer-tab img, .drawer-handle img, #tools-tab img, #doodletop-tab img, .tab img {
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 0 6px 0 !important;
+    object-fit: contain !important;
+    flex-shrink: 0 !important;
+    transform: none !important; 
+}
+
+/* The Text Container */
+.drawer-tab span, .drawer-handle span, #tools-tab span, #doodletop-tab span, .tab span {
+    display: block !important;
+    width: 12px !important; 
+    word-break: break-all !important;
+    overflow-wrap: break-word !important;
+    text-transform: uppercase !important;
+    line-height: 1.1 !important;
+    font-size: 11px !important;
+    font-weight: bold !important;
+    white-space: normal !important;
+    text-align: center !important;
+    letter-spacing: 0 !important;
+    transform: none !important; 
+    direction: ltr !important;
+}
+
+/* --- TOOLS CONTENT & SECTIONS --- */
+#tools-content {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.tool-section {
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(128,128,128,0.5);
+    padding-bottom: 5px;
+}
+
+/* --- THEME PAINTER --- */
+#color-preview {
+    width: 50px; height: 50px;
+    position: relative;
+    border: 2px solid var(--ui-text);
+    cursor: pointer;
+    margin: 0 auto 10px auto;
+    background: #444;
+}
+#bg-color-box {
+    position: absolute; bottom: 0; right: 0; width: 30px; height: 30px;
+    background: var(--desktop-bg); border: 1px solid white; z-index: 1;
+}
+#fg-color-box {
+    position: absolute; top: 0; left: 0; width: 30px; height: 30px;
+    background: var(--win-bg); border: 1px solid white; z-index: 2;
+}
+
+#color-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+}
+.color-swatch {
+    height: 20px;
+    border: 1px solid #000;
+    cursor: pointer;
+}
+
+/* --- QUICK TOGGLES (icon buttons) --- */
+.icon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 8px; }   /* 3 toggles per row */
+.icon-btn { width: 100%; height: auto; aspect-ratio: 1; min-width: 0; flex-shrink: 0; background: var(--ui-face); border-top: 2px solid var(--ui-light); border-left: 2px solid var(--ui-light); border-right: 2px solid var(--ui-dark); border-bottom: 2px solid var(--ui-dark); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; outline: none; }
+.icon-btn img { width: 26px; height: 26px; image-rendering: pixelated; filter: drop-shadow(1px 1px 0px rgba(0,0,0,0.5)); transition: transform 0.1s; pointer-events: none; }
+.icon-btn:active, .icon-btn.depressed { border-top: 2px solid var(--ui-dark); border-left: 2px solid var(--ui-dark); border-right: 2px solid var(--ui-light); border-bottom: 2px solid var(--ui-light); background: var(--win-bg); }
+.icon-btn:active img, .icon-btn.depressed img { transform: translate(1px, 1px); filter: drop-shadow(0px 0px 0px rgba(0,0,0,0)); }
+
+/* Keep both drawers (and the doodle canvas) above every window */
+#tools-drawer, #doodletop-drawer {
+    /* Set this to a very high number to stay above windows (which start at 100) */
+    z-index: 999999 !important; 
+}
+
+/* Ensure the canvas for DoodleTop also stays above everything when active */
+#doodletop-canvas {
+    z-index: 999998 !important;
+}
+
+/* Hide the drawers while booting / shutting down */
+/* Hard hide for drawers when system is busy */
+body.system-busy #tools-drawer, 
+body.system-busy #doodletop-drawer,
+body.system-busy #doodletop-canvas {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* --- DRAWER STATES (js/customize/drawer-tabs.js) --- */
+/* The OPEN drawer sits above the closed one, so the other tab can't overlap it */
+#tools-drawer.drawer-is-open, #doodletop-drawer.drawer-is-open { z-index: 1000000 !important; }
+/* "Keep on top of windows" switched off: windows (z 100+) can cover the drawer */
+#tools-drawer.drawer-behind, #doodletop-drawer.drawer-behind { z-index: 90 !important; }
+#tools-drawer.drawer-behind.drawer-is-open, #doodletop-drawer.drawer-behind.drawer-is-open { z-index: 99 !important; }
+/* Hidden by the visitor (right-click a tab > Hide) */
+#tools-drawer.drawer-hidden, #doodletop-drawer.drawer-hidden { display: none !important; }
+
+/* Compact screens (phones, landscape): icon-only tabs so they cover less of the page */
+body.compact-desktop #tools-tab, body.compact-desktop #doodletop-tab { min-height: 0 !important; padding: 5px 2px !important; }
+body.compact-desktop #tools-tab span, body.compact-desktop #doodletop-tab span { display: none !important; }
+body.compact-desktop #tools-tab img, body.compact-desktop #doodletop-tab img { margin: 0 !important; }
+/* Tall drawer contents scroll instead of running off short screens */
+#tools-drawer { max-height: calc(100vh - 50px); }
+#tools-content { max-height: calc(100vh - 70px); overflow-y: auto; }
+
+/* While one drawer is open, the other drawer (and its tab) is hidden entirely (drawer-tabs.js) */
+body.drawer-open-tools #doodletop-drawer,
+body.drawer-open-doodletop #tools-drawer { visibility: hidden !important; pointer-events: none !important; }
+
+/* LEFT-SIDE DRAWERS (drawer-tabs.js setSide): the same drawers, mirrored onto the left edge.
+   The drawer slides in from the left and its tab sits on the drawer's right edge. */
+#tools-drawer.drawer-left { right: auto !important; left: -160px; transition: left 0.3s cubic-bezier(0, 0, 0.2, 1); box-shadow: 4px 4px 0 rgba(0,0,0,0.5); }
+#tools-drawer.drawer-left.open { left: 0; }
+#doodletop-drawer.drawer-left { right: auto !important; left: -175px; transition: left 0.3s cubic-bezier(0, 0, 0.2, 1), opacity 0.3s ease !important; }
+#doodletop-drawer.drawer-left[style*="right: 0px"] { left: 0; }   /* doodletop-ui.js marks "open" with right: 0px */
+.drawer-left #tools-tab, .drawer-left #doodletop-tab {
+    left: auto !important; right: -32px;
+    border-left: none !important; border-right: 2px solid var(--ui-dark) !important;
+    filter: drop-shadow(3px 3px 4px rgba(0,0,0,0.6)) !important;
+}
+/* While dragging a tab across: a dashed outline on the edge it will move to when dropped */
+.drawer-side-ghost { position: fixed; top: 40px; bottom: 60px; width: 40px; z-index: 1000001; pointer-events: none; display: none;
+    border: 3px dashed var(--title-grad-1, #000080); background: rgba(255,255,255,0.25); }
+.drawer-side-ghost.show { display: block; }
+.drawer-side-ghost.left { left: 4px; }
+.drawer-side-ghost.right { right: 4px; }

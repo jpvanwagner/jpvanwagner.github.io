@@ -1,0 +1,34 @@
+/*
+ * CONTEXT-MENU.CSS - Right-click menus (js/core/context-menu.js) and the small
+ * "Properties" dialog opened from an icon's menu.
+ */
+#context-menu {
+    display: none;
+    position: fixed;
+    z-index: 1000002;                 /* above drawers, bricks, start menu */
+    min-width: 170px;
+    padding: 2px;
+    background: var(--ui-face);
+    color: var(--ui-text);
+    border: 2px solid;
+    border-color: var(--ui-light) var(--ui-dark) var(--ui-dark) var(--ui-light);
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    font-family: var(--user-font, Tahoma, sans-serif);
+    font-size: 12px;
+}
+.cm-item {
+    display: flex; align-items: center; width: 100%;
+    padding: 4px 14px 4px 4px;
+    background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: default;
+}
+.cm-item:hover:not([disabled]), .cm-item:focus:not([disabled]) {
+    background: var(--title-grad-1); color: var(--title-text); outline: none;
+}
+.cm-item[disabled] { opacity: 0.5; }
+.cm-check { width: 16px; flex-shrink: 0; text-align: center; }
+.cm-sep { height: 0; margin: 3px 2px; border-top: 1px solid var(--ui-dark); border-bottom: 1px solid var(--ui-light); }
+
+.props-dialog { padding: 10px 12px; font-size: 12px; }
+.props-head { display: flex; align-items: center; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--ui-dark); }
+.props-head img { width: 32px; height: 32px; image-rendering: pixelated; }
+.props-kind { opacity: 0.75; }

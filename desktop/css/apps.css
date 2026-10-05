@@ -1,0 +1,300 @@
+/*
+ * APPS.CSS - Styles for the built-in programs' menu bars and dropdowns.
+ *   NetCrawler browser  (js/apps/browser.js)
+ *   Notes text editor   (js/apps/notes.js)
+ * The clock only uses inline styles plus the bevel helpers in base.css; the calculator is styled below ("CALCULATOR").
+ */
+
+/* ===== NetCrawler browser ===== */
+.browser-menubar-wrapper { transition: transform 0.2s ease-in-out; }
+.browser-container.autohide-active .browser-menubar-wrapper {
+    position: absolute !important; top: 0; left: 0; right: 0;
+    transform: translateY(-100%); box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
+}
+.browser-container.autohide-active .browser-autohide-zone:hover + .browser-menubar-wrapper,
+.browser-container.autohide-active .browser-menubar-wrapper:hover,
+.browser-container.autohide-active .browser-menubar-wrapper:focus-within { transform: translateY(0); }
+.browser-menu-item { position: relative; cursor: default; padding: 4px 8px; user-select: none; outline: none; }
+.browser-dropdown {
+    display: none !important; position: absolute; top: 100%; left: 0;
+    background: var(--ui-face); border-top: 2px solid var(--ui-light); border-left: 2px solid var(--ui-light);
+    border-bottom: 2px solid var(--ui-dark); border-right: 2px solid var(--ui-dark);
+    min-width: 160px; z-index: 100005 !important; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); 
+    color: var(--ui-text); font-weight: normal; flex-direction: column; 
+}
+/* Only the focused menu is open; js/core/menubar.js moves focus as you point across the bar */
+.browser-menu-item:focus-within .browser-dropdown { display: flex !important; }
+.browser-menu-item:hover,
+.browser-menu-item:focus-within { background: var(--ui-light); color: var(--ui-text); }
+.browser-dropdown div { padding: 6px 10px; cursor: pointer; white-space: nowrap; display:flex; align-items:center; gap:8px; }
+.browser-dropdown div:hover:not(.separator) { background: var(--title-grad-1); color: white; }
+.browser-dropdown .separator { height: 1px; background: var(--ui-dark); margin: 2px 0; padding: 0; border-bottom: 1px solid var(--ui-light); pointer-events: none; }
+
+/* ===== Notes ===== */
+/* Menu focus behavior */
+.notes-menu-item {
+    position: relative; cursor: default; padding: 2px 6px; user-select: none; outline: none;
+}
+.notes-menu-item:hover, .notes-menu-item:focus-within {
+    background: var(--ui-light); color: var(--ui-text);
+}
+.notes-dropdown {
+    display: none; position: absolute; top: 100%; left: 0;
+    background: var(--ui-face);
+    border-top: 2px solid var(--ui-light); border-left: 2px solid var(--ui-light);
+    border-bottom: 2px solid var(--ui-dark); border-right: 2px solid var(--ui-dark);
+    min-width: 140px; z-index: 10000; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); color: var(--ui-text);
+}
+.notes-menu-item:focus-within .notes-dropdown {
+    display: block;
+}
+.notes-dropdown div {
+    padding: 4px 10px; cursor: pointer; white-space: nowrap;
+}
+.notes-dropdown div:hover:not(.separator):not(.disabled) {
+    background: var(--title-grad-1); color: white;
+}
+.notes-dropdown .separator {
+    height: 1px; background: var(--ui-dark); margin: 2px 0; padding: 0;
+    border-bottom: 1px solid var(--ui-light); pointer-events: none;
+}
+.notes-dropdown .disabled {
+    color: rgba(128,128,128,0.8); cursor: default;
+}
+.notes-textarea::selection {
+    background: var(--title-grad-1); color: white;
+}
+
+/* --- GAMES (desktop/js/apps/games.js) --- */
+.games-folder { padding: 10px; }
+.games-hint { margin: 0 0 10px; font-size: 12px; }
+.games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.games-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    background: transparent; border: 1px dotted transparent; padding: 6px; cursor: pointer;
+    color: inherit; font: inherit; font-size: 12px;
+}
+.games-item img { width: 112px; aspect-ratio: 16 / 9; object-fit: cover; border: 2px solid; border-color: var(--ui-dark) var(--ui-light) var(--ui-light) var(--ui-dark); }
+.games-item:hover, .games-item:focus { border-color: var(--ui-text); outline: none; }
+.games-item:focus span { background: var(--title-grad-1); color: var(--title-text); }
+.game-window { position: absolute; inset: 0; background: #000; }
+.game-window iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+/* --- NETCRAWLER TABS (js/apps/browser-tabs.js) --- */
+.nc-tabs { display: flex; align-items: flex-end; gap: 2px; padding: 3px 4px 0; overflow-x: auto; scrollbar-width: thin; }
+.browser-container.tabs-off .nc-tabs,
+.browser-container.tabs-off .needs-tabs { display: none !important; }
+.nc-tab {
+    display: flex; align-items: center; gap: 4px; flex: 0 1 170px; min-width: 70px;
+    padding: 3px 4px 3px 8px; font-size: 11px; cursor: default;
+    background: var(--ui-face); color: var(--ui-text);
+    border: 2px solid; border-bottom: 0; border-color: var(--ui-light) var(--ui-dark) transparent var(--ui-light);
+    border-radius: 3px 3px 0 0; opacity: 0.8;
+}
+.nc-tab.active { opacity: 1; font-weight: bold; margin-bottom: -2px; padding-bottom: 5px; position: relative; z-index: 1; }
+.nc-tab-title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nc-tab-x, .nc-newtab {
+    border: 1px solid var(--ui-dark); background: var(--ui-face); color: var(--ui-text);
+    font: bold 10px/1 Tahoma, sans-serif; cursor: pointer; padding: 1px 4px;
+}
+.nc-newtab { margin: 0 0 3px 2px; padding: 2px 7px; font-size: 12px; }
+
+/* NetCrawler toolbar icon buttons (refresh, home) */
+/* Back / Forward: a bit chunkier than the other toolbar buttons, and greyed out when there's nowhere to go */
+.nc-nav-btn { padding: 4px 11px; min-width: 32px; font-size: 15px; font-weight: 900; line-height: 1; color: var(--ui-text); cursor: pointer; }
+.nc-nav-btn:disabled { opacity: 0.4; cursor: default; filter: grayscale(1); }
+/* "You're back on the tab you started in" bubble under a tab (browser-tabs.js tabHint) */
+.nc-tab-hint { position: fixed; z-index: 2147483000; max-width: 260px; padding: 6px 9px; font-size: 12px; line-height: 1.35;
+    background: #ffffe1; color: #000; border: 1px solid #000; box-shadow: 2px 2px 0 rgba(0,0,0,0.35); cursor: pointer; transition: opacity .4s; }
+.nc-tab-hint::before { content: ""; position: absolute; top: -7px; left: 14px; border: 6px solid transparent; border-top: 0; border-bottom-color: #000; }
+.nc-tab-hint::after { content: ""; position: absolute; top: -5px; left: 15px; border: 5px solid transparent; border-top: 0; border-bottom-color: #ffffe1; }
+.nc-tab-hint.fade { opacity: 0; }
+.nc-icon-btn { display: inline-flex; align-items: center; justify-content: center; padding: 3px 7px; color: var(--ui-text); cursor: pointer; }
+.nc-icon-btn svg { display: block; }
+
+/* --- NETWORK window (desktop/js/apps/network.js) --- */
+.net-window { display: flex; flex-direction: column; height: 100%; background: var(--ui-face); color: var(--ui-text); font-size: 12px; }
+.net-address { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-bottom: 2px solid var(--ui-dark); }
+.net-address > div { flex: 1; display: flex; align-items: center; gap: 5px; background: #fff; color: #000; border: 2px inset var(--ui-dark); padding: 1px 5px; }
+.net-address img { width: 14px; height: 14px; }
+.net-body { flex: 1; overflow-y: auto; background: #fff; color: #000; margin: 2px; border: 2px inset var(--ui-dark); }
+.net-address .net-web { flex: none; padding: 2px 8px; font: inherit; font-weight: bold; cursor: pointer; }
+.net-body { padding-bottom: 10px; }
+.net-intro { display: flex; gap: 10px; align-items: flex-start; padding: 10px 10px 4px; line-height: 1.45; }
+.net-intro img { flex: none; image-rendering: pixelated; margin-top: 2px; }
+.net-intro p { margin: 0 0 6px; }
+.net-ringbar { display: flex; gap: 4px; padding: 2px 10px 6px 108px; }
+.net-ringbar button { padding: 0; border: 0; background: none; line-height: 0; cursor: pointer; }
+.net-ringbar img { width: 31px; height: 31px; image-rendering: pixelated; }
+.net-ringbar button:hover img { filter: brightness(1.08); }
+.net-h { margin: 10px 10px 4px; padding-bottom: 2px; font-size: 13px; border-bottom: 1px solid #808080; }
+.net-n { font-weight: normal; color: #555; }
+.net-index { margin-top: 14px; }
+.net-index > summary.net-h { cursor: pointer; list-style: none; }
+.net-index > summary::-webkit-details-marker { display: none; }
+.net-index > summary::before { content: '\25B8'; display: inline-block; width: 14px; }
+.net-index[open] > summary::before { content: '\25BE'; }
+.net-win-list { list-style: none; margin: 0; padding: 2px 6px 4px; }
+.net-win-list .net-site { display: flex; align-items: center; gap: 7px; padding: 3px 5px; border: 1px dotted transparent; }
+.net-win-list .net-site:hover { border-color: #000; }
+.net-win-list .net-site a { display: flex; flex-direction: column; min-width: 0; color: #000; text-decoration: none; }
+.net-win-list .net-site a:hover .net-title { text-decoration: underline; color: #000080; }
+.net-win-list .net-fav { width: 16px; height: 16px; flex: none; object-fit: contain; }
+.net-win-list .net-title { font-weight: bold; }
+.net-win-list .net-url { font-size: 11px; color: #555; }
+.net-win-list .net-hubtag { margin-left: auto; font-size: 10px; color: #555; border: 1px solid #888; padding: 0 4px; }
+.net-steps { margin: 4px 10px; padding-left: 20px; line-height: 1.45; }
+.net-steps li { margin-bottom: 3px; }
+.net-steps a { color: #000080; }
+.net-field { display: flex; flex-direction: column; gap: 3px; margin: 8px 10px; font-weight: bold; }
+.net-field input { font: inherit; font-weight: normal; padding: 3px 5px; border: 2px inset #808080; }
+.net-preview { margin: 4px 10px; min-height: 31px; line-height: 0; }
+.net-preview img { image-rendering: pixelated; }
+.net-code { display: block; width: calc(100% - 20px); box-sizing: border-box; margin: 4px 10px; font: 11px/1.4 'Courier New', monospace; border: 2px inset #808080; resize: vertical; }
+.net-copyrow { margin: 4px 10px; }
+.net-copy { padding: 4px 12px; font: inherit; font-weight: bold; cursor: pointer; }
+.net-copied { margin-left: 8px; font-weight: bold; color: #006400; }
+.net-small { margin: 2px 10px 6px; color: #444; }
+.net-gfx { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin: 0 10px; }
+.net-gfx figure { margin: 0; text-align: center; }
+.net-gfx img { image-rendering: pixelated; display: block; margin: 0 auto; }
+.net-gfx figcaption { font-size: 11px; color: #444; margin-top: 3px; }
+.net-status { padding: 2px 6px; font-size: 11px; }
+
+/* Favicon on each NetCrawler tab (browser-tabs.js) */
+.nc-tab-icon { width: 14px; height: 14px; flex: 0 0 14px; object-fit: contain; image-rendering: pixelated; }
+
+/* --- FOLDERS (desktop/js/apps/folders.js): Explorer-style Sample Courses / Games / Projects --- */
+.fx { display: flex; flex-direction: column; height: 100%; background: var(--ui-face); color: var(--ui-text); font-size: 12px; }
+.fx-bar { display: flex; gap: 6px; align-items: stretch; padding: 5px; border-bottom: 1px solid var(--ui-dark, #808080); }
+.fx-web { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; cursor: pointer; font: inherit; font-weight: bold; color: var(--ui-text); white-space: nowrap; }
+.fx-web img { width: 16px; height: 16px; }
+.fx-path { flex: 1; min-width: 0; padding: 4px 6px; background: #fff; color: #000; font-family: 'Courier New', monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 5px 8px 4px; }
+.fx-tools label { display: inline-flex; align-items: center; gap: 4px; font-weight: bold; }
+.fx-tools select { font: inherit; font-weight: normal; padding: 1px 2px; background: #fff; color: #000; border: 2px inset var(--ui-light, #fff); }
+.fx-hint { flex: 1 1 220px; margin: 0; }
+.fx-grid { flex: 1; overflow: auto; margin: 0 6px; padding: 8px; background: #fff; color: #000;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px 6px; align-content: start; }
+.fx-loading { grid-column: 1 / -1; color: #555; margin: 4px; }
+.fx-item { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 5px 3px; border: 1px dotted transparent;
+    background: none; cursor: pointer; font: inherit; color: #000; text-align: center; }
+.fx-item:hover .fx-thumb { filter: brightness(1.08); }
+.fx-item:focus-visible { outline: none; border-color: #000; }
+.fx-item.sel .fx-name { background: var(--ui-select, #000080); color: #fff; }
+.fx-item.sel .fx-thumb { outline: 2px solid var(--ui-select, #000080); }
+.fx-thumb { position: relative; width: 104px; height: 66px; background: #222; border: 1px solid #808080; box-shadow: 2px 2px 0 rgba(0,0,0,0.25); }
+.fx-thumb > img:first-child { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fx-badge { position: absolute; right: -6px; bottom: -6px; width: 26px; height: 26px; image-rendering: pixelated;
+    background: #fff; border: 1px solid #808080; padding: 1px; }
+.fx-name { padding: 1px 3px; line-height: 1.3; max-width: 112px; overflow-wrap: anywhere; }
+.fx-status { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 38px; margin: 5px 6px 6px; padding: 4px 6px;
+    border: 1px solid; border-color: var(--ui-dark, #808080) #fff #fff var(--ui-dark, #808080); }
+.fx-kind { color: #555; font-style: italic; }
+.fx-acts { display: flex; gap: 4px; flex: none; }
+.fx-type, .fx-desc, .fx-head { display: none; }
+/* View: Small icons (icon badge only, name underneath) */
+.fx-v-small { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
+.fx-v-small .fx-thumb { width: 34px; height: 34px; background: none; border: 0; box-shadow: none; }
+.fx-v-small .fx-badge { position: static; width: 32px; height: 32px; border: 0; background: none; padding: 0; }
+.fx-v-small .fx-name { max-width: 102px; overflow-wrap: normal; hyphens: auto; }
+/* View: List (16px icons in columns, like a file list) */
+.fx-v-list { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 2px 10px; }
+.fx-v-list .fx-item, .fx-v-details .fx-item { flex-direction: row; justify-content: flex-start; gap: 6px; padding: 2px 3px; text-align: left; }
+.fx-v-list .fx-thumb, .fx-v-details .fx-thumb { width: 18px; height: 18px; flex: none; background: none; border: 0; box-shadow: none; }
+.fx-v-list .fx-badge, .fx-v-details .fx-badge { position: static; width: 18px; height: 18px; border: 0; background: none; padding: 0; }
+.fx-v-list .fx-name { max-width: none; }
+.fx-v-list .fx-item.sel .fx-thumb, .fx-v-small .fx-item.sel .fx-thumb, .fx-v-details .fx-item.sel .fx-thumb { outline: none; }
+/* View: Details (a table: Name | Type | Description, with a header row) */
+.fx-v-details { display: block; padding: 0; }
+.fx-v-details .fx-head, .fx-v-details .fx-item { display: grid; grid-template-columns: 18px minmax(150px, 1.2fr) 100px 2fr; align-items: center; width: 100%; }
+.fx-v-details .fx-head { position: sticky; top: 0; z-index: 1; gap: 6px; padding: 0 3px; background: var(--ui-face, #c0c0c0); color: var(--ui-text, #000); font-weight: bold; }
+.fx-v-details .fx-head span { padding: 2px 4px; border: 1px solid; border-color: #fff var(--ui-dark, #808080) var(--ui-dark, #808080) #fff; }
+.fx-v-details .fx-head span:first-child { grid-column: 1 / 3; }
+.fx-v-details .fx-name { max-width: none; }
+.fx-v-details .fx-type, .fx-v-details .fx-desc { display: block; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx-v-details .fx-item:nth-child(odd) { background: #f3f3f3; }
+.fx-acts button { padding: 3px 12px; cursor: pointer; font: inherit; font-weight: bold; color: var(--ui-text); }
+
+/* --- MESSENGER (desktop/js/apps/messenger.js): "Messages from Joe", late-90s instant-messenger look --- */
+/* The tray bubble FLASHES until the message is read, like a late-90s messenger: it swaps between a lit
+   (bright green, glowing) and an unlit (faded) state. It flashes for everyone, including visitors whose
+   computer asks for reduced motion (they get a slower, gentler flash), since it's how you know a message came in. */
+#tray-msg { width: 22px; height: 20px; padding: 0; margin-right: 4px; border: 1px solid transparent; border-radius: 3px;
+    background: none; cursor: pointer; vertical-align: middle; animation: im-flash 0.9s steps(1) infinite !important; }
+#tray-msg { position: relative; }
+#tray-msg img { width: 16px; height: 16px; image-rendering: pixelated; display: block; margin: 0 auto; }
+#tray-msg .im-badge { position: absolute; right: -5px; top: -5px; min-width: 13px; height: 13px; padding: 0 2px; box-sizing: border-box;
+    border-radius: 7px; background: #d22; color: #fff; font: bold 9px/13px Tahoma, sans-serif; text-align: center; pointer-events: none; }
+.im-next { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0; padding: 4px 6px;
+    background: #ffffe1; border: 1px solid #808080; font-size: 11px; }
+.im-next[hidden] { display: none; }
+.im-next-btn { padding: 2px 10px; cursor: pointer; font: inherit; font-weight: bold; }
+#tray-msg:hover { animation-play-state: paused !important; background: #b7f5c4; border-color: #2c9d48; }
+@keyframes im-flash {
+    0%   { background: #7dff9a; border-color: #1f8a3c; box-shadow: 0 0 6px 2px #5cff80; opacity: 1; }
+    50%  { background: transparent; border-color: transparent; box-shadow: none; opacity: 0.25; }
+}
+@media (prefers-reduced-motion: reduce) { #tray-msg { animation-duration: 1.6s !important; } }
+.im-menu { position: fixed; z-index: 2147483000; display: flex; flex-direction: column; padding: 2px; min-width: 160px; background: #c0c0c0; }
+.im-menu button { text-align: left; padding: 5px 12px; background: none; border: 0; font: 11px Tahoma, 'MS Sans Serif', sans-serif; cursor: pointer; color: #000; }
+.im-menu button:hover { background: #000080; color: #fff; }
+/* The message window keeps the classic grey dialog look whatever the desktop theme is */
+.im { height: 100%; box-sizing: border-box; overflow: auto; padding: 8px 9px 6px; background: #d4d0c8; color: #000;
+    font: 11px Tahoma, 'MS Sans Serif', Verdana, sans-serif; }
+.im .bevel-in { background: #fff; border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px 0 #404040; }
+.im .bevel-out { background: #d4d0c8; border: 2px solid; border-color: #fff #404040 #404040 #fff; box-shadow: inset -1px -1px 0 #808080; }
+.im-view { display: flex; flex-direction: column; gap: 6px; }
+.im-view[hidden] { display: none; }
+.im-who { display: flex; gap: 8px; align-items: flex-start; padding: 6px; border: 1px solid; border-color: #808080 #fff #fff #808080; }
+.im-pic { width: 42px; height: 42px; image-rendering: pixelated; border: 2px solid; border-color: #808080 #fff #fff #808080; background: #dfe6f3; flex: none; }
+.im-fields { flex: 1; display: flex; flex-wrap: wrap; gap: 4px 8px; }
+.im-f { display: flex; align-items: center; gap: 4px; flex: 1 1 100%; }
+.im-f.short { flex: 1 1 40%; }
+.im-f span { white-space: nowrap; }
+.im-f input { flex: 1; min-width: 0; font: inherit; padding: 2px 4px; color: #000; }
+.im-status { display: flex; align-items: center; gap: 3px; color: #006400; font-weight: bold; white-space: nowrap; }
+.im-status i { width: 9px; height: 9px; border-radius: 50%; background: #2bd14a; border: 1px solid #0b6b1e; box-shadow: inset -1px -1px 0 #139a31; }
+.im-when { display: flex; gap: 8px; }
+.im-body { min-height: 64px; padding: 6px 8px; font-size: 12px; line-height: 1.45; color: #000; }
+.im-body p { margin: 0 0 8px; }
+.im-link { background: none; border: 0; padding: 0; font: inherit; color: #0000ee; text-decoration: underline; cursor: pointer; }
+.im-btns { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+.im-btns button { min-width: 70px; padding: 4px 8px; font: inherit; color: #000; cursor: pointer; }
+.im-btns button:active { border-color: #404040 #fff #fff #404040; box-shadow: none; }
+.im-off { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+.im-quote { color: #555; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.im-text { min-height: 90px; resize: vertical; font: 12px Tahoma, Verdana, sans-serif; padding: 5px; color: #000; }
+.im-count { text-align: right; color: #555; }
+.im-status-line { margin: 4px 0 0; min-height: 1.2em; font-style: italic; }
+.im, .im input, .im textarea, .im button, .im-menu button { font-family: Tahoma, "MS Sans Serif", Verdana, sans-serif !important; }
+
+/* --- CALCULATOR (desktop/js/apps/calculator.js): a 1990s pocket calculator with a 7-segment LCD --- */
+.calc { height: 100%; padding: 8px; overflow: hidden; box-sizing: border-box; background: var(--ui-face, #c0c0c0); outline: none; display: flex; }
+.calc-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; padding: 9px 10px 10px; border-radius: 10px 10px 16px 16px;
+    background: linear-gradient(180deg, #4a4f5a, #2c3038); box-shadow: inset 1px 1px 0 rgba(255,255,255,0.25), inset -2px -2px 0 rgba(0,0,0,0.4), 2px 2px 0 rgba(0,0,0,0.35);
+    transition: transform 0.6s cubic-bezier(.5,-0.2,.4,1.25); }
+.calc-flip .calc-body { transform: rotate(180deg); }
+.calc-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.calc-brand { font: bold 11px/1 Tahoma, Verdana, sans-serif; letter-spacing: 1.5px; color: #c9ced8; font-style: italic; }
+.calc-solar { display: flex; gap: 2px; padding: 2px; background: #1a1a1a; border: 1px solid #000; box-shadow: 0 1px 0 rgba(255,255,255,0.2); cursor: default; }
+.calc-solar i { width: 13px; height: 11px; background: linear-gradient(135deg, #5a3a2a, #2a1810 60%, #4a2c20); }
+.calc-lcd { position: relative; display: flex; align-items: center; justify-content: flex-end; height: 48px; padding: 4px 6px 4px 14px;
+    background: linear-gradient(180deg, #a9b98f, #c4d2a7); border: 2px solid; border-color: #1c1f24 #6d7480 #6d7480 #1c1f24; border-radius: 3px;
+    box-shadow: inset 2px 2px 3px rgba(0,0,0,0.35); }
+.calc-op { position: absolute; left: 5px; top: 3px; font: bold 11px/1 Tahoma, sans-serif; color: #1d2414; }
+.calc-digits { display: flex; align-items: center; width: 100%; min-width: 0; }
+.calc .seg { flex: 1 1 0; min-width: 0; height: auto; max-height: 38px; aspect-ratio: 24 / 36; }
+.calc .seg .on { fill: #1d2414; }
+.calc .seg .off { fill: rgba(29, 36, 20, 0.07); }
+.calc-keys { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(5, 1fr); gap: 6px; }
+.calc-key { min-height: 26px; padding: 0; cursor: pointer; font: bold 15px/1 Tahoma, Verdana, sans-serif; color: #f2f2f2;
+    border: 0; border-radius: 5px; background: linear-gradient(180deg, #6b717d, #4b505a);
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3), 0 3px 0 #15171b; transform: translateY(0); transition: transform 0.05s, box-shadow 0.05s; }
+.calc-key:hover { background: linear-gradient(180deg, #777e8b, #555b66); }
+.calc-key:active, .calc-key.down { transform: translateY(3px); box-shadow: inset 1px 1px 0 rgba(255,255,255,0.2), 0 0 0 #15171b; }
+.calc-key:focus-visible { outline: 2px solid #ffd54a; outline-offset: 1px; }
+.calc-key.k-red { background: linear-gradient(180deg, #d0504a, #a5302b); }
+.calc-key.k-op { background: linear-gradient(180deg, #a8adb7, #858b96); color: #111; }
+.calc-key.k-eq { grid-row: span 2; background: linear-gradient(180deg, #e8a33a, #c47a12); color: #1a1000; }
+.calc-key.k-zero { grid-column: span 2; }

@@ -1,0 +1,97 @@
+/*
+ * DESKTOP-ICONS.CSS - The draggable icons on the desktop (built by js/core/desktop-icons.js).
+ * Includes the pulsing red glow that marks readme.txt as "open me first".
+ */
+
+/* --- DESKTOP ICONS --- */
+.desktop-icon {
+    position: absolute; 
+    width: 90px;       
+    padding: 5px;
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    
+    color: white; 
+    text-shadow: 2px 2px 0px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    font-weight: bold;
+    cursor: default;
+    border: 1px solid transparent;
+    z-index: 1;
+    line-height: 1.4;
+
+    /* MOBILE FIX: Prevents pulling page down while dragging icons */
+    touch-action: none; 
+}
+
+.desktop-icon img {
+    /* INCREASED DESKTOP ICON SIZE */
+    width: 48px;
+    height: 48px;
+    margin-bottom: 6px;
+    pointer-events: none; 
+    /* Standard Shadow */
+    filter: drop-shadow(3px 3px 0px rgba(0,0,0,0.8));
+}
+
+.desktop-icon:hover {
+    background: rgba(0, 0, 128, 0.5);
+    border: 1px dotted rgba(255, 255, 255, 0.8);
+}
+
+.desktop-icon.selected {
+    background: rgba(0, 0, 128, 0.8);
+    border: 1px dotted white;
+}
+
+/* RED GLOW ANIMATION */
+@keyframes pulse-red-anim {
+    0% { filter: drop-shadow(3px 3px 0px rgba(0,0,0,0.8)) drop-shadow(0 0 0 rgba(255, 0, 0, 0)); }
+    50% { filter: drop-shadow(3px 3px 0px rgba(0,0,0,0.8)) drop-shadow(0 0 8px rgba(255, 0, 0, 1)); transform: scale(1.05); }
+    100% { filter: drop-shadow(3px 3px 0px rgba(0,0,0,0.8)) drop-shadow(0 0 0 rgba(255, 0, 0, 0)); }
+}
+.pulse-red img {
+    animation: pulse-red-anim 1.5s infinite ease-in-out;
+}
+
+/* Icon size + crisp pixel-art shadows */
+#desktop .desktop-icon img {
+    width: 48px !important;
+    height: 48px !important;
+    filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.7));
+    image-rendering: pixelated;
+}
+
+/* Wrapper so the shortcut arrow can sit on the icon's bottom-left corner */
+.desktop-icon .icon-art { position: relative; width: 48px; height: 48px; margin-bottom: 6px; }
+#desktop .desktop-icon .icon-art img { margin-bottom: 0; }
+
+/* Shortcut arrow: the image is icon-sized with the arrow already in its bottom-left
+   corner, so it is simply laid over the whole icon */
+#desktop .desktop-icon img.shortcut-arrow {
+    position: absolute;
+    left: 0; top: 0;
+    filter: none;
+}
+
+/* --- COMPACT DESKTOP: phones, landscape, small windows (class set by desktop-icons.js) --- */
+body.compact-desktop .desktop-icon { width: 70px; padding: 3px; font-size: 11px; line-height: 1.25; }
+body.compact-desktop #desktop .desktop-icon img { width: 36px !important; height: 36px !important; }
+body.compact-desktop .desktop-icon .icon-art { width: 36px; height: 36px; margin-bottom: 3px; }
+
+/* Compact start menu: shorter rows so it fits a landscape phone */
+body.compact-desktop .os-menu-item { padding: 5px 10px; gap: 8px; }
+body.compact-desktop .os-menu-item img { width: 20px !important; height: 20px !important; }
+
+/* Labels read on any wallpaper, light or dark: the classic white text with a solid black
+   outline all the way around, plus a soft dark halo behind it (no backing box) */
+.desktop-icon > span {
+    text-shadow:
+        -1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000,
+        -1px  0   0 #000,                1px  0   0 #000,
+        -1px  1px 0 #000, 0  1px 0 #000, 1px  1px 0 #000,
+         2px  2px 0 #000,
+         0 0 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.6);
+}

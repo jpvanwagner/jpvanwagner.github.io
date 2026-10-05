@@ -1,0 +1,31 @@
+/* ==========================================================================
+   RETRO-CURSOR.CSS - Pixel-art mouse pointers for the retro desktop (Win95 arrow, link hand,
+   text I-beam). Switched on by html.retro-cursor (desktop/js/customize/retro-cursor.js);
+   TOOLS > Quick Toggles or Settings > Appearance turn it off. Never used in Traditional View.
+   Pictures: images/cursors/*.png, chunky 2x pixels, plus sharper @2x copies for high-resolution
+   screens (drawn by tools/make-cursors.py).
+   The cursor is inherited, so anything with its own special cursor (resize edges, drawing
+   tools) keeps it; only ordinary arrows, hands and text cursors are swapped.
+   ========================================================================== */
+html.retro-cursor, html.retro-cursor body {
+    cursor: url('../../images/cursors/arrow.png') 0 0, default;
+    cursor: -webkit-image-set(url('../../images/cursors/arrow.png') 1x, url('../../images/cursors/arrow@2x.png') 2x) 0 0, default;
+    cursor: image-set(url('../../images/cursors/arrow.png') 1x, url('../../images/cursors/arrow@2x.png') 2x) 0 0, default;
+}
+html.retro-cursor a[href], html.retro-cursor button:not(:disabled), html.retro-cursor [onclick],
+html.retro-cursor select, html.retro-cursor summary, html.retro-cursor label, html.retro-cursor [role="button"],
+html.retro-cursor input[type="checkbox"], html.retro-cursor input[type="radio"], html.retro-cursor input[type="range"],
+html.retro-cursor .os-menu-item, html.retro-cursor .desktop-icon, html.retro-cursor .brick, html.retro-cursor .icon-btn,
+html.retro-cursor .cm-item, html.retro-cursor .nc-tab, html.retro-cursor .df-item,
+html.retro-cursor [style*="cursor: pointer"], html.retro-cursor [style*="cursor:pointer"] {
+    cursor: url('../../images/cursors/hand.png') 11 0, pointer;
+    cursor: -webkit-image-set(url('../../images/cursors/hand.png') 1x, url('../../images/cursors/hand@2x.png') 2x) 11 0, pointer;
+    cursor: image-set(url('../../images/cursors/hand.png') 1x, url('../../images/cursors/hand@2x.png') 2x) 11 0, pointer;
+}
+html.retro-cursor input:not([type]), html.retro-cursor input[type="text"], html.retro-cursor input[type="search"],
+html.retro-cursor input[type="email"], html.retro-cursor input[type="url"], html.retro-cursor input[type="number"],
+html.retro-cursor textarea, html.retro-cursor [contenteditable="true"] {
+    cursor: url('../../images/cursors/text.png') 7 16, text;
+    cursor: -webkit-image-set(url('../../images/cursors/text.png') 1x, url('../../images/cursors/text@2x.png') 2x) 7 16, text;
+    cursor: image-set(url('../../images/cursors/text.png') 1x, url('../../images/cursors/text@2x.png') 2x) 7 16, text;
+}

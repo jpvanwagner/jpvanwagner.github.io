@@ -1,0 +1,83 @@
+/*
+ * BASE.CSS - Foundation for the retro desktop (index.html).
+ *   1. Font import        2. Color/font variables (the Tools drawer rewrites these live)
+ *   3. Global reset       4. Page background (default wallpaper)
+ *   5. 3D bevel helpers   6. Layer containers
+ * Load this first; every other desktop stylesheet relies on its variables.
+ */
+
+/* IMPORT DEFAULT FONT */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* --- GLOBAL VARS --- */
+:root {
+    /* DESKTOP (classic Windows 95 teal) */
+    --desktop-bg: #008080;
+    
+    /* UI ELEMENTS (Tools.applyTheme() overwrites these at runtime) */
+    --ui-face: #c0c0c0;         
+    --ui-light: #e8e8e8;
+    --ui-dark: #808080;
+    --ui-text: #000000; 
+    
+    /* WINDOWS */
+    --win-bg: #ffffff;
+    --win-text: #000000;
+    --title-grad-1: #000080;
+    --title-grad-2: #1084d0;
+    --title-text: #ffffff;
+    
+    /* FONT SETTINGS (Controlled by Tools) */
+    --user-font: 'Courier New', monospace;
+    --font-size: 12px; /* Standard size for non-pixel fonts */
+}
+
+/* GLOBAL RESET */
+* {
+    box-sizing: border-box;
+    user-select: none;
+    font-family: var(--user-font); 
+}
+
+/* Apply dynamic size to all text elements */
+body, button, input, select, textarea, .brick, .window, .menu-item {
+    font-size: var(--font-size);
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--desktop-bg);
+    /* Default wallpaper (change it from Start > Settings > Wallpapers) */
+    background-image: url('../../images/wallpapers/clouds.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    image-rendering: pixelated;
+    height: 100vh;
+    color: var(--ui-text);
+}
+
+/* 3D BEVEL UTILITY */
+.bevel-out {
+    border-top: 2px solid var(--ui-light);
+    border-left: 2px solid var(--ui-light);
+    border-right: 2px solid var(--ui-dark);
+    border-bottom: 2px solid var(--ui-dark);
+    background: var(--ui-face);
+    color: var(--ui-text);
+}
+
+.bevel-in {
+    border-top: 2px solid var(--ui-dark);
+    border-left: 2px solid var(--ui-dark);
+    border-right: 2px solid var(--ui-light);
+    border-bottom: 2px solid var(--ui-light);
+    background: var(--win-bg); 
+}
+
+/* CONTAINER FIXES */
+#desktop-environment { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+#window-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
+.window { pointer-events: auto; }

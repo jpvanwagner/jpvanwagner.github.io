@@ -1,0 +1,110 @@
+/*
+ * WINDOWS.CSS - The draggable/resizable program windows created by js/core/window-manager.js.
+ * Structure: .window > .title-bar (+ .win-controls) > .window-content, plus .resizer handles.
+ */
+
+/* --- WINDOWS --- */
+.window {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 6px 6px 0px rgba(0,0,0,0.4);
+    padding: 3px;
+    background: var(--ui-face);
+    color: var(--ui-text);
+    border-top: 2px solid var(--ui-light);
+    border-left: 2px solid var(--ui-light);
+    border-right: 2px solid var(--ui-dark);
+    border-bottom: 2px solid var(--ui-dark);
+    z-index: 100;
+    
+    min-width: 0;
+    max-width: 100vw;
+    max-height: 100vh;
+}
+
+.title-bar {
+    background: linear-gradient(90deg, var(--title-grad-1), var(--title-grad-2));
+    color: var(--title-text);
+    padding: 2px 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    cursor: default;
+    height: 22px;
+    margin-bottom: 2px;
+    
+    /* CRITICAL MOBILE FIX: Prevents scroll intercepting window drag */
+    touch-action: none; 
+}
+
+.title-bar.active { filter: brightness(1.2); }
+.title-label { display: flex; align-items: center; gap: 6px; pointer-events: none; min-width: 0; overflow: hidden; }
+.title-label span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.title-label img { width: 16px; height: 16px; image-rendering: pixelated; filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.6)); flex-shrink: 0; }
+
+.win-controls { display: flex; gap: 2px; flex-shrink: 0; }
+.win-controls button {
+    width: 18px; height: 16px;
+    font-size: 10px; line-height: 10px; font-weight: bold;
+    border: 1px solid white;
+    background: silver;
+    color: black;
+    cursor: pointer;
+    box-shadow: 1px 1px 0 black;
+    padding: 0;
+}
+
+.window-content {
+    flex-grow: 1;
+    overflow-y: auto; /* ALLOW SCROLLING IF TALLER THAN SCREEN */
+    overflow-x: hidden;
+    position: relative;
+    background: var(--win-bg);
+    color: var(--win-text);
+    border: 2px inset var(--ui-dark);
+}
+
+/* --- RESIZE HANDLES: 4 edges + 4 corners (see WM.setupResizing) --- */
+.resizer { position: absolute; touch-action: none; z-index: 10; }
+.rz-n, .rz-s { left: 8px; right: 8px; height: 6px; cursor: ns-resize; }
+.rz-e, .rz-w { top: 8px; bottom: 8px; width: 6px; cursor: ew-resize; }
+.rz-n { top: -4px; }  .rz-s { bottom: -4px; }
+.rz-e { right: -4px; } .rz-w { left: -4px; }
+.rz-ne, .rz-nw, .rz-se, .rz-sw { width: 14px; height: 14px; }
+.rz-ne { top: -4px; right: -4px; cursor: nesw-resize; }
+.rz-sw { bottom: -4px; left: -4px; cursor: nesw-resize; }
+.rz-nw { top: -4px; left: -4px; cursor: nwse-resize; }
+.rz-se { bottom: -2px; right: -2px; cursor: nwse-resize; }
+/* the classic diagonal "grip" in the bottom-right corner */
+.rz-se::after {
+    content: ''; position: absolute; right: 4px; bottom: 4px;
+    width: 7px; height: 7px;
+    background: linear-gradient(135deg, transparent 0 40%, var(--ui-dark) 40% 50%, transparent 50% 65%, var(--ui-dark) 65% 75%, transparent 75%);
+}
+.window.maximized .resizer { display: none; }
+.window.maximized { box-shadow: none; }
+
+/* While dragging/resizing: iframes must not swallow the pointer (window-manager.js adds this) */
+body.wm-busy { user-select: none; -webkit-user-select: none; }
+body.wm-busy iframe { pointer-events: none !important; }
+
+/* Minimize / restore / maximize "zoom" outline (WM.zoomOutline) */
+.wm-zoom {
+    position: fixed; z-index: 99990; pointer-events: none;
+    border: 2px solid var(--title-grad-1, #000080);
+    outline: 1px dotted var(--ui-light, #fff);
+}
+.wm-zoom.go { transition: left .22s ease-in-out, top .22s ease-in-out, width .22s ease-in-out, height .22s ease-in-out; }
+
+
+/* Window animations (WM.animateWin / maximize): short and subtle, like a late-90s desktop with
+   "animate windows" switched on. Shrink into the taskbrick, grow back out, pop open, glide to a new size. */
+.window.wm-shrink { animation: wm-shrink .2s ease-in forwards; pointer-events: none; }
+.window.wm-grow   { animation: wm-grow .2s ease-out; }
+.window.wm-pop    { animation: wm-pop .16s ease-out; }
+.window.wm-sizing { transition: left .18s ease-out, top .18s ease-out, width .18s ease-out, height .18s ease-out; }
+@keyframes wm-shrink { from { transform: scale(1); opacity: 1; } to { transform: scale(.08); opacity: 0; } }
+@keyframes wm-grow   { from { transform: scale(.08); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes wm-pop    { from { transform: scale(.94); opacity: .4; } to { transform: scale(1); opacity: 1; } }

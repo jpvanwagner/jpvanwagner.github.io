@@ -1,0 +1,64 @@
+/*
+ * EFFECTS.CSS - Purely cosmetic effects.
+ *   CRT scanlines overlay  (Tools > Quick Toggles)
+ *   Boot screen flicker    (js/core/startup.js)
+ *   Shutdown text flicker  (js/core/shutdown.js)
+ */
+
+/* CRT Effect */
+#crt-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 9999;
+}
+.crt-off { display: none; }
+.crt-on {
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
+    display: block;
+}
+
+/* Boot screen flicker */
+@keyframes boot-flicker {
+    0% { opacity: 0.97; filter: brightness(0.95) contrast(1.1); }
+    5% { opacity: 1; filter: brightness(1.05) contrast(1); }
+    10% { opacity: 0.98; }
+    15% { opacity: 1; }
+    100% { opacity: 1; }
+}
+.crt-boot-active {
+    animation: boot-flicker 0.1s infinite;
+}
+
+/* Shutdown screen */
+@keyframes crt-text-flicker {
+    0% { filter: brightness(0.85); text-shadow: 1px 1px 0px rgba(0,0,0,1), 0 0 2px rgba(255,255,255,0.1); }
+    100% { filter: brightness(1.1); text-shadow: 1px 1px 0px rgba(0,0,0,1), 0 0 4px rgba(255,255,255,0.3); }
+}
+.win95-shutdown-text {
+    font-family: 'MS Sans Serif', 'Tahoma', 'Verdana', sans-serif;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+    -webkit-font-smoothing: none;
+    font-smooth: never;
+    animation: crt-text-flicker 0.15s infinite alternate;
+}
+
+/* Shutdown screen: the green, pulsing power button with "ON" (js/core/shutdown.js) */
+.power-on-btn {
+    position: absolute; bottom: 24px; right: 28px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    background: none; border: 0; cursor: pointer; color: #39ff5a; font-family: Verdana, Tahoma, sans-serif; font-weight: bold;
+    animation: power-glow 1.6s ease-in-out infinite;
+}
+.power-on-btn .power-icon { font-size: 44px; line-height: 1; }
+.power-on-btn .power-label { font-size: 16px; letter-spacing: 3px; }
+.power-on-btn:hover { transform: scale(1.08); }
+.power-on-btn:focus-visible { outline: 2px dashed #39ff5a; outline-offset: 4px; }
+@keyframes power-glow {
+    0%, 100% { text-shadow: 0 0 4px rgba(57,255,90,.5); filter: brightness(.95); }
+    50%      { text-shadow: 0 0 14px rgba(57,255,90,1), 0 0 26px rgba(57,255,90,.6); filter: brightness(1.2); }
+}
+@media (prefers-reduced-motion: reduce) { .power-on-btn { animation: none; text-shadow: 0 0 10px rgba(57,255,90,.8); } }
