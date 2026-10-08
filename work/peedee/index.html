@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>/* portfolio demo: lets the page around this game mute it (shared/demo-controls.js) */try{if(parent!==window&&parent.DemoControls)parent.DemoControls.early(window)}catch(e){}</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PeeDee's Dental Defense</title>
+<meta name="description" content="Fill cavities, scrub plaque, zap germs and take down Hal-9001 (Halitosis!) in a colorful 16-bit platformer.">
+<meta name="theme-color" content="#12061f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="stage">
+  <canvas id="game" width="400" height="225" aria-label="PeeDee's Dental Defense game screen"></canvas>
+
+  <div id="hud" aria-hidden="true">
+    <div class="hud-l">
+      <div class="meter"><b style="color:var(--cyan)">HP</b><div class="track"><div class="fill" id="hpFill"></div></div></div>
+      <div class="meter"><b style="color:var(--lime)">ROT</b><div class="track"><div class="fill" id="rotFill"></div></div></div>
+      <div class="meter"><b style="color:var(--pink)">SP</b><div id="spIcons"></div></div>
+    </div>
+    <div id="levelName"></div>
+    <div id="bossBar"><div id="bossName">HAL-9001</div><div class="btrack"><div id="bossFill"></div></div></div>
+    <div class="hud-r">
+      <div class="scorebox"><div id="score">000000</div><div class="spots" id="spots"></div></div>
+      <div class="hud-btns">
+        <button class="hbtn" id="hudMute" type="button" title="Sound (M)">&#9835;</button>
+        <button class="hbtn" id="hudPause" type="button" title="Pause (P)">II</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="dialog" role="dialog" aria-live="polite">
+    <canvas id="portrait" width="40" height="40"></canvas>
+    <div id="dlgBody"><div id="dlgName"></div><div id="dlgText"></div><div id="dlgNext">&#9654; JUMP / TAP</div></div>
+  </div>
+</div>
+
+<!-- TITLE -->
+<div id="titleScreen" class="overlay on"><div class="panel">
+  <h1 class="logo"><span class="logo-a">PeeDee's</span><span class="logo-b">DENTAL DEFENSE</span></h1>
+  <p class="tag">Fill cavities. Scrub plaque. Zap germs. Save the smile!</p>
+  <div class="btn-col">
+    <button class="btn green" id="btnStart" type="button">Start Adventure</button>
+    <button class="btn blue" id="btnSkip" type="button">Skip Tutorial</button>
+    <button class="btn ghost small" id="btnHelp" type="button">How to Play</button>
+  </div>
+  <div class="btn-row">
+    <button class="btn ghost small js-sound" type="button">Sound: On</button>
+    <button class="btn ghost small js-fs" type="button">Fullscreen</button>
+  </div>
+  <a class="jv-credit" href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">
+    <img alt="" width="20" height="20" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACLUlEQVR4nM2UTUhUURiGn3PuwLSQGnWiGGYqS6uZiVoU5SQuchWFbiJaBQYSZC1aBAoO1KLIqGwT0ULIbVqbwJ39LkqEoaKfq2FaOuNUGI4ulGDmfi1Gb03nalvf3f1+3vN83+FcWO1SKyUTVZUiAqGKNWRnfiEIg+M/1cGtQXk5Nu3Z6xlMVFWKALsjAQ4d2MbzoTGys/PU7woxms7x5usMCsWrcdPUCCSqgrJnc4Bvs/PUx0OMTM5QEw4QDgV5NjTKj7kF6uIhPqdzvJ3I8S+pNvmEmkiA9WV+XryfomF/NaPpHL0D79i+qZzKMj+hDeV8n1vwXJNpqBRPX0/QdeMSdbGNPB78RHV4HY7jYI9P03X9Ik0nThIs83saGiPXbqmQgd5b7rfjSCmBLrZY2qLh+Hljjz4DWWtOn0u6Zt13rvzJKUVLa4eLoTyutCQ0dPOMHO18RKFQKBYLWD4f+UIBBHw+i3w+7+bQFv3tjdReuOv6GISO4zCSydKXyqC0Jtm4jy/9V7G0JnK4jeFMlgepDFpbdDTtNQgNQxHhfmoKUGgUBcdxxxNx6EtNIShAGfs1Rgb42NMu4Z07SkombRtEiMRii7MW4+nhYWLNnSUeni9lbrDHPVrp0hL5i2ptbbPRb4wMMGnbRKJRlFL0337onioiHDl7DKUWqT207M/hw702iUSjnjmvUZfk8fSKip+6pgwKpUjb9rJmKxIu6cnllpKrbEh2/7dndes3KNPMpND3uDEAAAAASUVORK5CYII=">
+    <span><span class="jv-years">2026</span> <span class="jv-name">Joe VanWagner</span></span>
+  </a>
+</div></div>
+
+<!-- HOW TO PLAY -->
+<div id="helpScreen" class="overlay"><div class="panel">
+  <h2 class="title" style="color:var(--cyan)">How to Play</h2>
+  <table class="keys">
+    <tr><th></th><th>Keyboard</th><th>Touch</th></tr>
+    <tr><td>Move</td><td>&larr; &rarr; / A D</td><td>&#9664; &#9654;</td></tr>
+    <tr><td>Jump</td><td>Space / &uarr; / W / Z<br>(hold to jump higher)</td><td>JUMP</td></tr>
+    <tr><td>Drop through a ledge</td><td>hold &darr; + Jump</td><td>hold &#9660; + JUMP</td></tr>
+    <tr><td>Zap</td><td>X / F / J</td><td>ZAP</td></tr>
+    <tr><td>Special attack<br>(2 per level)</td><td>V / Q / L</td><td>SP</td></tr>
+    <tr><td>Clean (hold)</td><td>C / E / K</td><td>MED</td></tr>
+    <tr><td>Pause / Sound</td><td>P or Esc / M</td><td>II / &#9835;</td></tr>
+  </table>
+  <ul class="tips">
+    <li>Stand on a <b style="color:var(--yellow)">cavity</b> or next to <b style="color:var(--yellow)">plaque</b> and hold Clean until the bar fills.</li>
+    <li>Every dirty spot raises the <b style="color:var(--lime)">ROT</b> meter. If it fills up, the mouth is lost!</li>
+    <li>Bop germs on the head or zap them. Fluoride drops give points; mint leaves heal you.</li>
+  </ul>
+  <button class="btn green" id="btnHelpBack" type="button">Got It</button>
+</div></div>
+
+<!-- PAUSE -->
+<div id="pauseScreen" class="overlay"><div class="panel">
+  <h2 class="title" style="color:var(--yellow)">Paused</h2>
+  <div class="btn-col">
+    <button class="btn green" id="btnResume" type="button">Resume</button>
+    <button class="btn blue" id="btnRestart" type="button">Restart Level</button>
+    <button class="btn ghost small" id="btnPauseHelp" type="button">How to Play</button>
+    <button class="btn small" id="btnQuit" type="button">Quit to Title</button>
+  </div>
+  <div class="btn-row">
+    <button class="btn ghost small js-sound" type="button">Sound: On</button>
+    <button class="btn ghost small js-fs" type="button">Fullscreen</button>
+  </div>
+</div></div>
+
+<!-- LEVEL CLEAR -->
+<div id="clearScreen" class="overlay"><div class="panel">
+  <h2 class="title" style="color:var(--green)">Area Clean!</h2>
+  <p class="sub" id="clearName"></p>
+  <div class="stats" id="clearStats"></div>
+  <div class="final"><span class="lbl">SCORE</span><span class="num" id="clearScore">0</span></div>
+  <button class="btn green" id="btnContinue" type="button">Continue</button>
+</div></div>
+
+<!-- GAME OVER / VICTORY -->
+<div id="endScreen" class="overlay"><div class="panel wide">
+  <div class="end-grid">
+    <div>
+      <canvas id="endPd" width="44" height="36" aria-hidden="true"></canvas>
+      <h2 class="title" id="endTitle" style="color:var(--red)">Game Over</h2>
+      <p class="sub" id="endSub"></p>
+      <div class="final"><span class="lbl">FINAL SCORE</span><span class="num" id="endScore">0</span></div>
+      <div class="stats" id="endStats"></div>
+      <div class="btn-col">
+        <button class="btn green" id="btnRetry" type="button">Retry Level</button>
+        <button class="btn blue" id="btnAgain" type="button">New Game</button>
+        <button class="btn ghost small" id="btnEndTitle" type="button">Title Screen</button>
+      </div>
+    </div>
+    <div>
+      <button class="btn small" id="saveImgBtn" type="button">&#11015; Save Image</button>
+      <div id="shareBox" class="share-box">
+        <h3 class="share-h">SHARE YOUR SCORE</h3>
+        <p class="share-text" id="shareText"></p>
+        <div class="share-links" id="shareLinks"></div>
+        <p class="share-note">Facebook won't let sites fill in a post, so its button copies the text for you to paste.</p>
+      </div>
+      <a class="jv-credit" href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">
+        <img alt="" width="20" height="20" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACLUlEQVR4nM2UTUhUURiGn3PuwLSQGnWiGGYqS6uZiVoU5SQuchWFbiJaBQYSZC1aBAoO1KLIqGwT0ULIbVqbwJ39LkqEoaKfq2FaOuNUGI4ulGDmfi1Gb03nalvf3f1+3vN83+FcWO1SKyUTVZUiAqGKNWRnfiEIg+M/1cGtQXk5Nu3Z6xlMVFWKALsjAQ4d2MbzoTGys/PU7woxms7x5usMCsWrcdPUCCSqgrJnc4Bvs/PUx0OMTM5QEw4QDgV5NjTKj7kF6uIhPqdzvJ3I8S+pNvmEmkiA9WV+XryfomF/NaPpHL0D79i+qZzKMj+hDeV8n1vwXJNpqBRPX0/QdeMSdbGNPB78RHV4HY7jYI9P03X9Ik0nThIs83saGiPXbqmQgd5b7rfjSCmBLrZY2qLh+Hljjz4DWWtOn0u6Zt13rvzJKUVLa4eLoTyutCQ0dPOMHO18RKFQKBYLWD4f+UIBBHw+i3w+7+bQFv3tjdReuOv6GISO4zCSydKXyqC0Jtm4jy/9V7G0JnK4jeFMlgepDFpbdDTtNQgNQxHhfmoKUGgUBcdxxxNx6EtNIShAGfs1Rgb42NMu4Z07SkombRtEiMRii7MW4+nhYWLNnSUeni9lbrDHPVrp0hL5i2ptbbPRb4wMMGnbRKJRlFL0337onioiHDl7DKUWqT207M/hw702iUSjnjmvUZfk8fSKip+6pgwKpUjb9rJmKxIu6cnllpKrbEh2/7dndes3KNPMpND3uDEAAAAASUVORK5CYII=">
+        <span><span class="jv-years">2026</span> <span class="jv-name">Joe VanWagner</span></span>
+      </a>
+    </div>
+  </div>
+</div></div>
+
+<!-- TOUCH CONTROLS -->
+<div id="touch" aria-hidden="true">
+  <div class="pad" id="pad">
+    <div class="tb arrow" id="tLeft">&#9664;</div>
+    <div class="tb arrow" id="tRight">&#9654;</div>
+    <div class="tb arrow" id="tDown">&#9660;</div>
+  </div>
+  <div class="cluster">
+    <div class="tb" id="tMed" data-key="med">MED</div>
+    <div class="tb" id="tZap" data-key="shoot">ZAP</div>
+    <div class="tb" id="tJump" data-key="jump">JUMP</div>
+    <div class="tb" id="tSp" data-key="special">SP</div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/util.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/input.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/world.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/bosses.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/update.js"></script>
+<script src="js/flow.js"></script>
+<script src="js/share.js"></script>
+<script src="js/hud.js"></script>
+<script src="js/render.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

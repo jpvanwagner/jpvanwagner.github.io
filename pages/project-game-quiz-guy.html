@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-CTPAT-COURSE.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="feb97e46">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz-Guy: learning game</title>
+    <meta name="description" content="Quiz-Guy, a playable HTML/JavaScript learning game by Joseph VanWagner.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=fa07d833">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=cdfd7b86">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=11acaf42"></script>
+    <script src="../config/shared-content.js?v=e9eeb62c"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/lightbox.js?v=af09d593"></script>          <!-- click a screenshot to see it full size -->
+    <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/game-frame.js?v=9300be14"></script>   <!-- fits the game frame to the game -->
+    <script src="js/quiz-builder.js?v=e6a76d60"></script>   <!-- "Make your own quiz game!" -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=01dee569"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=defb0451"></script>
+</head>
+<body data-title="Quiz-Guy" data-nav="projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="projects.html#games">&larr; Back to Portfolio</a></p>
+                <p class="kicker">Learning game · HTML / JavaScript</p>
+                <h1>Quiz-Guy</h1>
+                <p class="lede">A maze-chase quiz, built to turn software training review into something people want to replay.</p>
+                <p>A maze-chase game: eat the dots, dodge the ghosts, and eat a glowing <strong>?</strong> block to get a quick review question. Answer it right to power up and turn the tables on the ghosts. Three mazes (Library, City Blocks, and Rings), one per level; play as Quiz-Guy or Quiz-Gal.</p>
+                <p><strong>This demo:</strong> easy general trivia (geography, science, animals, history, and more). In training, it reviewed <a href="https://asana.com/" target="_blank" rel="noopener">Asana</a> basics.<br><strong>Controls:</strong> WASD or arrow keys to move, or click anywhere in the maze and Quiz-Guy finds his own way there. Answer questions with the mouse or number keys. On a phone or tablet, tap the maze or use the D-pad.</p>
+                <p class="media-note"></p>
+                <div class="btn-row">
+                    <a class="btn primary" href="../games/quiz-guy/index.html" target="_blank" rel="noopener">Play full screen</a>
+                    <!-- Retro Desktop only: open the game in its own desktop window -->
+                    <button class="btn retro-only" type="button" onclick="parent.GamesApp.open('quiz-guy')" title="Opens the game as its own program on the desktop, with a full-screen button">Open as a desktop program</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- The game itself is a single self-contained file: /games/quiz-guy/index.html -->
+        <section class="panel">
+            <div class="panel-body course-panel">
+                <div class="course-frame game-frame">
+                    <iframe data-demo src="../games/quiz-guy/index.html" title="Quiz-Guy (playable game)" loading="lazy" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe>
+                </div>
+                <p class="course-note">Tip: click inside the game first so it can hear your keyboard. On a small screen, try the
+                <a href="../games/quiz-guy/index.html" target="_blank" rel="noopener">full-screen version</a>.</p>
+                <h2>Screenshots</h2>
+                <div class="shots tall">
+                    <figure><a class="zoom" href="../images/games/quiz-guy/title.webp" data-caption="The title screen: pick Quiz-Guy or Quiz-Gal, controls, lives, and questions per level."><img src="../images/games/quiz-guy/thumbs/title.jpg" alt="Quiz-Guy: pick a character" loading="lazy"></a><figcaption>Pick a character</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/quiz-guy/tutorial.webp" data-caption="The optional tutorial walks through each rule, right in the first maze."><img src="../images/games/quiz-guy/thumbs/tutorial.jpg" alt="Quiz-Guy: the three-step tutorial" loading="lazy"></a><figcaption>The three-step tutorial</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/quiz-guy/gameplay.webp" data-caption="The Library maze: dots, roaming ghosts, and glowing ? blocks that trigger a question."><img src="../images/games/quiz-guy/thumbs/gameplay.jpg" alt="Quiz-Guy: gameplay in the library maze" loading="lazy"></a><figcaption>Gameplay in the Library maze</figcaption></figure>
+                </div>
+                <h2>Design features</h2>
+                <ul class="tags"><li>Gamified learning</li><li>Knowledge checks</li><li>JavaScript</li><li>Arcade style</li><li>Difficulty settings</li><li>Keyboard controls</li><li>Mobile friendly</li><li>Maze levels</li></ul>
+                <div class="btn-row">
+                    <a class="btn" href="projects.html#games">&larr; Back to Portfolio</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- "Make your own quiz game!": pages/js/quiz-builder.js builds the form and the downloadable copy -->
+        <section class="panel" id="make-your-own">
+            <div class="panel-body">
+                <h2>Make your own quiz game!</h2>
+                <p>Type in your own multiple-choice questions and get a copy of Quiz-Guy that asks them instead. Save it to your
+                   desktop and double-click to play, send it to your students or team, or put it on your own website.
+                   Each question can have 2 to 4 answer choices; click the circle next to the right one.</p>
+                <p>Want to change more than the questions? The <a href="../games/builder/index.html" target="_blank" rel="noopener" title="Opens the Quizcade Builder in a new tab">Quizcade Builder</a>
+                   edits everything in Quiz-Guy and its sister games: the on-screen words, rules, colors, sprites, and backgrounds and mazes. You can paste
+                   questions in from a spreadsheet, watch a live preview, and copy paste-ready HTML for a web page, an embed, or a Rise 360 Code block.</p>
+                <div data-quiz-builder="quiz-guy" data-title="Quiz-Guy"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

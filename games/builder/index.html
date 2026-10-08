@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quizcade Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #111111;
+        --panel: #1b1b22;
+        --panel-2: #24242e;
+        --line: #3a3a48;
+        --text: #ececf1;
+        --muted: #a3a3b2;
+        --brand: #3232FF;
+        --accent: #f1c40f;
+        --good: #2ecc71;
+        --bad: #e74c3c;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); }
+    body { font: 15px/1.5 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .retro { font-family: 'Press Start 2P', 'Courier New', monospace; }
+    a { color: var(--accent); }
+    button, input, select, textarea { font: inherit; color: inherit; }
+
+    header {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px;
+        padding: 16px; border-bottom: 2px solid var(--line);
+    }
+    header h1 { margin: 0; font-size: 18px; color: var(--accent); text-shadow: 2px 2px 0 var(--brand); }
+    header p { margin: 0; color: var(--muted); flex: 1 1 300px; }
+
+    #layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 16px; }
+    @media (max-width: 1000px) { #layout { grid-template-columns: minmax(0, 1fr); } }
+    #preview-col { position: sticky; top: 16px; align-self: start; display: flex; flex-direction: column; gap: 12px; }
+    @media (max-width: 1000px) { #preview-col { position: static; } }
+
+    section, details.section {
+        background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+        padding: 14px 16px; margin-bottom: 14px;
+    }
+    details.section > summary {
+        cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px;
+    }
+    details.section > summary::-webkit-details-marker { display: none; }
+    details.section > summary::before { content: '▸'; color: var(--accent); transition: transform 0.15s; }
+    details.section[open] > summary::before { transform: rotate(90deg); }
+    h2 { font-size: 12px; margin: 0; color: var(--accent); }
+    details.section[open] > summary { margin-bottom: 12px; }
+    .hint { color: var(--muted); font-size: 13px; margin: 4px 0 10px; }
+    .warn { color: var(--accent); font-size: 13px; }
+    .err { color: var(--bad); font-size: 13px; }
+
+    .game-picker { display: flex; flex-wrap: wrap; gap: 10px; }
+    .game-btn {
+        background: var(--panel-2); border: 2px solid var(--line); border-radius: 6px;
+        padding: 12px 16px; cursor: pointer; font-size: 10px;
+    }
+    .game-btn:hover { border-color: #fff; }
+    .game-btn.active { background: var(--brand); border-color: #fff; }
+
+    .btn {
+        background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+        padding: 7px 12px; cursor: pointer; white-space: nowrap;
+    }
+    .btn:hover { border-color: #fff; }
+    .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+    .btn.primary:hover { border-color: #fff; }
+    .btn.danger:hover { border-color: var(--bad); color: var(--bad); }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px 14px; }
+    label.field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+    label.field.check { flex-direction: row; align-items: center; gap: 8px; color: var(--text); }
+    input[type=text], input[type=number], input[type=url], select, textarea {
+        background: #0d0d12; border: 1px solid var(--line); border-radius: 5px; padding: 6px 8px; width: 100%;
+    }
+    input:focus, select:focus, textarea:focus { outline: 2px solid var(--brand); outline-offset: 0; border-color: var(--brand); }
+    textarea { resize: vertical; min-height: 60px; }
+    textarea.mono { font-family: Consolas, 'Courier New', monospace; font-size: 13px; line-height: 1.25; white-space: pre; }
+    .field-help { font-size: 12px; color: #7d7d8c; }
+
+    .color-pair { display: flex; gap: 6px; align-items: center; }
+    .color-pair input[type=color] { width: 36px; height: 32px; padding: 0; border: 1px solid var(--line); border-radius: 5px; background: none; flex-shrink: 0; }
+    .color-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .color-list .color-pair { width: 150px; }
+
+    /* Questions table */
+    .q-table-wrap { overflow-x: auto; }
+    table.q-table { border-collapse: collapse; width: 100%; min-width: 720px; }
+    .q-table th { font-size: 12px; color: var(--muted); text-align: left; padding: 4px; font-weight: 600; }
+    .q-table td { padding: 3px 4px; vertical-align: top; }
+    .q-table td.num { color: var(--muted); font-size: 12px; padding-top: 9px; width: 28px; }
+    .q-table td.q { min-width: 220px; }
+    .q-table td.correct { width: 70px; }
+    .q-table tr.bad td { background: rgba(231, 76, 60, 0.12); }
+    .q-table textarea { min-height: 34px; height: 34px; }
+    .answer-input { border-left: 4px solid var(--c) !important; }
+
+    /* Sprites */
+    .sprite-card { border: 1px solid var(--line); border-radius: 6px; padding: 10px; background: var(--panel-2); margin-bottom: 10px; }
+    .sprite-head { display: flex; gap: 12px; align-items: flex-start; }
+    .sprite-preview {
+        width: 96px; height: 96px; flex-shrink: 0; border-radius: 4px; image-rendering: pixelated;
+        background: repeating-conic-gradient(#2c2c36 0 25%, #1f1f27 0 50%) 0 0 / 16px 16px;
+    }
+    .sprite-body { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .sprite-title { font-weight: 600; }
+    .palette-row { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
+    .palette-row .key { width: 44px; text-align: center; font-family: monospace; }
+    .palette-row .color-pair { flex: 1; }
+
+    /* Preview & export */
+    #preview-frame-wrap { background: #000; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    #preview-frame { display: block; width: 100%; height: 720px; border: 0; background: #111; }
+    #status { font-size: 13px; color: var(--muted); }
+    #load-msg { margin-top: 10px; }
+    .out-box { margin-top: 10px; }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .tab { background: none; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 13px; }
+    .tab.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .copied { color: var(--good); font-size: 13px; }
+
+    footer { padding: 8px 16px 24px; text-align: center; }
+    .jv-credit { display: inline-flex; align-items: center; gap: 8px; font-size: 8px; color: #aaa; text-decoration: none; letter-spacing: 1px; }
+    .jv-credit img { width: 20px; height: 20px; image-rendering: pixelated; }
+    .jv-credit .jv-name { color: var(--accent); }
+    .jv-credit:hover .jv-name { text-decoration: underline; }
+    .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+    <h1 class="retro">QUIZCADE BUILDER</h1>
+    <p>Pick a game, change the questions, words, colors and pictures, then copy the finished HTML into Rise 360, a website, or anywhere else that takes HTML.</p>
+</header>
+
+<div id="layout">
+    <!-- ================= LEFT: EDITING ================= -->
+    <div id="edit-col">
+        <section>
+            <h2 class="retro">1. PICK A GAME</h2>
+            <p class="hint">Start from one of the games, or open a game file you made before (any Quizcade .html file, including ones exported from here).</p>
+            <div class="game-picker">
+                <button type="button" class="game-btn retro" data-game="quizaga">QUIZAGA</button>
+                <button type="button" class="game-btn retro" data-game="quiz-guy">QUIZ-GUY</button>
+                <button type="button" class="game-btn retro" data-game="quizcavator">QUIZCAVATOR</button>
+                <label class="btn" style="align-self:center">Open a game file…
+                    <input id="open-file" type="file" accept=".html,.htm,text/html" class="hidden">
+                </label>
+            </div>
+            <div id="load-msg" class="hint"></div>
+        </section>
+
+        <div id="editor" class="hidden">
+            <details class="section" open id="sec-questions">
+                <summary><h2 class="retro">2. QUESTIONS</h2><span id="q-count" class="hint" style="margin:0"></span></summary>
+                <p class="hint">Each question needs 2 to 4 answers. Pick the correct one in the last column. Empty answer boxes are left out.</p>
+                <div class="q-table-wrap"><table class="q-table" id="q-table"></table></div>
+                <div class="row" style="margin-top:8px">
+                    <button type="button" class="btn" id="q-add">+ Add a question</button>
+                    <button type="button" class="btn" id="q-csv">Download as spreadsheet (CSV)</button>
+                    <button type="button" class="btn danger" id="q-clear">Remove all</button>
+                </div>
+                <details style="margin-top:12px">
+                    <summary style="cursor:pointer">Paste questions from a spreadsheet (Excel, Google Sheets, CSV)…</summary>
+                    <p class="hint">Copy rows with these columns and paste below: <b>Question | Answer A | Answer B | Answer C | Answer D | Correct</b>.
+                        "Correct" can be the letter (A–D), the number (1–4) or the answer's exact text. Leave unused answer cells blank. A header row is skipped automatically.</p>
+                    <textarea id="q-paste" class="mono" rows="6" placeholder="What is 2 + 2?	3	4	5		B"></textarea>
+                    <div class="row" style="margin-top:6px">
+                        <button type="button" class="btn primary" id="q-replace">Replace all questions</button>
+                        <button type="button" class="btn" id="q-append">Add to the list</button>
+                        <span id="q-paste-msg" class="hint"></span>
+                    </div>
+                </details>
+            </details>
+
+            <details class="section" id="sec-text">
+                <summary><h2 class="retro">3. WORDS</h2></summary>
+                <div id="text-fields"></div>
+            </details>
+
+            <details class="section" id="sec-settings">
+                <summary><h2 class="retro">4. RULES</h2></summary>
+                <div id="settings-fields" class="grid"></div>
+            </details>
+
+            <details class="section" id="sec-colors">
+                <summary><h2 class="retro">5. COLORS</h2></summary>
+                <p class="hint">Click a swatch to pick a color, or type any CSS color (#ff0000, red, rgba(255,0,0,0.5)).</p>
+                <div id="color-fields" class="grid"></div>
+            </details>
+
+            <details class="section" id="sec-sprites">
+                <summary><h2 class="retro">6. SPRITES &amp; BACKGROUNDS</h2></summary>
+                <p class="hint">Upload a picture (PNG with a see-through background works best) to replace a sprite, or edit its pixel art.
+                    Big pictures are shrunk automatically so the game stays small. Draw players facing right.</p>
+                <div id="sprite-fields"></div>
+            </details>
+
+            <details class="section hidden" id="sec-maze">
+                <summary><h2 class="retro">7. MAZES</h2></summary>
+                <p class="hint">Level 1 uses the first maze, level 2 the second, and so on, starting over after the last.<br>
+                    <code>#</code> wall &nbsp; <code>.</code> dot &nbsp; <code>space</code> empty &nbsp; <code>-</code> ghost door &nbsp; <code>P</code> player start &nbsp; <code>G</code> ghost start (one ghost each).
+                    Rows open at both ends wrap around. The tutorial uses the first maze's first long straight corridor (19+ squares).</p>
+                <div id="maze-list"></div>
+                <button type="button" class="btn" id="maze-add">+ Add a maze (copy of the last one)</button>
+            </details>
+        </div>
+    </div>
+
+    <!-- ================= RIGHT: PREVIEW & EXPORT ================= -->
+    <div id="preview-col" class="hidden">
+        <section>
+            <div class="row" style="justify-content:space-between">
+                <h2 class="retro">PREVIEW</h2>
+                <div class="row">
+                    <label class="field check"><input type="checkbox" id="live" checked> Live</label>
+                    <button type="button" class="btn" id="refresh">↻ Restart preview</button>
+                </div>
+            </div>
+            <div id="status" style="margin-top:6px"></div>
+        </section>
+        <div id="preview-frame-wrap"><iframe id="preview-frame" title="Game preview" sandbox="allow-scripts"></iframe></div>
+
+        <section>
+            <h2 class="retro">GET THE HTML</h2>
+            <div class="tabs" id="out-tabs">
+                <button type="button" class="tab active" data-tab="file">Whole page</button>
+                <button type="button" class="tab" data-tab="embed">Embed code</button>
+                <button type="button" class="tab" data-tab="link">Hosted link</button>
+            </div>
+            <div data-panel="file">
+                <p class="hint">The complete game in one HTML file. Use it for <b>Rise 360 → Code block</b> (paste it all in), save it as a .html file
+                    to upload to a website (e.g. Neocities), or open it straight from your computer.</p>
+                <div class="row">
+                    <button type="button" class="btn primary" id="copy-file">Copy HTML</button>
+                    <button type="button" class="btn" id="download-file">Download .html file</button>
+                    <span id="file-msg" class="copied"></span>
+                </div>
+            </div>
+            <div data-panel="embed" class="hidden">
+                <p class="hint">A self-contained <code>&lt;iframe&gt;</code> you can paste into any page's HTML (Squarespace/WordPress/Google Sites "embed" or
+                    "custom HTML" blocks, blogs, LMS pages). The game runs in its own box, so it can't clash with the page, and you can put several games on one page.</p>
+                <div class="row">
+                    <label class="field" style="width:140px">Height (px)<input type="number" id="embed-height" value="800" min="300" step="10"></label>
+                    <label class="field" style="width:160px">Max width (px)<input type="number" id="embed-width" value="950" min="300" step="10"></label>
+                </div>
+                <div class="row" style="margin-top:8px">
+                    <button type="button" class="btn primary" id="copy-embed">Copy embed code</button>
+                    <span id="embed-msg" class="copied"></span>
+                </div>
+            </div>
+            <div data-panel="link" class="hidden">
+                <p class="hint">Uploaded the .html file somewhere (Neocities, GitHub Pages, your LMS)? Paste its web address to get embed code that loads it from there.
+                    This also works with <b>Rise 360 → Embed</b> blocks (they take the address or the code).</p>
+                <label class="field">Web address of the game<input type="url" id="hosted-url" placeholder="https://yoursite.neocities.org/quizaga/"></label>
+                <div class="row" style="margin-top:8px">
+                    <button type="button" class="btn primary" id="copy-link">Copy embed code</button>
+                    <span id="link-msg" class="copied"></span>
+                </div>
+            </div>
+            <div class="out-box"><textarea id="out-text" class="mono" rows="5" readonly></textarea></div>
+            <p class="hint" id="out-size"></p>
+        </section>
+    </div>
+</div>
+
+<footer>
+    <a class="jv-credit retro" href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">
+        <img alt="" width="20" height="20" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACLUlEQVR4nM2UTUhUURiGn3PuwLSQGnWiGGYqS6uZiVoU5SQuchWFbiJaBQYSZC1aBAoO1KLIqGwT0ULIbVqbwJ39LkqEoaKfq2FaOuNUGI4ulGDmfi1Gb03nalvf3f1+3vN83+FcWO1SKyUTVZUiAqGKNWRnfiEIg+M/1cGtQXk5Nu3Z6xlMVFWKALsjAQ4d2MbzoTGys/PU7woxms7x5usMCsWrcdPUCCSqgrJnc4Bvs/PUx0OMTM5QEw4QDgV5NjTKj7kF6uIhPqdzvJ3I8S+pNvmEmkiA9WV+XryfomF/NaPpHL0D79i+qZzKMj+hDeV8n1vwXJNpqBRPX0/QdeMSdbGNPB78RHV4HY7jYI9P03X9Ik0nThIs83saGiPXbqmQgd5b7rfjSCmBLrZY2qLh+Hljjz4DWWtOn0u6Zt13rvzJKUVLa4eLoTyutCQ0dPOMHO18RKFQKBYLWD4f+UIBBHw+i3w+7+bQFv3tjdReuOv6GISO4zCSydKXyqC0Jtm4jy/9V7G0JnK4jeFMlgepDFpbdDTtNQgNQxHhfmoKUGgUBcdxxxNx6EtNIShAGfs1Rgb42NMu4Z07SkombRtEiMRii7MW4+nhYWLNnSUeni9lbrDHPVrp0hL5i2ptbbPRb4wMMGnbRKJRlFL0337onioiHDl7DKUWqT207M/hw702iUSjnjmvUZfk8fSKip+6pgwKpUjb9rJmKxIu6cnllpKrbEh2/7dndes3KNPMpND3uDEAAAAASUVORK5CYII=">
+        <span>&copy; <span class="jv-years">2025&ndash;2026</span> <span class="jv-name">Joe VanWagner</span></span>
+    </a>
+</footer>
+
+<script>
+"use strict";
+/* =========================================================================================
+   QUIZCADE BUILDER
+   Loads a game file, reads its EDIT ZONE (<script id="quizcade-config">), lets you change it,
+   and writes a new copy of the game with your changes. Everything happens in your browser.
+   ========================================================================================= */
+const $ = id => document.getElementById(id);
+const CONFIG_RE = /<script id="quizcade-config">([\s\S]*?)<\/script>/;
+const GAME_NAMES = { 'quizaga': 'Quizaga', 'quiz-guy': 'Quiz-Guy', 'quizcavator': 'Quizcavator' };
+const LETTERS = ['A', 'B', 'C', 'D'];
+
+let template = '';     // the game file's full HTML
+let cfg = null;        // its EDIT ZONE, as an object
+let qrows = [];        // the questions table: { q, a: [4 strings], correct: 0-3 }
+let fromBundled = false;
+
+document.querySelectorAll('.jv-years').forEach(el => {
+    const year = new Date().getFullYear();
+    el.textContent = year > 2025 ? '2025–' + year : '2025';
+});
+
+/* ---------- small helpers ---------- */
+function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+        if (v == null || v === false) continue;
+        if (k === 'class') el.className = v;
+        else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+        else if (k === 'value' || k === 'checked' || k === 'selected') el[k] = v;
+        else el.setAttribute(k, v === true ? '' : v);
+    }
+    kids.flat().forEach(k => { if (k != null) el.append(k); });
+    return el;
+}
+const humanize = k => k.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/^./, c => c.toUpperCase());
+const clone = o => JSON.parse(JSON.stringify(o));
+function store(key, value) { try { if (value === undefined) localStorage.removeItem(key); else localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage off: fine */ } }
+function recall(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; } }
+function kb(n) { return n < 1024 * 1024 ? Math.round(n / 1024) + ' KB' : (n / 1024 / 1024).toFixed(1) + ' MB'; }
+
+/* ---------- loading a game ---------- */
+document.querySelectorAll('.game-btn').forEach(btn => btn.addEventListener('click', () => loadBundled(btn.dataset.game)));
+
+async function loadBundled(game) {
+    const msg = $('load-msg');
+    msg.className = 'hint';
+    msg.textContent = 'Loading ' + GAME_NAMES[game] + '…';
+    try {
+        const res = await fetch('../' + game + '/index.html', { cache: 'no-cache' });
+        if (!res.ok) throw new Error(res.status);
+        useTemplate(await res.text(), true);
+    } catch (e) {
+        msg.className = 'warn';
+        msg.textContent = 'Your browser won’t let this page load ' + game + '/index.html by itself (that happens when the Builder is opened ' +
+            'from your computer instead of a website). No problem: click “Open a game file…” and choose the file ' + game + '/index.html.';
+    }
+}
+
+$('open-file').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (file) useTemplate(await file.text(), false);
+});
+
+function useTemplate(html, bundled) {
+    const msg = $('load-msg');
+    const m = html.match(CONFIG_RE);
+    let conf = null;
+    if (m) {
+        try { conf = new Function(m[1] + '\n;return QUIZCADE;')(); } catch (err) { conf = null; msg.textContent = String(err); }
+    }
+    if (!conf || !conf.game) {
+        msg.className = 'err';
+        msg.textContent = 'That file doesn’t look like a Quizcade game (it needs the <script id="quizcade-config"> EDIT ZONE). ' + (m ? 'Its EDIT ZONE has a mistake in it: ' + msg.textContent : '');
+        return;
+    }
+    template = html;
+    fromBundled = bundled;
+    cfg = conf;
+    msg.className = 'hint';
+    msg.textContent = 'Editing ' + (GAME_NAMES[cfg.game] || cfg.game) + (bundled ? '' : ' (from your file)') + '.';
+
+    // Pick up where you left off (only for the built-in games; a file you open is its own save)
+    const saved = bundled && recall('quizcade-builder:' + cfg.game);
+    if (saved && saved.cfg) {
+        cfg = saved.cfg;
+        msg.append(' Restored your edits from ' + new Date(saved.time).toLocaleString() + '. ',
+            h('button', { type: 'button', class: 'btn', onclick: () => { store('quizcade-builder:' + conf.game, undefined); useTemplate(html, true); } }, 'Start over from the original'));
+    }
+
+    document.querySelectorAll('.game-btn').forEach(b => b.classList.toggle('active', b.dataset.game === cfg.game));
+    $('editor').classList.remove('hidden');
+    $('preview-col').classList.remove('hidden');
+    buildForm();
+    changed(true);
+}
+
+/* ---------- reacting to edits ---------- */
+let previewTimer = null;
+function changed(now) {
+    if (fromBundled) store('quizcade-builder:' + cfg.game, { cfg, time: Date.now() });
+    updateOutput();
+    if (!$('live').checked && !now) return;
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(refreshPreview, now ? 0 : 700);
+}
+function refreshPreview() {
+    $('preview-frame').srcdoc = buildHtml();
+    $('status').textContent = 'Preview updated ' + new Date().toLocaleTimeString() + '. Full screen is turned off inside the preview.';
+}
+$('refresh').addEventListener('click', refreshPreview);
+$('live').addEventListener('change', () => { if ($('live').checked) refreshPreview(); });
+
+/* ---------- building the form ---------- */
+function buildForm() {
+    buildQuestions();
+    buildText();
+    buildSettings();
+    buildColors();
+    buildSprites();
+    buildMaze();
+}
+
+/* Questions */
+function rowsFromQuestions(list) {
+    return (list || []).map(item => ({
+        q: String(item.q || ''),
+        a: LETTERS.map((_, i) => (item.opts && item.opts[i] != null ? String(item.opts[i]) : '')),
+        correct: Number.isInteger(item.ans) ? item.ans : 0
+    }));
+}
+function rowProblem(r) {
+    const filled = r.a.filter(s => s.trim()).length;
+    if (!r.q.trim()) return 'no question';
+    if (filled < 2) return 'needs at least 2 answers';
+    if (!r.a[r.correct] || !r.a[r.correct].trim()) return 'the correct answer is empty';
+    return '';
+}
+function syncQuestions() {
+    cfg.questions = qrows.filter(r => !rowProblem(r)).map(r => {
+        const kept = r.a.map((text, i) => ({ text: text.trim(), i })).filter(x => x.text);
+        return { q: r.q.trim(), opts: kept.map(x => x.text), ans: kept.findIndex(x => x.i === r.correct) };
+    });
+    const bad = qrows.length - cfg.questions.length;
+    $('q-count').textContent = cfg.questions.length + ' question' + (cfg.questions.length === 1 ? '' : 's') + (bad ? ' · ' + bad + ' need fixing (left out until fixed)' : '');
+    $('q-count').className = bad ? 'warn' : 'hint';
+}
+function buildQuestions() {
+    qrows = rowsFromQuestions(cfg.questions);
+    drawQuestionTable();
+}
+function drawQuestionTable() {
+    const colors = (cfg.colors && cfg.colors.answers) || ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f'];
+    const labels = (cfg.text && cfg.text.answerLabels) || LETTERS;
+    const table = $('q-table');
+    table.replaceChildren(h('tr', null, h('th'), h('th', null, 'Question'), LETTERS.map((L, i) => h('th', null, 'Answer ' + (labels[i] || L))), h('th', null, 'Correct'), h('th')));
+    qrows.forEach((r, idx) => {
+        const tr = h('tr', { class: rowProblem(r) ? 'bad' : '', title: rowProblem(r) });
+        const refresh = () => { tr.className = rowProblem(r) ? 'bad' : ''; tr.title = rowProblem(r); syncQuestions(); changed(); };
+        const select = h('select', { onchange: e => { r.correct = +e.target.value; refresh(); } },
+            LETTERS.map((L, i) => h('option', { value: i, selected: i === r.correct }, labels[i] || L)));
+        tr.append(
+            h('td', { class: 'num' }, String(idx + 1)),
+            h('td', { class: 'q' }, h('textarea', { rows: 1, value: r.q, 'aria-label': 'Question ' + (idx + 1), oninput: e => { r.q = e.target.value; refresh(); } })),
+            LETTERS.map((L, i) => h('td', null, h('input', {
+                type: 'text', class: 'answer-input', value: r.a[i], style: '--c:' + (colors[i] || '#444'),
+                'aria-label': 'Question ' + (idx + 1) + ' answer ' + L, oninput: e => { r.a[i] = e.target.value; refresh(); }
+            }))),
+            h('td', { class: 'correct' }, select),
+            h('td', null, h('button', { type: 'button', class: 'btn danger', title: 'Remove this question', 'aria-label': 'Remove question ' + (idx + 1),
+                onclick: () => { qrows.splice(idx, 1); drawQuestionTable(); syncQuestions(); changed(); } }, '✕'))
+        );
+        table.append(tr);
+    });
+    syncQuestions();
+}
+$('q-add').addEventListener('click', () => {
+    qrows.push({ q: '', a: ['', '', '', ''], correct: 0 });
+    drawQuestionTable();
+    const boxes = $('q-table').querySelectorAll('td.q textarea');
+    boxes[boxes.length - 1].focus();
+});
+$('q-clear').addEventListener('click', () => {
+    if (!confirm('Remove all ' + qrows.length + ' questions?')) return;
+    qrows = [];
+    drawQuestionTable();
+    changed();
+});
+
+// Spreadsheet paste: tab-separated (copied from Excel/Sheets) or comma-separated (CSV)
+function parseDelimited(text) {
+    const delim = text.includes('\t') ? '\t' : ',';
+    const rows = [];
+    let row = [], cell = '', quoted = false;
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (quoted) {
+            if (ch === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+            else if (ch === '"') quoted = false;
+            else cell += ch;
+        } else if (ch === '"' && cell === '') quoted = true;
+        else if (ch === delim) { row.push(cell); cell = ''; }
+        else if (ch === '\n' || ch === '\r') {
+            if (ch === '\r' && text[i + 1] === '\n') i++;
+            row.push(cell); rows.push(row); row = []; cell = '';
+        } else cell += ch;
+    }
+    if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+    return rows.map(r => r.map(c => c.trim())).filter(r => r.some(c => c));
+}
+function rowsFromSheet(text) {
+    const out = [], problems = [];
+    parseDelimited(text).forEach((cells, n) => {
+        if (n === 0 && /question/i.test(cells[0]) && cells.length > 1) return;   // header row
+        while (cells.length && !cells[cells.length - 1]) cells.pop();
+        if (cells.length < 4) { problems.push(n + 1); return; }
+        const answers = cells.length >= 6 ? cells.slice(1, 5) : cells.slice(1, -1);
+        const key = cells[cells.length - 1];
+        const a = LETTERS.map((_, i) => answers[i] || '');
+        let correct = -1;
+        if (/^[A-Da-d]$/.test(key)) correct = key.toUpperCase().charCodeAt(0) - 65;
+        else if (/^[1-4]$/.test(key)) correct = +key - 1;
+        else correct = a.findIndex(x => x && x.toLowerCase() === key.toLowerCase());
+        if (correct < 0 || !a[correct]) { problems.push(n + 1); return; }
+        out.push({ q: cells[0], a, correct });
+    });
+    return { out, problems };
+}
+function pasteQuestions(replace) {
+    const { out, problems } = rowsFromSheet($('q-paste').value);
+    const msg = $('q-paste-msg');
+    if (!out.length) { msg.className = 'err'; msg.textContent = 'No questions found. Check the column order.'; return; }
+    qrows = replace ? out : qrows.concat(out);
+    drawQuestionTable();
+    changed();
+    msg.className = problems.length ? 'warn' : 'copied';
+    msg.textContent = 'Added ' + out.length + ' question' + (out.length === 1 ? '' : 's') + '.' +
+        (problems.length ? ' Skipped line' + (problems.length > 1 ? 's ' : ' ') + problems.join(', ') + ' (couldn’t tell the answers or which one is correct).' : '');
+    if (!problems.length) $('q-paste').value = '';
+}
+$('q-replace').addEventListener('click', () => pasteQuestions(true));
+$('q-append').addEventListener('click', () => pasteQuestions(false));
+$('q-csv').addEventListener('click', () => {
+    const esc = s => /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    const lines = [['Question', 'Answer A', 'Answer B', 'Answer C', 'Answer D', 'Correct']]
+        .concat(qrows.map(r => [r.q, ...r.a, LETTERS[r.correct]]));
+    download('﻿' + lines.map(l => l.map(esc).join(',')).join('\r\n'), (cfg.game || 'quiz') + '-questions.csv', 'text/csv');
+});
+
+/* Words */
+function textInput(obj, key, label, help) {
+    const v = obj[key];
+    const multi = typeof v === 'string' && (v.includes('\n') || v.length > 60);
+    const input = multi
+        ? h('textarea', { rows: 3, value: v, oninput: e => { obj[key] = e.target.value; changed(); } })
+        : h('input', { type: 'text', value: v, oninput: e => { obj[key] = e.target.value; changed(); } });
+    return h('label', { class: 'field' }, label || humanize(key), input, help ? h('span', { class: 'field-help' }, help) : null);
+}
+const TEXT_HELP = {
+    title: 'The big title on screen.',
+    pageTitle: 'Shown on the browser tab.',
+    prompt: 'Shown in the question box before the first question.',
+    keepGoing: 'Shown in the question box after a question is answered.',
+    actionButton: 'The action button on phones and tablets.',
+    extraLife: '{points} is replaced with the number from Rules.'
+};
+function buildText() {
+    const box = $('text-fields');
+    box.replaceChildren();
+    const T = cfg.text;
+    const simple = h('div', { class: 'grid' });
+    box.append(simple);
+    for (const [key, v] of Object.entries(T)) {
+        if (typeof v === 'string') simple.append(textInput(T, key, null, TEXT_HELP[key]));
+        else if (Array.isArray(v) && key === 'tutorial') {
+            box.append(h('h3', { class: 'hint', style: 'margin-top:14px' }, 'Tutorial steps'),
+                h('div', { class: 'grid' }, v.map((_, i) => textInput(v, i, 'Step ' + (i + 1)))));
+        } else if (Array.isArray(v)) {
+            box.append(h('h3', { class: 'hint', style: 'margin-top:14px' }, humanize(key)),
+                h('div', { class: 'grid' }, v.map((_, i) => textInput(v, i, String(i + 1)))));
+        } else if (v && typeof v === 'object') {
+            box.append(h('details', { style: 'margin-top:12px' }, h('summary', { style: 'cursor:pointer' }, humanize(key)),
+                h('div', { class: 'grid', style: 'margin-top:8px' }, Object.keys(v).map(k => textInput(v, k)))));
+        }
+    }
+}
+
+/* Rules */
+const SETTING_HELP = {
+    livesChoices: 'Buttons on the title screen, e.g. 1, 3, 5',
+    questionsPerLevelChoices: 'Buttons on the title screen, e.g. 3, 5, 10',
+    extraLifeEvery: 'Points per extra life (0 = none)',
+    showTutorial: 'Show the 3-step tutorial after START',
+    autoFullscreen: 'Go full screen when START is pressed (where the page allows it)',
+    shuffleQuestions: 'Ask in random order (off = in list order)',
+    shuffleAnswers: 'Mix up the A/B/C/D order each time',
+    powerDuration: 'Milliseconds (1000 = 1 second)',
+    playerSpeed: 'Quiz-Guy / Quizcavator: 1, 2, 4 or 5',
+    ghostSpeed: '1, 2, 4 or 5',
+    digSpeed: '1, 2, 4 or 5',
+    enemySpeed: 'Quizcavator: 1, 2, 4 or 5',
+    starCount: '0 = no stars'
+};
+function buildSettings() {
+    const box = $('settings-fields');
+    box.replaceChildren();
+    const Sx = cfg.settings;
+    for (const [key, v] of Object.entries(Sx)) {
+        const help = SETTING_HELP[key] ? h('span', { class: 'field-help' }, SETTING_HELP[key]) : null;
+        if (typeof v === 'boolean') {
+            box.append(h('div', null, h('label', { class: 'field check' },
+                h('input', { type: 'checkbox', checked: v, onchange: e => { Sx[key] = e.target.checked; changed(); } }), humanize(key)), help));
+        } else if (typeof v === 'number') {
+            box.append(h('label', { class: 'field' }, humanize(key),
+                h('input', { type: 'number', value: v, step: 'any', oninput: e => { if (e.target.value !== '') { Sx[key] = +e.target.value; changed(); } } }), help));
+        } else if (Array.isArray(v)) {
+            box.append(h('label', { class: 'field' }, humanize(key),
+                h('input', { type: 'text', value: v.join(', '), oninput: e => {
+                    const nums = e.target.value.split(/[,\s]+/).filter(Boolean).map(Number).filter(n => n > 0);
+                    if (nums.length) { Sx[key] = nums; changed(); }
+                } }), help));
+        }
+    }
+}
+
+/* Colors */
+function toHex6(c) {
+    if (typeof c !== 'string') return null;
+    if (/^#[0-9a-f]{6}$/i.test(c)) return c.toLowerCase();
+    if (/^#[0-9a-f]{3}$/i.test(c)) return '#' + c.slice(1).split('').map(x => x + x).join('').toLowerCase();
+    const probe = document.createElement('canvas').getContext('2d');   // named colors like "red"
+    probe.fillStyle = '#010203';
+    probe.fillStyle = c;
+    return /^#[0-9a-f]{6}$/i.test(probe.fillStyle) && (probe.fillStyle !== '#010203' || c === '#010203') ? probe.fillStyle : null;
+}
+function colorPair(obj, key, onChange) {
+    const text = h('input', { type: 'text', value: obj[key], 'aria-label': String(key) });
+    const pick = h('input', { type: 'color', value: toHex6(obj[key]) || '#000000', title: 'Pick a color' });
+    pick.addEventListener('input', () => { obj[key] = pick.value; text.value = pick.value; onChange(); });
+    text.addEventListener('input', () => { obj[key] = text.value; const hx = toHex6(text.value); if (hx) pick.value = hx; onChange(); });
+    return h('div', { class: 'color-pair' }, pick, text);
+}
+function buildColors() {
+    const box = $('color-fields');
+    box.replaceChildren();
+    for (const [key, v] of Object.entries(cfg.colors)) {
+        const onChange = () => { changed(); if (key === 'answers') drawQuestionTable(); };
+        if (Array.isArray(v)) {
+            box.append(h('div', { class: 'field', style: 'grid-column: 1 / -1' }, h('span', null, humanize(key)),
+                h('div', { class: 'color-list' }, v.map((_, i) => colorPair(v, i, onChange)))));
+        } else {
+            box.append(h('div', { class: 'field' }, h('span', null, humanize(key)), colorPair(cfg.colors, key, onChange)));
+        }
+    }
+}
+
+/* Sprites & backgrounds */
+const BIG_PICTURES = ['background'];   // fill the screen: kept larger, saved as JPEG
+function shrinkImage(file, isBig) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(reader.error);
+        reader.onload = () => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('Not a picture the browser can read.'));
+            img.onload = () => {
+                const max = isBig ? 1280 : 256;
+                const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+                if (scale === 1 && file.size <= (isBig ? 300 : 60) * 1024) { resolve(reader.result); return; }   // already small
+                const c = document.createElement('canvas');
+                c.width = Math.max(1, Math.round(img.naturalWidth * scale));
+                c.height = Math.max(1, Math.round(img.naturalHeight * scale));
+                const g = c.getContext('2d');
+                g.imageSmoothingEnabled = img.naturalWidth > 64;   // keep tiny pixel art crisp
+                g.drawImage(img, 0, 0, c.width, c.height);
+                resolve(isBig ? c.toDataURL('image/jpeg', 0.85) : c.toDataURL('image/png'));
+            };
+            img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+function drawSpritePreview(canvas, def) {
+    const g = canvas.getContext('2d');
+    g.clearRect(0, 0, canvas.width, canvas.height);
+    const fit = (w, hh) => { const s = Math.min(canvas.width / w, canvas.height / hh); return { s, x: (canvas.width - w * s) / 2, y: (canvas.height - hh * s) / 2 }; };
+    if (def.image) {
+        const img = new Image();
+        img.onload = () => { const f = fit(img.naturalWidth, img.naturalHeight); g.imageSmoothingEnabled = img.naturalWidth > canvas.width; g.drawImage(img, f.x, f.y, img.naturalWidth * f.s, img.naturalHeight * f.s); };
+        img.src = def.image;
+        return;
+    }
+    if (!Array.isArray(def.pixels) || !def.pixels.length) {
+        g.fillStyle = '#7d7d8c'; g.font = '12px sans-serif'; g.textAlign = 'center';
+        g.fillText('built-in', canvas.width / 2, canvas.height / 2 - 6); g.fillText('drawing', canvas.width / 2, canvas.height / 2 + 10);
+        return;
+    }
+    const cols = Math.max(...def.pixels.map(r => r.length)), rows = def.pixels.length;
+    const f = fit(cols, rows), tint = ((cfg.colors.answers || cfg.colors.enemies || ['#e74c3c'])[0]);
+    def.pixels.forEach((row, y) => [...row].forEach((ch, x) => {
+        let col = (def.palette || {})[ch];
+        if (col === 'answer' || col === 'tint') col = tint;
+        if (!col) return;
+        g.fillStyle = col;
+        g.fillRect(f.x + x * f.s, f.y + y * f.s, Math.ceil(f.s), Math.ceil(f.s));
+    }));
+}
+function buildSprites() {
+    const box = $('sprite-fields');
+    box.replaceChildren();
+    for (const [name, def] of Object.entries(cfg.sprites || {})) {
+        const isBig = BIG_PICTURES.includes(name);
+        const preview = h('canvas', { class: 'sprite-preview', width: 96, height: 96 });
+        const redraw = () => drawSpritePreview(preview, def);
+        const urlInput = h('input', { type: 'url', placeholder: 'or paste a picture’s web address', value: def.image && !def.image.startsWith('data:') ? def.image : '' });
+        const info = h('span', { class: 'field-help' });
+        const showInfo = () => {
+            info.textContent = !def.image ? (def.pixels ? 'Using the pixel art below.' : (isBig || name === 'dirt' ? 'None (plain color).' : 'Using the built-in drawing.'))
+                : def.image.startsWith('data:') ? 'Using your uploaded picture (' + kb(def.image.length * 0.75) + ').' : 'Using the picture at that address.';
+        };
+        const file = h('input', { type: 'file', accept: 'image/*', class: 'hidden', onchange: async e => {
+            const f = e.target.files[0];
+            e.target.value = '';
+            if (!f) return;
+            try { def.image = await shrinkImage(f, isBig); urlInput.value = ''; showInfo(); redraw(); changed(); }
+            catch (err) { info.textContent = err.message; }
+        } });
+        urlInput.addEventListener('change', () => { def.image = urlInput.value.trim(); showInfo(); redraw(); changed(); });
+        const body = h('div', { class: 'sprite-body' },
+            h('div', { class: 'sprite-title' }, humanize(name)),
+            h('div', { class: 'row' },
+                h('label', { class: 'btn' }, 'Upload picture…', file),
+                h('button', { type: 'button', class: 'btn danger', onclick: () => { def.image = ''; urlInput.value = ''; showInfo(); redraw(); changed(); } }, 'Remove picture')),
+            urlInput, info);
+        const extras = h('div', { class: 'row' });
+        if ('size' in def) extras.append(h('label', { class: 'field', style: 'width:150px' }, 'Width (game pixels)',
+            h('input', { type: 'number', min: 1, value: def.size, oninput: e => { if (+e.target.value > 0) { def.size = +e.target.value; changed(); } } })));
+        if ('rotate' in def) extras.append(h('label', { class: 'field check' },
+            h('input', { type: 'checkbox', checked: def.rotate, onchange: e => { def.rotate = e.target.checked; changed(); } }), 'Turn to face direction of travel'));
+        if (extras.childNodes.length) body.append(extras);
+
+        const card = h('div', { class: 'sprite-card' }, h('div', { class: 'sprite-head' }, preview, body));
+        if (Array.isArray(def.pixels)) card.append(pixelEditor(def, redraw));
+        box.append(card);
+        showInfo();
+        redraw();
+    }
+}
+function pixelEditor(def, redraw) {
+    const pal = def.palette = def.palette || {};
+    const palBox = h('div');
+    const drawPalette = () => {
+        palBox.replaceChildren(...Object.keys(pal).map(k => h('div', { class: 'palette-row' },
+            h('input', { type: 'text', class: 'key', value: k, maxlength: 1, 'aria-label': 'Letter', onchange: e => {
+                const nk = e.target.value;
+                if (!nk || nk === k || nk === '.' || nk in pal) { e.target.value = k; return; }
+                const entries = Object.entries(pal).map(([kk, vv]) => [kk === k ? nk : kk, vv]);
+                Object.keys(pal).forEach(kk => delete pal[kk]);
+                entries.forEach(([kk, vv]) => { pal[kk] = vv; });
+                drawPalette(); redraw(); changed();
+            } }),
+            pal[k] === 'answer' || pal[k] === 'tint'
+                ? h('span', { class: 'field-help', style: 'flex:1' }, pal[k] === 'answer' ? 'each ship’s A/B/C/D color' : 'each enemy’s color')
+                : colorPair(pal, k, () => { redraw(); changed(); }),
+            h('button', { type: 'button', class: 'btn danger', title: 'Remove', onclick: () => { delete pal[k]; drawPalette(); redraw(); changed(); } }, '✕'))));
+    };
+    drawPalette();
+    const grid = h('textarea', { class: 'mono', rows: Math.min(20, def.pixels.length + 1), spellcheck: false, value: def.pixels.join('\n'),
+        oninput: e => { def.pixels = e.target.value.split(/\r?\n/).filter((line, i, all) => line.length || i < all.length - 1); redraw(); changed(); } });
+    return h('details', { style: 'margin-top:10px' }, h('summary', { style: 'cursor:pointer' }, 'Edit pixel art'),
+        h('p', { class: 'hint' }, 'One letter per pixel; "." is see-through. Each letter’s color is set below.'),
+        grid,
+        h('div', { style: 'margin-top:8px' }, palBox,
+            h('button', { type: 'button', class: 'btn', onclick: () => {
+                const free = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').find(L => !(L in pal));
+                if (free) { pal[free] = '#ffffff'; drawPalette(); changed(); }
+            } }, '+ Add a color')));
+}
+
+/* Mazes (Quiz-Guy) */
+function mazeNotes(lines) {
+    const all = lines.join('');
+    const notes = [];
+    if (!/[Pp]/.test(all)) notes.push('No P: the player will start in the first open square from the bottom.');
+    if (!/[Gg]/.test(all)) notes.push('No G: one ghost will start in the middle.');
+    if ((all.match(/\./g) || []).length < 12) notes.push('Very few dots: the glowing ? blocks are placed on dots.');
+    return notes;
+}
+function readLayout(text) {
+    const lines = text.split(/\r?\n/);
+    while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+    const width = Math.max(0, ...lines.map(l => l.length));
+    return lines.map(l => l.padEnd(width, ' '));
+}
+function mazeEditor(getRows, setRows, extras) {
+    const msg = h('div', { class: 'hint' });
+    const area = h('textarea', { class: 'mono', rows: Math.max(8, getRows().length + 1), spellcheck: false, value: getRows().join('\n') });
+    const check = () => {
+        const rows = readLayout(area.value);
+        const notes = mazeNotes(rows);
+        msg.className = notes.length ? 'warn' : 'hint';
+        msg.textContent = notes.join(' ') || rows.length + ' rows × ' + (rows[0] || '').length + ' columns.';
+        return rows;
+    };
+    area.addEventListener('input', () => { setRows(check()); changed(); });
+    check();
+    return h('div', { class: 'sprite-card' }, extras || null, area, msg);
+}
+function buildMaze() {
+    const list = $('maze-list');
+    list.replaceChildren();
+    const multi = Array.isArray(cfg.mazes), single = Array.isArray(cfg.maze);
+    $('sec-maze').classList.toggle('hidden', !multi && !single);
+    $('maze-add').classList.toggle('hidden', !multi);
+    if (single) {   // a file from before mazes could change per level
+        list.append(mazeEditor(() => cfg.maze, rows => { cfg.maze = rows; }));
+        return;
+    }
+    if (!multi) return;
+    cfg.mazes.forEach((m, i) => {
+        if (m.wall == null) m.wall = cfg.colors.wall || '#6a2bb8';
+        if (m.wallEdge == null) m.wallEdge = cfg.colors.wallEdge || '#c99bff';
+        const head = h('div', { class: 'row', style: 'margin-bottom:8px' },
+            h('strong', null, 'Level ' + (i + 1) + (cfg.mazes.length > 1 ? ' (then every ' + cfg.mazes.length + ' levels)' : '')),
+            h('label', { class: 'field', style: 'width:170px' }, 'Name', h('input', { type: 'text', value: m.name || '', oninput: e => { m.name = e.target.value; changed(); } })),
+            h('div', { class: 'field' }, h('span', null, 'Walls'), colorPair(m, 'wall', changed)),
+            h('div', { class: 'field' }, h('span', null, 'Wall rim'), colorPair(m, 'wallEdge', changed)),
+            cfg.mazes.length > 1 ? h('button', { type: 'button', class: 'btn danger', onclick: () => {
+                if (!confirm('Remove maze ' + (i + 1) + (m.name ? ' (' + m.name + ')' : '') + '?')) return;
+                cfg.mazes.splice(i, 1); buildMaze(); changed();
+            } }, 'Remove') : null);
+        list.append(mazeEditor(() => m.layout || [], rows => { m.layout = rows; }, head));
+    });
+}
+$('maze-add').addEventListener('click', () => {
+    const last = cfg.mazes[cfg.mazes.length - 1];
+    cfg.mazes.push(Object.assign(clone(last), { name: (last.name || 'Maze') + ' copy' }));
+    buildMaze();
+    changed();
+});
+
+/* ---------- writing the game ---------- */
+const SECTION_NOTES = {
+    text: 'WORDS ON SCREEN',
+    settings: 'RULES',
+    colors: 'COLORS (any CSS color: "#ff0000", "red", "rgb(255,0,0)")',
+    sprites: 'SPRITES & BACKGROUNDS\n       image: a link or data: URI replaces the built-in look. size: width in game pixels.\n       pixels: one letter per pixel, colored by palette ("." = see-through).',
+    maze: 'MAZE\n       # wall   . dot   (space) empty   - ghost door   P player start   G ghost start',
+    mazes: 'MAZES (level 1 uses the first, level 2 the second, and so on, then they repeat)\n       # wall   . dot   (space) empty   - ghost door   P player start   G ghost start',
+    questions: 'QUESTIONS\n       q = question, opts = 2 to 4 answers, ans = the correct answer counting from 0 (0 = A, 1 = B, 2 = C, 3 = D)'
+};
+const IND = '    ';
+const jsKey = k => /^[A-Za-z_$][\w$]*$/.test(k) ? k : JSON.stringify(k);
+const jsStr = s => JSON.stringify(s).replace(/<\//g, '<\\/').replace(/[\u2028\u2029]/g, c => (c === '\u2028' ? '\\u2028' : '\\u2029'));
+function inline(v) {
+    if (typeof v === 'string') return jsStr(v);
+    if (v === null || v === undefined) return 'null';
+    if (typeof v !== 'object') return String(v);
+    if (Array.isArray(v)) return '[' + v.map(inline).join(', ') + ']';
+    return '{ ' + Object.keys(v).map(k => jsKey(k) + ': ' + inline(v[k])).join(', ') + ' }';
+}
+function pretty(v, depth) {
+    const one = inline(v);
+    if (v === null || typeof v !== 'object') return one;
+    const pad = IND.repeat(depth + 1), end = IND.repeat(depth);
+    const rowsOfText = Array.isArray(v) && v.length > 1 && v.every(x => typeof x === 'string') && v.some(x => x.length > 12);
+    const hasObjects = Array.isArray(v) && v.some(x => x && typeof x === 'object');
+    if (!rowsOfText && !hasObjects && one.length + depth * 4 <= 110) return one;
+    if (Array.isArray(v)) {
+        const items = v.map(x => (x && typeof x === 'object' && !Array.isArray(x) && inline(x).length < 400) ? inline(x) : pretty(x, depth + 1));
+        return '[\n' + items.map(s => pad + s).join(',\n') + '\n' + end + ']';
+    }
+    return '{\n' + Object.keys(v).map(k => pad + jsKey(k) + ': ' + pretty(v[k], depth + 1)).join(',\n') + '\n' + end + '}';
+}
+function serializeConfig(c) {
+    const keys = Object.keys(c);
+    let out = '/* Made with the Quizcade Builder. Edit the values below by hand, or open this file in the Builder again. */\nconst QUIZCADE = {\n';
+    keys.forEach((k, i) => {
+        if (SECTION_NOTES[k]) out += '\n' + IND + '/* ---------- ' + SECTION_NOTES[k] + ' ---------- */\n';
+        out += IND + jsKey(k) + ': ' + pretty(c[k], 1) + (i < keys.length - 1 ? ',' : '') + (k === 'game' ? '   // tells the Builder which game this is' : '') + '\n';
+    });
+    return out + '};';
+}
+const escHtml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const escAttr = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+function buildHtml() {
+    const js = serializeConfig(cfg);
+    const title = (cfg.text && (cfg.text.pageTitle || cfg.text.title)) || 'Quizcade';
+    return template
+        .replace(CONFIG_RE, () => '<script id="quizcade-config">\n' + js + '\n<\/script>')
+        .replace(/<title>[\s\S]*?<\/title>/, () => '<title>' + escHtml(title) + '</title>');
+}
+function gameTitle() { return (cfg.text && (cfg.text.pageTitle || cfg.text.title)) || GAME_NAMES[cfg.game] || 'Quizcade game'; }
+function embedCode() {
+    const hgt = Math.max(300, +$('embed-height').value || 800), wid = Math.max(300, +$('embed-width').value || 950);
+    return '<iframe title="' + escAttr(gameTitle()) + '" srcdoc="' + escAttr(buildHtml()) + '" style="display:block;width:100%;max-width:' + wid +
+        'px;height:' + hgt + 'px;margin:0 auto;border:0;" allow="fullscreen" allowfullscreen></iframe>';
+}
+function linkCode() {
+    const url = $('hosted-url').value.trim();
+    if (!url) return '';
+    const hgt = Math.max(300, +$('embed-height').value || 800), wid = Math.max(300, +$('embed-width').value || 950);
+    return '<iframe title="' + escAttr(gameTitle()) + '" src="' + escAttr(url) + '" style="display:block;width:100%;max-width:' + wid +
+        'px;height:' + hgt + 'px;margin:0 auto;border:0;" allow="fullscreen" allowfullscreen loading="lazy"></iframe>';
+}
+
+/* ---------- export ---------- */
+let activeTab = 'file';
+document.querySelectorAll('#out-tabs .tab').forEach(tab => tab.addEventListener('click', () => {
+    activeTab = tab.dataset.tab;
+    document.querySelectorAll('#out-tabs .tab').forEach(t => t.classList.toggle('active', t === tab));
+    document.querySelectorAll('[data-panel]').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== activeTab));
+    updateOutput();
+}));
+['embed-height', 'embed-width', 'hosted-url'].forEach(id => $(id).addEventListener('input', updateOutput));
+
+let outputTimer = null;
+function updateOutput() {
+    clearTimeout(outputTimer);
+    outputTimer = setTimeout(() => {
+        if (!cfg) return;
+        const text = activeTab === 'file' ? buildHtml() : activeTab === 'embed' ? embedCode() : linkCode();
+        const out = $('out-text');
+        out.value = text.length > 20000 ? text.slice(0, 20000) + '\n… (' + kb(text.length) + ' in all: use the Copy button to get everything)' : text;
+        $('out-size').textContent = text ? 'Size: ' + kb(new Blob([text]).size) + '.' : 'Type the web address above.';
+    }, 150);
+}
+async function copyText(text, msgId) {
+    const msg = $(msgId);
+    if (!text) { msg.textContent = 'Nothing to copy yet.'; return; }
+    try {
+        await navigator.clipboard.writeText(text);
+    } catch (e) {   // older browsers / blocked clipboard
+        const t = h('textarea', { value: text, style: 'position:fixed;left:-9999px' });
+        document.body.append(t);
+        t.select();
+        document.execCommand('copy');
+        t.remove();
+    }
+    msg.textContent = 'Copied!';
+    setTimeout(() => { msg.textContent = ''; }, 2500);
+}
+function download(text, name, type) {
+    const url = URL.createObjectURL(new Blob([text], { type: type + ';charset=utf-8' }));
+    const a = h('a', { href: url, download: name });
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+const fileSlug = () => (gameTitle().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'quizcade-game');
+$('copy-file').addEventListener('click', () => copyText(buildHtml(), 'file-msg'));
+$('download-file').addEventListener('click', () => download(buildHtml(), fileSlug() + '.html', 'text/html'));
+$('copy-embed').addEventListener('click', () => copyText(embedCode(), 'embed-msg'));
+$('copy-link').addEventListener('click', () => copyText(linkCode(), 'link-msg'));
+
+// Open a game straight away from the address, e.g. builder/?game=quiz-guy
+const startGame = new URLSearchParams(location.search).get('game');
+if (startGame && GAME_NAMES[startGame]) loadBundled(startGame);
+</script>
+</body>
+</html>

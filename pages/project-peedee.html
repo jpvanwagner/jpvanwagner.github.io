@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-PEEDEE.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="d1fed646">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeeDee's Dental Defense</title>
+    <meta name="description" content="PeeDee&#39;s Dental Defense by Joseph VanWagner: a colorful pixel-art platformer about fighting plaque, tartar, germs, and bad breath. Play it in your browser.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=fa07d833">
+    <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
+    <link rel="stylesheet" href="css/modern.css?v=cdfd7b86">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=11acaf42"></script>
+    <script src="../config/shared-content.js?v=e9eeb62c"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/lightbox.js?v=af09d593"></script>
+    <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=01dee569"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=defb0451"></script>
+</head>
+<body data-title="PeeDee's Dental Defense" data-nav="my-projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="my-projects.html">&larr; Back to Projects</a></p>
+                <p class="kicker">Game · HTML / JavaScript</p>
+                <h1>PeeDee's Dental Defense</h1>
+                <p class="lede">Fill cavities. Scrub plaque. Zap germs. Save the smile!</p>
+                <p>A colorful, 16-bit-style platformer set inside a mouth. You play PeeDee, a tiny dental hero with a zapper,
+                   working from the front teeth down under the gums, around the backs of the molars, and across the tongue to face
+                   <strong>Hal-9001</strong>, better known as Halitosis: the bad breath that grew from every skipped brushing.</p>
+                <p>It's a game first, but it sneaks in real oral-health ideas along the way: plaque hides between teeth and along
+                   the gumline, untreated plaque hardens into tartar, gum-disease bacteria do their damage below the surface, and a
+                   coated tongue feeds bad breath. Every dirty spot you leave behind raises the <strong>ROT</strong> meter, so the
+                   faster you clean, the bigger your bonus.</p>
+                <div class="btn-row">
+                    <a class="btn primary" href="../work/peedee/index.html" target="_blank" rel="noopener">Play full screen</a>
+                    <button class="btn retro-only" type="button" onclick="parent.PeeDeeApp && parent.PeeDeeApp.open()" title="Opens the game as its own program on the desktop, with a full-screen button">Open as a desktop program</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- The game itself: /work/peedee/index.html (plus its css/ and js/ folders) -->
+        <section class="panel">
+            <div class="panel-body course-panel">
+                <h2>Play it</h2>
+                <div class="course-frame">
+                    <iframe data-demo src="../work/peedee/index.html" title="PeeDee's Dental Defense (playable game)" loading="lazy" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe>
+                </div>
+                <p class="course-note">Tip: click inside the game first so it can hear your keyboard. On a phone or tablet, on-screen
+                   buttons appear. The game also works in the <a href="../work/peedee/index.html" target="_blank" rel="noopener">full-screen version</a>.</p>
+                <p><strong>Controls:</strong> arrow keys or A/D to move; Space, Up, W, or Z to jump (hold it to go higher);
+                   hold Down and jump to drop through a ledge; X, F, or J to zap; hold C, E, or K while standing still to clean or heal;
+                   V, Q, or L for a special attack (two per level); P or Esc to pause; M for sound.</p>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Playable demo</li><li>Platformer</li><li>Touch controls</li></ul>
+
+                <h2>The four levels</h2>
+                <ol>
+                    <li><strong>Bite Club</strong> (the front teeth, and the tutorial): a full lower jaw of 16 teeth in braces, each
+                        shaped like the real thing. Signs teach moving, jumping, filling cavities, and zapping germs, and you learn to
+                        drop through the braces wire into the gum pockets between teeth to scrub out plaque.</li>
+                    <li><strong>Tartarus</strong> (under the gums): a dark cave of roots, chasms, and nerve bundles that crackle on and
+                        off. Its boss is <strong>Gingi</strong>, a frantic, armored gum-disease germ. Your zaps bounce off his tartar
+                        plates, so you heal infected roots to free oxygen bubbles and knock them into him.</li>
+                    <li><strong>The Dark Side of the Molar</strong> (the backs of the teeth): climb the enamel and tartar ridges on the
+                        back of every tooth to scrub tartar at the gumline, past tartar crabs, acid spitters, and sugar bugs.</li>
+                    <li><strong>Tongue-Fu</strong> (the tongue): one squishy, rolling surface that bounces you around. Scrub off the
+                        furry coating as you go, then take on <strong>Hal-9001</strong>, whose stench shield feeds on that coating
+                        until you clean every patch away.</li>
+                </ol>
+                <p>Each level has its own special attack: <strong>Floss Frenzy</strong>, <strong>Power Brush</strong>, and a
+                   <strong>Mouthwash Wave</strong>, and all of them clean as they go. (Tartarus is too deep under the gums to get a
+                   signal, so you're on your own down there.) When the game ends, you can save a score card or share your score.</p>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Boss fights</li><li>Oral health</li></ul>
+
+                <h2>Screenshots</h2>
+                <div class="shots">
+                    <figure><a class="zoom" href="../images/projects/peedee/title.webp" data-caption="The title screen: start the adventure, skip the tutorial, or read how to play."><img src="../images/projects/peedee/thumbs/title.jpg" alt="The PeeDee's Dental Defense title screen over a pink gum backdrop" loading="lazy"></a><figcaption>The title screen</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/peedee/bite-club.webp" data-caption="Bite Club: signs teach each move. Here, dropping through the braces wire to scrub plaque."><img src="../images/projects/peedee/thumbs/bite-club.jpg" alt="PeeDee on the braces wire above tall teeth, with tutorial signs" loading="lazy"></a><figcaption>Bite Club: braces and plaque</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/peedee/cavity.webp" data-caption="Every dirty spot is marked with a bouncing ! in the tutorial; stand on a cavity and hold C to fill it."><img src="../images/projects/peedee/thumbs/cavity.jpg" alt="Huge molars with braces and a germ marked by an exclamation point" loading="lazy"></a><figcaption>A cavity to fill</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/peedee/tartarus.webp" data-caption="Tartarus: the dark cave under the gums, with roots, chasms, and crackling nerves."><img src="../images/projects/peedee/thumbs/tartarus.jpg" alt="A dark purple cave with glowing nerve fibers" loading="lazy"></a><figcaption>Tartarus, under the gums</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/peedee/dark-side.webp" data-caption="The Dark Side of the Molar: walk the tops of the teeth and scrub tartar along their backs."><img src="../images/projects/peedee/thumbs/dark-side.jpg" alt="The backs of large white molars above pink gums, with a tartar crab" loading="lazy"></a><figcaption>The backs of the molars</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/peedee/tongue-fu.webp" data-caption="Tongue-Fu: a bouncy, rolling tongue with sores to avoid and coating to scrub."><img src="../images/projects/peedee/thumbs/tongue-fu.jpg" alt="PeeDee on the rolling pink tongue with germs and drops nearby" loading="lazy"></a><figcaption>Tongue-Fu</figcaption></figure>
+                </div>
+
+                <h2>How it's built</h2>
+                <p>Plain HTML, CSS, and JavaScript, with no build step: it runs straight from the files, even offline. The world is
+                   drawn one pixel at a time on a small canvas and scaled up with hard edges for a crisp pixel-art look, while the
+                   text stays sharp at full resolution. The view widens on wide screens and grows taller on phones instead of
+                   letterboxing, and all of the music and sound effects are synthesized in the browser. A level checker simulates
+                   thousands of runs, jumps, and drops through every level to make sure every dirty spot can be reached and nobody
+                   can get stuck.</p>
+                <h2>Design features</h2>
+                <ul class="tags"><li>Game design</li><li>Pixel art</li><li>JavaScript</li><li>Platformer</li><li>Boss fights</li><li>Oral health</li><li>Mobile friendly</li><li>Synthesized audio</li></ul>
+                <div class="btn-row">
+                    <a class="btn" href="my-projects.html">&larr; Back to Projects</a>
+                    <a class="btn primary" href="../work/peedee/index.html" target="_blank" rel="noopener">Play full screen</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Quiz-Guy Quiz</title>
+
+<!-- =====================================================================================
+     ✏️  EDIT ZONE: everything you'd normally want to change is in this one block.
+     Words, rules, colors, sprites, the mazes and questions. The game engine further down
+     reads these values, so you shouldn't need to touch anything below this block.
+     (The Quizcade Builder reads and rewrites this block too. Keep the id="quizcade-config".)
+     ===================================================================================== -->
+<script id="quizcade-config">
+const QUIZCADE = {
+    game: "quiz-guy",   // tells the Builder which game this is. Leave it as is.
+
+    /* ---------- WORDS ON SCREEN ---------- */
+    text: {
+        title: "QUIZ-GUY",
+        pageTitle: "Quiz-Guy Quiz",                // browser tab title
+        prompt: "FIND A GLOWING ? BLOCK!",         // sidebar text before the first question
+        keepGoing: "KEEP EATING!",                 // sidebar text after a question is answered
+        start: "START GAME",
+        playAgain: "PLAY AGAIN",
+        gameOver: "GAME OVER",
+        finalScore: "FINAL SCORE:",
+        extraLife: "EXTRA LIFE EVERY {points} POINTS",
+        characters: ["QUIZ-GUY", "QUIZ-GAL"],      // names on the character buttons
+        tutorial: [                                // one entry per tutorial step ("\n" = new line)
+            "STEP 1:\n\nNavigate the maze and eat the dots to score points!",
+            "STEP 2:\n\nAvoid the roaming ghosts, or you will lose a life!",
+            "STEP 3:\n\nEat the glowing ? blocks to answer questions. Answer right to power up and eat ghosts!"
+        ],
+        controls: {
+            touch: "TOUCH MAZE TO AUTO-PATHFIND OR USE D-PAD",
+            mouse: "MOUSE (CLICK MAZE TO AUTO-PATHFIND)",
+            keys: "WASD / ARROWS",
+            both: "CLICK MAZE TO AUTO-PATHFIND OR USE KEYBOARD"
+        },
+        labels: {
+            score: "SCORE", level: "LEVEL", lives: "LIVES",
+            character: "CHARACTER",
+            controls: "CONTROLS", controlsPrefix: "CONTROLS:", activeControls: "ACTIVE CONTROLS",
+            mouse: "MOUSE", keys: "KEYS", both: "BOTH",
+            questionsPerLevel: "QUESTIONS/LEVEL",
+            skip: "SKIP", next: "NEXT ➡"
+        },
+        answerLabels: ["A", "B", "C", "D"]
+    },
+
+    /* ---------- RULES ---------- */
+    settings: {
+        livesChoices: [1, 3, 5],                   // buttons on the title screen
+        defaultLives: 3,
+        questionsPerLevelChoices: [3, 5, 10],
+        defaultQuestionsPerLevel: 5,
+        pointsPerCorrect: 500,
+        pointsPerDot: 10,
+        pointsPerGhost: 200,
+        extraLifeEvery: 2000,                      // 0 = no extra lives
+        showTutorial: true,                        // false = START jumps straight into the game
+        autoFullscreen: true,                      // go full screen when START is pressed (if the page allows it)
+        shuffleQuestions: true,                    // false = ask in the order written below
+        shuffleAnswers: false,                     // true = mix up the A/B/C/D order each time
+        showCharacterChoice: true,                 // show the QUIZ-GUY / QUIZ-GAL choice
+        powerupsPerLevel: 6,                       // glowing ? blocks per maze (1 to 10)
+        powerDuration: 6000,                       // milliseconds the ghosts stay edible
+        playerSpeed: 2,                            // must divide evenly into 20: 1, 2, 4 or 5
+        ghostSpeed: 1                              // must divide evenly into 20: 1, 2, 4 or 5
+    },
+
+    /* ---------- COLORS (any CSS color: "#ff0000", "red", "rgb(255,0,0)") ---------- */
+    colors: {
+        brand: "#3232FF",                          // buttons and title shadow
+        accent: "#f1c40f",                         // title and score text
+        pageBackground: "#111111",
+        correct: "#2ecc71",
+        wrong: "#e74c3c",
+        answers: ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f"],   // A, B, C, D letters
+        background: "#0f0c1d",                     // maze floor
+        wall: "#6a2bb8",                           // walls, for mazes that don't set their own
+        wallEdge: "#c99bff",                       // the lit rim around walls
+        dot: "#ffd166",
+        questionBlock: ["#ffffff", "#ffd166"],     // the ? block blinks between these
+        questionMark: "#0f0c1d",
+        ghostDoor: "#ff9ecf",                      // only used if a maze has "-" tiles
+        player: "#FFFF00",
+        bow: "#e74c3c",
+        bowCenter: "#3498db",
+        ghosts: ["#a3e635", "#3b82f6", "#a855f7", "#f97316"],   // lime, royal blue, violet, orange
+        scaredGhost: ["#475569", "#94a3b8"],       // edible ghosts blink between these
+        scaredFace: "#fde68a",
+        path: "rgba(255, 255, 255, 0.4)"           // dots showing a mouse/touch route
+    },
+
+    /* ---------- SPRITES & BACKGROUND ----------
+       Put an image link or a data: URI in "image" to swap in your own picture (e.g. "https://.../hero.png").
+       Leave it "" to use the built-in drawing (colors above). "size" is the width in game pixels
+       (one maze square is 20). "rotate": true turns the picture to face the way it's moving
+       (draw it facing RIGHT). */
+    sprites: {
+        player: { image: "", size: 16, rotate: true },      // Quiz-Guy
+        galPlayer: { image: "", size: 16, rotate: true },   // Quiz-Gal
+        ghost: { image: "", size: 16 },            // used for every ghost
+        scaredGhost: { image: "", size: 16 },
+        background: { image: "" }                  // shows behind the maze
+    },
+
+    /* ---------- MAZES ----------
+       Level 1 uses the first maze, level 2 the second, and so on, starting over after the last.
+       Each maze can set its own wall colors (or leave them out to use colors.wall / colors.wallEdge).
+       # wall   . dot   (space) empty floor   - ghost door (ghosts only)
+       P where the player starts   G where a ghost starts (one ghost per G; eaten ghosts go back to theirs)
+       Rows open at both edges wrap around (tunnels). Every row in a maze must be the same length.
+       The glowing ? blocks are placed on dots at random. The tutorial plays out in the first maze,
+       on its first long straight corridor. */
+    mazes: [
+        {
+            name: "Library",
+            wall: "#6a2bb8", wallEdge: "#c99bff",
+            layout: [
+                "############################",
+                "#G.......G........G.......G#",
+                "#.#####.#####..#####.#####.#",
+                "#..........................#",
+                "###.######.######.######.###",
+                "#..........................#",
+                "#.###.#####.####.#####.###.#",
+                "#..........................#",
+                "##.#####.####..####.#####.##",
+                "#..........................#",
+                "#...###..###....###..###...#",
+                "#.#####.#####..#####.#####.#",
+                "#..........................#",
+                "###.######.######.######.###",
+                "#..........................#",
+                "#.###.#####.####.#####.###.#",
+                "#..........................#",
+                "##.#####.####..####.#####.##",
+                "#..........................#",
+                "#.#####.#####..#####.#####.#",
+                "#............P.............#",
+                "############################"
+            ]
+        },
+        {
+            name: "City Blocks",
+            wall: "#17766f", wallEdge: "#6ff0dc",
+            layout: [
+                "############################",
+                "#G........................G#",
+                "#.##.##.##.##..##.##.##.##.#",
+                "#.##.##.##.##..##.##.##.##.#",
+                "#..........................#",
+                "#.###.####.##..##.####.###.#",
+                "#.###.####.##..##.####.###.#",
+                "#..........................#",
+                "#.##.##.##.##..##.##.##.##.#",
+                "#.##.##.##.##..##.##.##.##.#",
+                "#G........................G#",
+                "#..........................#",
+                "#.###.####.##..##.####.###.#",
+                "#.###.####.##..##.####.###.#",
+                "#..........................#",
+                "#.##.##.##.##..##.##.##.##.#",
+                "#.##.##.##.##..##.##.##.##.#",
+                "#..........................#",
+                "#.###.####.##..##.####.###.#",
+                "#.###.####.##..##.####.###.#",
+                "#............P.............#",
+                "############################"
+            ]
+        },
+        {
+            name: "Rings",
+            wall: "#a3165f", wallEdge: "#ff8cc6",
+            layout: [
+                "############################",
+                "#..........................#",
+                "#.#####.############.#####.#",
+                "#.#......................#.#",
+                "#.#.#########..#########.#.#",
+                "#.#.#..................#.#.#",
+                "#.#.#.###.########.###.#.#.#",
+                "#.#...#G............G#.#.#.#",
+                "#.#.#.#.############.#.#.#.#",
+                "#.#.#.#.############.#.#.#.#",
+                "#...#.#.############...#.#.#",
+                "#.#.#...############.#.#...#",
+                "#.#.#.#.############.#.#.#.#",
+                "#.#.#.#.############.#.#.#.#",
+                "#.#.#.#G............G#...#.#",
+                "#.#.#.#######..#######.#.#.#",
+                "#.#.#..................#.#.#",
+                "#.#.#####.########.#####.#.#",
+                "#.#......................#.#",
+                "#.###########..###########.#",
+                "#............P.............#",
+                "############################"
+            ]
+        }
+    ],
+
+    /* ---------- QUESTIONS ----------
+       q = question, opts = 2 to 4 answers (A, B, C, D), ans = number of the correct answer
+       counting from 0 (0 = A, 1 = B, 2 = C, 3 = D). */
+    questions: [
+        { q: "What is the capital of France?", opts: ["Madrid", "Paris", "Berlin", "Rome"], ans: 1 },
+        { q: "Which planet is known as the Red Planet?", opts: ["Saturn", "Venus", "Jupiter", "Mars"], ans: 3 },
+        { q: "How many continents are there?", opts: ["7", "5", "6", "8"], ans: 0 },
+        { q: "What gas do plants take in from the air?", opts: ["Helium", "Carbon dioxide", "Nitrogen", "Oxygen"], ans: 1 },
+        { q: "What is the largest ocean on Earth?", opts: ["Pacific", "Arctic", "Atlantic", "Indian"], ans: 0 },
+        { q: "How many legs does a spider have?", opts: ["8", "12", "10", "6"], ans: 0 },
+        { q: "At what temperature does water freeze in Fahrenheit?", opts: ["50°F", "32°F", "100°F", "0°F"], ans: 1 },
+        { q: "Which animal is called the \"King of the Jungle\"?", opts: ["Elephant", "Tiger", "Lion", "Gorilla"], ans: 2 },
+        { q: "What color do you get when you mix blue and yellow?", opts: ["Purple", "Brown", "Green", "Orange"], ans: 2 },
+        { q: "Who painted the Mona Lisa?", opts: ["Leonardo da Vinci", "Vincent van Gogh", "Pablo Picasso", "Claude Monet"], ans: 0 },
+        { q: "What is the tallest animal in the world?", opts: ["Giraffe", "Horse", "Elephant", "Ostrich"], ans: 0 },
+        { q: "How many days are in a leap year?", opts: ["364", "366", "365", "367"], ans: 1 },
+        { q: "Which instrument has 88 keys?", opts: ["Violin", "Piano", "Trumpet", "Guitar"], ans: 1 },
+        { q: "In which sport do you score a touchdown?", opts: ["Basketball", "American football", "Soccer", "Tennis"], ans: 1 },
+        { q: "What is the largest planet in our solar system?", opts: ["Earth", "Jupiter", "Saturn", "Neptune"], ans: 1 },
+        { q: "What do bees make?", opts: ["Butter", "Syrup", "Jam", "Honey"], ans: 3 },
+        { q: "How many sides does a hexagon have?", opts: ["6", "7", "5", "8"], ans: 0 },
+        { q: "Which country is home to the kangaroo?", opts: ["Brazil", "Australia", "Canada", "India"], ans: 1 },
+        { q: "What is H2O more commonly called?", opts: ["Water", "Sugar", "Salt", "Oxygen"], ans: 0 },
+        { q: "Which fruit \"keeps the doctor away,\" according to the saying?", opts: ["An apple", "A grape", "An orange", "A banana"], ans: 0 },
+        { q: "What is the closest star to Earth?", opts: ["Sirius", "The Sun", "Polaris", "Alpha Centauri"], ans: 1 },
+        { q: "How many minutes are in an hour?", opts: ["90", "60", "100", "30"], ans: 1 },
+        { q: "What is the main ingredient in guacamole?", opts: ["Tomato", "Avocado", "Lime", "Pepper"], ans: 1 },
+        { q: "Which of these animals is a mammal?", opts: ["Shark", "Trout", "Dolphin", "Octopus"], ans: 2 },
+        { q: "Which famous ship sank on its first voyage in 1912?", opts: ["Titanic", "Lusitania", "Santa Maria", "Mayflower"], ans: 0 },
+        { q: "What shape has three sides?", opts: ["Circle", "Square", "Triangle", "Pentagon"], ans: 2 },
+        { q: "What is the longest river in South America?", opts: ["Mississippi", "Nile", "Amazon", "Danube"], ans: 2 },
+        { q: "What does a thermometer measure?", opts: ["Time", "Speed", "Weight", "Temperature"], ans: 3 },
+        { q: "How many players does one soccer team have on the field?", opts: ["11", "12", "10", "9"], ans: 0 },
+        { q: "What is 7 × 8?", opts: ["48", "56", "64", "54"], ans: 1 },
+        { q: "What is the smallest US state by area?", opts: ["Rhode Island", "Vermont", "Connecticut", "Delaware"], ans: 0 },
+        { q: "What does a caterpillar turn into?", opts: ["A spider", "A bee", "A beetle", "A butterfly or moth"], ans: 3 },
+        { q: "Which month has the fewest days?", opts: ["January", "April", "February", "November"], ans: 2 },
+        { q: "Who wrote \"Romeo and Juliet\"?", opts: ["William Shakespeare", "Mark Twain", "Jane Austen", "Charles Dickens"], ans: 0 },
+        { q: "What is the hardest natural substance?", opts: ["Diamond", "Iron", "Quartz", "Gold"], ans: 0 },
+        { q: "Which of these is a primary color of paint?", opts: ["Orange", "Red", "Green", "Purple"], ans: 1 },
+        { q: "In which country are the Great Pyramids of Giza?", opts: ["Mexico", "India", "Peru", "Egypt"], ans: 3 },
+        { q: "What is a baby cat called?", opts: ["A kitten", "A foal", "A cub", "A puppy"], ans: 0 },
+        { q: "How many strings does a standard guitar have?", opts: ["5", "8", "6", "4"], ans: 2 },
+        { q: "Which planet is famous for its rings?", opts: ["Saturn", "Venus", "Mercury", "Mars"], ans: 0 }
+    ]
+};
+</script>
+<!-- ============================== END OF EDIT ZONE ============================== -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+    /* ==================== SHARED QUIZCADE STYLES (same in every game) ==================== */
+    /* Colors come from the EDIT ZONE (colors.brand, colors.accent, ...) and are applied at startup. */
+    :root {
+        --brand: #3232FF;
+        --accent: #f1c40f;
+        --page-bg: #111111;
+        --good: #2ecc71;
+        --bad: #e74c3c;
+    }
+
+    /* html only fills the window; the page padding and min-height live on body alone
+       (on both, the page came out 20px taller than the window and always scrolled) */
+    html { margin: 0; padding: 0; background-color: var(--page-bg); }
+    body {
+        margin: 0;
+        padding: 10px;
+        background-color: var(--page-bg);
+        color: #fff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+        box-sizing: border-box;
+        overscroll-behavior-y: contain;
+    }
+    :fullscreen { background-color: var(--page-bg); }
+    button { font: inherit; }
+    .retro-text { font-family: 'Press Start 2P', 'Courier New', Courier, monospace; }
+
+    #game-wrapper {
+        width: 100%;
+        max-width: 950px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    h1 {
+        margin: 0 0 15px 0;
+        flex-shrink: 0;
+        font-size: clamp(16px, 4vw, 24px);
+        color: var(--accent);
+        text-align: center;
+        text-shadow: 2px 2px 0 var(--brand);
+    }
+
+    /* Game column + question sidebar */
+    #main-content {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        align-items: stretch;
+        justify-content: center;
+    }
+    #game-column {
+        flex: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 300px;
+    }
+    #ui-bar {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: clamp(8px, 1.5vw, 12px);
+        background: #222;
+        padding: 10px;
+        box-sizing: border-box;
+        border: 2px solid #555;
+        text-transform: uppercase;
+    }
+    #ui-bar .hud-value { color: var(--accent); }
+    #lives-display { display: inline-block; transition: transform 0.2s; }
+    #game-container {
+        position: relative;
+        width: 100%;
+        max-width: 560px;
+        box-shadow: 0 0 0 4px #444;
+        background-color: #000;
+    }
+    #gameCanvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        image-rendering: pixelated;
+    }
+    #active-controls-hud {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 10px;
+        color: #ccc;
+        background: #222;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #444;
+        line-height: 1.4;
+        width: 100%;
+        max-width: 560px;
+        box-sizing: border-box;
+    }
+
+    /* Fullscreen button (hidden automatically where full screen isn't allowed) */
+    #fs-toggle-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        border: 2px solid #fff;
+        border-radius: 5px;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 20;
+        transition: background 0.2s, transform 0.1s;
+    }
+    #fs-toggle-btn:hover { background: rgba(255, 255, 255, 0.3); }
+    #fs-toggle-btn:active { transform: scale(0.9); }
+
+    .flash {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        z-index: 5;
+    }
+    #red-flash { background-color: var(--bad); }
+    #green-flash { background-color: var(--good); }
+    .flash.on { opacity: 0.6; }
+
+    /* Title / game over screens */
+    .modal {
+        display: none;
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.95);
+        padding: 5%;
+        box-sizing: border-box;
+        z-index: 10;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        overflow-y: auto;
+    }
+    .modal.open { display: flex; }
+    /* centered when it fits, scrollable from the top when it doesn't (short screens) */
+    .modal > :first-child { margin-top: auto; }
+    .modal > :last-child { margin-bottom: auto; }
+    .modal h2 {
+        margin-top: 0;
+        color: var(--accent);
+        font-size: clamp(20px, 4vw, 30px);
+        line-height: 1.6;
+        text-shadow: 2px 2px 0 var(--brand);
+    }
+    #title-modal h2 { margin-bottom: 10px; }
+    #game-over-modal h2 { color: var(--bad); text-shadow: 2px 2px 0 #fff; }
+    .final-score { font-size: 10px; margin-top: 20px; }
+    #final-score { font-size: 20px; color: var(--accent); }
+
+    .settings-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+        font-size: 10px;
+        color: #ccc;
+    }
+    .toggle-group {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .toggle-btn {
+        background: #222;
+        color: #777;
+        border: 2px solid #444;
+        padding: 10px 15px;
+        font-size: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .toggle-btn.active {
+        background: var(--brand);
+        color: #fff;
+        border-color: #fff;
+    }
+    .action-btn {
+        background: var(--brand);
+        color: white;
+        border: 4px solid #fff;
+        padding: 15px 20px;
+        font-size: clamp(12px, 3vw, 16px);
+        cursor: pointer;
+        text-transform: uppercase;
+        margin-top: 20px;
+        width: 100%;
+        max-width: 350px;
+    }
+    .action-btn:hover { background: #fff; color: var(--brand); border-color: var(--brand); }
+    .action-btn:active { transform: scale(0.95); }
+
+    /* Credit line: pixel head + copyright, links to the portfolio */
+    .jv-credit {
+        margin-top: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 8px;
+        line-height: 1.4;
+        color: #aaa;
+        text-decoration: none;
+        letter-spacing: 1px;
+    }
+    .jv-credit img { width: 20px; height: 20px; image-rendering: pixelated; flex-shrink: 0; }
+    .jv-credit .jv-name { color: var(--accent); }
+    .jv-credit:hover .jv-name, .jv-credit:focus-visible .jv-name { text-decoration: underline; }
+
+    /* Question sidebar */
+    #sidebar {
+        flex: 1;
+        min-width: 250px;
+        background-color: #000;
+        padding: 20px;
+        box-sizing: border-box;
+        display: none;
+        flex-direction: column;
+        box-shadow: 0 0 0 4px #444, inset 0 0 0 2px #fff;
+    }
+    #sidebar.open { display: flex; }
+    #question-panel { flex-grow: 1; display: flex; flex-direction: column; }
+    #question-text {
+        font-size: 16px;
+        color: var(--accent);
+        margin-bottom: 20px;
+        line-height: 1.4;
+        font-weight: 600;
+    }
+    .answer-option {
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+        background: #111;
+        border: 2px solid #333;
+        border-left: 6px solid var(--answer-color, #444);
+        border-radius: 5px;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    .answer-option .answer-letter { color: var(--answer-color, #fff); font-weight: bold; }
+    .option-btn {
+        background: #111;
+        color: white;
+        border: 2px solid #444;
+        padding: 15px;
+        margin-bottom: 12px;
+        text-align: left;
+        font-size: 12px;
+        line-height: 1.6;
+        cursor: pointer;
+        transition: background 0.2s;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-weight: 500;
+        width: 100%;
+    }
+    .option-btn:hover { background: #333; border-color: #fff; }
+    .option-btn .answer-letter { color: var(--answer-color, #fff); }
+    .option-btn.correct { background: #27ae60 !important; border-color: #2ecc71 !important; color: #000; }
+    .option-btn.wrong { background: #c0392b !important; border-color: #e74c3c !important; }
+    .sidebar-section {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px dashed #444;
+        text-align: center;
+    }
+    .sidebar-heading { font-size: 8px; margin-bottom: 10px; color: #aaa; }
+    #extra-life-note { font-size: 12px; font-weight: bold; color: var(--good); }
+
+    /* Tutorial overlay */
+    #demo-ui {
+        display: none;
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 15;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 40px 20px;
+        box-sizing: border-box;
+    }
+    #demo-ui.open { display: flex; }
+    #demo-text {
+        background: rgba(0, 0, 0, 0.95);
+        color: var(--accent);
+        padding: 20px;
+        border: 2px solid var(--accent);
+        font-size: 14px;
+        font-weight: bold;
+        text-align: center;
+        border-radius: 5px;
+        width: 90%;
+        margin-bottom: 20px;
+        line-height: 1.5;
+        white-space: pre-line;
+    }
+    .demo-btn-row { display: flex; gap: 15px; width: 100%; justify-content: center; }
+    .demo-btn {
+        background: var(--bad);
+        color: white;
+        border: 2px solid #fff;
+        padding: 12px 25px;
+        font-size: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 5px;
+        text-transform: uppercase;
+    }
+    #next-demo-btn { background: var(--good); color: #000; animation: pulseBtn 1.5s infinite; }
+    @keyframes pulseBtn { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+    /* Touch-screen controls */
+    #mobile-controls {
+        display: none;
+        gap: 10px;
+        margin-top: 15px;
+        justify-content: center;
+        width: 100%;
+    }
+    body.touch #mobile-controls { display: grid; }
+    .dpad-btn {
+        background-color: rgba(255, 255, 255, 0.2);
+        border: 4px solid rgba(255, 255, 255, 0.5);
+        color: white;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: none;
+    }
+    .dpad-btn:active { background-color: var(--brand); border-color: #fff; }
+    #btn-action { background-color: var(--bad); border-radius: 5px; font-size: 14px; font-weight: bold; }
+    #btn-action:active { filter: brightness(0.8); }
+    body.touch .hide-on-touch { display: none !important; }
+    body.touch #active-controls-hud { margin-top: 8px; padding: 6px; font-size: 8px; }
+    body.touch #mobile-controls { margin-top: 8px; }
+
+    @media (max-width: 800px) {
+        #main-content { flex-direction: column; align-items: center; }
+        #game-column, #sidebar { width: 100%; max-width: 560px; }
+    }
+    /* ==================== END SHARED STYLES ==================== */
+
+    /* ==================== QUIZ-GUY ==================== */
+    #gameCanvas { touch-action: manipulation; }
+    #mobile-controls { grid-template-columns: repeat(3, 54px); grid-template-rows: repeat(3, 54px); gap: 8px; }
+    #btn-up { grid-column: 2; grid-row: 1; }
+    #btn-left { grid-column: 1; grid-row: 2; }
+    #btn-right { grid-column: 3; grid-row: 2; }
+    #btn-down { grid-column: 2; grid-row: 3; }
+    /* the maze screen is short, so the title screen is a little tighter */
+    #title-modal h2 { margin-bottom: 0; }
+    #title-modal .settings-row { margin-top: 10px; gap: 8px; }
+    #title-modal .action-btn { margin-top: 14px; }
+    .char-icon { width: 16px; height: 16px; image-rendering: pixelated; }
+    /* On touch screens the question pops up over the maze instead of in the sidebar */
+    #quiz-modal #question-panel { width: 100%; max-width: 500px; flex-grow: 0; }
+    #quiz-modal #question-text { font-size: 18px; }
+</style>
+</head>
+
+<body>
+
+<div id="game-wrapper">
+    <h1 class="retro-text" data-text="title">QUIZ-GUY</h1>
+
+    <div id="main-content">
+        <div id="game-column">
+            <div id="ui-bar" class="retro-text">
+                <div><span data-text="labels.score">SCORE</span><br><span id="score-display" class="hud-value">000000</span></div>
+                <div><span data-text="labels.level">LEVEL</span><br><span id="level-display" class="hud-value">01 (0/5)</span></div>
+                <div><span data-text="labels.lives">LIVES</span><br><span id="lives-display">❤️❤️❤️</span></div>
+            </div>
+
+            <div id="game-container">
+                <canvas id="gameCanvas" width="560" height="440" aria-label="Game screen"></canvas>
+                <button id="fs-toggle-btn" type="button" title="Toggle full screen" aria-label="Toggle full screen">⛶</button>
+                <div id="red-flash" class="flash"></div>
+                <div id="green-flash" class="flash"></div>
+
+                <!-- TUTORIAL OVERLAY -->
+                <div id="demo-ui">
+                    <div id="demo-text"></div>
+                    <div class="demo-btn-row">
+                        <button id="skip-demo-btn" type="button" class="retro-text demo-btn" data-text="labels.skip">SKIP</button>
+                        <button id="next-demo-btn" type="button" class="retro-text demo-btn" data-text="labels.next">NEXT ➡</button>
+                    </div>
+                </div>
+
+                <!-- TITLE SCREEN -->
+                <div id="title-modal" class="modal open">
+                    <h2 class="retro-text" data-text="title">QUIZ-GUY</h2>
+
+                    <div class="settings-row" id="character-setting">
+                        <div class="retro-text" data-text="labels.character">CHARACTER</div>
+                        <div class="toggle-group" id="char-group"></div>
+                    </div>
+                    <div class="settings-row hide-on-touch">
+                        <div class="retro-text" data-text="labels.controls">CONTROLS</div>
+                        <div class="toggle-group control-group"></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="retro-text" data-text="labels.lives">LIVES</div>
+                        <div class="toggle-group" id="lives-group"></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="retro-text" data-text="labels.questionsPerLevel">QUESTIONS/LEVEL</div>
+                        <div class="toggle-group" id="questions-group"></div>
+                    </div>
+
+                    <button id="start-btn" type="button" class="action-btn retro-text" data-text="start">START GAME</button>
+                    <a class="jv-credit retro-text" href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">
+                        <img alt="" width="20" height="20" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACLUlEQVR4nM2UTUhUURiGn3PuwLSQGnWiGGYqS6uZiVoU5SQuchWFbiJaBQYSZC1aBAoO1KLIqGwT0ULIbVqbwJ39LkqEoaKfq2FaOuNUGI4ulGDmfi1Gb03nalvf3f1+3vN83+FcWO1SKyUTVZUiAqGKNWRnfiEIg+M/1cGtQXk5Nu3Z6xlMVFWKALsjAQ4d2MbzoTGys/PU7woxms7x5usMCsWrcdPUCCSqgrJnc4Bvs/PUx0OMTM5QEw4QDgV5NjTKj7kF6uIhPqdzvJ3I8S+pNvmEmkiA9WV+XryfomF/NaPpHL0D79i+qZzKMj+hDeV8n1vwXJNpqBRPX0/QdeMSdbGNPB78RHV4HY7jYI9P03X9Ik0nThIs83saGiPXbqmQgd5b7rfjSCmBLrZY2qLh+Hljjz4DWWtOn0u6Zt13rvzJKUVLa4eLoTyutCQ0dPOMHO18RKFQKBYLWD4f+UIBBHw+i3w+7+bQFv3tjdReuOv6GISO4zCSydKXyqC0Jtm4jy/9V7G0JnK4jeFMlgepDFpbdDTtNQgNQxHhfmoKUGgUBcdxxxNx6EtNIShAGfs1Rgb42NMu4Z07SkombRtEiMRii7MW4+nhYWLNnSUeni9lbrDHPVrp0hL5i2ptbbPRb4wMMGnbRKJRlFL0337onioiHDl7DKUWqT207M/hw702iUSjnjmvUZfk8fSKip+6pgwKpUjb9rJmKxIu6cnllpKrbEh2/7dndes3KNPMpND3uDEAAAAASUVORK5CYII=">
+                        <span>&copy; <span class="jv-years">2025&ndash;2026</span> <span class="jv-name">Joe VanWagner</span></span>
+                    </a>
+                </div>
+
+                <!-- QUESTION POP-UP (touch screens) -->
+                <div id="quiz-modal" class="modal"></div>
+
+                <!-- GAME OVER SCREEN -->
+                <div id="game-over-modal" class="modal">
+                    <h2 class="retro-text" data-text="gameOver">GAME OVER</h2>
+                    <p class="retro-text final-score"><span data-text="finalScore">FINAL SCORE:</span><br><br><span id="final-score">0</span></p>
+                    <button id="play-again-btn" type="button" class="action-btn retro-text" data-text="playAgain">PLAY AGAIN</button>
+                    <a class="jv-credit retro-text" href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">
+                        <img alt="" width="20" height="20" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACLUlEQVR4nM2UTUhUURiGn3PuwLSQGnWiGGYqS6uZiVoU5SQuchWFbiJaBQYSZC1aBAoO1KLIqGwT0ULIbVqbwJ39LkqEoaKfq2FaOuNUGI4ulGDmfi1Gb03nalvf3f1+3vN83+FcWO1SKyUTVZUiAqGKNWRnfiEIg+M/1cGtQXk5Nu3Z6xlMVFWKALsjAQ4d2MbzoTGys/PU7woxms7x5usMCsWrcdPUCCSqgrJnc4Bvs/PUx0OMTM5QEw4QDgV5NjTKj7kF6uIhPqdzvJ3I8S+pNvmEmkiA9WV+XryfomF/NaPpHL0D79i+qZzKMj+hDeV8n1vwXJNpqBRPX0/QdeMSdbGNPB78RHV4HY7jYI9P03X9Ik0nThIs83saGiPXbqmQgd5b7rfjSCmBLrZY2qLh+Hljjz4DWWtOn0u6Zt13rvzJKUVLa4eLoTyutCQ0dPOMHO18RKFQKBYLWD4f+UIBBHw+i3w+7+bQFv3tjdReuOv6GISO4zCSydKXyqC0Jtm4jy/9V7G0JnK4jeFMlgepDFpbdDTtNQgNQxHhfmoKUGgUBcdxxxNx6EtNIShAGfs1Rgb42NMu4Z07SkombRtEiMRii7MW4+nhYWLNnSUeni9lbrDHPVrp0hL5i2ptbbPRb4wMMGnbRKJRlFL0337onioiHDl7DKUWqT207M/hw702iUSjnjmvUZfk8fSKip+6pgwKpUjb9rJmKxIu6cnllpKrbEh2/7dndes3KNPMpND3uDEAAAAASUVORK5CYII=">
+                        <span>&copy; <span class="jv-years">2025&ndash;2026</span> <span class="jv-name">Joe VanWagner</span></span>
+                    </a>
+                </div>
+            </div>
+
+            <div id="active-controls-hud" class="retro-text"></div>
+
+            <!-- Touch-screen controls -->
+            <div id="mobile-controls">
+                <button id="btn-up" type="button" class="dpad-btn" aria-label="Up">⬆️</button>
+                <button id="btn-left" type="button" class="dpad-btn" aria-label="Left">⬅️</button>
+                <button id="btn-right" type="button" class="dpad-btn" aria-label="Right">➡️</button>
+                <button id="btn-down" type="button" class="dpad-btn" aria-label="Down">⬇️</button>
+            </div>
+        </div>
+
+        <!-- Question sidebar (shown during play) -->
+        <div id="sidebar">
+            <div id="question-panel">
+                <div id="question-text" data-text="prompt">FIND A GLOWING ? BLOCK!</div>
+                <div id="options-container"></div>
+            </div>
+            <div class="sidebar-section hide-on-touch">
+                <div class="retro-text sidebar-heading" data-text="labels.activeControls">ACTIVE CONTROLS</div>
+                <div class="toggle-group control-group"></div>
+            </div>
+            <div class="sidebar-section" id="extra-life-section">
+                <span id="extra-life-note"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="quizcade-engine">
+"use strict";
+/* =========================================================================================
+   SHARED QUIZCADE ENGINE (same in every game): settings, screens, questions, sprites, loop.
+   ========================================================================================= */
+const CFG = QUIZCADE, T = CFG.text, S = CFG.settings, C = CFG.colors;
+const $ = id => document.getElementById(id);
+const getPath = (obj, path) => path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
+
+// Phones and tablets (a touch screen with no mouse) get the on-screen buttons
+const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+if (isTouch) document.body.classList.add('touch');
+
+// Words and colors from the EDIT ZONE
+document.title = T.pageTitle || T.title;
+document.querySelectorAll('[data-text]').forEach(el => {
+    const v = getPath(T, el.dataset.text);
+    if (typeof v === 'string') el.textContent = v;
+});
+[['--brand', C.brand], ['--accent', C.accent], ['--page-bg', C.pageBackground], ['--good', C.correct], ['--bad', C.wrong]]
+    .forEach(([name, value]) => { if (value) document.documentElement.style.setProperty(name, value); });
+
+// Credit years: 2025 (first made) through the current year, updated automatically
+document.querySelectorAll('.jv-years').forEach(el => {
+    const year = new Date().getFullYear();
+    el.textContent = year > 2025 ? '2025–' + year : '2025';
+});
+
+// Extra-life note in the sidebar
+if (S.extraLifeEvery > 0) $('extra-life-note').textContent = (T.extraLife || '').replace('{points}', S.extraLifeEvery);
+else $('extra-life-section').style.display = 'none';
+
+function showEl(id, on) {
+    $(id).classList.toggle('open', on);
+    if ($(id).classList.contains('modal')) sizeForModal();
+}
+// A title/game-over screen taller than the game screen (short mazes, phones) stretches the
+// game area to fit, instead of getting cut off.
+function sizeForModal() {
+    const box = $('game-container');
+    box.style.minHeight = '';
+    const open = box.querySelector('.modal.open');
+    if (open && open.scrollHeight > box.clientHeight) box.style.minHeight = open.scrollHeight + 'px';
+}
+
+// A row of toggle buttons (lives, questions per level, ...). onPick gets the chosen value.
+function buildChoices(group, values, current, onPick, label = v => String(v)) {
+    group.innerHTML = '';
+    values.forEach(v => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'toggle-btn retro-text' + (v === current ? ' active' : '');
+        b.textContent = label(v);
+        b.addEventListener('click', () => {
+            group.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+            b.blur();   // so SPACE fires in the game instead of pressing this button again
+            onPick(v);
+        });
+        group.appendChild(b);
+    });
+}
+
+// Control mode: 'mouse' | 'keyboard' | 'both' | 'mobile' (touch screens)
+let controlMode = isTouch ? 'mobile' : 'both';
+function setControlMode(mode) {
+    controlMode = mode;
+    document.querySelectorAll('.control-group button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    const hud = $('active-controls-hud'), b = document.createElement('b');
+    b.textContent = T.labels.controlsPrefix;
+    const key = { mobile: 'touch', mouse: 'mouse', keyboard: 'keys', both: 'both' }[mode];
+    hud.replaceChildren(b, ' ' + T.controls[key]);
+}
+document.querySelectorAll('.control-group').forEach(group => {
+    [['mouse', T.labels.mouse], ['keyboard', T.labels.keys], ['both', T.labels.both]].forEach(([mode, label]) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'toggle-btn retro-text';
+        b.dataset.mode = mode;
+        b.textContent = label;
+        b.addEventListener('click', () => { b.blur(); setControlMode(mode); });
+        group.appendChild(b);
+    });
+});
+setControlMode(controlMode);
+
+// Full screen (the button hides itself where the browser or the embedding page doesn't allow it)
+const fullscreenAllowed = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+function enterFullscreen() {
+    try {
+        const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+        const p = req && req.call(el);
+        if (p && p.catch) p.catch(() => {});
+    } catch (e) { /* blocked: keep playing in the page */ }
+}
+function toggleFullscreen() {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen;
+        if (exit) exit.call(document);
+    } else enterFullscreen();
+}
+if (!fullscreenAllowed) $('fs-toggle-btn').style.display = 'none';
+$('fs-toggle-btn').addEventListener('click', toggleFullscreen);
+
+// Score, level and lives
+let score = 0, lives = 3, level = 1, questionsAnsweredThisLevel = 0, nextExtraLife = S.extraLifeEvery;
+let selectedLives = S.defaultLives, selectedQPL = S.defaultQuestionsPerLevel;
+function updateUI() {
+    $('score-display').textContent = String(score).padStart(6, '0');
+    $('level-display').textContent = `${String(level).padStart(2, '0')} (${questionsAnsweredThisLevel}/${selectedQPL})`;
+    $('lives-display').textContent = lives > 5 ? '❤️×' + lives : '❤️'.repeat(Math.max(0, lives));
+}
+function addScore(pts) {
+    score += pts;
+    if (S.extraLifeEvery > 0 && score >= nextExtraLife) {
+        lives++;
+        nextExtraLife += S.extraLifeEvery;
+        const livesEl = $('lives-display');
+        livesEl.style.transform = 'scale(1.5)';
+        setTimeout(() => { livesEl.style.transform = 'scale(1)'; }, 300);
+    }
+    updateUI();
+}
+function resetScore() {
+    score = 0; level = 1; questionsAnsweredThisLevel = 0;
+    nextExtraLife = S.extraLifeEvery; lives = selectedLives;
+    updateUI();
+}
+buildChoices($('lives-group'), S.livesChoices, selectedLives, v => { selectedLives = v; });
+buildChoices($('questions-group'), S.questionsPerLevelChoices, selectedQPL, v => { selectedQPL = v; updateUI(); });
+
+// Screen flashes
+function flash(id, ms) {
+    const f = $(id);
+    f.classList.add('on');
+    if (ms) setTimeout(() => f.classList.remove('on'), ms);
+}
+function unflash(id) { $(id).classList.remove('on'); }
+
+// Questions: only well-formed ones are used, dealt from a shuffled deck so none repeat until all are used
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+const QUESTIONS = (CFG.questions || []).filter((item, i) => {
+    const ok = item && typeof item.q === 'string' && Array.isArray(item.opts) &&
+        item.opts.length >= 2 && item.opts.length <= 4 && Number.isInteger(item.ans) && item.ans >= 0 && item.ans < item.opts.length;
+    if (!ok) console.warn('Quizcade: skipping question #' + (i + 1) + ' (needs q, 2 to 4 opts and a valid ans).', item);
+    return ok;
+});
+if (!QUESTIONS.length) QUESTIONS.push({ q: 'No questions yet: add some in the EDIT ZONE.', opts: ['OK', 'Got it'], ans: 0 });
+let questionDeck = [];
+function nextQuestion() {
+    if (!questionDeck.length) questionDeck = S.shuffleQuestions ? shuffle(QUESTIONS.slice()) : QUESTIONS.slice().reverse();
+    const src = questionDeck.pop();
+    const q = { q: src.q, opts: src.opts.map(String), ans: src.ans };
+    if (S.shuffleAnswers) {
+        const order = shuffle(q.opts.map((_, i) => i));
+        q.opts = order.map(i => String(src.opts[i]));
+        q.ans = order.indexOf(src.ans);
+    }
+    return q;
+}
+const answerLabel = i => (T.answerLabels && T.answerLabels[i]) || 'ABCD'[i];
+const answerColor = i => C.answers[i % C.answers.length];
+
+// Show a question in the sidebar. With onPick the answers are buttons; otherwise they're a key to the game.
+function renderQuestion(q, onPick) {
+    $('question-text').textContent = q.q;
+    const box = $('options-container');
+    box.replaceChildren();
+    q.opts.forEach((text, i) => {
+        const row = document.createElement(onPick ? 'button' : 'div');
+        row.className = onPick ? 'option-btn' : 'answer-option';
+        row.style.setProperty('--answer-color', answerColor(i));
+        const letter = document.createElement('strong');
+        letter.className = 'answer-letter';
+        letter.textContent = '[' + answerLabel(i) + ']';
+        const label = document.createElement('span');
+        label.textContent = text;
+        row.append(letter, label);
+        if (onPick) { row.type = 'button'; row.addEventListener('click', () => onPick(i, row)); }
+        box.appendChild(row);
+    });
+}
+function showPrompt(text) {
+    $('question-text').textContent = text;
+    $('options-container').replaceChildren();
+}
+
+// Sprites: an "image" (link or data: URI) if one is set, otherwise the pixel art.
+function loadImage(src) {
+    if (!src) return null;
+    const img = new Image();
+    img.onerror = () => console.warn('Quizcade: could not load image', src.slice(0, 80));
+    img.src = src;
+    return img;
+}
+const imageReady = img => !!(img && img.complete && img.naturalWidth);
+function pixelArt(pixels, palette, tint) {
+    if (!pixels || !pixels.length) return null;
+    const c = document.createElement('canvas');
+    c.width = Math.max(...pixels.map(r => r.length));
+    c.height = pixels.length;
+    const g = c.getContext('2d');
+    pixels.forEach((row, y) => {
+        for (let x = 0; x < row.length; x++) {
+            let color = palette[row[x]];
+            if (color === 'answer' || color === 'tint') color = tint;
+            if (!color) continue;   // "." or any letter not in the palette = see-through
+            g.fillStyle = color;
+            g.fillRect(x, y, 1, 1);
+        }
+    });
+    return c;
+}
+function makeSprite(def, tint) {
+    def = def || {};
+    return { def, img: loadImage(def.image), art: pixelArt(def.pixels, def.palette || {}, tint) };
+}
+// Draws a sprite centered on (x, y), `width` game pixels wide (height follows the picture's shape).
+function drawSprite(g, spr, x, y, width) {
+    const src = imageReady(spr.img) ? spr.img : spr.art;
+    if (!src) return false;
+    const sw = src.naturalWidth || src.width, sh = src.naturalHeight || src.height;
+    const w = width || spr.def.size || sw, h = w * sh / sw;
+    g.imageSmoothingEnabled = sw > w;   // crisp when enlarging pixel art, smooth when shrinking big pictures
+    g.drawImage(src, x - w / 2, y - h / 2, w, h);
+    return true;
+}
+// Fills the whole canvas with a picture, cropping to keep its shape (like CSS background-size: cover)
+function drawCover(g, img, w, h) {
+    if (!imageReady(img)) return false;
+    const s = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+    const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+    g.imageSmoothingEnabled = true;
+    g.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+    return true;
+}
+
+// Fixed-speed game loop: the game logic runs 60 times a second on every screen
+// (120 Hz and 144 Hz monitors used to run the games at double speed), drawing once per frame.
+function startLoop(update, render) {
+    const STEP = 1000 / 60;
+    let last = performance.now(), acc = 0;
+    function frame(now) {
+        acc += Math.min(now - last, 250);
+        last = now;
+        let steps = Math.max(0, Math.round(acc / STEP));
+        acc -= steps * STEP;
+        if (steps > 5) { steps = 5; acc = 0; }
+        while (steps-- > 0) update();
+        render();
+        requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+}
+
+// FIT TO WINDOW: shrinks the game (never below 300px wide) so the whole thing fits the window's height,
+// with no scrollbars, whether it's on a page, in a small window, in an embed, full screen or saved to your desktop.
+(function () {
+    function fit() {
+        sizeForModal();
+        const w = $('game-wrapper');
+        const cs = getComputedStyle(document.body);
+        const avail = window.innerHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
+        w.style.maxWidth = '';
+        if (w.offsetHeight <= avail) return;
+        let lo = 300, hi = w.offsetWidth;
+        for (let i = 0; i < 12; i++) {
+            const mid = (lo + hi) / 2;
+            w.style.maxWidth = mid + 'px';
+            if (w.offsetHeight > avail) hi = mid; else lo = mid;
+        }
+        w.style.maxWidth = Math.floor(lo) + 'px';
+    }
+    let t;
+    window.fitGame = () => { clearTimeout(t); t = setTimeout(fit, 60); };
+    window.addEventListener('resize', window.fitGame);
+    window.addEventListener('load', fit);
+    document.addEventListener('fullscreenchange', () => setTimeout(fit, 120));
+    [0, 300, 1200].forEach(ms => setTimeout(fit, ms));
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => window.fitGame());
+})();
+/* ============================== END SHARED ENGINE ============================== */
+
+
+/* =========================================================================================
+   QUIZ-GUY
+   ========================================================================================= */
+const TS = 20;   // size of one maze square in game pixels
+function speedOK(v, fallback, name) {
+    if (v > 0 && TS % v === 0) return v;
+    console.warn('Quizcade: ' + name + ' must divide evenly into ' + TS + ' (1, 2, 4 or 5). Using ' + fallback + '.');
+    return fallback;
+}
+const PLAYER_SPEED = speedOK(S.playerSpeed, 2, 'playerSpeed');
+const GHOST_SPEED = speedOK(S.ghostSpeed, 1, 'ghostSpeed');
+
+/* ---------- Read the mazes ---------- */
+// Tiles: 0 dot, 1 wall, 2 empty, 3 ghost door, 4 glowing ? block
+function parseMaze(def, n) {
+    const rows = (Array.isArray(def) ? def : (def && def.layout) || []).map(String);
+    if (!rows.length) return null;
+    const cols = Math.max(...rows.map(r => r.length));
+    const base = [], ghostStarts = [];
+    let playerStart = null;
+    rows.forEach((line, r) => {
+        const row = [];
+        for (let c = 0; c < cols; c++) {
+            const ch = line[c] || ' ';
+            if (ch === '#') row.push(1);
+            else if (ch === '.') row.push(0);
+            else if (ch === '-') row.push(3);
+            else {
+                if (ch === 'P' || ch === 'p') playerStart = { r, c };
+                if (ch === 'G' || ch === 'g') ghostStarts.push({ r, c });
+                row.push(2);
+            }
+        }
+        base.push(row);
+    });
+    if (!playerStart) {   // no P: start on the first open square from the bottom
+        for (let r = base.length - 1; r >= 0 && !playerStart; r--) {
+            const c = base[r].findIndex(t => t === 0 || t === 2);
+            if (c >= 0) playerStart = { r, c };
+        }
+    }
+    if (!ghostStarts.length) ghostStarts.push({ r: Math.floor(base.length / 2), c: Math.floor(cols / 2) });
+    if (!playerStart) { console.warn('Quizcade: maze #' + (n + 1) + ' has no open squares.'); return null; }
+    return {
+        base, cols, rows: base.length, playerStart, ghostStarts,
+        wall: (def && def.wall) || C.wall,
+        wallEdge: (def && def.wallEdge) || C.wallEdge
+    };
+}
+const MAZES = (CFG.mazes || []).map(parseMaze).filter(Boolean);
+if (!MAZES.length) MAZES.push(parseMaze(['#####', '#P.G#', '#####'], 0));
+
+const canvas = $('gameCanvas');
+const ctx = canvas.getContext('2d');
+let MAZE = null, COLS = 0, ROWS = 0;
+let wallLayer = null;   // the walls never change during a level, so they're drawn once and reused
+
+// Lit-block walls: a solid fill with a bright rim wherever a wall meets open floor
+function buildWallLayer() {
+    const layer = document.createElement('canvas');
+    layer.width = COLS * TS;
+    layer.height = ROWS * TS;
+    const g = layer.getContext('2d');
+    const isWall = (r, c) => r < 0 || r >= ROWS || c < 0 || c >= COLS || MAZE.base[r][c] === 1;
+    const RIM = 3;
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            const x = c * TS, y = r * TS, t = MAZE.base[r][c];
+            if (t === 3) {
+                g.fillStyle = C.ghostDoor;
+                g.fillRect(x, y + TS / 2 - 2, TS, 4);
+            }
+            if (t !== 1) continue;
+            g.fillStyle = MAZE.wall;
+            g.fillRect(x, y, TS, TS);
+            g.fillStyle = MAZE.wallEdge;
+            if (!isWall(r - 1, c)) g.fillRect(x, y, TS, RIM);
+            if (!isWall(r + 1, c)) g.fillRect(x, y + TS - RIM, TS, RIM);
+            if (!isWall(r, c - 1)) g.fillRect(x, y, RIM, TS);
+            if (!isWall(r, c + 1)) g.fillRect(x + TS - RIM, y, RIM, TS);
+        }
+    }
+    return layer;
+}
+
+function useMaze(m) {
+    MAZE = m;
+    if (COLS !== m.cols || ROWS !== m.rows) {
+        COLS = m.cols;
+        ROWS = m.rows;
+        canvas.width = COLS * TS;
+        canvas.height = ROWS * TS;
+        canvas.style.aspectRatio = canvas.width + ' / ' + canvas.height;
+        window.fitGame();
+    }
+    hero.startX = m.playerStart.c * TS;
+    hero.startY = m.playerStart.r * TS;
+    wallLayer = buildWallLayer();
+    map = m.base.map(row => [...row]);
+}
+const mazeForLevel = lvl => MAZES[(lvl - 1) % MAZES.length];
+
+let map = [];
+let state = 'TITLE';   // TITLE | DEMO | PLAY | PAUSED | DYING | WIN | GAMEOVER
+let isDemoMode = false;
+let isGal = false;
+let powerTimer = null;
+let dotsRemaining = 0;
+let deathFrame = 0;
+let demoStep = 0;
+let demoSubFrame = 0;
+
+const hero = { x: 0, y: 0, vx: 0, vy: 0, reqVx: 0, reqVy: 0, rad: 8, startX: 0, startY: 0, path: [] };
+let ghosts = [];
+
+const SPR = {
+    player: makeSprite(CFG.sprites.player),
+    galPlayer: makeSprite(CFG.sprites.galPlayer),
+    ghost: makeSprite(CFG.sprites.ghost),
+    scaredGhost: makeSprite(CFG.sprites.scaredGhost),
+    background: loadImage(CFG.sprites.background && CFG.sprites.background.image)
+};
+
+/* ---------- Title screen ---------- */
+const charIcons = [];
+if (S.showCharacterChoice) {
+    buildChoices($('char-group'), [false, true], false, v => { isGal = v; }, v => T.characters[v ? 1 : 0]);
+    Array.from($('char-group').children).forEach(btn => {
+        const icon = document.createElement('canvas');
+        icon.width = 16; icon.height = 16;
+        icon.className = 'char-icon';
+        btn.prepend(icon);
+        charIcons.push(icon);
+    });
+} else {
+    $('character-setting').style.display = 'none';
+}
+function drawMenuSprites() {
+    charIcons.forEach((icon, i) => {
+        const g = icon.getContext('2d');
+        g.clearRect(0, 0, 16, 16);
+        drawHeroAt(g, 8, 8, 0, 0.15, i === 1, 7);
+    });
+}
+
+// On touch screens, questions pop up over the maze (the sidebar is hidden there)
+if (isTouch) $('quiz-modal').appendChild($('question-panel'));
+
+/* ---------- Input & pathfinding ---------- */
+function clearPath() { hero.path = []; }
+const inGame = () => state !== 'TITLE' && state !== 'GAMEOVER';
+
+document.addEventListener('keydown', e => {
+    if (controlMode === 'mouse' || controlMode === 'mobile' || !inGame()) return;
+    const key = e.key.toLowerCase();
+    if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
+        e.preventDefault();
+        clearPath();
+    }
+    if (key === 'arrowleft' || key === 'a') { hero.reqVx = -PLAYER_SPEED; hero.reqVy = 0; }
+    if (key === 'arrowright' || key === 'd') { hero.reqVx = PLAYER_SPEED; hero.reqVy = 0; }
+    if (key === 'arrowup' || key === 'w') { hero.reqVx = 0; hero.reqVy = -PLAYER_SPEED; }
+    if (key === 'arrowdown' || key === 's') { hero.reqVx = 0; hero.reqVy = PLAYER_SPEED; }
+});
+
+function isWalkable(r, c, isGhost = false) {
+    if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return true;   // tunnels wrap
+    const tile = map[r][c];
+    if (tile === 1) return false;
+    if (tile === 3 && !isGhost) return false;
+    return true;
+}
+
+function getNearestWalkable(r, c) {
+    if (isWalkable(r, c)) return { r, c };
+    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]];
+    for (const [dr, dc] of dirs) if (isWalkable(r + dr, c + dc)) return { r: r + dr, c: c + dc };
+    return null;
+}
+
+// Breadth-first search through the maze (wrapping through tunnels)
+function findPath(startR, startC, endR, endC) {
+    const prev = new Map();
+    const startKey = startR * COLS + startC;
+    prev.set(startKey, -1);
+    const queue = [[startR, startC]];
+    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    for (let head = 0; head < queue.length && head < 2000; head++) {
+        const [r, c] = queue[head];
+        if (r === endR && c === endC) {
+            const path = [];
+            for (let k = r * COLS + c; k !== startKey; k = prev.get(k)) path.unshift({ r: Math.floor(k / COLS), c: k % COLS });
+            return path;
+        }
+        for (const [dr, dc] of dirs) {
+            const nr = r + dr;
+            let nc = c + dc;
+            if (nc < 0) nc = COLS - 1;
+            if (nc >= COLS) nc = 0;
+            if (nr < 0 || nr >= ROWS) continue;
+            const key = nr * COLS + nc;
+            if (!prev.has(key) && isWalkable(nr, nc)) {
+                prev.set(key, r * COLS + c);
+                queue.push([nr, nc]);
+            }
+        }
+    }
+    return [];
+}
+
+canvas.addEventListener('pointerdown', e => {
+    if (state !== 'PLAY' || controlMode === 'keyboard') return;
+    const rect = canvas.getBoundingClientRect();
+    let targetC = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width) / TS);
+    let targetR = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height) / TS);
+    if (!isWalkable(targetR, targetC)) {
+        const nearest = getNearestWalkable(targetR, targetC);
+        if (!nearest) return;
+        targetR = nearest.r; targetC = nearest.c;
+    }
+    const newPath = findPath(Math.round(hero.y / TS), Math.round(hero.x / TS), targetR, targetC);
+    if (newPath.length) hero.path = newPath;
+});
+
+[['btn-up', 0, -1], ['btn-down', 0, 1], ['btn-left', -1, 0], ['btn-right', 1, 0]].forEach(([id, dx, dy]) => {
+    $(id).addEventListener('pointerdown', e => {
+        e.preventDefault();
+        clearPath();
+        hero.reqVx = dx * PLAYER_SPEED;
+        hero.reqVy = dy * PLAYER_SPEED;
+    });
+    $(id).addEventListener('contextmenu', e => e.preventDefault());
+});
+
+/* ---------- Tutorial ---------- */
+function newGhost(c, r, color) {
+    return { x: c * TS, y: r * TS, home: { r, c }, vx: 0, vy: 0, color, scared: false, dead: false, animFrame: 0, speed: GHOST_SPEED };
+}
+
+// The tutorial plays out on the first maze's first straight corridor at least 19 squares long
+const DEMO_LANE = (() => {
+    const m = MAZES[0];
+    for (let r = 0; r < m.rows; r++) {
+        let run = 0;
+        for (let c = 0; c < m.cols; c++) {
+            run = (m.base[r][c] === 1 || m.base[r][c] === 3) ? 0 : run + 1;
+            if (run >= 19) return { r, c0: c - run + 1 };
+        }
+    }
+    return { r: m.playerStart.r, c0: Math.max(0, m.playerStart.c - 9) };
+})();
+
+function resetDemoScene(step) {
+    demoSubFrame = 0;
+    useMaze(MAZES[0]);
+    hero.vx = 0; hero.vy = 0;
+    hero.reqVx = 0; hero.reqVy = 0;
+    hero.path = [];
+    ghosts = [];
+    const { r, c0 } = DEMO_LANE;
+    const lane = c => Math.min(COLS - 1, c0 + c);
+    if (step === 0) {
+        for (let c = 4; c < 12; c++) map[r][lane(c)] = 0;   // a hallway of dots
+        hero.x = lane(11) * TS; hero.y = r * TS;
+    } else if (step === 1) {
+        hero.x = lane(11) * TS; hero.y = r * TS;
+        ghosts.push(newGhost(lane(18), r, C.ghosts[0]));
+    } else if (step === 2) {
+        map[r][lane(4)] = 4;   // a ? block near the player
+        hero.x = lane(8) * TS; hero.y = r * TS;
+        ghosts.push(newGhost(lane(0), r, C.ghosts[2 % C.ghosts.length]));
+    }
+}
+
+function startGame() {
+    if (S.autoFullscreen) enterFullscreen();
+    showEl('title-modal', false);
+    if (!S.showTutorial || !T.tutorial || !T.tutorial.length) { resetGame(true); return; }
+    showEl('demo-ui', true);
+    isDemoMode = true;
+    demoStep = 0;
+    state = 'DEMO';
+    deathFrame = 0;
+    resetDemoScene(0);
+    updateDemoUI();
+}
+
+function skipDemo() {
+    showEl('demo-ui', false);
+    isDemoMode = false;
+    resetGame(true);
+}
+
+function advanceDemo() {
+    demoStep++;
+    if (demoStep >= Math.min(3, T.tutorial.length)) {
+        skipDemo();
+    } else {
+        state = 'DEMO';   // un-pause if we were dying
+        resetDemoScene(demoStep);
+        updateDemoUI();
+    }
+}
+
+function updateDemoUI() {
+    $('demo-text').textContent = T.tutorial[demoStep] || '';
+}
+
+function processDemoLogic() {
+    demoSubFrame++;
+    if (demoStep === 0) {
+        if (demoSubFrame === 1) { hero.reqVx = -PLAYER_SPEED; hero.reqVy = 0; }
+        if (demoSubFrame > 100) resetDemoScene(0);
+    } else if (demoStep === 1) {
+        if (demoSubFrame === 1) {
+            hero.reqVx = 0; hero.reqVy = 0;
+            if (ghosts[0]) ghosts[0].vx = -GHOST_SPEED;
+        }
+        // getting caught resets the scene by itself
+    } else if (demoStep === 2) {
+        if (demoSubFrame === 1) {
+            hero.reqVx = -PLAYER_SPEED; hero.reqVy = 0;
+            if (ghosts[0]) ghosts[0].vx = GHOST_SPEED;
+        }
+        if (demoSubFrame > 150) resetDemoScene(2);
+    }
+}
+
+function drawDemoHighlights() {
+    ctx.save();
+    ctx.strokeStyle = C.accent;
+    ctx.lineWidth = 4;
+    const pulse = (Math.sin(Date.now() / 150) + 1) / 2 * 4;
+    let x = null, y = null;
+    if (demoStep === 0) { x = hero.x; y = hero.y; }
+    else if (demoStep === 1 && ghosts[0]) { x = ghosts[0].x; y = ghosts[0].y; }
+    else if (demoStep === 2) { x = Math.min(COLS - 1, DEMO_LANE.c0 + 4) * TS; y = DEMO_LANE.r * TS; }
+    if (x !== null) ctx.strokeRect(x - pulse / 2, y - pulse / 2, TS + pulse, TS + pulse);
+    ctx.restore();
+}
+
+/* ---------- Game systems ---------- */
+function initLevel() {
+    useMaze(mazeForLevel(level));
+    let possibleSpots = [];
+    for (let r = 3; r < ROWS - 3; r++) {
+        for (let c = 2; c < COLS - 2; c++) {
+            if (map[r][c] === 0) possibleSpots.push({ r, c });
+        }
+    }
+
+    // ? blocks go on random dots, spread out from each other
+    const picked = [];
+    const numPowerups = Math.max(1, Math.min(S.powerupsPerLevel, 10));
+    for (let i = 0; i < numPowerups && possibleSpots.length; i++) {
+        let best = null;
+        for (let attempts = 0; attempts < 50; attempts++) {
+            const cand = possibleSpots[Math.floor(Math.random() * possibleSpots.length)];
+            if (!picked.some(p => Math.hypot(p.c - cand.c, p.r - cand.r) < 8)) { best = cand; break; }
+        }
+        if (!best) best = possibleSpots[Math.floor(Math.random() * possibleSpots.length)];
+        picked.push(best);
+        map[best.r][best.c] = 4;
+        possibleSpots = possibleSpots.filter(s => s !== best);
+    }
+
+    // Everything edible (dots and ? blocks) has to be eaten to clear the maze
+    dotsRemaining = 0;
+    map.forEach(row => row.forEach(t => { if (t === 0 || t === 4) dotsRemaining++; }));
+    resetPositions();
+}
+
+function resetPositions() {
+    hero.x = hero.startX;
+    hero.y = hero.startY;
+    hero.vx = 0; hero.vy = 0;
+    hero.reqVx = 0; hero.reqVy = 0;
+    hero.path = [];
+    ghosts = MAZE.ghostStarts.map((g, i) => {
+        const ghost = newGhost(g.c, g.r, C.ghosts[i % C.ghosts.length]);
+        ghost.vx = GHOST_SPEED;
+        return ghost;
+    });
+    if (powerTimer) clearTimeout(powerTimer);
+}
+
+function resetGame(fullReset = false) {
+    if (fullReset) {
+        resetScore();
+        showEl('game-over-modal', false);
+        showEl('sidebar', !isTouch);
+        showPrompt(T.prompt);
+    }
+    state = 'PLAY';
+    updateUI();
+    initLevel();
+}
+
+function eatTileAt(tr, tc) {
+    if (!map[tr]) return;
+    const tile = map[tr][tc];
+    if (tile === 0) {
+        map[tr][tc] = 2;
+        if (!isDemoMode) {
+            dotsRemaining--;
+            addScore(S.pointsPerDot);
+            if (state === 'PLAY') checkWinCondition();
+        }
+    } else if (tile === 4) {
+        map[tr][tc] = 2;
+        if (!isDemoMode) {
+            dotsRemaining--;
+            if (state === 'PLAY') triggerQuiz();
+        } else {
+            ghosts.forEach(g => { if (!g.dead) { g.scared = true; g.vx = -g.vx; g.vy = -g.vy; } });
+        }
+    }
+}
+
+function handlePlayerMovement() {
+    if (hero.x % TS === 0 && hero.y % TS === 0) {
+        const tileC = Math.round(hero.x / TS);
+        const tileR = Math.round(hero.y / TS);
+
+        if (hero.path.length) {
+            let nextStep = hero.path[0];
+            if (tileC === nextStep.c && tileR === nextStep.r) {
+                hero.path.shift();
+                if (hero.path.length) {
+                    nextStep = hero.path[0];
+                } else {
+                    hero.reqVx = 0; hero.reqVy = 0;
+                    hero.vx = 0; hero.vy = 0;
+                    nextStep = null;
+                }
+            }
+            if (nextStep) {
+                let dc = nextStep.c - tileC;
+                const dr = nextStep.r - tileR;
+                if (dc > 1) dc = -1;
+                if (dc < -1) dc = 1;
+                hero.reqVx = dc * PLAYER_SPEED;
+                hero.reqVy = dr * PLAYER_SPEED;
+            }
+        }
+
+        let nextReqC = tileC + Math.sign(hero.reqVx);
+        const nextReqR = tileR + Math.sign(hero.reqVy);
+        if (nextReqC < 0) nextReqC = COLS - 1;
+        if (nextReqC >= COLS) nextReqC = 0;
+        if (isWalkable(nextReqR, nextReqC)) {
+            hero.vx = hero.reqVx;
+            hero.vy = hero.reqVy;
+        }
+
+        let nextC = tileC + Math.sign(hero.vx);
+        const nextR = tileR + Math.sign(hero.vy);
+        if (nextC < 0) nextC = COLS - 1;
+        if (nextC >= COLS) nextC = 0;
+        if (!isWalkable(nextR, nextC)) {
+            hero.vx = 0;
+            hero.vy = 0;
+        }
+    }
+
+    hero.x += hero.vx;
+    hero.y += hero.vy;
+    if (hero.x < 0) hero.x = canvas.width - TS;
+    if (hero.x >= canvas.width) hero.x = 0;
+
+    if (hero.x % TS === 0 && hero.y % TS === 0) eatTileAt(Math.floor(hero.y / TS), Math.floor(hero.x / TS));
+}
+
+function handleEnemyMovement(ent) {
+    let speed = ent.dead ? 4 : ent.speed;
+    ent.animFrame += 0.1;
+
+    if (ent.x % TS === 0 && ent.y % TS === 0) {
+        const tileC = Math.round(ent.x / TS);
+        const tileR = Math.round(ent.y / TS);
+
+        if (ent.dead && tileR === ent.home.r && tileC === ent.home.c) {
+            // Back at its own starting square: revive
+            ent.dead = false;
+            ent.scared = false;
+            speed = ent.speed;
+            ent.vx = 0;
+            ent.vy = 0;
+        }
+        const validMoves = [];
+        [{ x: speed, y: 0 }, { x: -speed, y: 0 }, { x: 0, y: speed }, { x: 0, y: -speed }].forEach(d => {
+            if (d.x === -ent.vx && d.y === -ent.vy && (ent.vx !== 0 || ent.vy !== 0)) return;   // no U-turns
+            let dirC = tileC + Math.sign(d.x);
+            const dirR = tileR + Math.sign(d.y);
+            if (dirC < 0) dirC = COLS - 1;
+            if (dirC >= COLS) dirC = 0;
+            if (isWalkable(dirR, dirC, true)) validMoves.push(d);
+        });
+
+        if (validMoves.length) {
+            let bestMove = validMoves[0];
+            let bestDist = ent.scared ? -1 : Infinity;
+            const targetX = ent.dead ? ent.home.c * TS : hero.x;
+            const targetY = ent.dead ? ent.home.r * TS : hero.y;
+            validMoves.forEach(m => {
+                const dist = Math.hypot(ent.x + m.x * (TS / speed) - targetX, ent.y + m.y * (TS / speed) - targetY);
+                if (ent.scared && !ent.dead) { if (dist > bestDist) { bestDist = dist; bestMove = m; } }
+                else if (dist < bestDist) { bestDist = dist; bestMove = m; }
+            });
+            ent.vx = bestMove.x;
+            ent.vy = bestMove.y;
+        } else {
+            ent.vx = -ent.vx;
+            ent.vy = -ent.vy;
+        }
+    }
+    ent.x += ent.vx;
+    ent.y += ent.vy;
+    if (ent.x < 0) ent.x = canvas.width - TS;
+    if (ent.x >= canvas.width) ent.x = 0;
+}
+
+function triggerQuiz() {
+    state = 'PAUSED';
+    clearPath();
+    const q = nextQuestion();
+    renderQuestion(q, (picked, btn) => handleAnswer(picked, q.ans, btn));
+    if (isTouch) showEl('quiz-modal', true);
+    window.fitGame();
+}
+
+function afterQuestion() {
+    showEl('quiz-modal', false);
+    showPrompt(T.keepGoing);
+    window.fitGame();
+}
+
+function handleAnswer(selectedIndex, correctIndex, btnElement) {
+    const btns = $('options-container').querySelectorAll('.option-btn');
+    btns.forEach(b => { b.disabled = true; });
+
+    if (selectedIndex === correctIndex) {
+        btnElement.classList.add('correct');
+        addScore(S.pointsPerCorrect);
+        questionsAnsweredThisLevel++;
+        updateUI();
+
+        // Power up: ghosts turn edible and run away
+        ghosts.forEach(g => {
+            if (!g.dead) {
+                g.scared = true;
+                g.x = Math.round(g.x / TS) * TS;   // snap to the grid so they can turn around cleanly
+                g.y = Math.round(g.y / TS) * TS;
+                g.vx = -g.vx;
+                g.vy = -g.vy;
+            }
+        });
+        if (powerTimer) clearTimeout(powerTimer);
+        powerTimer = setTimeout(() => { ghosts.forEach(g => { g.scared = false; }); }, S.powerDuration);
+
+        setTimeout(() => {
+            afterQuestion();
+            if (questionsAnsweredThisLevel >= selectedQPL) {
+                level++;
+                questionsAnsweredThisLevel = 0;
+                initLevel();
+            }
+            updateUI();
+            state = 'PLAY';
+            checkWinCondition();
+        }, 1000);
+    } else {
+        btnElement.classList.add('wrong');
+        if (btns[correctIndex]) btns[correctIndex].classList.add('correct');
+        setTimeout(() => {
+            afterQuestion();
+            startDeathSequence(true);
+        }, 2000);
+    }
+}
+
+function startDeathSequence(flashRed = false) {
+    state = 'DYING';
+    deathFrame = 0;
+    clearPath();
+    if (flashRed) flash('red-flash', 400);
+}
+
+function finishDeath() {
+    if (isDemoMode) {
+        resetDemoScene(demoStep);
+        state = 'DEMO';
+        return;
+    }
+    lives--;
+    updateUI();
+    if (lives <= 0) {
+        state = 'GAMEOVER';
+        $('final-score').textContent = String(score).padStart(6, '0');
+        showEl('game-over-modal', true);
+    } else {
+        resetPositions();
+        state = 'PLAY';
+        checkWinCondition();   // in case the last thing eaten was a block answered wrong
+    }
+}
+
+function checkWinCondition() {
+    if (dotsRemaining > 0 || state !== 'PLAY') return;
+    state = 'WIN';   // maze cleared: next level (and the next maze)
+    level++;
+    questionsAnsweredThisLevel = 0;
+    setTimeout(() => {
+        initLevel();
+        updateUI();
+        state = 'PLAY';
+    }, 1000);
+}
+
+/* ---------- Update (60 times a second) ---------- */
+function update() {
+    if (state === 'PLAY' || state === 'DEMO') {
+        if (state === 'DEMO') processDemoLogic();
+        handlePlayerMovement();
+        if (state !== 'PLAY' && state !== 'DEMO') return;   // a question popped up
+        ghosts.forEach(handleEnemyMovement);
+
+        const hitDist = TS * 0.7;
+        for (const g of ghosts) {
+            if (Math.hypot(g.x - hero.x, g.y - hero.y) >= hitDist || g.dead) continue;
+            if (g.scared) {
+                g.dead = true;
+                g.scared = false;
+                if (!isDemoMode) addScore(S.pointsPerGhost);
+                g.x = Math.round(g.x / TS) * TS;   // snap to the grid for the trip home
+                g.y = Math.round(g.y / TS) * TS;
+                g.vx = 0; g.vy = 0;
+            } else {
+                startDeathSequence();
+                break;
+            }
+        }
+    } else if (state === 'DYING') {
+        deathFrame++;
+        if (deathFrame > 90) finishDeath();
+    }
+}
+
+/* ---------- Drawing ---------- */
+function drawMap() {
+    ctx.fillStyle = C.background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawCover(ctx, SPR.background, canvas.width, canvas.height);
+    if (wallLayer) ctx.drawImage(wallLayer, 0, 0);
+
+    const blink = Math.floor(Date.now() / 200) % 2;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = "bold 12px 'Segoe UI', sans-serif";
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            const val = map[r][c];
+            const cx = c * TS + TS / 2, cy = r * TS + TS / 2;
+            if (val === 0) {   // dots are little diamonds
+                ctx.fillStyle = C.dot;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 3); ctx.lineTo(cx + 3, cy); ctx.lineTo(cx, cy + 3); ctx.lineTo(cx - 3, cy);
+                ctx.fill();
+            } else if (val === 4) {   // glowing ? block
+                ctx.fillStyle = C.questionBlock[blink % C.questionBlock.length];
+                ctx.beginPath();
+                if (ctx.roundRect) ctx.roundRect(cx - 7, cy - 7, 14, 14, 3); else ctx.rect(cx - 7, cy - 7, 14, 14);
+                ctx.fill();
+                ctx.fillStyle = C.questionMark;
+                ctx.fillText('?', cx, cy + 1);
+            }
+        }
+    }
+
+    if (hero.path.length) {
+        ctx.fillStyle = C.path;
+        hero.path.forEach(p => ctx.fillRect(p.c * TS + TS / 2 - 2, p.r * TS + TS / 2 - 2, 4, 4));
+    }
+}
+
+function drawBow(g, cx, cy, vx, vy, scale = 1) {
+    let bx = 0, by = -6;
+    if (vx < 0) bx = 4;
+    else if (vx > 0) bx = -4;
+    else if (vy < 0) { bx = 4; by = 4; }
+    else if (vy > 0) { bx = 4; by = -6; }
+    if (vx === 0 && vy === 0) bx = -4;
+    g.save();
+    g.translate(cx + bx * scale, cy + by * scale);
+    g.scale(scale, scale);
+    g.fillStyle = C.bow;
+    g.beginPath(); g.moveTo(0, 0); g.lineTo(-4, -4); g.lineTo(-4, 4); g.fill();
+    g.beginPath(); g.moveTo(0, 0); g.lineTo(4, -4); g.lineTo(4, 4); g.fill();
+    g.fillStyle = C.bowCenter;
+    g.beginPath(); g.arc(0, 0, 2.5, 0, Math.PI * 2); g.fill();
+    g.restore();
+}
+
+// The player, centered on (cx, cy). mouth: 0 = closed, 0.2 = open wide (fraction of a half turn).
+function drawHeroAt(g, cx, cy, angle, mouth, gal, radius = hero.rad, vx = 1, vy = 0) {
+    const spr = gal && SPR.galPlayer.img ? SPR.galPlayer : SPR.player;
+    if (imageReady(spr.img)) {
+        g.save();
+        g.translate(cx, cy);
+        if (spr.def.rotate !== false) g.rotate(angle);
+        drawSprite(g, spr, 0, 0, (spr.def.size || 16) * radius / 8);
+        g.restore();
+        if (gal && spr === SPR.player) drawBow(g, cx, cy, vx, vy, radius / 8);
+        return;
+    }
+    g.save();
+    g.translate(cx, cy);
+    g.rotate(angle);
+    g.fillStyle = C.player;
+    g.beginPath();
+    g.arc(0, 0, radius, mouth * Math.PI, (2 - mouth) * Math.PI);
+    g.lineTo(0, 0);
+    g.fill();
+    g.restore();
+    if (gal) drawBow(g, cx, cy, vx, vy, radius / 8);
+}
+
+function facingAngle() {
+    if (hero.vy > 0) return Math.PI / 2;
+    if (hero.vy < 0) return -Math.PI / 2;
+    if (hero.vx < 0) return Math.PI;
+    return 0;
+}
+
+function drawHero() {
+    const mouth = Math.floor(Date.now() / 150) % 2 === 0 ? 0.2 : 0;
+    drawHeroAt(ctx, hero.x + TS / 2, hero.y + TS / 2, facingAngle(), mouth, isGal, hero.rad, hero.vx, hero.vy);
+}
+
+function drawHeroDying() {
+    if (deathFrame > 60) return;
+    const cx = hero.x + TS / 2, cy = hero.y + TS / 2;
+    const spr = isGal && SPR.galPlayer.img ? SPR.galPlayer : SPR.player;
+    if (imageReady(spr.img)) {   // pictures shrink away
+        const s = Math.max(0, 1 - deathFrame / 60);
+        drawSprite(ctx, spr, cx, cy, (spr.def.size || 16) * s);
+        return;
+    }
+    const openProgress = (deathFrame / 60) * Math.PI;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = C.player;
+    ctx.beginPath();
+    ctx.arc(0, 0, hero.rad, openProgress, 2 * Math.PI - openProgress);
+    ctx.lineTo(0, 0);
+    ctx.fill();
+    ctx.restore();
+    if (isGal && deathFrame < 50) drawBow(ctx, cx, cy, hero.vx, hero.vy);
+}
+
+function drawGhostEyes(gx, gy, g) {
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(gx - 3, gy - 2, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(gx + 3, gy - 2, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#000';
+    const ex = Math.sign(g.vx), ey = Math.sign(g.vy);
+    ctx.fillRect(gx - 3.5 + ex, gy - 2.5 + ey, 2, 2);
+    ctx.fillRect(gx + 2.5 + ex, gy - 2.5 + ey, 2, 2);
+}
+
+function drawGhosts() {
+    const blink = Math.floor(Date.now() / 250) % 2;
+    ghosts.forEach(g => {
+        const gx = g.x + TS / 2, gy = g.y + TS / 2;
+        if (g.dead) { drawGhostEyes(gx, gy, g); return; }   // eyes heading home
+
+        const picture = g.scared ? (SPR.scaredGhost.img ? SPR.scaredGhost : null) : (SPR.ghost.img ? SPR.ghost : null);
+        if (picture && imageReady(picture.img)) {
+            if (g.scared && blink) ctx.globalAlpha = 0.6;
+            drawSprite(ctx, picture, gx, gy);
+            ctx.globalAlpha = 1;
+            return;
+        }
+
+        ctx.fillStyle = g.scared ? C.scaredGhost[blink % C.scaredGhost.length] : g.color;
+        ctx.beginPath();
+        ctx.arc(gx, gy, 8, Math.PI, 0);
+        ctx.lineTo(gx + 8, gy + 8);
+        ctx.lineTo(gx + 4, gy + 5);
+        ctx.lineTo(gx, gy + 8);
+        ctx.lineTo(gx - 4, gy + 5);
+        ctx.lineTo(gx - 8, gy + 8);
+        ctx.fill();
+
+        if (!g.scared) {
+            drawGhostEyes(gx, gy, g);
+        } else {
+            ctx.fillStyle = C.scaredFace;
+            ctx.fillRect(gx - 4, gy - 2, 2, 2);
+            ctx.fillRect(gx + 2, gy - 2, 2, 2);
+        }
+    });
+}
+
+function render() {
+    drawMap();
+    if (state === 'DYING') {
+        if (deathFrame < 20) { drawHero(); drawGhosts(); }
+        else drawHeroDying();
+    } else {
+        drawHero();
+        drawGhosts();
+        if (state === 'DEMO') drawDemoHighlights();
+    }
+    if (state === 'TITLE') drawMenuSprites();
+}
+
+/* ---------- Start up ---------- */
+$('start-btn').addEventListener('click', startGame);
+$('play-again-btn').addEventListener('click', () => resetGame(true));
+$('skip-demo-btn').addEventListener('click', skipDemo);
+$('next-demo-btn').addEventListener('click', advanceDemo);
+updateUI();
+initLevel();
+startLoop(update, render);
+</script>
+</body>
+</html>

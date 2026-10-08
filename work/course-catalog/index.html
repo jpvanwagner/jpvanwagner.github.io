@@ -1,0 +1,2465 @@
+<!DOCTYPE html>
+<!--
+  ════════════════════════════════════════════════════════════════════════════
+   LMS COURSE CATALOG
+   © 2026 Joe VanWagner · https://jvanwagner.neocities.org/
+  ════════════════════════════════════════════════════════════════════════════
+
+   WHAT IT IS
+   A single-file web tool for naming courses in a learning management system
+   (LMS) with a consistent course-code convention, giving each course a real
+   name, and keeping a searchable catalog of everything that's been created.
+
+   A course code is assembled from up to five segments, for example:
+
+        MAN101-20417-SUP-CA
+        └┬┘└┬┘ └─┬─┘ └┬┘ └┬┘
+       SUBJ NUM  CUST AUD STATE
+
+     SUBJ   subject / course type      (MAN = Management)
+     NUM    3-digit course number      (101; the hundreds digit sets the level)
+     CUST   customer code, optional    (20417 = a customer the course is built for)
+     AUD    audience                   (SUP = Supervisors)
+     STATE  2-letter state, optional   (CA)
+
+   MAIN FEATURES
+   • Course Builder: pick segment values, see a colour-coded preview of the
+     code, name the course, and add it to the catalog.
+   • Code Structure editor: turn segments on/off, reorder them (drag or
+     arrows), choose the separator in front of each one, drop some or all
+     separators from the final code, and keep/remove/underscore spaces.
+   • Duplicate protection: a course code or course name that is already in
+     use can't be created; the reason is explained on screen.
+   • Format flags: when the format changes, existing courses whose codes no
+     longer match are flagged. Each can be regenerated in the new format,
+     re-coded by hand, or marked OK (kept as-is).
+   • Catalog: search, sort, rename, re-code, remove, export to CSV, and
+     back up / restore everything as JSON.
+   • CSV import: download a template, fill it in (in Excel or similar),
+     upload it, review a per-row preview, then import in bulk.
+   • Light and dark themes (light by default), remembered between visits.
+
+   HOW IT'S BUILT
+   • One HTML file: CSS in the <style> block, the app in the
+     <script type="text/babel"> block at the bottom.
+   • React 18 renders the interface. Babel Standalone compiles the JSX in
+     the browser, so the source below stays readable with no build step.
+     (Both load from the cdnjs CDN; fonts load from Google Fonts.)
+   • All data lives in the visitor's own browser (localStorage). Nothing is
+     sent anywhere.
+
+   PORTFOLIO NOTE
+   Every company name, customer code and course in this file is fictional.
+   On a visitor's first visit the catalog is seeded with a few sample
+   courses (one deliberately in an outdated format, to show the flagging).
+  ════════════════════════════════════════════════════════════════════════════
+-->
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="author" content="Joe VanWagner" />
+  <meta name="description" content="LMS Course Catalog: build consistent course codes, name courses, and keep a searchable catalog." />
+  <title>LMS Course Catalog</title>
+  <!-- Favicon: the same 16×16 pixel head used in the footer credit, embedded so the file needs no image files. -->
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAiklEQVR42mNgoAXIdtf+j46R5QhqXlHh8x8bjW4YTptxGYBsEMm2o9M4Dfh4fB5BjNMAYjTDMFYD5KRl/hOLMTRfW1AGlug79gaOkTWgi4PUYzXg5LMfcAzig5yLTRynAegYZgA6xjAAVyA+2NBGfCCiG3KkpQwFE2UAMdFJVIbC5nSQGNE5kljbATwbgMtmlLotAAAAAElFTkSuQmCC" />
+
+  <script>
+    /*
+     * Apply the saved colour theme BEFORE anything paints. If this ran later
+     * (inside React), a visitor who chose dark mode would see a flash of the
+     * light theme on every page load. Light is the default.
+     * The try/catch covers browsers that block localStorage (private modes,
+     * strict iframe sandboxes); the page just falls back to light.
+     */
+    try { document.documentElement.dataset.theme = localStorage.getItem("ccat_theme") === "dark" ? "dark" : "light"; } catch (e) {}
+  </script>
+
+  <!-- React + ReactDOM (UI rendering) and Babel Standalone (compiles the JSX below in the browser). -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+
+  <!-- Fonts: Courier Prime (typewriter header), IBM Plex Sans (interface), IBM Plex Mono (course codes). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ══════════════════════════════════════════════════════════════════════
+       THEME TOKENS
+       Every colour in the app is a CSS custom property ("token"). The light
+       palette sits on :root; the dark palette overrides the same names when
+       <html data-theme="dark">. Components only ever reference tokens, so
+       switching theme is a single attribute change.
+       ══════════════════════════════════════════════════════════════════════ */
+
+    /* Light (default): paper and oatmeal neutrals, charcoal ink, ledger-navy accent */
+    :root {
+      color-scheme: light;                 /* native form controls & scrollbars follow the theme */
+      --font-ui:   'IBM Plex Sans', 'Segoe UI', Arial, sans-serif;
+      --font-mono: 'IBM Plex Mono', Consolas, monospace;
+      --font-head: 'Courier Prime', 'Courier New', Courier, monospace;
+
+      /* Surfaces */
+      --bg: #ebe7de;                       /* the "desk" behind everything */
+      --header-bg: #f7f5f0;
+      --panel: #f9f7f2;                    /* the "paper" each tab sits on */
+      --panel-border: #d5cfc2;
+      --tab-bg: #e3ded3;                   /* inactive tabs */
+      --tab-active-bg: #f9f7f2;
+      --tab-active-line: #d5cfc2;
+      --field: #fffefb;                    /* inputs, small buttons */
+      --field-border: #cdc6b8;
+      --field-focus-bg: #fffefb;
+      --soft: #f2eee6;                     /* subtle fills: rows, chips */
+      --soft-2: #e8e3d8;                   /* slightly stronger fill / hover */
+      --line: #e2ddd1;                     /* hairline dividers */
+      --line-2: #d2cbbd;                   /* stronger borders */
+      --well: #f2eee5;                     /* recessed areas like the code preview */
+      --menu: #fffefb;                     /* dropdowns, toasts */
+      --shadow: 0 8px 24px rgba(43,45,48,0.12);
+
+      /* Text, darkest to faintest */
+      --text: #2b2d30;
+      --text-2: #3b3e42;
+      --text-3: #5c5f63;
+      --text-4: #808286;
+      --text-5: #a5a49f;
+
+      /* Accent (links, active states, primary buttons) */
+      --accent: #2f4a62;
+      --accent-2: #3c5a75;
+      --accent-soft: rgba(47,74,98,0.08);
+      --accent-line: rgba(47,74,98,0.35);
+      --add-grad: linear-gradient(#2f4a62, #2f4a62);   /* solid; kept as a gradient so dark mode can swap it */
+
+      /* Status colours: text / background / border */
+      --warn: #765614; --warn-bg: #f5eed8; --warn-line: #dfcfa0;   /* mustard */
+      --err: #8b3a2e;  --err-bg: #f5e6e1;  --err-line: #dcbbb1;    /* brick */
+      --ok: #3e5f46;   --ok-bg: #e6eee5;   --ok-line: #bccfbd;     /* sage */
+      --info: #34516a; --info-bg: #e5ecf1; --info-line: #c0cfda;   /* steel */
+      --flag-row: rgba(184,146,58,0.08);                            /* tint behind flagged catalog rows */
+
+      /* One colour per code segment (used in the preview, field labels, reference lists) */
+      --seg-type: #5d4b7c; --seg-number: #8a4646; --seg-client: #4b6a53; --seg-audience: #34577a; --seg-location: #87672a;
+
+      /* Course level colours, 001–099 through 600–999 */
+      --lv0: #6c6f73; --lv1: #3e6285; --lv2: #4b6a53; --lv3: #87672a; --lv4: #985832; --lv5: #5d4b7c; --lv6: #8b3a2e;
+    }
+
+    /* Dark: "after hours" charcoal and slate with the same muted hues */
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #1c1e21;
+      --header-bg: #232528;
+      --panel: #25272b;
+      --panel-border: #393c41;
+      --tab-bg: #202225;
+      --tab-active-bg: #25272b;
+      --tab-active-line: #393c41;
+      --field: #2b2e32;
+      --field-border: #43464c;
+      --field-focus-bg: #2e3136;
+      --soft: #2a2c30;
+      --soft-2: #323539;
+      --line: #33363a;
+      --line-2: #3f4247;
+      --well: #212326;
+      --menu: #2b2e32;
+      --shadow: 0 8px 28px rgba(0,0,0,0.45);
+      --text: #e3e0d8;
+      --text-2: #d0cdc5;
+      --text-3: #aaa7a0;
+      --text-4: #85837e;
+      --text-5: #64635f;
+      --accent: #a3b9cc;
+      --accent-2: #7f9bb3;
+      --accent-soft: rgba(163,185,204,0.12);
+      --accent-line: rgba(163,185,204,0.38);
+      --add-grad: linear-gradient(#3c5a75, #3c5a75);
+      --warn: #d6bd7c; --warn-bg: rgba(214,189,124,0.1);  --warn-line: rgba(214,189,124,0.3);
+      --err: #d89a8c;  --err-bg: rgba(216,154,140,0.1);   --err-line: rgba(216,154,140,0.32);
+      --ok: #9dbf9f;   --ok-bg: rgba(157,191,159,0.1);    --ok-line: rgba(157,191,159,0.3);
+      --info: #a3b9cc; --info-bg: rgba(163,185,204,0.09); --info-line: rgba(163,185,204,0.26);
+      --flag-row: rgba(214,189,124,0.05);
+      --seg-type: #b4a5cf; --seg-number: #cf9b9b; --seg-client: #9dbf9f; --seg-audience: #a3b9cc; --seg-location: #d3b678;
+      --lv0: #9a9c9f; --lv1: #a3b9cc; --lv2: #9dbf9f; --lv3: #d3b678; --lv4: #d49b74; --lv5: #b4a5cf; --lv6: #d89a8c;
+    }
+
+    /* While the theme is switching, suppress transitions so every control
+       changes colour at once instead of fading individually. (The app adds
+       this class for one frame around each switch.) */
+    .theme-switching *, .theme-switching *::before, .theme-switching *::after { transition: none !important; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       BASE & PAGE LAYOUT
+       ══════════════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #root { min-height: 100%; }
+    body { overflow-x: hidden; background: var(--bg); color: var(--text); font-family: var(--font-ui); }
+    .lms-root { min-height: 100vh; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+    /* Header bar: typewriter face, sticks to the top while scrolling */
+    .lms-header {
+      padding: 22px 32px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--panel-border);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .lms-header, .lms-header button { font-family: var(--font-head); }
+    .lms-header-left { display: flex; flex-direction: column; gap: 3px; }
+    .lms-header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .lms-title { font-size: 24px; font-weight: 700; color: var(--text); }
+    .lms-subtitle { font-size: 10px; font-weight: 600; letter-spacing: 1.8px; text-transform: uppercase; color: var(--text-4); }
+    .lms-counter {
+      font-size: 13px; color: var(--text-4); padding: 6px 14px;
+      background: var(--soft); border: 1px solid var(--line-2); border-radius: 8px;
+    }
+    .theme-toggle {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 14px; border-radius: 8px; cursor: pointer;
+      background: var(--soft); border: 1px solid var(--line-2); color: var(--text-3);
+      font-size: 13px; font-weight: 700; transition: all 0.18s;
+    }
+    .theme-toggle:hover { border-color: var(--accent-line); color: var(--accent); }
+
+    /* Tabs look like file-folder tabs sitting on top of the panel */
+    .lms-tabs { display: flex; gap: 3px; padding: 20px 32px 0; overflow-x: auto; }
+    .lms-tab {
+      padding: 9px 22px; border-radius: 6px 6px 0 0;
+      border: 1px solid var(--line); border-bottom: none;
+      background: var(--tab-bg); color: var(--text-4);
+      font-family: var(--font-ui); font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;
+    }
+    .lms-tab:hover { background: var(--soft-2); color: var(--text-2); }
+    .lms-tab.active, .lms-tab.active:hover { background: var(--tab-active-bg); border-color: var(--tab-active-line); color: var(--accent); }
+
+    .lms-body { padding: 0 32px 24px; }
+    .lms-panel {
+      background: var(--panel); border: 1px solid var(--panel-border);
+      border-radius: 0 8px 8px 8px; padding: 28px 28px 32px;
+    }
+
+    /* Builder: two columns on wide screens, one on phones */
+    .builder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 32px; }
+    .fmt-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px 32px; }
+    @media (max-width: 680px) {
+      .builder-grid, .fmt-grid { grid-template-columns: 1fr; }
+      .lms-header { padding: 16px; }
+      .lms-tabs { padding: 16px 16px 0; }
+      .lms-body { padding: 0 16px 20px; }
+      .lms-panel { padding: 20px 16px 24px; }
+      .lms-tab { padding: 9px 14px; }
+    }
+    .col-full { grid-column: 1 / -1; }
+    .divider { height: 1px; background: var(--line); margin: 20px 0; }
+
+    .section-head {
+      font-size: 9.5px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-4); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       FORM FIELDS
+       ══════════════════════════════════════════════════════════════════════ */
+    .field { display: flex; flex-direction: column; margin-bottom: 16px; transition: opacity 0.2s; }
+    .field:last-child { margin-bottom: 0; }
+    .field.excluded { opacity: 0.5; }          /* the field's segment is switched off in Code Structure */
+    .field-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.4px; color: var(--text-3); margin-bottom: 7px;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    }
+    .field-label .req { color: var(--accent); }
+    .field-label .opt { color: var(--text-5); font-weight: 400; }
+    .seg-dot { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }   /* segment colour swatch */
+    .field-hint { font-size: 11px; color: var(--text-4); margin-top: 6px; line-height: 1.4; }
+    .field-hint.bad { color: var(--warn); }
+
+    .glass-input, .glass-select {
+      background: var(--field); border: 1px solid var(--field-border); border-radius: 6px; color: var(--text);
+      font-family: var(--font-ui); font-size: 13.5px; padding: 10px 13px; outline: none; transition: all 0.18s; width: 100%;
+      -webkit-appearance: none; appearance: none;
+    }
+    .glass-input:focus, .glass-select:focus {
+      border-color: var(--accent-line); background: var(--field-focus-bg); box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .glass-input::placeholder { color: var(--text-5); font-style: italic; font-size: 13px; }
+    .glass-input[readonly] { cursor: default; }
+    .glass-select option { background: var(--menu); color: var(--text); }
+    .glass-input.mono { font-family: var(--font-mono); letter-spacing: 0.5px; }
+    .glass-input.sm, .glass-select.sm { font-size: 12px; padding: 6px 10px; border-radius: 6px; }
+    .glass-select.sm { padding-right: 26px; }
+
+    /* Custom ▾ arrow for selects (the native one is hidden by appearance: none) */
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: '▾'; position: absolute; right: 13px; top: 50%;
+      transform: translateY(-50%); color: var(--text-4); pointer-events: none; font-size: 12px;
+    }
+    .select-wrap.sm::after { right: 9px; font-size: 11px; }
+    .stack { display: flex; flex-direction: column; gap: 8px; }
+    .input-row { display: flex; align-items: center; gap: 8px; }
+    .input-row .glass-input { flex: 1; }
+    input[type="checkbox"] { accent-color: var(--accent-2); width: 14px; height: 14px; cursor: pointer; flex-shrink: 0; }
+    .check-label { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text-4); cursor: pointer; margin-top: 7px; }
+    .check-label.inline { margin-top: 0; }
+
+    /* Level badge under the course number. --c is set inline to the level's colour;
+       color-mix() derives a faint tint of it for the background. */
+    .level-badge {
+      display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+      padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-top: 7px;
+      font-family: var(--font-mono); color: var(--c); background: color-mix(in srgb, var(--c) 13%, transparent);
+    }
+    .level-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: var(--c); }
+
+    /* Customer search dropdown */
+    .client-wrap { position: relative; }
+    .client-dropdown {
+      position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 200;
+      background: var(--menu); border: 1px solid var(--accent-line); border-radius: 6px;
+      max-height: 210px; overflow-y: auto; box-shadow: var(--shadow);
+    }
+    .client-item {
+      padding: 9px 13px; cursor: pointer; font-size: 13px;
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      transition: background 0.12s; border-bottom: 1px solid var(--line);
+    }
+    .client-item:last-child { border-bottom: none; }
+    .client-item:hover { background: var(--accent-soft); }
+    .client-item .ccode { font-family: var(--font-mono); font-size: 11px; color: var(--text-4); flex-shrink: 0; }
+    .client-item.none-item, .client-item.empty-item { color: var(--text-4); font-style: italic; }
+    .client-item.empty-item { cursor: default; }
+    .client-item.empty-item:hover { background: none; }
+
+    /* Banner shown at the top of the builder while re-coding an existing course */
+    .edit-banner {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      padding: 12px 16px; margin-bottom: 22px; border-radius: 6px;
+      background: var(--accent-soft); border: 1px solid var(--accent-line); color: var(--accent);
+      font-size: 12.5px; font-weight: 700;
+    }
+    .edit-banner .sub { font-weight: 500; color: var(--text-3); font-size: 11.5px; margin-top: 3px; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       CODE STRUCTURE EDITOR (segment list + separator rows + output options)
+       ══════════════════════════════════════════════════════════════════════ */
+    .seg-list { display: flex; flex-direction: column; }
+    .seg-row {
+      display: flex; align-items: center; gap: 10px; padding: 9px 10px 9px 8px; border-radius: 6px;
+      background: var(--soft); border: 1px solid var(--line-2);
+      transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+    }
+    .seg-row.off { opacity: 0.45; }                                           /* segment excluded */
+    .seg-row.off .seg-name { text-decoration: line-through; text-decoration-color: var(--text-4); }
+    .seg-row.dragging { opacity: 0.35; }                                      /* the row being dragged */
+    .seg-row.drop-target { border-color: var(--accent-line); background: var(--accent-soft); }
+    .seg-list > .seg-row + .seg-row { margin-top: 6px; }
+    .drag-handle { cursor: grab; color: var(--text-5); font-size: 15px; line-height: 1; padding: 2px; user-select: none; }
+    .drag-handle:active { cursor: grabbing; }
+    .seg-name { font-size: 12.5px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
+    .seg-val {
+      font-family: var(--font-mono); font-size: 11.5px; color: var(--text-4);
+      flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right;
+    }
+    .seg-val.has { color: var(--c); }                                         /* shows the current value in the segment's colour */
+    .seg-actions { display: flex; gap: 3px; flex-shrink: 0; }
+    .icon-btn {
+      width: 26px; height: 26px; border-radius: 5px; border: 1px solid var(--line-2);
+      background: var(--field); color: var(--text-3); cursor: pointer;
+      font-size: 12px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .icon-btn:hover:not(:disabled) { border-color: var(--accent-line); color: var(--accent); }
+    .icon-btn:disabled { opacity: 0.3; cursor: default; }
+
+    /* The "joined by [separator]" row drawn between two segments, with a connector line */
+    .sep-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 0 6px 30px; position: relative; }
+    .sep-row::before { content: ''; position: absolute; left: 15px; top: 0; bottom: 0; width: 1px; background: var(--line-2); }
+    .sep-lbl { font-size: 10.5px; color: var(--text-4); font-weight: 600; letter-spacing: 0.3px; }
+    .sep-row .select-wrap { width: 150px; }
+    .sep-custom { width: 70px !important; font-family: var(--font-mono); text-align: center; }
+    .sep-note { font-size: 10px; font-family: var(--font-mono); color: var(--warn); }
+    .sep-row.omitted .select-wrap { opacity: 0.5; }
+
+    .opt-block { margin-bottom: 18px; }
+    .opt-block:last-child { margin-bottom: 0; }
+    .opt-hint { font-size: 11px; color: var(--text-4); margin-top: 7px; line-height: 1.45; }
+    /* Segmented control (a row of mutually exclusive buttons) */
+    .seg-ctl { display: inline-flex; flex-wrap: wrap; gap: 3px; padding: 3px; border-radius: 6px; background: var(--soft-2); border: 1px solid var(--line); }
+    .seg-ctl button {
+      padding: 6px 12px; border-radius: 5px; border: 1px solid transparent; background: none;
+      color: var(--text-3); font-family: var(--font-ui); font-size: 11.5px; font-weight: 700;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .seg-ctl button:hover { color: var(--text); }
+    .seg-ctl button.active { background: var(--panel); border-color: var(--accent-line); color: var(--accent); }
+    :root[data-theme="dark"] .seg-ctl button.active { background: var(--accent-soft); }
+    .quick-seps { display: flex; flex-wrap: wrap; gap: 5px; }
+    .quick-seps button {
+      min-width: 34px; padding: 5px 9px; border-radius: 5px; border: 1px solid var(--line-2);
+      background: var(--field); color: var(--text-3); font-family: var(--font-mono); font-size: 12px; cursor: pointer; transition: all 0.15s;
+    }
+    .quick-seps button:hover { border-color: var(--accent-line); color: var(--accent); }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       CODE PREVIEW; each segment is drawn with a bracket and a label under
+       it, like annotating a code on a whiteboard. --c = the segment colour.
+       ══════════════════════════════════════════════════════════════════════ */
+    .code-preview {
+      background: var(--well); border: 1px solid var(--accent-line); border-radius: 8px; padding: 18px 22px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; min-height: 68px;
+    }
+    .code-placeholder { font-family: var(--font-mono); font-size: 12px; color: var(--text-5); font-style: italic; }
+    .code-strip { display: flex; flex-wrap: wrap; align-items: flex-start; row-gap: 10px; flex: 1; min-width: 0; }
+    .code-part { display: inline-flex; flex-direction: column; align-items: stretch; padding: 0 2px; }
+    .code-part-val, .code-sep { font-family: var(--font-mono); font-size: 20px; font-weight: 500; line-height: 1.3; letter-spacing: 0.6px; white-space: pre; }
+    .code-part-val { color: var(--c); text-align: center; padding: 0 1px; }
+    .code-part.missing .code-part-val { opacity: 0.4; font-style: italic; }     /* required segment not filled yet */
+    .code-part-brk { height: 7px; margin: 3px 1px 0; border: 2px solid var(--c); border-top: none; border-radius: 0 0 3px 3px; opacity: 0.7; }
+    .code-part.missing .code-part-brk { border-style: dashed; opacity: 0.4; }
+    .code-part-lbl { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--c); opacity: 0.8; text-align: center; margin-top: 4px; white-space: nowrap; }
+    .code-sep { color: var(--text-4); }
+    .code-final-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .code-final-lbl { font-size: 9.5px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--text-4); min-width: 92px; }
+    .code-final { font-family: var(--font-mono); font-size: 13px; color: var(--text-2); flex: 1; min-width: 0; word-break: break-all; }
+    .code-final.dim { color: var(--text-5); font-style: italic; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       BUTTONS
+       ══════════════════════════════════════════════════════════════════════ */
+    .btn {
+      padding: 9px 18px; border-radius: 6px; border: none; font-family: var(--font-ui); font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all 0.18s; letter-spacing: 0.4px; white-space: nowrap;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-copy { background: var(--accent-soft); border: 1px solid var(--accent-line); color: var(--accent); padding: 6px 12px; font-size: 11px; }
+    .btn-copy:hover { filter: brightness(1.08); }
+    .btn-copy.copied { background: var(--ok-bg); border-color: var(--ok-line); color: var(--ok); }
+    .btn-add { background: var(--add-grad); color: #fff; width: 100%; padding: 13px 24px; font-size: 13.5px; border-radius: 6px; margin-top: 14px; }
+    .btn-add:hover:not(:disabled) { filter: brightness(1.12); }
+    .btn-add:disabled { opacity: 0.3; }
+    .btn-ghost { background: var(--field); border: 1px solid var(--line-2); color: var(--text-3); padding: 7px 13px; font-size: 11.5px; }
+    .btn-ghost:hover:not(:disabled) { border-color: var(--accent-line); color: var(--accent); }
+    .btn-del { background: var(--err-bg); border: 1px solid var(--err-line); color: var(--err); padding: 5px 10px; font-size: 11px; border-radius: 6px; }
+    .btn-del:hover { filter: brightness(0.97) saturate(1.2); }
+    .btn-sm { background: var(--field); border: 1px solid var(--line-2); color: var(--text-3); padding: 5px 10px; font-size: 11px; border-radius: 6px; }
+    .btn-sm:hover:not(:disabled) { border-color: var(--accent-line); color: var(--accent); }
+    .btn-sm.primary { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent); }
+    .btn-clear { background: none; border: none; color: var(--text-4); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 4px; transition: color 0.15s; }
+    .btn-clear:hover { color: var(--err); }
+    .btn-inline { background: none; border: none; padding: 0; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; font-weight: 700; }
+    .btn-inline:hover { filter: brightness(1.2); }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       ALERTS & TOASTS
+       ══════════════════════════════════════════════════════════════════════ */
+    .alert {
+      display: flex; align-items: flex-start; gap: 9px; padding: 11px 14px; border-radius: 6px;
+      font-size: 12px; font-weight: 600; line-height: 1.45; margin-top: 12px; border: 1px solid transparent;
+    }
+    .alert-warn { background-color: var(--warn-bg); border-color: var(--warn-line); color: var(--warn); }
+    .alert-err  { background-color: var(--err-bg);  border-color: var(--err-line);  color: var(--err); }
+    .alert-ok   { background-color: var(--ok-bg);   border-color: var(--ok-line);   color: var(--ok); }
+    .alert-info { background-color: var(--info-bg); border-color: var(--info-line); color: var(--info); }
+    /* Toasts float bottom-right. Status backgrounds are translucent in dark mode,
+       so each toast layers its tint (background-image) over a solid base colour. */
+    .toast { position: fixed; right: 20px; bottom: 20px; z-index: 300; max-width: min(460px, calc(100vw - 32px)); box-shadow: var(--shadow); margin: 0; background-color: var(--menu) !important; }
+    .toast.alert-ok   { background-image: linear-gradient(var(--ok-bg), var(--ok-bg)); }
+    .toast.alert-warn { background-image: linear-gradient(var(--warn-bg), var(--warn-bg)); }
+    .toast.alert-err  { background-image: linear-gradient(var(--err-bg), var(--err-bg)); }
+    .toast.alert-info { background-image: linear-gradient(var(--info-bg), var(--info-bg)); }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       CATALOG TABLE
+       ══════════════════════════════════════════════════════════════════════ */
+    .cat-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .cat-toolbar .glass-input { max-width: 300px; }
+    .tool-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .tool-sep { width: 1px; height: 22px; background: var(--line-2); margin: 0 4px; }
+    .cat-count { font-size: 12px; font-family: var(--font-mono); color: var(--text-4); margin-left: auto; }
+
+    /* position: relative keeps absolutely positioned cell content (like the
+       screen-reader-only "Actions" heading) inside this horizontal scroller,
+       so a wide table never makes the whole page scroll sideways on phones. */
+    .table-scroll { overflow-x: auto; position: relative; }
+    .cat-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .cat-table th {
+      text-align: left; padding: 9px 14px; white-space: nowrap; font-size: 9.5px; font-weight: 700;
+      letter-spacing: 1.8px; text-transform: uppercase; color: var(--text-4); border-bottom: 1px solid var(--line-2);
+    }
+    .th-sort { background: none; border: none; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer; padding: 0; }
+    .th-sort:hover, .th-sort.on { color: var(--accent); }
+    .cat-table td { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    .cat-table tr:last-child td { border-bottom: none; }
+    .cat-table tbody tr:hover td { background: var(--soft); }
+    .cat-table tr.flagged td { background: var(--flag-row); }
+    .row-editing td { background: var(--accent-soft) !important; }           /* the course open in the builder */
+    .idx-cell { font-family: var(--font-mono); font-size: 11px; color: var(--text-5); }
+    .name-cell { color: var(--text-2); font-weight: 500; }
+    .muted-cell { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
+    .dash { opacity: 0.35; }
+    .mono { font-family: var(--font-mono); }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 5px; font-family: var(--font-mono); font-size: 11px; font-weight: 500; background: var(--soft-2); color: var(--text-3); }
+    .lvl-pill { display: inline-block; padding: 2px 8px; border-radius: 5px; font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--c); background: color-mix(in srgb, var(--c) 13%, transparent); }
+
+    /* Course code cell: click to copy; the ⧉ icon appears on hover */
+    .code-cell { font-family: var(--font-mono); font-size: 12.5px; color: var(--accent); font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: none; border: none; white-space: nowrap; }
+    .ci { opacity: 0; transition: opacity 0.12s; font-size: 10px; color: var(--text-4); }
+    .code-cell:hover .ci, .code-cell:focus-visible .ci { opacity: 1; }
+    .ci.done { opacity: 1 !important; color: var(--ok); }
+
+    /* Format flag details under a flagged code, plus "Kept as-is" and code history notes */
+    .fmt-flag { margin-top: 7px; display: flex; flex-direction: column; gap: 6px; }
+    .fmt-flag-msg { font-size: 11px; font-weight: 600; color: var(--warn); line-height: 1.4; word-break: break-word; }
+    .flag-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    .fmt-acked { margin-top: 6px; font-size: 10.5px; color: var(--ok); line-height: 1.4; word-break: break-word; }
+    .prev-codes { margin-top: 4px; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-4); cursor: help; }
+    .flag-banner { margin: 0 0 18px; }
+    .flag-banner-body { display: flex; flex-direction: column; gap: 9px; flex: 1; }
+
+    /* Inline rename editor inside a table row */
+    .name-edit { display: flex; flex-direction: column; gap: 6px; min-width: 220px; }
+    .name-edit-row { display: flex; gap: 6px; align-items: center; }
+    .name-edit-err { font-size: 11px; color: var(--err); font-weight: 600; }
+    .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+
+    /* CSV import preview panel */
+    .import-panel { border: 1px solid var(--accent-line); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+    .import-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; padding: 14px 16px; background: var(--accent-soft); }
+    .import-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .import-sub { font-size: 11.5px; color: var(--text-3); margin-top: 4px; line-height: 1.5; }
+    .import-table-wrap { max-height: 340px; overflow: auto; position: relative; }
+    .import-table td { vertical-align: top; }
+    .imp-badge { display: inline-block; padding: 1px 7px; border-radius: 5px; font-size: 10.5px; font-weight: 700; margin-right: 6px; white-space: nowrap; }
+    .imp-badge.ready   { background: var(--ok-bg);   color: var(--ok);   border: 1px solid var(--ok-line); }
+    .imp-badge.flag    { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn-line); }
+    .imp-badge.error   { background: var(--err-bg);  color: var(--err);  border: 1px solid var(--err-line); }
+    .imp-badge.example { background: var(--soft-2);  color: var(--text-4); }
+    .imp-note { font-size: 11.5px; color: var(--text-3); }
+    tr.imp-error td, tr.imp-example td { opacity: 0.75; }
+
+    .empty-state { text-align: center; padding: 70px 20px; color: var(--text-5); }
+    .empty-icon { font-size: 44px; margin-bottom: 14px; opacity: 0.4; }
+    .empty-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: var(--text-4); }
+    .empty-sub { font-size: 12px; color: var(--text-4); }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       REFERENCE TAB
+       ══════════════════════════════════════════════════════════════════════ */
+    .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    @media (max-width: 640px) { .ref-grid { grid-template-columns: 1fr; } }
+    .ref-wide { grid-column: 1 / -1; }
+    .ref-section-title { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-4); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+    .ref-list { display: flex; flex-direction: column; gap: 5px; }
+    .ref-row { display: flex; align-items: center; gap: 10px; padding: 8px 11px; background: var(--soft); border-radius: 6px; border: 1px solid var(--line); }
+    .ref-code { font-family: var(--font-mono); font-size: 12px; font-weight: 500; min-width: 42px; flex-shrink: 0; }
+    .ref-name { font-size: 12.5px; color: var(--text-3); }
+    .ref-scrollable { max-height: 340px; overflow-y: auto; padding-right: 4px; }
+    .state-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 5px; }
+    .fmt-box { background: var(--well); border: 1px solid var(--accent-line); border-radius: 8px; padding: 20px 24px; }
+    .fmt-pattern { font-family: var(--font-mono); font-size: 15px; color: var(--accent); letter-spacing: 0.5px; margin-bottom: 16px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; }
+    .fmt-desc-row { display: flex; gap: 16px; align-items: baseline; padding: 3px 0; }
+    .fmt-desc-row .k { font-family: var(--font-mono); font-size: 12px; min-width: 100px; flex-shrink: 0; }
+    .fmt-desc-row .v { font-size: 12px; color: var(--text-3); }
+    .fmt-examples { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 16px; }
+    .fmt-examples .ref-section-title { border: none; padding: 0; margin-bottom: 10px; }
+    .fmt-ex { font-family: var(--font-mono); font-size: 12px; color: var(--text-3); padding: 4px 0; border-bottom: 1px solid var(--line); word-break: break-all; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       FOOTER CREDIT; "© 2026 Joe VanWagner" with the pixel-head icon
+       ══════════════════════════════════════════════════════════════════════ */
+    .jv-credit { display: flex; justify-content: center; padding: 4px 16px 28px; font-family: var(--font-head); font-size: 13px; color: var(--text-4); }
+    .jv-credit a { display: inline-flex; align-items: center; gap: 7px; color: var(--accent); text-decoration: none; }
+    .jv-credit a:hover span { text-decoration: underline; }
+    /* The icon is a 16×16 image drawn at 24px: "pixelated" keeps its edges crisp instead of blurry. */
+    .jv-icon { width: 24px; height: 24px; image-rendering: pixelated; image-rendering: crisp-edges; border-radius: 4px; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       ACCESSIBILITY HELPERS
+       ══════════════════════════════════════════════════════════════════════ */
+    :focus-visible { outline: 2px solid var(--accent-line); outline-offset: 2px; }   /* visible keyboard focus */
+    .glass-input:focus-visible, .glass-select:focus-visible { outline: none; }       /* inputs use their own focus ring */
+    /* Visually hidden but still read by screen readers */
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<noscript><p style="padding:24px;font-family:sans-serif">This tool needs JavaScript enabled.</p></noscript>
+
+<script type="text/babel">
+/* ════════════════════════════════════════════════════════════════════════════
+   APP SCRIPT
+   Sections:
+     1. Reference data     ; subjects, audiences, customers, states, levels
+     2. Code format model  ; segments, separators, the default format
+     3. Sample & template  ; demo courses, CSV template, examples
+     4. Helpers            ; building, parsing and comparing codes
+     5. Storage            ; saving to / loading from localStorage
+     6. CSV import         ; parsing a CSV and checking each row
+     7. Small components   ; segmented control, code preview, credit footer
+     8. Format editor      ; the Code Structure panel
+     9. App                ; state, actions, and the three tabs
+   ════════════════════════════════════════════════════════════════════════════ */
+const { useState, useEffect, useRef } = React;
+
+/* ────────────────────────────────────────────────────────────────────────────
+   1. REFERENCE DATA (all fictional)
+   Each list feeds a dropdown in the builder and a table on the Reference tab.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+// Subject / course-type codes (first segment of a course code)
+const COURSE_TYPES = [
+  { code: "COM", label: "Compliance" },
+  { code: "GEN", label: "General" },
+  { code: "LIC", label: "Licensing & Certification" },
+  { code: "MAN", label: "Management" },
+  { code: "ONB", label: "Onboarding" },
+  { code: "PRD", label: "Product Knowledge" },
+  { code: "SAF", label: "Safety" },
+];
+
+// Audience codes. MAN is both a subject and an audience, which the code
+// parser has to cope with (see parseCode).
+const AUDIENCES = [
+  { code: "ALL", label: "All Staff" },
+  { code: "CON", label: "Contractors & Temps" },
+  { code: "DEV", label: "Professional Development" },
+  { code: "EXE", label: "Executives" },
+  { code: "FIN", label: "Finance" },
+  { code: "FLD", label: "Field Staff" },
+  { code: "HRS", label: "Human Resources" },
+  { code: "ITS", label: "IT & Systems" },
+  { code: "LND", label: "Learning & Development" },
+  { code: "MAN", label: "All Managers" },
+  { code: "NEW", label: "New Hires" },
+  { code: "OFF", label: "Office Staff" },
+  { code: "OPS", label: "Operations" },
+  { code: "REM", label: "Remedial" },
+  { code: "SLS", label: "Sales" },
+  { code: "SUP", label: "Supervisors" },
+  { code: "SVC", label: "Customer Service" },
+  { code: "TRN", label: "Trainers" },
+];
+
+// Customers a course can be built for. Codes vary in length on purpose, and
+// the three Harbor & Pine brands share one parent code (30017) to show that
+// a code can map to several customer names.
+const CLIENTS = [
+  { name: "Acme Logistics", code: "10452" },
+  { name: "Bluebird Outfitters", code: "20417" },
+  { name: "Cobalt Financial Group", code: "31008" },
+  { name: "Driftwood Hotels", code: "41566" },
+  { name: "Evergreen Grocers", code: "52031" },
+  { name: "Foxglove Pharmacy", code: "60288" },
+  { name: "Granite Data Centers", code: "70315" },
+  { name: "Harbor & Pine Apparel", code: "30017" },
+  { name: "Harbor & Pine Kids", code: "30017" },
+  { name: "Harbor & Pine Outlet", code: "30017" },
+  { name: "Ironleaf Hardware", code: "81240" },
+  { name: "Juniper Health Partners", code: "90872" },
+  { name: "Keystone Paper Co.", code: "11593" },
+  { name: "Lumen Telecom", code: "23690" },
+  { name: "Maple Street Market", code: "4471" },
+  { name: "Orchard Home Goods", code: "56102" },
+  { name: "Pinecrest Property Management", code: "67734" },
+  { name: "Quillfeather Books", code: "78845" },
+  { name: "Riverbend Recycling", code: "13377" },
+  { name: "Summit Sporting Goods", code: "24488" },
+  { name: "Tidewater Shipping", code: "35599" },
+  { name: "Umbra Electronics", code: "46610" },
+  { name: "Willow Creek Clinics", code: "57721" },
+  { name: "Zephyr Mobility", code: "110214" },
+];
+
+// US states + D.C., sorted by name for the dropdown
+const STATES = [
+  { code: "AL", name: "Alabama" }, { code: "AK", name: "Alaska" }, { code: "AZ", name: "Arizona" },
+  { code: "AR", name: "Arkansas" }, { code: "CA", name: "California" }, { code: "CO", name: "Colorado" },
+  { code: "CT", name: "Connecticut" }, { code: "DE", name: "Delaware" }, { code: "FL", name: "Florida" },
+  { code: "GA", name: "Georgia" }, { code: "HI", name: "Hawaii" }, { code: "ID", name: "Idaho" },
+  { code: "IL", name: "Illinois" }, { code: "IN", name: "Indiana" }, { code: "IA", name: "Iowa" },
+  { code: "KS", name: "Kansas" }, { code: "KY", name: "Kentucky" }, { code: "LA", name: "Louisiana" },
+  { code: "ME", name: "Maine" }, { code: "MD", name: "Maryland" }, { code: "MA", name: "Massachusetts" },
+  { code: "MI", name: "Michigan" }, { code: "MN", name: "Minnesota" }, { code: "MS", name: "Mississippi" },
+  { code: "MO", name: "Missouri" }, { code: "MT", name: "Montana" }, { code: "NE", name: "Nebraska" },
+  { code: "NV", name: "Nevada" }, { code: "NH", name: "New Hampshire" }, { code: "NJ", name: "New Jersey" },
+  { code: "NM", name: "New Mexico" }, { code: "NY", name: "New York" }, { code: "NC", name: "North Carolina" },
+  { code: "ND", name: "North Dakota" }, { code: "OH", name: "Ohio" }, { code: "OK", name: "Oklahoma" },
+  { code: "OR", name: "Oregon" }, { code: "PA", name: "Pennsylvania" }, { code: "RI", name: "Rhode Island" },
+  { code: "SC", name: "South Carolina" }, { code: "SD", name: "South Dakota" }, { code: "TN", name: "Tennessee" },
+  { code: "TX", name: "Texas" }, { code: "UT", name: "Utah" }, { code: "VT", name: "Vermont" },
+  { code: "VA", name: "Virginia" }, { code: "DC", name: "Washington D.C." }, { code: "WA", name: "Washington" },
+  { code: "WV", name: "West Virginia" }, { code: "WI", name: "Wisconsin" }, { code: "WY", name: "Wyoming" },
+];
+const STATE_CODES = new Set(STATES.map(s => s.code));   // fast "is this a real state code?" lookups
+
+// Older codes used region codes (R1–R5) in the last segment. They're retired:
+// a course that still has one is flagged, and regenerating it drops the region.
+const isRegionCode = v => /^R[1-5]$/i.test(String(v || "").trim());
+
+// Course levels by number range. Colours are theme tokens, so they adapt to dark mode.
+const LEVELS = [
+  { range: "001–099", label: "Remedial / Pre-Entry", color: "var(--lv0)" },
+  { range: "100–199", label: "Entry Level",          color: "var(--lv1)" },
+  { range: "200–299", label: "Intermediate",         color: "var(--lv2)" },
+  { range: "300–399", label: "Advanced",             color: "var(--lv3)" },
+  { range: "400–499", label: "Highly Advanced",      color: "var(--lv4)" },
+  { range: "500–599", label: "Manager Level",        color: "var(--lv5)" },
+  { range: "600–999", label: "Administrator Level",  color: "var(--lv6)" },
+];
+
+/* ────────────────────────────────────────────────────────────────────────────
+   2. CODE FORMAT MODEL
+   ──────────────────────────────────────────────────────────────────────────── */
+
+// The five segments a code can contain. Keys are stable ids used everywhere
+// (stored formats, stored course parts), so they never change even when a
+// label does (e.g. "location" is now labelled "State").
+//   required: the code can't be built until this segment has a value
+//             (unless the segment is switched off in Code Structure).
+//   short:    the tag drawn under the segment's bracket in the preview.
+const SEGMENTS = {
+  type:     { label: "Subject",  short: "SUBJ",  color: "var(--seg-type)",     required: true,  desc: "Subject / course type code (e.g. MAN)" },
+  number:   { label: "Number",   short: "NUM",   color: "var(--seg-number)",   required: true,  desc: "3-digit course number (e.g. 101, 099)" },
+  client:   { label: "Customer", short: "CUST",  color: "var(--seg-client)",   required: false, desc: "Customer code; skipped when no customer is chosen" },
+  audience: { label: "Audience", short: "AUD",   color: "var(--seg-audience)", required: true,  desc: "Audience code (e.g. SUP)" },
+  location: { label: "State",    short: "STATE", color: "var(--seg-location)", required: false, desc: "2-letter state code (e.g. CA); skipped when no state is chosen" },
+};
+const SEGMENT_IDS = Object.keys(SEGMENTS);
+
+// Separator choices offered in each "joined by" dropdown. "" means the two
+// segments are written right next to each other (e.g. MAN + 101 → MAN101).
+const SEPARATORS = [
+  { value: "-", label: "Hyphen  ( - )" },
+  { value: "_", label: "Underscore  ( _ )" },
+  { value: ".", label: "Period  ( . )" },
+  { value: "/", label: "Slash  ( / )" },
+  { value: " ", label: "Space" },
+  { value: "",  label: "None (joined)" },
+];
+const CUSTOM = "__custom";   // sentinel <option> value meaning "let me type my own"
+
+// The standard format, e.g. MAN101-20417-SUP-CA.
+// Each segment stores:
+//   on   – included in the code at all
+//   sep  – the separator written BEFORE this segment (ignored for the first one)
+//   keep – when sepMode is "custom", whether this separator survives into the final code
+// sepMode:   keep (all separators) | omit (none) | custom (per-separator "keep")
+// spaceMode: keep | remove | underscore; what happens to spaces in the final code
+const DEFAULT_FORMAT = {
+  order: ["type", "number", "client", "audience", "location"],
+  segs: {
+    type:     { on: true, sep: "-", keep: true },
+    number:   { on: true, sep: "",  keep: true },
+    client:   { on: true, sep: "-", keep: true },
+    audience: { on: true, sep: "-", keep: true },
+    location: { on: true, sep: "-", keep: true },
+  },
+  sepMode: "keep",
+  spaceMode: "keep",
+};
+
+/* ────────────────────────────────────────────────────────────────────────────
+   3. SAMPLE DATA, EXAMPLES & CSV TEMPLATE
+   ──────────────────────────────────────────────────────────────────────────── */
+
+// Shown on the Reference tab, re-rendered in whatever format is current.
+const EXAMPLES = [
+  { vals: { type: "MAN", number: "101", client: "20417", audience: "SUP", location: "CA" }, name: "Supervisor Essentials (California)" },
+  { vals: { type: "ONB", number: "100", audience: "ALL" },                                  name: "Welcome to the Company" },
+  { vals: { type: "PRD", number: "150", client: "30017", audience: "SLS" },                 name: "Harbor & Pine Product Knowledge" },
+  { vals: { type: "SAF", number: "210", client: "52031", audience: "FLD", location: "TX" }, name: "Evergreen Grocers Field Safety (Texas)" },
+  { vals: { type: "LIC", number: "301", audience: "ALL", location: "WA" },                  name: "Washington Licensing (Advanced)" },
+  { vals: { type: "COM", number: "099", audience: "REM" },                                  name: "Remedial Compliance Refresher" },
+];
+
+// Seeded into the catalog on a visitor's first visit so there's something to
+// explore. The last one uses an older code style ("ONB-120-NEW", with a hyphen
+// between subject and number) so it shows up flagged.
+const SAMPLE_COURSES = [
+  { id: "demo-1", code: "ONB100-ALL", name: "Welcome to the Company", parts: { type: "ONB", number: "100", audience: "ALL" },
+    type: "ONB", number: 100, client: "", clientCode: "", audience: "ALL", location: "", createdAt: "2026-01-12T15:00:00.000Z" },
+  { id: "demo-2", code: "MAN101-20417-SUP-CA", name: "Supervisor Essentials (California)",
+    parts: { type: "MAN", number: "101", client: "20417", audience: "SUP", location: "CA" },
+    type: "MAN", number: 101, client: "Bluebird Outfitters", clientCode: "20417", audience: "SUP", location: "CA", createdAt: "2026-02-03T15:00:00.000Z" },
+  { id: "demo-3", code: "PRD150-30017-SLS", name: "Harbor & Pine Product Knowledge",
+    parts: { type: "PRD", number: "150", client: "30017", audience: "SLS" },
+    type: "PRD", number: 150, client: "Harbor & Pine Apparel", clientCode: "30017", audience: "SLS", location: "", createdAt: "2026-02-20T15:00:00.000Z" },
+  { id: "demo-4", code: "SAF210-52031-FLD-TX", name: "Evergreen Grocers Field Safety (Texas)",
+    parts: { type: "SAF", number: "210", client: "52031", audience: "FLD", location: "TX" },
+    type: "SAF", number: 210, client: "Evergreen Grocers", clientCode: "52031", audience: "FLD", location: "TX", createdAt: "2026-03-09T15:00:00.000Z" },
+  { id: "demo-5", code: "COM305-31008-FIN-NY", name: "Financial Controls Refresher",
+    parts: { type: "COM", number: "305", client: "31008", audience: "FIN", location: "NY" },
+    type: "COM", number: 305, client: "Cobalt Financial Group", clientCode: "31008", audience: "FIN", location: "NY", createdAt: "2026-04-14T15:00:00.000Z" },
+  { id: "demo-6", code: "ONB-120-NEW", name: "New Hire Orientation", parts: { type: "ONB", number: "120", audience: "NEW" },
+    type: "ONB", number: 120, client: "", clientCode: "", audience: "NEW", location: "", createdAt: "2025-11-04T15:00:00.000Z" },
+];
+
+// CSV import: which column headers map to which field. Headers are compared
+// after lower-casing and stripping everything but letters, so "Course Name",
+// "course_name" and "COURSE NAME*" all match "coursename". Most specific first.
+const CSV_FIELDS = {
+  name:     ["coursename", "name", "coursetitle", "title"],
+  code:     ["coursecode", "code"],
+  type:     ["subject", "subjectcode", "coursetype", "type"],
+  number:   ["number", "coursenumber", "num"],
+  client:   ["customercode", "clientcode", "customer", "client"],
+  audience: ["audience", "audiencecode"],
+  location: ["state", "statecode", "location"],
+};
+const TEMPLATE_HEAD = ["Course Name", "Course Code", "Subject", "Number", "Customer Code", "Audience", "State"];
+// Two sample rows showing both ways to fill a row in. The importer skips any
+// row whose name starts with "(Example)", so they can be left in the file.
+const TEMPLATE_ROWS = [
+  ["(Example) Supervisor Essentials (California)", "MAN101-20417-SUP-CA", "", "", "", "", ""],
+  ["(Example) Evergreen Grocers Field Safety", "", "SAF", "210", "52031", "FLD", "TX"],
+];
+const EXAMPLE_PREFIX = "(example)";
+
+/* ────────────────────────────────────────────────────────────────────────────
+   4. HELPERS
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/** Level (label + colour) for a course number, or null if it isn't a valid number. */
+function getLevelInfo(num) {
+  const n = parseInt(num, 10);
+  if (isNaN(n) || n <= 0) return null;
+  if (n < 100) return LEVELS[0];
+  if (n < 200) return LEVELS[1];
+  if (n < 300) return LEVELS[2];
+  if (n < 400) return LEVELS[3];
+  if (n < 500) return LEVELS[4];
+  if (n < 600) return LEVELS[5];
+  return LEVELS[6];
+}
+
+/** "7" → "007", "99" → "099". Course numbers are always three digits in a code. */
+const padNum = val => String(parseInt(val, 10)).padStart(3, "0");
+
+/** Custom subject/audience codes: upper-case letters, digits and spaces only, max 10. */
+const sanitizeCode = s => s.toUpperCase().replace(/[^A-Z0-9 ]/g, "").slice(0, 10);
+
+/** Trim and collapse runs of whitespace: "  Safety   Basics " → "Safety Basics". */
+const cleanName = s => String(s || "").trim().replace(/\s+/g, " ");
+
+/** Name identity for duplicate checks: case- and spacing-insensitive. */
+const normName = s => cleanName(s).toLowerCase();
+
+/** Code identity for duplicate checks: ignores case and every separator,
+    so "MAN101-20417" and "man101_20417" count as the same code. */
+const normCode = s => (s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+/** Order-insensitive identity of a code's segment values, used to catch the
+    same segments written in a different order (101-MAN-… vs MAN101-…). */
+const partsKey = p => p ? SEGMENT_IDS.map(id => `${id}=${normCode(p[id])}`).join("|") : null;
+
+/** Escape a string for literal use inside a RegExp. */
+const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\\/-]/g, "\\$&");
+
+/** "1 course" / "3 courses" */
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
+/** Customer name for a code; but only when exactly one customer uses that code
+    (30017 belongs to three Harbor & Pine brands, so it returns ""). */
+const clientNameFor = code => {
+  const hits = CLIENTS.filter(x => x.code === code);
+  return hits.length === 1 ? hits[0].name : "";
+};
+
+/** Apply the "Spaces in final code" setting to a piece of the code. */
+function applySpaces(str, mode) {
+  if (mode === "remove") return str.replace(/\s/g, "");
+  if (mode === "underscore") return str.replace(/\s/g, "_");
+  return str;
+}
+
+/**
+ * THE CORE FUNCTION: assemble a course code from segment values and a format.
+ *
+ * Walks the segments in the format's order and, for each one that's switched on:
+ *   • skips it if it's optional and empty (no customer → no customer segment)
+ *   • records it as "missing" if it's required and empty
+ *   • otherwise writes its separator (unless it's the first piece, or the
+ *     separator is omitted by sepMode) followed by its value
+ *
+ * Returns:
+ *   slots   – every visible piece, including placeholders for missing ones
+ *             (the preview draws these as faded SUBJ / NUM / … tags)
+ *   missing – ids of required segments still empty
+ *   code    – the finished code string, or "" while anything is missing
+ *   used    – the values that actually went into the code (stored as `parts`)
+ */
+function buildCode(vals, fmt) {
+  const slots = [], missing = [], used = {};
+  fmt.order.forEach(id => {
+    const s = fmt.segs[id];
+    if (!s.on) return;
+    const raw = String(vals[id] || "").trim();
+    if (!raw && !SEGMENTS[id].required) return;
+    const dropSep = fmt.sepMode === "omit" || (fmt.sepMode === "custom" && !s.keep);
+    const sep = slots.length && !dropSep ? applySpaces(s.sep, fmt.spaceMode) : "";
+    if (!raw) { missing.push(id); slots.push({ id, sep, value: "", missing: true }); return; }
+    used[id] = raw;
+    slots.push({ id, sep, value: applySpaces(raw, fmt.spaceMode), missing: false });
+  });
+  const code = slots.length && !missing.length ? slots.map(s => s.sep + s.value).join("") : "";
+  return { slots, missing, code, used };
+}
+
+/**
+ * The reverse of buildCode: read segment values back out of a code that was
+ * written in `fmt`. Used by the CSV importer so an uploaded code can be
+ * understood (and later flagged or regenerated like any other course).
+ *
+ * How it works: the optional segments (customer, state) may or may not be
+ * present, so it tries every combination of them, fullest first. For each
+ * combination it builds a code from placeholder values, which yields the exact
+ * separators that combination would use, then turns that into a regular
+ * expression with one named group per segment and tests the real code.
+ *
+ * Known subject/audience codes are listed before the generic [A-Z]{1,10}
+ * fallback so that, when separators are omitted, "SUPCA" splits into SUP + CA
+ * rather than being read as one long audience code.
+ */
+const SEG_RE = {
+  type:     `${COURSE_TYPES.map(t => t.code).join("|")}|[A-Z]{1,10}`,
+  number:   `\\d{3}`,
+  client:   `\\d{1,10}`,
+  audience: `${AUDIENCES.map(a => a.code).join("|")}|[A-Z]{1,10}`,
+  location: [...STATE_CODES].join("|"),
+};
+function parseCode(code, fmt) {
+  const opt = SEGMENT_IDS.filter(id => !SEGMENTS[id].required && fmt.segs[id].on);
+  // mask's bits say which optional segments are present; count down so the
+  // fullest combination is tried first.
+  for (let mask = (1 << opt.length) - 1; mask >= 0; mask--) {
+    const vals = {};
+    SEGMENT_IDS.forEach(id => {
+      const i = opt.indexOf(id);
+      if (SEGMENTS[id].required || (i >= 0 && (mask >> i) & 1)) vals[id] = `@${id}@`;
+    });
+    const b = buildCode(vals, fmt);
+    if (!b.code) continue;
+    const src = b.slots.map(s => escapeRe(s.sep) + `(?<${s.id}>${SEG_RE[s.id]})`).join("");
+    const m = new RegExp(`^(?:${src})$`, "i").exec(code.trim());
+    if (m) return Object.fromEntries(b.slots.map(s => [s.id, m.groups[s.id].toUpperCase()]));
+  }
+  return null;
+}
+
+/**
+ * The segment values a catalog course's code was built from.
+ * Newer courses store them as `parts`; older ones are reconstructed from the
+ * individual fields. Retired region codes are dropped either way.
+ */
+function courseValues(c) {
+  const v = c.parts ? { ...c.parts } : {
+    type: c.type || "",
+    number: c.number ? padNum(c.number) : "",
+    client: c.clientCode ||
+      CLIENTS.find(x => x.name === c.client)?.code ||
+      (/^\d+$/.test(c.client || "") ? c.client : ""),
+    audience: c.audience || "",
+    location: c.location || "",
+  };
+  if (isRegionCode(v.location)) delete v.location;
+  return v;
+}
+
+/**
+ * How an existing course's code compares with the current format.
+ *   state "ok"      – the format would produce exactly this code
+ *   state "flagged" – it wouldn't; shown with Regenerate / Mark OK
+ *   state "acked"   – it wouldn't, but someone clicked Mark OK for this exact
+ *                     outcome. `target` records that outcome, so if the format
+ *                     changes again (and would produce something else) the
+ *                     course is flagged again.
+ *   expected        – the code the current format would give it ("" if a
+ *                     required segment is missing, so it can't be rebuilt)
+ */
+function formatStatus(c, fmt) {
+  const b = buildCode(courseValues(c), fmt);
+  if (b.code === c.code) return { state: "ok", expected: b.code };
+  const target = b.code || "!" + b.missing.join(",");
+  return { state: c.ackFor === target ? "acked" : "flagged", expected: b.code, missing: b.missing, used: b.used, target };
+}
+
+/**
+ * Why `code` would clash with existing course `c` (or null if it doesn't):
+ *   "same"      – identical ignoring case and separators
+ *   "reordered" – the same segment values in a different order
+ *   "pending"   – `c` is flagged and would BECOME this code if regenerated,
+ *                 so the code is effectively reserved for it. (Courses marked
+ *                 OK keep their own code and don't reserve anything.)
+ */
+function codeConflictReason(c, code, parts, fmt) {
+  const ck = normCode(code), pk = partsKey(parts);
+  if (normCode(c.code) === ck) return "same";
+  if (pk && c.parts && partsKey(c.parts) === pk) return "reordered";
+  if (fmt) {
+    const st = formatStatus(c, fmt);
+    if (st.state === "flagged" && normCode(st.expected) === ck) return "pending";
+  }
+  return null;
+}
+/** First course whose code conflicts (exceptId skips the course being edited). */
+function findCodeConflict(list, code, parts, exceptId, fmt) {
+  return list.find(c => c.id !== exceptId && codeConflictReason(c, code, parts, fmt));
+}
+/** First course already using this name (case- and spacing-insensitive). */
+function findNameConflict(list, name, exceptId) {
+  const nk = normName(name);
+  return nk ? list.find(c => c.id !== exceptId && normName(c.name) === nk) : undefined;
+}
+
+/** Natural sort by code, so SAF99 comes before SAF100. */
+const sortByCode = list => [...list].sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }));
+/** Short unique id for new courses. */
+const makeId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+/** Copy to the clipboard, falling back to the old execCommand trick where the
+    Clipboard API is unavailable (non-HTTPS pages, some embedded frames). */
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch {}
+    document.body.removeChild(ta);
+  }
+}
+
+/** Trigger a file download of generated text (CSV, JSON) without a server. */
+function downloadFile(filename, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/** Quote one CSV cell. Values starting with = + - @ get a leading apostrophe so
+    spreadsheet apps show them as text instead of running them as formulas. */
+function csvCell(v) {
+  let s = String(v ?? "");
+  if (/^[=+\-@]/.test(s)) s = "'" + s;
+  return `"${s.replace(/"/g, '""')}"`;
+}
+/** Rows → CSV text. The leading ﻿ (byte-order mark) makes Excel read it as UTF-8. */
+const toCsv = rows => "﻿" + rows.map(r => r.map(csvCell).join(",")).join("\r\n");
+
+/* ────────────────────────────────────────────────────────────────────────────
+   5. STORAGE
+   Everything is kept in the visitor's own browser. Every read/write is wrapped
+   in try/catch because storage can be blocked or full; the app keeps working
+   for the session either way.
+   ──────────────────────────────────────────────────────────────────────────── */
+const STORAGE_KEY = "ccat_courses_v1";
+const FORMAT_KEY  = "ccat_format_v1";
+const THEME_KEY   = "ccat_theme";   // also read by the inline script in <head>
+
+/** Saved courses; on a first visit (nothing saved yet) the sample courses. */
+function loadCourses() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw === null) return SAMPLE_COURSES;
+    const list = JSON.parse(raw);
+    return Array.isArray(list) ? list.filter(c => c && typeof c.code === "string") : [];
+  } catch { return SAMPLE_COURSES; }
+}
+function saveCourses(courses) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(courses)); } catch {}
+}
+
+/** Saved format, validated field by field so a damaged or older saved value
+    can never break the app (anything unrecognised falls back to the default). */
+function loadFormat() {
+  try {
+    const f = JSON.parse(localStorage.getItem(FORMAT_KEY));
+    if (!f || typeof f !== "object") return DEFAULT_FORMAT;
+    const order = Array.isArray(f.order) && f.order.length === SEGMENT_IDS.length && SEGMENT_IDS.every(id => f.order.includes(id))
+      ? f.order : DEFAULT_FORMAT.order;
+    const segs = {};
+    SEGMENT_IDS.forEach(id => { segs[id] = { ...DEFAULT_FORMAT.segs[id], ...(f.segs?.[id] || {}) }; });
+    return {
+      order, segs,
+      sepMode:   ["keep", "omit", "custom"].includes(f.sepMode) ? f.sepMode : DEFAULT_FORMAT.sepMode,
+      spaceMode: ["keep", "remove", "underscore"].includes(f.spaceMode) ? f.spaceMode : DEFAULT_FORMAT.spaceMode,
+    };
+  } catch { return DEFAULT_FORMAT; }
+}
+function saveFormat(fmt) {
+  try { localStorage.setItem(FORMAT_KEY, JSON.stringify(fmt)); } catch {}
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   6. CSV IMPORT
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Parse CSV text into rows of trimmed cells.
+ * • Detects the delimiter (comma, semicolon or tab) from the header line;
+ *   Excel in many European locales saves "CSV" with semicolons.
+ * • Handles quoted cells, "" escaped quotes, and line breaks inside quotes.
+ * • Strips the apostrophe our own exporter adds in front of formula-like values.
+ */
+function parseCsv(text) {
+  text = text.replace(/^﻿/, "");
+  const first = text.split(/\r?\n/, 1)[0] || "";
+  const delim = [",", ";", "\t"].map(d => [d, first.split(d).length]).sort((a, b) => b[1] - a[1])[0][0];
+  const rows = [];
+  let row = [], cell = "", quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quoted) {
+      if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else quoted = false; }
+      else cell += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === delim) { row.push(cell); cell = ""; }
+    else if (ch === "\n" || ch === "\r") {
+      if (ch === "\r" && text[i + 1] === "\n") i++;   // treat \r\n as one line break
+      row.push(cell); rows.push(row); row = []; cell = "";
+    } else cell += ch;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows.map(r => r.map(c => c.trim().replace(/^'(?=[=+\-@])/, "")));
+}
+
+/**
+ * Check every row of an uploaded CSV against the catalog (and against earlier
+ * rows in the same file, so a file can't contain its own duplicates).
+ *
+ * A row needs a Course Name plus either:
+ *   • a Course Code; imported exactly as written; if its segments can be read
+ *     from it (parseCode) they're stored, otherwise the course is marked
+ *     `freeform` and will be flagged until someone re-codes it; or
+ *   • its segments; the code is generated in the current format.
+ *
+ * Returns { error } when the file itself is unusable, otherwise { rows } where
+ * each row is "ready" (with the course entry to add), "error" (with the
+ * reason), or "example" (a template sample row, ignored).
+ */
+function analyzeImport(table, courses, fmt) {
+  if (!table.length) return { error: "The file is empty." };
+  // Map each field to its column index using the header aliases.
+  const head = table[0].map(h => h.toLowerCase().replace(/[^a-z]/g, ""));
+  const col = {};
+  Object.entries(CSV_FIELDS).forEach(([field, aliases]) => {
+    const alias = aliases.find(a => head.includes(a));
+    if (alias) col[field] = head.indexOf(alias);
+  });
+  if (col.name === undefined) return { error: "Couldn't find a “Course Name” column. Start from the CSV template." };
+
+  const accepted = [...courses];   // grows as rows are accepted, for in-file duplicate checks
+  const rows = [];
+  table.slice(1).forEach((cells, i) => {
+    const line = i + 2;                               // spreadsheet line number (header is line 1)
+    if (cells.every(c => !c)) return;                 // blank line: ignore silently
+    const get = f => (col[f] === undefined ? "" : cells[col[f]] || "");
+    const name = cleanName(get("name"));
+    let code = get("code").trim();
+    const out = (status, note, entry) => rows.push({ line, code, name, status, note, entry });
+
+    if (name.toLowerCase().startsWith(EXAMPLE_PREFIX)) return out("example", "Example row; ignored.");
+    if (!name) return out("error", "Missing course name.");
+
+    // Read and validate the segment columns.
+    const vals = {
+      type: sanitizeCode(get("type")).trim(),
+      number: get("number").replace(/\s/g, ""),
+      client: get("client"),
+      audience: sanitizeCode(get("audience")).trim(),
+      location: get("location").toUpperCase(),
+    };
+    if (vals.number) {
+      // Spreadsheets turn "099" into 99; padNum puts the zero back.
+      if (!/^\d{1,3}$/.test(vals.number) || parseInt(vals.number, 10) === 0) return out("error", `Number “${vals.number}” must be 001–999.`);
+      vals.number = padNum(vals.number);
+    }
+    let clientName = "";
+    if (vals.client && !/^\d{1,10}$/.test(vals.client)) {
+      // Not digits, so it may be a customer name: look up its code.
+      const hit = CLIENTS.find(x => x.name.toLowerCase() === vals.client.toLowerCase());
+      if (!hit) return out("error", `Unknown customer “${vals.client}”. Use its customer code.`);
+      clientName = hit.name; vals.client = hit.code;
+    } else if (vals.client) clientName = clientNameFor(vals.client);
+    if (vals.location && isRegionCode(vals.location)) return out("error", `Region codes like “${vals.location}” are no longer used. Use a state code or leave it blank.`);
+    if (vals.location && !STATE_CODES.has(vals.location)) return out("error", `Unknown state code “${vals.location}”.`);
+    const given = Object.fromEntries(Object.entries(vals).filter(([, v]) => v));
+    const hasSegs = Object.keys(given).length > 0;
+
+    // Work out the code and its segment values.
+    let parts = null, note = "";
+    if (code) {
+      if (hasSegs) parts = given;
+      else {
+        // Try the current format first, then the standard one.
+        parts = parseCode(code, fmt) || parseCode(code, DEFAULT_FORMAT);
+        if (parts && isRegionCode(parts.location)) delete parts.location;
+        note = parts ? "Segments read from the code." : "Code doesn't follow the segment structure.";
+      }
+    } else {
+      if (!hasSegs) return out("error", "Needs a course code, or its segments (Subject, Number, Audience…).");
+      const b = buildCode(vals, fmt);
+      if (!b.code) return out("error", `Can't build a code: missing ${b.missing.map(m => SEGMENTS[m].label).join(", ")}.`);
+      code = b.code; parts = b.used; note = "Code generated from the segments.";
+    }
+
+    // Duplicate checks, against the catalog plus rows accepted so far.
+    const clash = findCodeConflict(accepted, code, parts, undefined, fmt);
+    if (clash) return out("error", `Code is already in use by ${clash.code} (“${clash.name}”).`);
+    const dupName = findNameConflict(accepted, name);
+    if (dupName) return out("error", `Name is already in use by ${dupName.code}.`);
+
+    const p = parts || {};
+    const entry = {
+      id: makeId(), code, name,
+      ...(parts ? { parts } : { freeform: true }),
+      type: p.type || "",
+      number: p.number ? parseInt(p.number, 10) : null,
+      client: p.client ? (clientName || clientNameFor(p.client)) : "",
+      clientCode: p.client || "",
+      audience: p.audience || "",
+      location: p.location || "",
+      createdAt: new Date().toISOString(),
+    };
+    accepted.push(entry);
+    const flagged = formatStatus(entry, fmt).state !== "ok";
+    out("ready", [note, flagged && "It will be flagged: it doesn't match the current format."].filter(Boolean).join(" "), { ...entry, flagged });
+  });
+  return { rows };
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   7. SMALL COMPONENTS
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/** A row of mutually exclusive buttons. options: [[value, label], …] */
+function SegControl({ value, options, onChange, label }) {
+  return (
+    <div className="seg-ctl" role="group" aria-label={label}>
+      {options.map(([v, text]) => (
+        <button key={v} type="button" className={value === v ? "active" : ""} aria-pressed={value === v}
+          onClick={() => onChange(v)}>{text}</button>
+      ))}
+    </div>
+  );
+}
+
+/** The colour-coded code preview: each segment with a bracket and a short tag
+    under it, separators in between. Missing required segments show faded. */
+function CodeStrip({ slots }) {
+  return (
+    <div className="code-strip">
+      {slots.map(sl => (
+        <React.Fragment key={sl.id}>
+          {sl.sep && <span className="code-sep">{sl.sep}</span>}
+          <span className={`code-part${sl.missing ? " missing" : ""}`} style={{ "--c": SEGMENTS[sl.id].color }}>
+            <span className="code-part-val">{sl.missing ? SEGMENTS[sl.id].short : sl.value}</span>
+            <span className="code-part-brk" />
+            <span className="code-part-lbl" title={SEGMENTS[sl.id].label}>{SEGMENTS[sl.id].short}</span>
+          </span>
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+// The 16×16 pixel-head icon, embedded as a data URI so the file stands alone.
+const JV_HEAD = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAiklEQVR42mNgoAXIdtf+j46R5QhqXlHh8x8bjW4YTptxGYBsEMm2o9M4Dfh4fB5BjNMAYjTDMFYD5KRl/hOLMTRfW1AGlug79gaOkTWgi4PUYzXg5LMfcAzig5yLTRynAegYZgA6xjAAVyA+2NBGfCCiG3KkpQwFE2UAMdFJVIbC5nSQGNE5kljbATwbgMtmlLotAAAAAElFTkSuQmCC";
+// The year the project was made. The credit reads "2026" during 2026 and
+// "2026-<this year>" afterwards.
+const COPYRIGHT_START = 2026;
+
+/**
+ * Keeps track of today's date and re-renders when the calendar year rolls
+ * over, so the credit updates even if the page is left open over New Year.
+ * A timer is set for just after the next 1 January. Browsers can't wait
+ * longer than about 24.8 days in one setTimeout (2^31−1 ms), so the delay is
+ * capped and the hook simply re-checks whenever it wakes early.
+ */
+function useCurrentYear() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const nextYear = new Date(now.getFullYear() + 1, 0, 1, 0, 0, 1);
+    const t = setTimeout(() => setNow(new Date()), Math.min(nextYear - now, 2147483647));
+    return () => clearTimeout(t);
+  }, [now]);
+  return now.getFullYear();
+}
+
+/** Footer credit, matching the author's other projects. */
+function Credit() {
+  const year = useCurrentYear();
+  const years = year > COPYRIGHT_START ? `${COPYRIGHT_START}-${year}` : `${COPYRIGHT_START}`;
+  return (
+    <footer className="jv-credit">
+      <a href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">
+        <img className="jv-icon" src={JV_HEAD} alt="" width="24" height="24" />
+        <span>&copy; <span id="copyYears">{years}</span> Joe VanWagner</span>
+      </a>
+    </footer>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   8. FORMAT EDITOR (the "Code Structure" panel in the builder)
+   Edits the shared format object. Every change re-renders the preview, the
+   Reference tab, and the format flags on existing courses.
+   ──────────────────────────────────────────────────────────────────────────── */
+function FormatEditor({ format, setFormat, vals }) {
+  const [dragId, setDragId] = useState(null);       // segment being dragged
+  const [overId, setOverId] = useState(null);       // segment currently under the pointer
+  const [customSep, setCustomSep] = useState({});   // segments whose "joined by" shows the custom text box
+
+  /** Merge a change into one segment's settings. */
+  const updSeg = (id, patch) =>
+    setFormat(f => ({ ...f, segs: { ...f.segs, [id]: { ...f.segs[id], ...patch } } }));
+
+  /** Move a segment to a new position. Removing it first, then inserting at the
+      target index, means dragging downward lands after the target and dragging
+      upward lands before it; what people expect from a drag-to-reorder list. */
+  const moveTo = (id, idx) => setFormat(f => {
+    const order = f.order.filter(x => x !== id);
+    order.splice(Math.max(0, Math.min(order.length, idx)), 0, id);
+    return { ...f, order };
+  });
+
+  /** "Set every separator to" shortcut. */
+  const setAllSeps = sep => {
+    setCustomSep({});
+    setFormat(f => ({ ...f, segs: Object.fromEntries(SEGMENT_IDS.map(id => [id, { ...f.segs[id], sep }])) }));
+  };
+
+  // The first switched-on segment never shows a separator in front of it.
+  const firstOn = format.order.find(id => format.segs[id].on);
+  // Stop the last remaining segment from being switched off (a code needs at least one).
+  const onCount = format.order.filter(id => format.segs[id].on).length;
+
+  return (
+    <div className="fmt-grid">
+      {/* Left: the ordered segment list with a "joined by" row between segments */}
+      <div>
+        <div className="field-label">Segments <span className="opt">(drag or use arrows to reorder, tick to include)</span></div>
+        <div className="seg-list">
+          {format.order.map((id, i) => {
+            const s = format.segs[id], def = SEGMENTS[id];
+            const showSep = s.on && id !== firstOn;
+            // Show the custom text box if the user chose "Custom…" or the saved separator isn't a preset.
+            const isCustom = customSep[id] || !SEPARATORS.some(p => p.value === s.sep);
+            // Is this separator dropped from the final code by the current sepMode?
+            const omitted = s.sep !== "" && (format.sepMode === "omit" || (format.sepMode === "custom" && !s.keep));
+            const val = vals[id];
+            return (
+              <React.Fragment key={id}>
+                {showSep && (
+                  <div className={`sep-row${omitted ? " omitted" : ""}`}>
+                    <span className="sep-lbl">joined by</span>
+                    <div className="select-wrap sm">
+                      <select className="glass-select sm" aria-label={`Separator before ${def.label}`}
+                        value={isCustom ? CUSTOM : s.sep}
+                        onChange={e => {
+                          const v = e.target.value;
+                          setCustomSep(c => ({ ...c, [id]: v === CUSTOM }));
+                          if (v !== CUSTOM) updSeg(id, { sep: v });
+                        }}>
+                        {SEPARATORS.map(p => <option key={p.label} value={p.value}>{p.label}</option>)}
+                        <option value={CUSTOM}>Custom…</option>
+                      </select>
+                    </div>
+                    {isCustom && (
+                      // Letters and digits aren't allowed as separators: they'd blur into the segment values.
+                      <input className="glass-input sm sep-custom" maxLength={3} placeholder="e.g. ~"
+                        aria-label={`Custom separator before ${def.label}`} value={s.sep}
+                        onChange={e => updSeg(id, { sep: e.target.value.replace(/[A-Za-z0-9]/g, "") })} />
+                    )}
+                    {format.sepMode === "custom" && s.sep !== "" && (
+                      <label className="check-label inline">
+                        <input type="checkbox" checked={s.keep} onChange={e => updSeg(id, { keep: e.target.checked })} />
+                        keep in final code
+                      </label>
+                    )}
+                    {omitted && <span className="sep-note">omitted from final code</span>}
+                  </div>
+                )}
+                {/* The segment row itself: drag handle, include checkbox, name, current value, ↑/↓ */}
+                <div
+                  className={`seg-row${s.on ? "" : " off"}${dragId === id ? " dragging" : ""}${overId === id && dragId && dragId !== id ? " drop-target" : ""}`}
+                  draggable
+                  onDragStart={e => { setDragId(id); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", id); }}
+                  onDragEnter={e => { e.preventDefault(); setOverId(id); }}
+                  onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
+                  onDrop={e => { e.preventDefault(); if (dragId && dragId !== id) moveTo(dragId, format.order.indexOf(id)); setDragId(null); setOverId(null); }}
+                  onDragEnd={() => { setDragId(null); setOverId(null); }}
+                >
+                  <span className="drag-handle" aria-hidden="true">⠿</span>
+                  <input type="checkbox" checked={s.on} aria-label={`Include ${def.label} in code`}
+                    disabled={s.on && onCount === 1}
+                    onChange={e => updSeg(id, { on: e.target.checked })} />
+                  <span className="seg-dot" style={{ background: def.color }} />
+                  <span className="seg-name">{def.label}</span>
+                  <span className={`seg-val${s.on && val ? " has" : ""}`} style={{ "--c": def.color }}>
+                    {!s.on ? "excluded" : (val || (def.required ? "required" : "optional"))}
+                  </span>
+                  {/* Arrow buttons: the keyboard- and touch-friendly alternative to dragging */}
+                  <span className="seg-actions">
+                    <button type="button" className="icon-btn" disabled={i === 0} aria-label={`Move ${def.label} earlier`}
+                      onClick={() => moveTo(id, i - 1)}>↑</button>
+                    <button type="button" className="icon-btn" disabled={i === format.order.length - 1} aria-label={`Move ${def.label} later`}
+                      onClick={() => moveTo(id, i + 1)}>↓</button>
+                  </span>
+                </div>
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Right: output options */}
+      <div>
+        <div className="opt-block">
+          <div className="field-label">Separators in final code</div>
+          <SegControl label="Separators in final code" value={format.sepMode}
+            options={[["keep", "Keep all"], ["omit", "Omit all"], ["custom", "Choose which"]]}
+            onChange={v => setFormat(f => ({ ...f, sepMode: v }))} />
+          <div className="opt-hint">
+            {format.sepMode === "keep" && "Every separator you've set appears in the generated code."}
+            {format.sepMode === "omit" && "Segments are joined with no separators at all, e.g. MAN10120417SUPCA."}
+            {format.sepMode === "custom" && "Untick “keep in final code” on any separator to the left to drop just that one."}
+          </div>
+        </div>
+
+        <div className="opt-block">
+          <div className="field-label">Spaces in final code</div>
+          <SegControl label="Spaces in final code" value={format.spaceMode}
+            options={[["keep", "Keep"], ["remove", "Remove"], ["underscore", "Replace with _"]]}
+            onChange={v => setFormat(f => ({ ...f, spaceMode: v }))} />
+          <div className="opt-hint">Applies to space separators and to any spaces inside custom codes.</div>
+        </div>
+
+        <div className="opt-block">
+          <div className="field-label">Set every separator to</div>
+          <div className="quick-seps">
+            {SEPARATORS.map(p => (
+              <button key={p.label} type="button" title={p.label} onClick={() => setAllSeps(p.value)}>
+                {p.value === " " ? "space" : p.value === "" ? "none" : p.value}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="opt-block">
+          <button type="button" className="btn btn-ghost" onClick={() => { setCustomSep({}); setFormat(DEFAULT_FORMAT); }}>
+            ↺ Reset to standard format
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   9. APP
+   ──────────────────────────────────────────────────────────────────────────── */
+function App() {
+  /* ── State ──────────────────────────────────────────────────────────────── */
+  const [theme, setTheme] = useState(() => document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+  const [tab, setTab] = useState("builder");             // builder | catalog | reference
+  const [format, setFormat] = useState(loadFormat);
+
+  // Builder fields
+  const [cType, setCType] = useState("");                // subject dropdown value (or CUSTOM)
+  const [customType, setCustomType] = useState("");      // typed subject when cType === CUSTOM
+  const [cNum, setCNum] = useState("");
+  const [clientSearch, setClientSearch] = useState("");  // text typed into the customer search box
+  const [showDrop, setShowDrop] = useState(false);       // customer dropdown open?
+  const [selClient, setSelClient] = useState(null);      // chosen customer { name, code }
+  const [manualClient, setManualClient] = useState(false);
+  const [manualCode, setManualCode] = useState("");
+  const [audience, setAudience] = useState("");
+  const [customAud, setCustomAud] = useState("");
+  const [selState, setSelState] = useState("");
+  const [cName, setCName] = useState("");
+  const [recodeId, setRecodeId] = useState(null);        // id of the catalog course open for re-coding
+
+  // Catalog
+  const [courses, setCourses] = useState(loadCourses);
+  const [catSearch, setCatSearch] = useState("");
+  const [sort, setSort] = useState({ key: "code", dir: 1 });
+  const [renameId, setRenameId] = useState(null);        // row showing the inline rename box
+  const [renameVal, setRenameVal] = useState("");
+  const [renameErr, setRenameErr] = useState("");
+  const [onlyFlagged, setOnlyFlagged] = useState(false);
+  const [importPreview, setImportPreview] = useState(null);
+
+  // Feedback
+  const [copiedId, setCopiedId] = useState(null);        // which copy button shows "✓ Copied"
+  const [toast, setToast] = useState(null);              // { kind, text } message, bottom-right
+
+  const dropRef = useRef(null);
+  const restoreRef = useRef(null);
+  const csvRef = useRef(null);
+  const toastTimer = useRef(null);
+  const copyTimer = useRef(null);
+
+  /* ── Effects ────────────────────────────────────────────────────────────── */
+  // Persist courses and format whenever they change.
+  useEffect(() => { saveCourses(courses); }, [courses]);
+  useEffect(() => { saveFormat(format); }, [format]);
+
+  // Apply and remember the theme. "theme-switching" disables CSS transitions
+  // for a moment so the whole page swaps colours at once.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add("theme-switching");
+    root.dataset.theme = theme;
+    try { localStorage.setItem(THEME_KEY, theme); } catch {}
+    const t = setTimeout(() => root.classList.remove("theme-switching"), 50);
+    return () => clearTimeout(t);
+  }, [theme]);
+
+  // Close the customer dropdown when clicking anywhere outside it.
+  useEffect(() => {
+    const fn = (e) => { if (dropRef.current && !dropRef.current.contains(e.target)) setShowDrop(false); };
+    document.addEventListener("mousedown", fn);
+    return () => document.removeEventListener("mousedown", fn);
+  }, []);
+
+  /** Show a toast. Successes disappear after 4 s; warnings and errors stay 10 s. */
+  const flash = (kind, text) => {
+    clearTimeout(toastTimer.current);
+    setToast({ kind, text });
+    toastTimer.current = setTimeout(() => setToast(null), kind === "ok" ? 4000 : 10000);
+  };
+
+  /** Copy text and briefly show "✓ Copied" on the button identified by `id`. */
+  const doCopy = (text, id) => {
+    copyText(text);
+    clearTimeout(copyTimer.current);
+    setCopiedId(id);
+    copyTimer.current = setTimeout(() => setCopiedId(null), 2200);
+  };
+
+  /* ── Derived builder values (recomputed every render) ───────────────────── */
+  const filteredClients = CLIENTS.filter(c =>
+    c.name.toLowerCase().includes(clientSearch.toLowerCase()) || c.code.includes(clientSearch)
+  );
+
+  const typeCode   = cType === CUSTOM ? customType.trim() : cType;
+  const audCode    = audience === CUSTOM ? customAud.trim() : audience;
+  const numValid   = /^\d{1,3}$/.test(cNum) && parseInt(cNum, 10) > 0;
+  const clientCode = manualClient ? manualCode : (selClient?.code || "");
+
+  // The current value of every segment, as buildCode expects them.
+  const vals = {
+    type: typeCode,
+    number: numValid ? padNum(cNum) : "",
+    client: clientCode,
+    audience: audCode,
+    location: selState,
+  };
+
+  // While re-coding, duplicate checks must ignore the course being edited.
+  const recoding = courses.find(c => c.id === recodeId) || null;
+  const exceptId = recoding?.id;
+
+  const build = buildCode(vals, format);
+  const fullCode = build.code;
+  const name = cleanName(cName);
+  const fullLabel = fullCode && name ? `${fullCode}: ${name}` : "";   // "CODE: Name", as shown in the LMS
+  const levelInfo = numValid ? getLevelInfo(cNum) : null;
+
+  const codeConflict = fullCode ? findCodeConflict(courses, fullCode, build.used, exceptId, format) : null;
+  const nameConflict = findNameConflict(courses, name, exceptId);
+  const canSubmit = !!fullCode && !!name && !codeConflict && !nameConflict;
+
+  /** Clear every builder field. */
+  const resetBuilder = () => {
+    setCType(""); setCustomType(""); setCNum("");
+    setClientSearch(""); setSelClient(null); setManualClient(false); setManualCode("");
+    setAudience(""); setCustomAud(""); setSelState(""); setCName("");
+  };
+
+  /** The course fields that come from the builder (shared by Add and Save). */
+  const entryFields = () => ({
+    parts: build.used,
+    type: typeCode,
+    number: numValid ? parseInt(cNum, 10) : null,
+    client: manualClient ? clientNameFor(manualCode) : (selClient?.name || ""),
+    clientCode,
+    audience: audCode,
+    location: selState,
+  });
+
+  /** "Add to Catalog" (or "Save changes" while re-coding). */
+  const handleSubmit = () => {
+    if (!fullCode || !name) return;
+    // Re-check against the latest list (Enter can submit even while the button
+    // is disabled): a duplicate code or name is never created.
+    if (findCodeConflict(courses, fullCode, build.used, exceptId, format) || findNameConflict(courses, name, exceptId)) {
+      flash("err", `Not ${recoding ? "saved" : "added"}: that course code or course name is already in use.`);
+      return;
+    }
+    if (recoding) return saveRecode();
+    const entry = { id: makeId(), code: fullCode, name, ...entryFields(), createdAt: new Date().toISOString() };
+    setCourses(prev => sortByCode([...prev, entry]));
+    flash("ok", `Added ${fullCode}: ${name}`);
+    setCName("");   // keep the segments, so a series of related courses is quick to enter
+  };
+
+  /* ── Re-code: load a catalog course into the builder, then save over it ── */
+  const startRecode = (c) => {
+    const v = courseValues(c);
+    // Pick the matching dropdown option, or switch to "custom" for unknown codes.
+    const pick = (list, code, setSel, setCustom) => {
+      if (!code) { setSel(""); setCustom(""); }
+      else if (list.some(x => x.code === code)) { setSel(code); setCustom(""); }
+      else { setSel(CUSTOM); setCustom(code); }
+    };
+    pick(COURSE_TYPES, v.type, setCType, setCustomType);
+    pick(AUDIENCES, v.audience, setAudience, setCustomAud);
+    setCNum(v.number || "");
+    // Restore the customer from the list if we can tell which one it was; otherwise enter the code manually.
+    const known = v.client && CLIENTS.find(x => x.code === v.client && (x.name === c.client || clientNameFor(v.client) === x.name));
+    setClientSearch(""); setShowDrop(false);
+    if (known) { setManualClient(false); setSelClient(known); setManualCode(""); }
+    else if (v.client) { setManualClient(true); setSelClient(null); setManualCode(v.client); }
+    else { setManualClient(false); setSelClient(null); setManualCode(""); }
+    setSelState(STATE_CODES.has(v.location) ? v.location : "");
+    setCName(c.name);
+    setRenameId(null);
+    setRecodeId(c.id);
+    setTab("builder");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  const cancelRecode = () => { setRecodeId(null); resetBuilder(); };
+
+  /** Save the builder's values over the course being re-coded. The old code is
+      appended to `previousCodes` so the LMS record can still be traced. */
+  const saveRecode = () => {
+    const orig = recoding;
+    const codeChanged = orig.code !== fullCode;
+    if (!codeChanged && orig.name === name && partsKey(orig.parts) === partsKey(build.used)) {
+      flash("info", "No changes to save.");
+      return;
+    }
+    if (codeChanged && !window.confirm(`Change ${orig.code} to ${fullCode}?\n\nThe old code stays in the course's history. Remember to update it in the LMS too.`)) return;
+    const { ackFor, freeform, ...rest } = orig;   // re-coding clears any "Mark OK" and freeform state
+    const updated = {
+      ...rest, ...entryFields(), code: fullCode, name,
+      previousCodes: codeChanged ? [...(orig.previousCodes || []), orig.code] : orig.previousCodes,
+      updatedAt: new Date().toISOString(),
+    };
+    setCourses(p => sortByCode(p.map(c => c.id === orig.id ? updated : c)));
+    flash("ok", codeChanged ? `Re-coded ${orig.code} → ${fullCode}` : `Saved ${fullCode}: ${name}`);
+    cancelRecode();
+    setTab("catalog");
+  };
+
+  /* ── Format flags on existing courses ───────────────────────────────────── */
+  const statuses = Object.fromEntries(courses.map(c => [c.id, formatStatus(c, format)]));
+  const flaggedIds = courses.filter(c => statuses[c.id].state === "flagged").map(c => c.id);
+  const flaggedFilter = onlyFlagged && flaggedIds.length > 0;   // "Show only flagged" turns itself off once nothing is flagged
+
+  /** Mark OK: remember the outcome the course is OK with (see formatStatus). */
+  const markOk = (ids) => setCourses(p => p.map(c => ids.includes(c.id) ? { ...c, ackFor: formatStatus(c, format).target } : c));
+  /** Undo Mark OK. */
+  const reflag = (id) => setCourses(p => p.map(c => {
+    if (c.id !== id) return c;
+    const { ackFor, ...rest } = c;
+    return rest;
+  }));
+
+  /**
+   * Rebuild the given courses' codes in the current format.
+   * It runs in passes: if course A's new code is currently held by course B,
+   * and B is also being regenerated, A succeeds on a later pass once B has
+   * moved. Whatever still can't move (a real clash, or a missing segment) is
+   * left flagged and reported.
+   */
+  const regenerate = (ids) => {
+    let next = courses.slice();
+    const pending = new Set(ids);
+    const now = new Date().toISOString();
+    let done = 0, progress = true;
+    while (progress) {
+      progress = false;
+      for (const id of [...pending]) {
+        const c = next.find(x => x.id === id);
+        const st = c && formatStatus(c, format);
+        if (!c || st.state === "ok") { pending.delete(id); continue; }
+        if (!st.expected || findCodeConflict(next, st.expected, null, id, format)) continue;
+        next = next.map(x => {
+          if (x.id !== id) return x;
+          const { ackFor, ...rest } = x;
+          return {
+            ...rest, code: st.expected, parts: st.used,
+            location: isRegionCode(x.location) ? "" : x.location,
+            previousCodes: [...(x.previousCodes || []), x.code], updatedAt: now,
+          };
+        });
+        pending.delete(id); done++; progress = true;
+      }
+    }
+    // Explain each course that couldn't be regenerated.
+    const blocked = [...pending].map(id => {
+      const c = next.find(x => x.id === id), st = formatStatus(c, format);
+      if (c.freeform) return `${c.code} (no segments; use Re-code)`;
+      if (!st.expected) return `${c.code} (missing ${st.missing.map(m => SEGMENTS[m].label).join(", ")})`;
+      const clash = findCodeConflict(next, st.expected, null, id, format);
+      return normCode(clash.code) === normCode(st.expected)
+        ? `${c.code} (${st.expected} is already used by ${clash.code})`
+        : `${c.code} (${clash.code} would also become ${st.expected})`;
+    });
+    setCourses(sortByCode(next));
+    if (blocked.length) flash("warn", `Regenerated ${plural(done, "code", "codes")}. Not changed: ${blocked.join("; ")}.`);
+    else flash("ok", `Regenerated ${plural(done, "code", "codes")} in the current format.`);
+  };
+
+  const regenOne = (c) => {
+    const st = statuses[c.id];
+    if (!window.confirm(`Change ${c.code} to ${st.expected}?\n\nThe old code stays in the course's history. Remember to update it in the LMS too.`)) return;
+    regenerate([c.id]);
+  };
+  const regenAll = () => {
+    if (!window.confirm(`Regenerate ${plural(flaggedIds.length, "flagged code", "flagged codes")} in the current format?\n\nOld codes stay in each course's history. Remember to update them in the LMS too.`)) return;
+    regenerate(flaggedIds);
+  };
+
+  /* ── Catalog row actions ────────────────────────────────────────────────── */
+  const doDelete = (c) => {
+    if (!window.confirm(`Remove ${c.code}: ${c.name} from the catalog?`)) return;
+    setCourses(p => p.filter(x => x.id !== c.id));
+    if (c.id === recodeId) cancelRecode();
+  };
+
+  const startRename = (c) => { setRenameId(c.id); setRenameVal(c.name); setRenameErr(""); };
+  /** Save an inline rename, refusing empty or duplicate names. */
+  const saveRename = (id) => {
+    const n = cleanName(renameVal);
+    if (!n) { setRenameErr("Course name can't be empty."); return; }
+    const dup = findNameConflict(courses, n, id);
+    if (dup) { setRenameErr(`The name “${dup.name}” is already in use by ${dup.code}. Course names must be unique.`); return; }
+    setCourses(p => p.map(c => c.id === id ? { ...c, name: n, updatedAt: new Date().toISOString() } : c));
+    if (id === recodeId) setCName(n);   // keep the builder in sync if that course is open there
+    setRenameId(null);
+  };
+
+  /* ── Import / export ────────────────────────────────────────────────────── */
+  /** Spreadsheet-friendly export, including each course's format status and code history. */
+  const exportCsv = () => {
+    const head = ["Course Code", "Course Name", "Subject", "Number", "Level", "Customer", "Customer Code", "Audience", "State",
+      "Format Status", "Code in Current Format", "Previous Codes", "Created"];
+    const statusText = { ok: "Matches", flagged: "Flagged", acked: "Kept as-is" };
+    const rows = sortByCode(courses).map(c => [
+      c.code, c.name, c.type, c.number ? String(c.number).padStart(3, "0") : "",
+      getLevelInfo(c.number)?.label || "", c.client, c.clientCode, c.audience, c.location,
+      statusText[statuses[c.id].state], statuses[c.id].expected, (c.previousCodes || []).join(" > "), c.createdAt,
+    ]);
+    downloadFile(`course-catalog-${new Date().toISOString().slice(0, 10)}.csv`, toCsv([head, ...rows]), "text/csv;charset=utf-8");
+  };
+
+  const downloadTemplate = () => {
+    downloadFile("course-import-template.csv", toCsv([TEMPLATE_HEAD, ...TEMPLATE_ROWS]), "text/csv;charset=utf-8");
+    flash("info", "Template downloaded. One course per row: a Course Name plus either a Course Code or its segments " +
+      "(Subject, Number and Audience; Customer Code and State are optional). Rows starting with “(Example)” are ignored.");
+  };
+
+  /** Read an uploaded CSV and open the import preview (nothing is added yet). */
+  const readCsv = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const table = parseCsv(String(reader.result));
+      const result = analyzeImport(table, courses, format);
+      if (result.error) { flash("err", result.error); return; }
+      if (!result.rows.length) { flash("warn", "No course rows found in that file."); return; }
+      setImportPreview({ fileName: file.name, table, rows: result.rows });
+    };
+    reader.readAsText(file);
+  };
+
+  /** "Import N courses": re-check against the catalog as it is now, then add the ready rows. */
+  const confirmImport = () => {
+    const { rows = [] } = analyzeImport(importPreview.table, courses, format);
+    const add = rows.filter(r => r.status === "ready").map(({ entry: { flagged, ...e } }) => e);
+    const skipped = rows.filter(r => r.status === "error").length;
+    setCourses(p => sortByCode([...p, ...add]));
+    setImportPreview(null);
+    flash(skipped ? "warn" : "ok",
+      `Imported ${plural(add.length, "course", "courses")}` + (skipped ? `; skipped ${plural(skipped, "row", "rows")} with problems.` : "."));
+  };
+
+  /** Full backup (format + courses) as JSON, for moving between browsers. */
+  const exportJson = () => {
+    const data = { app: "lms-course-catalog", version: 1, exportedAt: new Date().toISOString(), format, courses };
+    downloadFile(`course-catalog-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(data, null, 2), "application/json");
+  };
+
+  /** Restore a JSON backup. Merges into the catalog and skips anything that
+      would duplicate an existing code or name. */
+  const importJson = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        const list = Array.isArray(data) ? data : data?.courses;
+        if (!Array.isArray(list)) throw new Error("bad file");
+        const next = [...courses];
+        let added = 0, skipped = 0;
+        list.forEach(raw => {
+          const ok = raw && typeof raw.code === "string" && typeof raw.name === "string" && raw.code.trim() && cleanName(raw.name);
+          if (!ok || findCodeConflict(next, raw.code, raw.parts, undefined, format) || findNameConflict(next, raw.name)) { skipped++; return; }
+          next.push({ ...raw, id: makeId(), code: raw.code.trim(), name: cleanName(raw.name) });
+          added++;
+        });
+        setCourses(sortByCode(next));
+        flash(skipped ? "warn" : "ok",
+          `Restored ${plural(added, "course", "courses")}` +
+          (skipped ? `; skipped ${skipped} duplicate or invalid entr${skipped !== 1 ? "ies" : "y"}.` : "."));
+      } catch {
+        flash("err", "That file isn't a valid catalog backup.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  /* ── Catalog view: filter by search / flags, then sort ──────────────────── */
+  const q = catSearch.trim().toLowerCase();
+  const shown = courses
+    .filter(c => !flaggedFilter || statuses[c.id].state === "flagged")
+    .filter(c => !q || [c.code, c.name, c.client, c.clientCode, c.type, c.audience, c.location, (c.previousCodes || []).join(" ")]
+      .some(v => String(v || "").toLowerCase().includes(q)))
+    .sort((a, b) => {
+      const av = String(a[sort.key] ?? ""), bv = String(b[sort.key] ?? "");
+      return av.localeCompare(bv, undefined, { numeric: true, sensitivity: "base" }) * sort.dir;
+    });
+
+  /** A sortable column header: click once for ascending, again for descending. */
+  const sortTh = (k, children) => (
+    <th aria-sort={sort.key === k ? (sort.dir === 1 ? "ascending" : "descending") : "none"}>
+      <button className={`th-sort${sort.key === k ? " on" : ""}`}
+        onClick={() => setSort(s => ({ key: k, dir: s.key === k ? -s.dir : 1 }))}>
+        {children} {sort.key === k ? (sort.dir === 1 ? "↑" : "↓") : ""}
+      </button>
+    </th>
+  );
+
+  // Small render helpers
+  const dash = <span className="dash">–</span>;
+  const segLabel = (id) => (
+    <>
+      <span className="seg-dot" style={{ background: SEGMENTS[id].color }} />
+      {SEGMENTS[id].label}
+    </>
+  );
+  const fieldClass = id => `field${format.segs[id].on ? "" : " excluded"}`;
+  const excludedNote = id => !format.segs[id].on && <span className="opt">(excluded from code)</span>;
+
+  // Reference tab: the current format drawn as a pattern, e.g. [SUBJ][NUM]-[CUST]-[AUD]-[STATE]
+  const pattern = buildCode(Object.fromEntries(SEGMENT_IDS.map(id => [id, `[${SEGMENTS[id].short}]`])), format);
+
+  // Counts for the import preview summary line
+  const importCounts = importPreview && {
+    ready: importPreview.rows.filter(r => r.status === "ready").length,
+    flagged: importPreview.rows.filter(r => r.status === "ready" && r.entry.flagged).length,
+    error: importPreview.rows.filter(r => r.status === "error").length,
+    example: importPreview.rows.filter(r => r.status === "example").length,
+  };
+
+  /* ── Render ─────────────────────────────────────────────────────────────── */
+  return (
+    <div className="lms-root">
+
+      {/* ═══ Header ═══ */}
+      <div className="lms-header">
+        <div className="lms-header-left">
+          <div className="lms-title">LMS Course Catalog</div>
+          <div className="lms-subtitle">Learning Management System · Course Code Registry</div>
+        </div>
+        <div className="lms-header-right">
+          <div className="lms-counter">{plural(courses.length, "course", "courses")} registered</div>
+          <button className="theme-toggle" aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            onClick={() => setTheme(t => t === "light" ? "dark" : "light")}>
+            {theme === "light" ? "☾  Dark mode" : "☀  Light mode"}
+          </button>
+        </div>
+      </div>
+
+      {/* ═══ Tabs (the Catalog tab shows a ⚑ count when courses are flagged) ═══ */}
+      <div className="lms-tabs" role="tablist">
+        {[
+          { id: "builder",   label: recoding ? "✎  Re-coding" : "✦  Course Builder" },
+          { id: "catalog",   label: `≡  Catalog (${courses.length})${flaggedIds.length ? `  ⚑ ${flaggedIds.length}` : ""}` },
+          { id: "reference", label: "◈  Reference" },
+        ].map(t => (
+          <button key={t.id} role="tab" aria-selected={tab === t.id}
+            className={`lms-tab${tab === t.id ? " active" : ""}`} onClick={() => setTab(t.id)}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="lms-body">
+
+        {/* ═══════════════════════════ BUILDER TAB ═══════════════════════════ */}
+        {tab === "builder" && (
+          <div className="lms-panel">
+            {recoding && (
+              <div className="edit-banner">
+                <div>
+                  ✎ Re-coding <span className="mono">{recoding.code}</span>: {recoding.name}
+                  <div className="sub">Change any segment or the name, then save. The old code is kept in the course's history.</div>
+                </div>
+                <button className="btn btn-sm" onClick={cancelRecode}>Cancel re-coding</button>
+              </div>
+            )}
+
+            <div className="builder-grid">
+
+              {/* ── Left column: subject, number, audience ── */}
+              <div>
+                <div className="section-head">Course Identity</div>
+
+                <div className={fieldClass("type")}>
+                  <div className="field-label">{segLabel("type")} <span className="req">*</span> {excludedNote("type")}</div>
+                  <div className="stack">
+                    <div className="select-wrap">
+                      <select className="glass-select" value={cType} onChange={e => setCType(e.target.value)}>
+                        <option value="">Select a subject...</option>
+                        {COURSE_TYPES.map(t => <option key={t.code} value={t.code}>{t.code}: {t.label}</option>)}
+                        <option value={CUSTOM}>✎ Other / custom code…</option>
+                      </select>
+                    </div>
+                    {cType === CUSTOM && (
+                      <input type="text" className="glass-input mono" placeholder="Subject code"
+                        value={customType} maxLength={10}
+                        onChange={e => setCustomType(sanitizeCode(e.target.value))} />
+                    )}
+                  </div>
+                </div>
+
+                <div className={fieldClass("number")}>
+                  <div className="field-label">{segLabel("number")} <span className="req">*</span> {excludedNote("number")}</div>
+                  {/* A text input (not type="number") so leading zeros like 099 survive; digits only, max 3. */}
+                  <input type="text" inputMode="numeric" maxLength={3} className="glass-input mono"
+                    placeholder="e.g. 101, 099, 501…" value={cNum}
+                    onChange={e => setCNum(e.target.value.replace(/\D/g, "").slice(0, 3))}
+                    onBlur={() => { if (numValid) setCNum(padNum(cNum)); }} />
+                  {levelInfo && (
+                    <div className="level-badge" style={{ "--c": levelInfo.color }}>
+                      <span className="level-dot" />
+                      {levelInfo.label}
+                    </div>
+                  )}
+                  {cNum && !numValid && <div className="field-hint bad">Course numbers run from 001 to 999.</div>}
+                </div>
+
+                <div className={fieldClass("audience")}>
+                  <div className="field-label">{segLabel("audience")} <span className="req">*</span> {excludedNote("audience")}</div>
+                  <div className="stack">
+                    <div className="select-wrap">
+                      <select className="glass-select" value={audience} onChange={e => setAudience(e.target.value)}>
+                        <option value="">Select an audience...</option>
+                        {AUDIENCES.map(a => <option key={a.code} value={a.code}>{a.code}: {a.label}</option>)}
+                        <option value={CUSTOM}>✎ Other / custom code…</option>
+                      </select>
+                    </div>
+                    {audience === CUSTOM && (
+                      <input type="text" className="glass-input mono" placeholder="Audience code"
+                        value={customAud} maxLength={10}
+                        onChange={e => setCustomAud(sanitizeCode(e.target.value))} />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Right column: customer and state ── */}
+              <div>
+                <div className="section-head">Customer & State</div>
+
+                <div className={fieldClass("client")}>
+                  <div className="field-label">{segLabel("client")} <span className="opt">(optional)</span> {excludedNote("client")}</div>
+                  {!manualClient ? (
+                    // Searchable customer picker: type a name or code, pick from the list.
+                    <div className="client-wrap" ref={dropRef}>
+                      <div className="input-row">
+                        <input type="text" className="glass-input"
+                          placeholder="Search customer or code…"
+                          value={selClient ? `${selClient.name}: ${selClient.code}` : clientSearch}
+                          onChange={e => { setClientSearch(e.target.value); setSelClient(null); setShowDrop(true); }}
+                          onFocus={() => { setShowDrop(true); if (selClient) setClientSearch(""); }}
+                          onKeyDown={e => { if (e.key === "Escape") setShowDrop(false); }}
+                          readOnly={!!selClient}
+                        />
+                        {selClient && (
+                          <button className="btn-clear" aria-label="Clear customer"
+                            onClick={() => { setSelClient(null); setClientSearch(""); }}>×</button>
+                        )}
+                      </div>
+                      {showDrop && !selClient && (
+                        <div className="client-dropdown">
+                          <div className="client-item none-item"
+                            onClick={() => { setSelClient(null); setClientSearch(""); setShowDrop(false); }}>
+                            No customer (left out of the code)
+                          </div>
+                          {filteredClients.map((c, i) => (
+                            <div key={i} className="client-item"
+                              onClick={() => { setSelClient(c); setShowDrop(false); setClientSearch(""); }}>
+                              <span>{c.name}</span>
+                              <span className="ccode">{c.code}</span>
+                            </div>
+                          ))}
+                          {filteredClients.length === 0 && <div className="client-item empty-item">No results</div>}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    // Manual entry for customers not in the list: digits only, any length up to 10.
+                    <input type="text" inputMode="numeric" className="glass-input mono" placeholder="Customer code, e.g. 20417"
+                      value={manualCode} maxLength={10}
+                      onChange={e => setManualCode(e.target.value.replace(/\D/g, "").slice(0, 10))} />
+                  )}
+                  <label className="check-label">
+                    <input type="checkbox" checked={manualClient}
+                      onChange={e => { setManualClient(e.target.checked); setSelClient(null); setManualCode(""); setClientSearch(""); }} />
+                    Enter customer code manually
+                  </label>
+                </div>
+
+                <div className={fieldClass("location")}>
+                  <div className="field-label">{segLabel("location")} <span className="opt">(optional)</span> {excludedNote("location")}</div>
+                  <div className="select-wrap">
+                    <select className="glass-select" value={selState} onChange={e => setSelState(e.target.value)}>
+                      <option value="">No specific state</option>
+                      {STATES.map(s => <option key={s.code} value={s.code}>{s.name} ({s.code})</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Full width: Code Structure editor ── */}
+              <div className="col-full">
+                <div className="divider" style={{ marginTop: 0 }} />
+                <div className="section-head">Code Structure</div>
+                <FormatEditor format={format} setFormat={setFormat} vals={vals} />
+                {flaggedIds.length > 0 && (
+                  <div className="alert alert-warn">
+                    <span>⚑</span>
+                    <span>
+                      {plural(flaggedIds.length, "existing course doesn't", "existing courses don't")} match this format.{" "}
+                      <button className="btn-inline" onClick={() => { setOnlyFlagged(true); setTab("catalog"); }}>Review in Catalog →</button>
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* ── Full width: course name, preview, messages, submit ── */}
+              <div className="col-full">
+                <div className="divider" style={{ marginTop: 0 }} />
+                <div className="section-head">Course Name & Generated Code</div>
+
+                <div className="field">
+                  <div className="field-label">Course Name <span className="req">*</span> <span className="opt">(the title shown in the catalog; must be unique)</span></div>
+                  <input type="text" className="glass-input" placeholder="e.g. Supervisor Essentials"
+                    value={cName} maxLength={200} onChange={e => setCName(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") handleSubmit(); }} />
+                </div>
+
+                <div className="field-label" style={{ marginBottom: "8px" }}>Generated Course Code</div>
+                <div className="code-preview">
+                  {build.slots.length
+                    ? <CodeStrip slots={build.slots} />
+                    : <span className="code-placeholder">Complete the fields above to generate a code…</span>}
+                  {fullCode && (
+                    <button className={`btn btn-copy${copiedId === "code" ? " copied" : ""}`}
+                      onClick={() => doCopy(fullCode, "code")}>
+                      {copiedId === "code" ? "✓ Copied" : "⧉ Copy code"}
+                    </button>
+                  )}
+                </div>
+                <div className="code-final-row">
+                  <span className="code-final-lbl">Catalog label</span>
+                  <span className={`code-final${fullLabel ? "" : " dim"}`}>
+                    {fullLabel || (fullCode ? `${fullCode}: (enter a course name)` : "–")}
+                  </span>
+                  {fullLabel && (
+                    <button className={`btn btn-copy${copiedId === "label" ? " copied" : ""}`}
+                      onClick={() => doCopy(fullLabel, "label")}>
+                      {copiedId === "label" ? "✓ Copied" : "⧉ Copy label"}
+                    </button>
+                  )}
+                </div>
+
+                {/* Status messages, most informative first */}
+                {recoding && fullCode && fullCode !== recoding.code && (
+                  <div className="alert alert-info">
+                    <span>ⓘ</span>
+                    <span>Saving changes this course's code from <span className="mono">{recoding.code}</span> to <span className="mono">{fullCode}</span>.</span>
+                  </div>
+                )}
+                {build.missing.length > 0 && (build.slots.length > build.missing.length || cName) && (
+                  <div className="alert alert-info">
+                    <span>ⓘ</span>
+                    <span>Still needed: {build.missing.map(id => SEGMENTS[id].label).join(", ")}.</span>
+                  </div>
+                )}
+                {codeConflict && (
+                  <div className="alert alert-err" role="alert">
+                    <span>⚠</span>
+                    <span>
+                      {/* A different explanation for each kind of conflict (see codeConflictReason) */}
+                      {{
+                        same: <>Course code <span className="mono">{fullCode}</span> is already in use
+                          {codeConflict.code !== fullCode && <> (as <span className="mono">{codeConflict.code}</span>, which differs only in separators or capitals)</>}
+                          {" "}by “{codeConflict.name}”.</>,
+                        reordered: <>Course code <span className="mono">{fullCode}</span> uses the same segments as <span className="mono">{codeConflict.code}</span> (“{codeConflict.name}”) in a different order.</>,
+                        pending: <>Course code <span className="mono">{fullCode}</span> is reserved: “{codeConflict.name}” (<span className="mono">{codeConflict.code}</span>) is flagged
+                          and would become this code if regenerated in the current format. Mark that course OK in the Catalog to free the code.</>,
+                      }[codeConflictReason(codeConflict, fullCode, build.used, format)]}
+                      {" "}Change a segment, such as the course number, to create a new code.
+                    </span>
+                  </div>
+                )}
+                {nameConflict && (
+                  <div className="alert alert-err" role="alert">
+                    <span>⚠</span>
+                    <span>
+                      The course name “{nameConflict.name}” is already in use by <span className="mono">{nameConflict.code}</span>. Course names must be unique.
+                    </span>
+                  </div>
+                )}
+
+                <button className="btn btn-add" disabled={!canSubmit} onClick={handleSubmit}>
+                  {recoding ? "✓ Save changes" : "+ Add to Catalog"}
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════ CATALOG TAB ═══════════════════════════ */}
+        {tab === "catalog" && (
+          <div className="lms-panel">
+            {/* Toolbar: search · CSV import/template/export · JSON backup/restore */}
+            <div className="cat-toolbar">
+              <input type="search" className="glass-input"
+                placeholder="Search code, name, customer, audience…" aria-label="Search catalog"
+                value={catSearch} onChange={e => setCatSearch(e.target.value)} />
+              <div className="tool-group">
+                <button className="btn btn-ghost" onClick={() => csvRef.current?.click()}>⤒ Import CSV</button>
+                <button className="btn btn-ghost" onClick={downloadTemplate}>⤓ CSV template</button>
+                <button className="btn btn-ghost" onClick={exportCsv} disabled={!courses.length}>⤓ Export CSV</button>
+              </div>
+              <span className="tool-sep" aria-hidden="true" />
+              <div className="tool-group">
+                <button className="btn btn-ghost" onClick={exportJson} disabled={!courses.length}>⤓ Backup</button>
+                <button className="btn btn-ghost" onClick={() => restoreRef.current?.click()}>⤒ Restore</button>
+              </div>
+              {/* Hidden file pickers opened by the buttons above. Resetting value lets the same file be chosen twice. */}
+              <input ref={csvRef} type="file" accept=".csv,text/csv" hidden
+                onChange={e => { readCsv(e.target.files[0]); e.target.value = ""; }} />
+              <input ref={restoreRef} type="file" accept="application/json,.json" hidden
+                onChange={e => { importJson(e.target.files[0]); e.target.value = ""; }} />
+              <span className="cat-count">{shown.length} of {plural(courses.length, "course", "courses")}</span>
+            </div>
+
+            {/* CSV import preview: one row per CSV line with its outcome */}
+            {importPreview && (
+              <div className="import-panel">
+                <div className="import-head">
+                  <div>
+                    <div className="import-title">Import preview: {importPreview.fileName}</div>
+                    <div className="import-sub">
+                      {plural(importCounts.ready, "course", "courses")} ready to import
+                      {importCounts.flagged > 0 && <> ({importCounts.flagged} will be flagged)</>}
+                      {importCounts.error > 0 && <> · {plural(importCounts.error, "row", "rows")} with problems will be skipped</>}
+                      {importCounts.example > 0 && <> · {plural(importCounts.example, "example row", "example rows")} ignored</>}
+                    </div>
+                  </div>
+                  <div className="flag-actions">
+                    <button className="btn btn-sm primary" disabled={!importCounts.ready} onClick={confirmImport}>
+                      Import {plural(importCounts.ready, "course", "courses")}
+                    </button>
+                    <button className="btn btn-sm" onClick={() => setImportPreview(null)}>Cancel</button>
+                  </div>
+                </div>
+                <div className="import-table-wrap">
+                  <table className="cat-table import-table">
+                    <thead><tr><th>Line</th><th>Course Code</th><th>Course Name</th><th>Result</th></tr></thead>
+                    <tbody>
+                      {importPreview.rows.map(r => {
+                        const badge = r.status === "ready" ? (r.entry.flagged ? ["flag", "⚑ Ready"] : ["ready", "✓ Ready"])
+                          : r.status === "error" ? ["error", "✕ Skipped"] : ["example", "Ignored"];
+                        return (
+                          <tr key={r.line} className={`imp-${r.status}`}>
+                            <td className="idx-cell">{r.line}</td>
+                            <td className="mono">{r.code || dash}</td>
+                            <td className="name-cell">{r.name || dash}</td>
+                            <td><span className={`imp-badge ${badge[0]}`}>{badge[1]}</span><span className="imp-note">{r.note}</span></td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Banner + bulk actions when any course doesn't match the current format */}
+            {flaggedIds.length > 0 && (
+              <div className="alert alert-warn flag-banner">
+                <span>⚑</span>
+                <div className="flag-banner-body">
+                  <div>
+                    {plural(flaggedIds.length, "course has a code", "courses have codes")} that {flaggedIds.length === 1 ? "doesn't" : "don't"} match
+                    the current code format. Regenerate or re-code them, or mark them OK to keep them as they are.
+                  </div>
+                  <div className="flag-actions">
+                    <button className="btn btn-sm" onClick={() => setOnlyFlagged(v => !v)}>
+                      {flaggedFilter ? "Show all courses" : "Show only flagged"}
+                    </button>
+                    <button className="btn btn-sm primary" onClick={regenAll}>↻ Regenerate all flagged</button>
+                    <button className="btn btn-sm" onClick={() => markOk(flaggedIds)}>✓ Mark all OK</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {shown.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">◎</div>
+                <div className="empty-title">{courses.length === 0 ? "No courses yet" : "No matching courses"}</div>
+                <div className="empty-sub">
+                  {courses.length === 0 ? "Create one in Course Builder, or import a list with the CSV template" : "Try adjusting your search"}
+                </div>
+              </div>
+            ) : (
+              <div className="table-scroll">
+                <table className="cat-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      {sortTh("code", "Course Code")}
+                      {sortTh("name", "Course Name")}
+                      <th>Subject</th><th>Level</th>
+                      <th>Customer</th><th>Audience</th><th>State</th>
+                      {sortTh("createdAt", "Added")}
+                      <th><span className="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {shown.map((c, i) => {
+                      const lv = getLevelInfo(c.number);
+                      const renaming = renameId === c.id;
+                      const st = statuses[c.id];
+                      return (
+                        <tr key={c.id} className={[st.state === "flagged" && "flagged", c.id === recodeId && "row-editing"].filter(Boolean).join(" ")}>
+                          <td className="idx-cell">{i + 1}</td>
+
+                          {/* Code cell: click to copy "CODE: Name"; flag details, Mark-OK state and history underneath */}
+                          <td>
+                            <button className="code-cell" onClick={() => doCopy(`${c.code}: ${c.name}`, c.id)} title="Copy full label (code: name)">
+                              {c.code}
+                              <span className={`ci${copiedId === c.id ? " done" : ""}`}>{copiedId === c.id ? "✓" : "⧉"}</span>
+                            </button>
+                            {st.state === "flagged" && (
+                              <div className="fmt-flag">
+                                <div className="fmt-flag-msg">
+                                  ⚑ {c.freeform
+                                    ? <>Doesn't follow the segment structure. Re-code it to assign segments, or mark it OK.</>
+                                    : st.expected
+                                      ? <>Current format: <span className="mono">{st.expected}</span>{isRegionCode(c.parts?.location ?? c.location) && " (region codes are retired)"}</>
+                                      : <>Can't rebuild in the current format: missing {st.missing.map(m => SEGMENTS[m].label).join(", ")}</>}
+                                </div>
+                                <div className="flag-actions">
+                                  {st.expected && <button className="btn btn-sm primary" onClick={() => regenOne(c)}>↻ Regenerate</button>}
+                                  <button className="btn btn-sm" onClick={() => markOk([c.id])}>✓ Mark OK</button>
+                                </div>
+                              </div>
+                            )}
+                            {st.state === "acked" && (
+                              <div className="fmt-acked">
+                                ✓ Kept as-is{st.expected && <> (format gives <span className="mono">{st.expected}</span>)</>}
+                                {" "}<button className="btn-inline" onClick={() => reflag(c.id)}>Flag again</button>
+                              </div>
+                            )}
+                            {c.previousCodes?.length > 0 && (
+                              <div className="prev-codes" title={`Code history: ${[...c.previousCodes, c.code].join(" → ")}`}>
+                                was {c.previousCodes[c.previousCodes.length - 1]}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Name cell: plain text, or the inline rename editor */}
+                          <td className="name-cell">
+                            {renaming ? (
+                              <div className="name-edit">
+                                <div className="name-edit-row">
+                                  <input className="glass-input sm" value={renameVal} autoFocus maxLength={200}
+                                    aria-label={`New name for ${c.code}`}
+                                    onChange={e => { setRenameVal(e.target.value); setRenameErr(""); }}
+                                    onKeyDown={e => { if (e.key === "Enter") saveRename(c.id); if (e.key === "Escape") setRenameId(null); }} />
+                                  <button className="btn btn-sm primary" onClick={() => saveRename(c.id)}>Save</button>
+                                  <button className="btn btn-sm" onClick={() => setRenameId(null)}>Cancel</button>
+                                </div>
+                                {renameErr && <div className="name-edit-err" role="alert">⚠ {renameErr}</div>}
+                              </div>
+                            ) : c.name}
+                          </td>
+
+                          <td>{c.type ? <span className="pill">{c.type}</span> : dash}</td>
+                          <td>
+                            {lv ? (
+                              <span className="lvl-pill" style={{ "--c": lv.color }} title={lv.label}>
+                                {String(c.number).padStart(3, "0")}
+                              </span>
+                            ) : dash}
+                          </td>
+                          <td className="muted-cell">
+                            {c.client || c.clientCode
+                              ? <>{c.client}{c.client && c.clientCode ? " · " : ""}{c.clientCode}</>
+                              : dash}
+                          </td>
+                          <td>{c.audience ? <span className="pill">{c.audience}</span> : dash}</td>
+                          <td className="muted-cell">{c.location || dash}</td>
+                          <td className="muted-cell">{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "–"}</td>
+                          <td>
+                            {!renaming && (
+                              <div className="row-actions">
+                                <button className="btn btn-sm" onClick={() => startRename(c)}>Rename</button>
+                                <button className="btn btn-sm" onClick={() => startRecode(c)}>Re-code</button>
+                                <button className="btn btn-del" onClick={() => doDelete(c)}>Remove</button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══════════════════════════ REFERENCE TAB ══════════════════════════ */}
+        {tab === "reference" && (
+          <div className="lms-panel">
+            <div className="ref-grid">
+
+              {/* The current format, its segments, and the examples rendered in it */}
+              <div className="ref-wide">
+                <div className="ref-section-title">Current Code Format</div>
+                <div className="fmt-box">
+                  <div className="fmt-pattern">{pattern.slots.map(s => s.sep + s.value).join("")}</div>
+                  {pattern.slots.map(s => (
+                    <div key={s.id} className="fmt-desc-row">
+                      <span className="k" style={{ color: SEGMENTS[s.id].color }}>[{SEGMENTS[s.id].short}]</span>
+                      <span className="v">{SEGMENTS[s.id].desc}</span>
+                    </div>
+                  ))}
+                  <div className="fmt-examples">
+                    <div className="ref-section-title">Examples in this format</div>
+                    {EXAMPLES.map(ex => {
+                      const code = buildCode(ex.vals, format).code;
+                      return code ? <div key={ex.name} className="fmt-ex">{code}: {ex.name}</div> : null;
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="ref-section-title">Subject / Course Types</div>
+                <div className="ref-list">
+                  {COURSE_TYPES.map(t => (
+                    <div key={t.code} className="ref-row">
+                      <span className="ref-code" style={{ color: SEGMENTS.type.color }}>{t.code}</span>
+                      <span className="ref-name">{t.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="ref-section-title">Audience Codes</div>
+                <div className="ref-list ref-scrollable">
+                  {AUDIENCES.map(a => (
+                    <div key={a.code} className="ref-row">
+                      <span className="ref-code" style={{ color: SEGMENTS.audience.color }}>{a.code}</span>
+                      <span className="ref-name">{a.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="ref-section-title">Course Level Guide</div>
+                <div className="ref-list">
+                  {LEVELS.map(lv => (
+                    <div key={lv.range} className="ref-row">
+                      <span className="ref-code" style={{ color: lv.color, minWidth: "60px" }}>{lv.range}</span>
+                      <span className="ref-name">{lv.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="ref-section-title">Customer Codes</div>
+                <div className="ref-list ref-scrollable">
+                  {CLIENTS.map((c, i) => (
+                    <div key={i} className="ref-row">
+                      <span className="ref-code" style={{ color: SEGMENTS.client.color, minWidth: "54px" }}>{c.code}</span>
+                      <span className="ref-name">{c.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="ref-wide">
+                <div className="ref-section-title">State Codes</div>
+                <div className="state-grid">
+                  {STATES.map(s => (
+                    <div key={s.code} className="ref-row">
+                      <span className="ref-code" style={{ color: SEGMENTS.location.color, minWidth: "28px" }}>{s.code}</span>
+                      <span className="ref-name">{s.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* ═══ Footer credit ═══ */}
+      <Credit />
+
+      {/* ═══ Toast (bottom-right status message) ═══ */}
+      {toast && (
+        <div className={`alert alert-${toast.kind} toast`} role="status">
+          <span>{{ ok: "✓", info: "ⓘ" }[toast.kind] || "⚠"}</span>
+          <span>{toast.text}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Mount the app into <div id="root">.
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
