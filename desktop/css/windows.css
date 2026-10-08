@@ -108,3 +108,17 @@ body.wm-busy iframe { pointer-events: none !important; }
 @keyframes wm-shrink { from { transform: scale(1); opacity: 1; } to { transform: scale(.08); opacity: 0; } }
 @keyframes wm-grow   { from { transform: scale(.08); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes wm-pop    { from { transform: scale(.94); opacity: .4; } to { transform: scale(1); opacity: 1; } }
+
+/* --- OS DIALOG (desktop/js/core/os-dialog.js): retro Yes / No message boxes --- */
+.osd-shield { position: fixed; inset: 0; background: transparent; }
+.osd { display: flex; flex-direction: column; justify-content: space-between; height: 100%; padding: 12px 14px 10px; box-sizing: border-box;
+    background: var(--ui-face, #c0c0c0); color: var(--ui-text, #000); font-size: 13px; }
+.osd-body { display: flex; align-items: flex-start; gap: 14px; }
+.osd-icon { flex: none; line-height: 0; }
+.osd-msg { margin: 6px 0 0; line-height: 1.4; }
+.osd-btns { display: flex; justify-content: center; gap: 10px; }
+.osd-btns button { min-width: 80px; padding: 4px 12px; cursor: pointer; font: inherit; color: var(--ui-text, #000); }
+.osd-btns button:focus-visible { outline: 1px dotted #000; outline-offset: -5px; }
+.osd-win .resizer { display: none; }
+@keyframes osd-flash { 0%, 50% { filter: none; } 25%, 75% { filter: brightness(1.25) saturate(0.4); } }
+.osd-win.osd-flash { animation: osd-flash .35s linear 1; }

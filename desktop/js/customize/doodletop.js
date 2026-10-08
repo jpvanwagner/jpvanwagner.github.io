@@ -206,9 +206,8 @@ window.DoodleTop = {
     },
 
     clearCanvas() {
-        if(confirm("Clear your doodle?")) {
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        }
+        OSDialog.confirm({ title: 'DoodleTop', message: 'Clear your doodle?', icon: 'question', ok: 'Clear', cancel: 'Keep it' })
+            .then(yes => { if (yes) this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); });
     },
 };
 

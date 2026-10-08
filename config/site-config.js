@@ -58,12 +58,14 @@ window.SiteConfig = {
 
     // Playable learning games (games/<id>/index.html). The retro desktop opens them in their
     // own window at this size; Traditional View has a page for each (pages/project-game-<id>.html).
+    // thumb = the picture in the desktop's Games folder. A short looping clip for the folder's preview
+    // pane goes in images/previews/<id>.webm + .mp4 + .jpg (poster); none = the thumb is shown instead.
     games: [
-        { id: 'mall-run',    label: 'Mall Run',    width: 900, height: 620, tip: 'Endless 3D runner quiz' },
-        { id: 'quiz-man',    label: 'Quiz-Man',    width: 640, height: 700, tip: 'Maze-chase quiz' },
-        { id: 'quizaga',     label: 'Quizaga',     width: 640, height: 860, tip: 'Space-shooter quiz' },
-        { id: 'quizcavator', label: 'Quizcavator', width: 640, height: 860, tip: 'Digging quiz' },
-        { id: 'right-this-way', label: 'Right This Way, Please', width: 1180, height: 760, tip: 'Access-desk security game' }
+        { id: 'mall-run',    label: 'Mall Run',    width: 900, height: 620, tip: 'Endless 3D runner quiz', thumb: 'images/games/mall-run-v2.jpg' },
+        { id: 'quiz-guy',    label: 'Quiz-Guy',    width: 640, height: 700, tip: 'Maze-chase quiz', thumb: 'images/games/quiz-guy-v2.jpg' },
+        { id: 'quizaga',     label: 'Quizaga',     width: 640, height: 860, tip: 'Space-shooter quiz', thumb: 'images/games/quizaga-v2.jpg' },
+        { id: 'quizcavator', label: 'Quizcavator', width: 640, height: 860, tip: 'Digging quiz', thumb: 'images/games/quizcavator-v2.jpg' },
+        { id: 'right-this-way', label: 'Right This Way, Please', width: 1180, height: 760, tip: 'Access-desk security game', thumb: 'images/games/right-this-way.jpg' }
     ],
 
     // VISITOR COUNTER (the 88x31 badge in the footer). One count for the whole site, shown on

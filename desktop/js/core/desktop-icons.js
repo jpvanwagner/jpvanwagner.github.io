@@ -85,7 +85,9 @@ window.Desktop = {
             this.els.push(el);
             
             // Icon URL logic
-            const imgUrl = (icon.icon.startsWith('http')) ? icon.icon : `images/icons/${icon.icon}`;
+            let imgUrl = (icon.icon.startsWith('http')) ? icon.icon : `images/icons/${icon.icon}`;
+            // A Rubbish bin with something in it: lid off, rubbish showing
+            if (el.classList.contains('rubbish-full') && icon.icon === 'os/rubbish.png') imgUrl = 'images/icons/os/rubbish-full.png';
             
             // Shortcuts (icons that open a web page) get the little arrow badge, like a real desktop
             const arrow = icon.shortcut ? `<img class="shortcut-arrow" src="images/icons/os/shortcut.png" alt="" draggable="false">` : '';

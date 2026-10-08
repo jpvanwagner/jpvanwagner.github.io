@@ -129,7 +129,7 @@ work/                      Sample e-learning (unmodified Rise 360 web exports, o
                            file names, narration that says them, logos blurred).
 
 games/                     Playable learning games, one self-contained index.html each
-  mall-run/  quiz-man/  quizaga/  quizcavator/
+  mall-run/  quiz-guy/  quizaga/  quizcavator/
                            Listed in config/site-config.js (games); Traditional View page for each is
                            pages/project-game-<id>.html. To add one: drop it in games/<id>/index.html,
                            add it to `games` in the config, copy a project-game page, add a card to
@@ -194,7 +194,7 @@ images/
 * **Messages from Joe (Retro Desktop tray pop-ups):** the messages themselves are `MESSAGES` in
   `desktop/js/apps/messenger.js` (one arrives every 20 to 30 minutes, at random; unread ones queue up and open one at a time). In-app replies go to `messageEndpoint`
   in `config/site-config.js` (paste a free Formspree form address there); left empty, "Send" opens the
-  visitor's email app. Optional sound: put an audio file at `sounds/uh-oh.mp3`.
+  visitor's email app. Its "uh-oh!" is synthesized in the browser (no sound file).
 * **Folders (Sample Courses / Games / Projects on the desktop):** `desktop/js/apps/folders.js`; they read
   the Portfolio page's course cards and `games` in `config/site-config.js`, so nothing to edit there.
 * **Themes / wallpapers:** `desktop/js/customize/themes-data.js` / `wallpapers-data.js`.

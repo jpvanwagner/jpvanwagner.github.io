@@ -1,548 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quizcavator Quiz</title>
-    <!-- Import a classic retro arcade font -->
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Quizcavator Quiz</title>
 
-        /* ========================================================
-           VISUAL STYLES & RESPONSIVE LAYOUT
-           ======================================================== */
-        :root {
-            --brand-blue: #3232FF; 
-            --dirt-color: #A0522D; 
-            --dirt-surface: #663300;
-            --sky-color: #000000;
-            --tunnel-color: #000000; 
-        }
+<!-- =====================================================================================
+     ✏️  EDIT ZONE: everything you'd normally want to change is in this one block.
+     Words, rules, colors, sprites, backgrounds and questions. The game engine further down
+     reads these values, so you shouldn't need to touch anything below this block.
+     (The Quizcade Builder reads and rewrites this block too. Keep the id="quizcade-config".)
+     ===================================================================================== -->
+<script id="quizcade-config">
+const QUIZCADE = {
+    game: "quizcavator",   // tells the Builder which game this is. Leave it as is.
 
-        /* html only fills the window; the page padding and min-height live on body alone
-           (on both, the page came out 20px taller than the window and always scrolled) */
-        html { margin: 0; padding: 0; background-color: #111; }
-        body {
-            margin: 0;
-            padding: 10px;
-            background-color: #111; 
-            color: #fff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            min-height: 100vh;
-            box-sizing: border-box;
-            overscroll-behavior-y: contain; 
-        }
+    /* ---------- WORDS ON SCREEN ---------- */
+    text: {
+        title: "QUIZCAVATOR",
+        pageTitle: "Quizcavator Quiz",             // browser tab title
+        prompt: "DIG TO AN ANSWER BLOCK!",         // sidebar text before the first question
+        start: "START GAME",
+        playAgain: "PLAY AGAIN",
+        gameOver: "GAME OVER",
+        finalScore: "FINAL SCORE:",
+        actionButton: "BLAST",                      // the touch-screen action button
+        extraLife: "EXTRA LIFE EVERY {points} POINTS",
+        tutorial: [                                // one entry per tutorial step ("\n" = new line)
+            "STEP 1:\n\nManually drive into dirt to carve tunnels! Digging is 50% slower than moving in empty space.",
+            "STEP 2:\n\nEnemies can burrow through the dirt. Face them and press SPACE (or BLAST) to knock them out!",
+            "STEP 3:\n\nDig down to the correct answer block to clear the level!"
+        ],
+        controls: {
+            touch: "TOUCH ANYWHERE TO AUTO-DIG OR USE D-PAD",
+            mouse: "MOUSE (CLICK ANYWHERE TO AUTO-DIG. CLICK ENEMIES TO BLAST)",
+            keys: "WASD / ARROWS TO DIG. SPACEBAR TO BLAST.",
+            both: "CLICK ANYWHERE TO AUTO-DIG OR USE KEYBOARD."
+        },
+        labels: {
+            score: "SCORE", level: "LEVEL", lives: "LIVES",
+            controls: "CONTROLS", controlsPrefix: "CONTROLS:", activeControls: "ACTIVE CONTROLS",
+            mouse: "MOUSE", keys: "KEYS", both: "BOTH",
+            questionsPerLevel: "QUESTIONS/LEVEL",
+            skip: "SKIP", next: "NEXT ➡"
+        },
+        answerLabels: ["A", "B", "C", "D"]
+    },
 
-        .retro-text {
-            font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
-        }
+    /* ---------- RULES ---------- */
+    settings: {
+        livesChoices: [1, 3, 5],                   // buttons on the title screen
+        defaultLives: 3,
+        questionsPerLevelChoices: [3, 5, 10],
+        defaultQuestionsPerLevel: 5,
+        pointsPerCorrect: 500,
+        pointsPerDirt: 5,                          // per square of dirt dug
+        pointsPerEnemy: 300,
+        extraLifeEvery: 2000,                      // 0 = no extra lives
+        showTutorial: true,                        // false = START jumps straight into the game
+        autoFullscreen: true,                      // go full screen when START is pressed (if the page allows it)
+        shuffleQuestions: true,                    // false = ask in the order written below
+        shuffleAnswers: false,                     // true = mix up the A/B/C/D order each time
+        baseEnemies: 3,                            // enemies on level 1 (one more every 2 levels)
+        hitsToDefeat: 4,                           // blasts needed to knock out an enemy
+        playerSpeed: 2,                            // in tunnels; must divide evenly into 20: 1, 2, 4 or 5
+        digSpeed: 1,                               // through dirt; same rule
+        enemySpeed: 1                              // same rule
+    },
 
-        :fullscreen {
-            background-color: #111;
-        }
+    /* ---------- COLORS (any CSS color: "#ff0000", "red", "rgb(255,0,0)") ---------- */
+    colors: {
+        brand: "#3232FF",                          // buttons and title shadow
+        accent: "#f1c40f",                         // title and score text
+        pageBackground: "#111111",
+        correct: "#2ecc71",
+        wrong: "#e74c3c",
+        answers: ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f"],   // A, B, C, D blocks and labels
+        sky: "#000000",
+        tunnel: "#000000",
+        dirt: "#A0522D",
+        dirtSpeckle: "#6e451f",
+        surface: "#663300",                        // the line where the sky meets the dirt
+        bedrock: "#444444",
+        bedrockInner: "#222222",
+        enemies: ["#8b5cf6", "#10b981"],           // enemies take turns using these (violet, emerald)
+        blast: "#9be7ff",                          // the air-blast rings
+        dizzyStars: "#ffd166",                     // stars circling a stunned enemy
+        path: "rgba(255, 255, 255, 0.4)"           // dots showing a mouse/touch route
+    },
 
-        #game-wrapper {
-            width: 100%;
-            max-width: 950px; 
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    /* ---------- SPRITES & BACKGROUNDS ----------
+       To swap in your own picture, put an image link or a data: URI in "image" (e.g. "https://.../digger.png").
+       Otherwise the pixel art below is used: each letter is one pixel, colored by "palette".
+       "." is see-through. The palette color "tint" means "this enemy's color" (colors.enemies).
+       "size" is the width in game pixels (one dirt square is 20). Draw the player facing RIGHT;
+       it turns to face the way it's digging. */
+    sprites: {
+        player: {
+            image: "",
+            size: 28,   // the empty left side keeps the body centered on its square while the scoop reaches forward
+            palette: { T: "#555555", Y: "#f1c40f", G: "#87ceeb", K: "#222222", S: "#7f8c8d" },
+            pixels: [
+                "........TTTTTTTTTTTT........",
+                "........TTTTTTTTTTTT........",
+                "........TTYYYYYYYYTT........",
+                "........TTYYYYYYYYTT........",
+                "..........YYYYGGGG......SSSS",
+                "..........YYYYGGGG......SSSS",
+                "..........YYYYGGGG......SSSS",
+                "..........YYYYGGGGKKKKKKSSSS",
+                "..........YYYYGGGGKKKKKKSSSS",
+                "..........YYYYGGGG......SSSS",
+                "..........YYYYGGGG......SSSS",
+                "..........YYYYGGGG......SSSS",
+                "........TTYYYYYYYYTT........",
+                "........TTYYYYYYYYTT........",
+                "........TTTTTTTTTTTT........",
+                "........TTTTTTTTTTTT........"
+            ]
+        },
+        enemy: {
+            image: "",
+            size: 14,   // drawn facing RIGHT; flips when moving left
+            palette: { M: "tint", W: "#ffffff", K: "#000000" },
+            pixels: [
+                "....MMMMMM....",
+                "...MMMMMMMM...",
+                "..MMMMMMMMMM..",
+                ".MWWWWMMWWWWM.",
+                "MMWWWKKMWWWKKM",
+                "MMWWWKKMWWWKKM",
+                "MMWWWWMMWWWWMM",
+                "MMMMMMMMMMMMMM",
+                "MMMMMMMMMMMMMM",
+                "MMMMMMMMMMMMMM",
+                ".MMMMMMMMMMMM.",
+                "..MMMMMMMMMM..",
+                "...MMMMMMMM...",
+                "....MMMMMM...."
+            ]
+        },
+        enemyBurrowing: {                          // what an enemy looks like while it burrows through dirt
+            image: "",
+            size: 14,
+            palette: { W: "#ffffff", R: "#a3e635" },
+            pixels: [
+                "..............",
+                "..............",
+                "..WWWW..WWWW..",
+                ".WWWWWWWWWWWW.",
+                ".WWRRWWWWRRWW.",
+                ".WWRRWWWWRRWW.",
+                ".WWWWWWWWWWWW.",
+                "..WWWW..WWWW..",
+                "..............",
+                "..............",
+                "..............",
+                "..............",
+                "..............",
+                ".............."
+            ]
+        },
+        dirt: { image: "" },                       // a texture picture to tile across the dirt
+        background: { image: "" }                  // shows through the sky and the tunnels
+    },
 
-        h1 { 
-            margin: 0 0 15px 0; 
-            flex-shrink: 0;
-            font-size: clamp(16px, 4vw, 24px); 
-            color: #f1c40f; 
-            text-align: center; 
-            text-shadow: 2px 2px 0 var(--brand-blue);
-        }
-
-        /* Flex container for the game and sidebar */
-        #main-content {
-            width: 100%;
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-            align-items: stretch;
-            justify-content: center;
-        }
-
-        /* The left column containing the maze and HUD */
-        #game-column {
-            flex: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 300px; 
-        }
-
-        #ui-bar {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: clamp(8px, 1.5vw, 12px);
-            background: #222;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 2px solid #555;
-            text-transform: uppercase;
-        }
-
-        #game-container {
-            position: relative;
-            width: 100%;
-            max-width: 560px;
-            box-shadow: 0 0 0 4px #444;
-            background-color: #000;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: auto;
-            /* Prevents squishing by locking aspect ratio for deep digging */
-            aspect-ratio: 560 / 640; 
-            object-fit: contain;
-            image-rendering: pixelated; 
-        }
-
-        /* Constant control display */
-        #active-controls-hud {
-            margin-top: 15px;
-            text-align: center;
-            font-size: 10px;
-            color: #ccc;
-            background: #222;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #444;
-            line-height: 1.4;
-            width: 100%;
-            max-width: 560px;
-            box-sizing: border-box;
-        }
-
-        /* --- In-Game Fullscreen Button --- */
-        #fs-toggle-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            color: #fff;
-            border: 2px solid #fff;
-            border-radius: 5px;
-            width: 40px;
-            height: 40px;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 20;
-            transition: background 0.2s, transform 0.1s;
-        }
-        #fs-toggle-btn:hover { background: rgba(255, 255, 255, 0.3); }
-        #fs-toggle-btn:active { transform: scale(0.9); }
-
-        #red-flash, #green-flash {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-            z-index: 5;
-        }
-        #red-flash { background-color: rgba(255, 0, 0, 0.6); }
-        #green-flash { background-color: rgba(46, 204, 113, 0.6); }
-
-        /* Modal Styles */
-        .modal {
-            display: none; 
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.95);
-            padding: 5%;
-            box-sizing: border-box;
-            z-index: 10;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        .modal h2 { 
-            margin-top: 0; 
-            color: #f1c40f; 
-            font-size: clamp(20px, 4vw, 30px); 
-            line-height: 1.6; 
-            text-shadow: 2px 2px 0 var(--brand-blue);
-        }
-        
-        #title-modal h2 { margin-bottom: 10px; }
-
-        /* Settings UI */
-        .settings-row {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-            font-size: 10px;
-            color: #ccc;
-        }
-        .toggle-group {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .toggle-btn {
-            background: #222;
-            color: #777;
-            border: 2px solid #444;
-            padding: 10px 15px;
-            font-size: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .toggle-btn.active {
-            background: var(--brand-blue);
-            color: #fff;
-            border-color: #fff;
-        }
-
-        .action-btn {
-            background: var(--brand-blue);
-            color: white;
-            border: 4px solid #fff;
-            padding: 15px 20px;
-            font-size: clamp(12px, 3vw, 16px);
-            cursor: pointer;
-            text-transform: uppercase;
-            margin-top: 20px;
-            width: 100%;
-            max-width: 350px;
-        }
-        .action-btn:hover { background: #fff; color: var(--brand-blue); border-color: var(--brand-blue); }
-        .action-btn:active { transform: scale(0.95); }
-
-        /* Sidebar UI */
-        #sidebar {
-            flex: 1;
-            min-width: 250px;
-            background-color: #000;
-            padding: 20px;
-            box-sizing: border-box;
-            display: none; 
-            flex-direction: column;
-            box-shadow: 0 0 0 4px #444, inset 0 0 0 2px #fff;
-        }
-        #question-panel { flex-grow: 1; display: flex; flex-direction: column; }
-        #question-text {
-            font-size: 16px;
-            color: #f1c40f;
-            margin-bottom: 20px;
-            line-height: 1.4;
-            font-weight: 600;
-        }
-        .option-btn {
-            background: #111;
-            color: white;
-            border: 2px solid #444;
-            padding: 15px;
-            margin-bottom: 12px;
-            text-align: left;
-            font-size: 12px;
-            line-height: 1.6;
-            cursor: pointer;
-            transition: background 0.2s;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-weight: 500;
-            width: 100%;
-        }
-        .option-btn:hover { background: #333; border-color: #fff; }
-        .option-btn.correct { background: #27ae60 !important; border-color: #2ecc71 !important; color: #000; }
-        .option-btn.wrong { background: #c0392b !important; border-color: #e74c3c !important; }
-
-        /* Demo Overlay */
-        #demo-ui {
-            display: none;
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 15;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end; /* Always on bottom */
-            padding: 40px 20px;
-            box-sizing: border-box;
-            pointer-events: auto;
-        }
-        #demo-text {
-            background: rgba(0,0,0,0.95);
-            color: #f1c40f;
-            padding: 20px;
-            border: 2px solid #f1c40f;
-            font-size: 14px;
-            font-weight: bold;
-            text-align: center;
-            border-radius: 5px;
-            width: 90%;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-        .demo-btn-row {
-            display: flex;
-            gap: 15px;
-            width: 100%;
-            justify-content: center;
-        }
-        .demo-btn {
-            background: #e74c3c;
-            color: white;
-            border: 2px solid #fff;
-            padding: 12px 25px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 5px;
-            text-transform: uppercase;
-        }
-        #next-demo-btn { 
-            background: #2ecc71; 
-            color: #000; 
-            animation: pulseBtn 1.5s infinite;
-        }
-        @keyframes pulseBtn {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        /* Mobile Adjustments */
-        @media (max-width: 800px) {
-            #main-content {
-                flex-direction: column;
-                align-items: center;
-            }
-            #game-column, #sidebar {
-                width: 100%;
-                max-width: 560px;
-            }
-        }
-
-        /* --- Mobile Controls --- */
-        #mobile-controls {
-            display: none;
-            grid-template-columns: 60px 60px 60px 80px;
-            grid-template-rows: 60px 60px 60px;
-            gap: 10px;
-            margin-top: 15px;
-            justify-content: center;
-            width: 100%;
-        }
-
-        .dpad-btn {
-            background-color: rgba(255, 255, 255, 0.2);
-            border: 4px solid rgba(255, 255, 255, 0.5);
-            color: white;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-            touch-action: manipulation;
-        }
-        .dpad-btn:active { background-color: var(--brand-blue); border-color: #fff; }
-        #btn-up { grid-column: 2; grid-row: 1; }
-        #btn-left { grid-column: 1; grid-row: 2; }
-        #btn-right { grid-column: 3; grid-row: 2; }
-        #btn-down { grid-column: 2; grid-row: 3; }
-        #btn-action { 
-            grid-column: 4; 
-            grid-row: 2; 
-            background-color: #e74c3c; 
-            border-radius: 5px; 
-            font-size: 14px; 
-            font-weight: bold;
-        }
-        #btn-action:active { background-color: #c0392b; }
-        /* Credit line on the title screen */
-        .jv-credit { margin-top: 12px; font-size: 8px; color: #aaa; text-align: center; letter-spacing: 1px; }
-        .jv-credit a { color: #f1c40f; text-decoration: none; }
-        .jv-credit a:hover { text-decoration: underline; }
-    </style>
-</head>
-<body>
-
-    <div id="game-wrapper">
-        <h1 class="retro-text">QUIZCAVATOR</h1>
-        
-        <div id="main-content">
-            <!-- Left Game Board Column -->
-            <div id="game-column">
-                <div id="ui-bar" class="retro-text">
-                    <div>SCORE<br><span id="score-display" style="color:#f1c40f">000000</span></div>
-                    <div>LEVEL<br><span id="level-display" style="color:#f1c40f">01 (0/5)</span></div>
-                    <div>LIVES<br><span id="lives-display">❤️❤️❤️</span></div>
-                </div>
-
-                <div id="game-container">
-                    <canvas id="gameCanvas" width="560" height="640"></canvas>
-                    <button id="fs-toggle-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
-                    <div id="red-flash"></div>
-                    <div id="green-flash"></div>
-
-                    <!-- DEMO UI OVERLAY -->
-                    <div id="demo-ui">
-                        <div id="demo-text">STEP 1</div>
-                        <div class="demo-btn-row">
-                            <button id="skip-demo-btn" class="retro-text demo-btn" onclick="skipDemo()">SKIP</button>
-                            <button id="next-demo-btn" class="retro-text demo-btn" onclick="advanceDemo()">NEXT ➡</button>
-                        </div>
-                    </div>
-
-                    <!-- TITLE SCREEN MODAL -->
-                    <div id="title-modal" class="modal" style="display: flex;">
-                        <h2 class="retro-text">QUIZCAVATOR</h2>
-
-                        <div class="settings-row" id="controls-setting">
-                            <div class="retro-text">CONTROLS</div>
-                            <div class="toggle-group">
-                                <button class="toggle-btn retro-text" onclick="setControlMode('mouse')">MOUSE</button>
-                                <button class="toggle-btn retro-text" onclick="setControlMode('keyboard')">KEYS</button>
-                                <button class="toggle-btn retro-text active" onclick="setControlMode('both')">BOTH</button>
-                            </div>
-                        </div>
-
-                        <div class="settings-row">
-                            <div class="retro-text">LIVES</div>
-                            <div class="toggle-group" id="lives-group">
-                                <button class="toggle-btn retro-text" onclick="setLives(1, this)">1</button>
-                                <button class="toggle-btn retro-text active" onclick="setLives(3, this)">3</button>
-                                <button class="toggle-btn retro-text" onclick="setLives(5, this)">5</button>
-                            </div>
-                        </div>
-
-                        <div class="settings-row">
-                            <div class="retro-text">QUESTIONS/LEVEL</div>
-                            <div class="toggle-group" id="questions-group">
-                                <button class="toggle-btn retro-text" onclick="setQPL(3, this)">3</button>
-                                <button class="toggle-btn retro-text active" onclick="setQPL(5, this)">5</button>
-                                <button class="toggle-btn retro-text" onclick="setQPL(10, this)">10</button>
-                            </div>
-                        </div>
-                        
-                        <button class="action-btn retro-text" onclick="startDemo()">START GAME</button>
-                        <div class="jv-credit retro-text">&copy; 2026 <a href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">Joe VanWagner</a></div>
-                    </div>
-
-                    <!-- QUIZ MODAL (Mobile Fallback) -->
-                    <div id="quiz-modal" class="modal">
-                        <h2 id="question-text-mobile" style="color:#f1c40f; font-family:'Segoe UI', sans-serif;">Question?</h2>
-                        <div id="options-container-mobile" style="width: 100%; max-width: 500px;"></div>
-                    </div>
-
-                    <!-- GAME OVER MODAL -->
-                    <div id="game-over-modal" class="modal">
-                        <h2 id="game-over-title" class="retro-text" style="color: #e74c3c; text-shadow: 2px 2px 0 #fff;">GAME OVER</h2>
-                        <p class="retro-text" style="font-size: 10px; margin-top: 20px;">FINAL SCORE:<br><br><span id="final-score" style="font-size: 20px; color: #f1c40f;">0</span></p>
-                        <button class="action-btn retro-text" onclick="resetGame(true)">PLAY AGAIN</button>
-                    </div>
-                </div>
-                
-                <!-- Constant Controls Display -->
-                <div id="active-controls-hud" class="retro-text">CONTROLS: MOUSE & KEYBOARD</div>
-                
-                <!-- Mobile Controls (D-Pad) -->
-                <div id="mobile-controls">
-                    <div id="btn-up" class="dpad-btn">⬆️</div>
-                    <div id="btn-left" class="dpad-btn">⬅️</div>
-                    <div id="btn-right" class="dpad-btn">➡️</div>
-                    <div id="btn-down" class="dpad-btn">⬇️</div>
-                    <div id="btn-action" class="dpad-btn">PUMP</div>
-                </div>
-            </div>
-
-            <!-- Right Sidebar UI Area (Shows only during gameplay) -->
-            <div id="sidebar">
-                <div id="question-panel">
-                    <div id="question-text">DIG TO AN ANSWER BLOCK!</div>
-                    <div id="options-container">
-                        <!-- Injected via JS -->
-                    </div>
-                </div>
-
-                <!-- Persistent Editable Controls HUD -->
-                <div id="sidebar-controls" style="margin-top: 20px; padding-top: 20px; border-top: 2px dashed #444; text-align: center;">
-                    <div class="retro-text" style="font-size:8px; margin-bottom:10px; color:#aaa;">ACTIVE CONTROLS</div>
-                    <div class="toggle-group">
-                        <button class="toggle-btn retro-text" onclick="setControlMode('mouse')">MOUSE</button>
-                        <button class="toggle-btn retro-text" onclick="setControlMode('keyboard')">KEYS</button>
-                        <button class="toggle-btn retro-text active" onclick="setControlMode('both')">BOTH</button>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 20px; font-size: 12px; font-weight:bold; text-align: center; padding-top: 20px; border-top: 2px dashed #444;">
-                    <span style="color:#2ecc71;">EXTRA LIFE EVERY 2000 POINTS</span>
-                </div>
-            </div>
-            
-        </div>
-    </div>
-
-<script>
-    /* =========================================================================
-       GLOBAL VARIABLES & CONFIGURATION
-       ========================================================================= */
-    const CONFIG = {
-        playerSpeed: 2,           
-        enemySpeed: 1, 
-        baseEnemies: 3,
-        cols: 28,
-        rows: 32, // Essential for deep digging map
-        tileSize: 20
-    };
-
-    let selectedLives = 3;
-    let selectedQPL = 5;
-    let currentControlMode = 'both'; 
-    let isDemoMode = false;
-    const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const TS = CONFIG.tileSize; 
-
-    let map = [];
-    let state = 'TITLE'; 
-    let score = 0;
-    let lives = 3;
-    let level = 1;
-    let questionsAnsweredThisLevel = 0;
-    let nextExtraLife = 2000;
-    
-    let currentQuestion = null;
-    let deathFrame = 0; 
-    let demoStep = 0;
-    let demoSubFrame = 0;
-
-    let player = { x: 0, y: 0, vx: 0, vy: 0, reqVx: 0, reqVy: 0, startX: 13*TS, startY: 2*TS, path: [], facing: {x: 0, y: 1} };
-    let enemies = [];
-    let pump = { active: false, timer: 0, x: 0, y: 0, target: null };
-
-    const masterQuestionPool = [   // easy general trivia across many categories
+    /* ---------- QUESTIONS ----------
+       q = question, opts = 2 to 4 answers (A, B, C, D), ans = number of the correct answer
+       counting from 0 (0 = A, 1 = B, 2 = C, 3 = D). */
+    questions: [
         { q: "What is the capital of France?", opts: ["Rome", "Madrid", "Berlin", "Paris"], ans: 3 },
         { q: "Which planet is known as the Red Planet?", opts: ["Jupiter", "Mars", "Venus", "Saturn"], ans: 1 },
         { q: "How many continents are there?", opts: ["5", "8", "7", "6"], ans: 2 },
@@ -583,1053 +209,1502 @@
         { q: "What is a baby cat called?", opts: ["A kitten", "A foal", "A puppy", "A cub"], ans: 0 },
         { q: "How many strings does a standard guitar have?", opts: ["4", "6", "8", "5"], ans: 1 },
         { q: "Which planet is famous for its rings?", opts: ["Mars", "Mercury", "Venus", "Saturn"], ans: 3 }
-    ];
-
-    // ==========================================
-    // UI SETUP & LOGIC
-    // ==========================================
-    function updateControlHUD() {
-        const hud = document.getElementById('active-controls-hud');
-        if(currentControlMode === 'mobile') hud.innerHTML = "<b>CONTROLS:</b> TOUCH ANYWHERE TO AUTO-DIG OR USE D-PAD";
-        else if(currentControlMode === 'mouse') hud.innerHTML = "<b>CONTROLS:</b> MOUSE (CLICK ANYWHERE TO AUTO-DIG. CLICK ENEMIES TO PUMP)";
-        else if(currentControlMode === 'keyboard') hud.innerHTML = "<b>CONTROLS:</b> WASD / ARROWS TO DIG. SPACEBAR TO PUMP.";
-        else hud.innerHTML = "<b>CONTROLS:</b> CLICK ANYWHERE TO AUTO-DIG OR USE KEYBOARD.";
-    }
-
-    function setControlMode(mode) {
-        currentControlMode = mode;
-        
-        let allBtns = document.querySelectorAll('.toggle-btn');
-        allBtns.forEach(b => {
-            let txt = b.innerText.trim();
-            if (txt === 'MOUSE' || txt === 'KEYS' || txt === 'BOTH') {
-                b.classList.remove('active');
-                if (txt.toLowerCase().includes(mode.substring(0,3))) b.classList.add('active');
-                if (mode === 'both' && txt === 'BOTH') b.classList.add('active');
-            }
-        });
-        updateControlHUD();
-    }
-
-    if (isMobile) {
-        document.getElementById('controls-setting').style.display = 'none';
-        document.getElementById('sidebar-controls').style.display = 'none';
-        currentControlMode = 'mobile';
-        updateControlHUD();
-    } else {
-        updateControlHUD();
-    }
-
-    function setLives(val, btnElement) {
-        selectedLives = val;
-        let btns = document.getElementById('lives-group').getElementsByTagName('button');
-        for(let b of btns) b.classList.remove('active');
-        btnElement.classList.add('active');
-    }
-
-    function setQPL(val, btnElement) {
-        selectedQPL = val;
-        let btns = document.getElementById('questions-group').getElementsByTagName('button');
-        for(let b of btns) b.classList.remove('active');
-        btnElement.classList.add('active');
-    }
-
-    function toggleFullscreen() {
-        try {
-            if (!document.fullscreenElement) {
-                let elem = document.documentElement;
-                let p = elem.requestFullscreen ? elem.requestFullscreen() : undefined;
-                if (p) p.catch(()=>{});
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-            }
-        } catch(e) { console.log("Fullscreen toggle blocked."); }
-    }
-
-    /* =========================================================================
-       INPUT HANDLING, COMBAT & PATHFINDING
-       ========================================================================= */
-    function clearPath() { player.path = []; }
-
-    function firePump() {
-        if (pump.active || isDemoMode && state !== 'DEMO') return;
-        
-        let target = null;
-        let pC = Math.round(player.x/TS);
-        let pR = Math.round(player.y/TS);
-        
-        for (let dist = 1; dist <= 3; dist++) {
-            let checkC = pC + (player.facing.x * dist);
-            let checkR = pR + (player.facing.y * dist);
-            
-            // Blocked by bedrock, but dirt is fine for pump? In arcade you can't shoot through dirt.
-            if (map[checkR] && (map[checkR][checkC] === 1 || map[checkR][checkC] === 3)) break;
-
-            for (let e of enemies) {
-                if (e.state === 'DEAD') continue;
-                let eC = Math.round(e.x/TS);
-                let eR = Math.round(e.y/TS);
-                if (eC === checkC && eR === checkR) {
-                    target = e;
-                    break;
-                }
-            }
-            if (target) break;
-        }
-
-        pump.active = true;
-        pump.timer = 15;
-        
-        if (target) {
-            target.state = 'STUNNED';
-            target.stunTimer = 120; // 2 seconds stun
-            target.inflate += 1;
-            
-            if (target.inflate >= 4) {
-                target.state = 'DEAD';
-                if(!isDemoMode) addScore(300);
-            }
-        }
-    }
-
-    document.addEventListener('keydown', (e) => {
-        if (currentControlMode === 'mouse' || currentControlMode === 'mobile') return;
-        const key = e.key.toLowerCase();
-        
-        if (key === ' ') {
-            e.preventDefault();
-            firePump();
-            return;
-        }
-
-        if(["arrowup","arrowdown","arrowleft","arrowright"].includes(key)) {
-            e.preventDefault();
-            clearPath(); 
-        }
-        
-        if (key === 'arrowleft' || key === 'a')  { player.reqVx = -1; player.reqVy = 0; player.facing = {x:-1, y:0}; }
-        if (key === 'arrowright'|| key === 'd') { player.reqVx = 1; player.reqVy = 0; player.facing = {x:1, y:0}; }
-        if (key === 'arrowup'   || key === 'w')  { player.reqVx = 0; player.reqVy = -1; player.facing = {x:0, y:-1}; }
-        if (key === 'arrowdown' || key === 's')  { player.reqVx = 0; player.reqVy = 1; player.facing = {x:0, y:1}; }
-    });
-
-    // Walkable includes dirt(1) because the player automatically digs it. Bedrock(3) is hard blocked.
-    function isWalkable(r, c) {
-        if(r < 0 || r >= CONFIG.rows || c < 0 || c >= CONFIG.cols) return false; 
-        let tile = map[r][c];
-        if (tile === 3) return false;
-        return true; 
-    }
-
-    function getNearestWalkable(r, c) {
-        if (isWalkable(r, c)) return {r, c};
-        let dirs = [{r:-1,c:0}, {r:1,c:0}, {r:0,c:-1}, {r:0,c:1}, {r:-1,c:-1}, {r:-1,c:1}, {r:1,c:-1}, {r:1,c:1}];
-        for (let d of dirs) {
-            if (isWalkable(r+d.r, c+d.c)) return {r: r+d.r, c: c+d.c};
-        }
-        return null;
-    }
-
-    function findPath(startR, startC, endR, endC) {
-        let queue = [{r: startR, c: startC, path: []}];
-        let visited = new Set();
-        visited.add(`${startR},${startC}`);
-        let dirs = [{r:-1,c:0}, {r:1,c:0}, {r:0,c:-1}, {r:0,c:1}];
-        let iterations = 0;
-
-        while(queue.length > 0 && iterations < 2000) {
-            iterations++;
-            let curr = queue.shift();
-            
-            if (curr.r === endR && curr.c === endC) return curr.path;
-
-            for (let d of dirs) {
-                let nr = curr.r + d.r;
-                let nc = curr.c + d.c;
-                
-                let key = `${nr},${nc}`;
-                if (!visited.has(key) && isWalkable(nr, nc)) {
-                    visited.add(key);
-                    queue.push({r: nr, c: nc, path: [...curr.path, {r: nr, c: nc}]});
-                }
-            }
-        }
-        return [];
-    }
-
-    function handleCanvasClick(e) {
-        if (state !== 'PLAY' && state !== 'DEMO') return;
-        if (currentControlMode === 'keyboard') return;
-
-        let clientX, clientY;
-        if (e.touches && e.touches.length > 0) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-        } else {
-            clientX = e.clientX;
-            clientY = e.clientY;
-        }
-
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        
-        const mx = (clientX - rect.left) * scaleX;
-        const my = (clientY - rect.top) * scaleY;
-
-        let targetC = Math.floor(mx / TS);
-        let targetR = Math.floor(my / TS);
-
-        // Check if clicked an enemy to fire pump
-        for(let en of enemies) {
-            if (en.state !== 'DEAD' && Math.floor(en.x/TS) === targetC && Math.floor(en.y/TS) === targetR) {
-                let dx = targetC - Math.floor(player.x/TS);
-                let dy = targetR - Math.floor(player.y/TS);
-                if (Math.abs(dx) > Math.abs(dy)) player.facing = {x: dx > 0 ? 1 : -1, y: 0};
-                else player.facing = {x: 0, y: dy > 0 ? 1 : -1};
-                firePump();
-                return;
-            }
-        }
-
-        if (!isWalkable(targetR, targetC)) {
-            let nearest = getNearestWalkable(targetR, targetC);
-            if (nearest) {
-                targetR = nearest.r;
-                targetC = nearest.c;
-            } else { return; }
-        }
-
-        let startC = Math.round(player.x / TS);
-        let startR = Math.round(player.y / TS);
-
-        let newPath = findPath(startR, startC, targetR, targetC);
-        if (newPath && newPath.length > 0) {
-            player.path = newPath;
-        }
-    }
-
-    canvas.addEventListener('mousedown', handleCanvasClick);
-    canvas.addEventListener('touchstart', (e) => { handleCanvasClick(e); }, {passive: false});
-
-    function setupMobileControls() {
-        if (isMobile) {
-            document.getElementById('mobile-controls').style.display = 'grid';
-            const bindBtn = (id, dx, dy) => {
-                const btn = document.getElementById(id);
-                btn.addEventListener('touchstart', (e) => { e.preventDefault(); clearPath(); player.reqVx = dx; player.reqVy = dy; player.facing = {x:dx, y:dy}; });
-                btn.addEventListener('mousedown', (e) => { e.preventDefault(); clearPath(); player.reqVx = dx; player.reqVy = dy; player.facing = {x:dx, y:dy}; });
-            };
-            bindBtn('btn-up', 0, -1);
-            bindBtn('btn-down', 0, 1);
-            bindBtn('btn-left', -1, 0);
-            bindBtn('btn-right', 1, 0);
-            
-            let actBtn = document.getElementById('btn-action');
-            actBtn.addEventListener('touchstart', (e) => { e.preventDefault(); firePump(); });
-            actBtn.addEventListener('mousedown', (e) => { e.preventDefault(); firePump(); });
-        }
-    }
-    setupMobileControls();
-
-    /* =========================================================================
-       DEMO LOGIC (STEP-BY-STEP ANIMATED)
-       ========================================================================= */
-    function resetDemoScene(step) {
-        demoSubFrame = 0;
-        
-        map = [];
-        for (let r = 0; r < CONFIG.rows; r++) {
-            let row = [];
-            for (let c = 0; c < CONFIG.cols; c++) {
-                if (c === 0 || c === CONFIG.cols - 1 || r === CONFIG.rows - 1) row.push(3);
-                else if (r < 3) row.push(0);
-                else row.push(1); // Solid Dirt
-            }
-            map.push(row);
-        }
-        
-        player.vx = 0; player.vy = 0;
-        player.reqVx = 0; player.reqVy = 0;
-        player.path = [];
-        enemies = [];
-        deathFrame = 0;
-
-        if (step === 0) {
-            player.x = 13 * TS;
-            player.y = 2 * TS;
-            player.facing = {x: 0, y: 1};
-        }
-        else if (step === 1) {
-            for(let c=6; c<22; c++) map[6][c] = 2; // Pre-dug tunnel
-            player.x = 14 * TS; // Spawns inside tunnel for combat demo
-            player.y = 6 * TS;
-            player.facing = {x: -1, y: 0};
-            enemies.push({ x: 9 * TS, y: 6 * TS, vx: 0, vy: 0, color: '#e74c3c', animFrame: 0, state: 'WANDER', inflate: 0, ghostTimer: 100, stunTimer: 0 });
-        }
-        else if (step === 2) {
-            player.x = 10 * TS;
-            player.y = 4 * TS; // Above the block
-            map[10][10] = 4; map[10][11] = 4; map[11][10] = 4; map[11][11] = 4;
-            player.facing = {x: 0, y: 1};
-        }
-    }
-
-    function startDemo() {
-        try {
-            if (!document.fullscreenElement) {
-                let elem = document.documentElement;
-                let p = elem.requestFullscreen ? elem.requestFullscreen() : undefined;
-                if(p) p.catch(()=>{});
-            }
-        } catch(e) {}
-
-        document.getElementById('title-modal').style.display = 'none';
-        document.getElementById('demo-ui').style.display = 'flex';
-        isDemoMode = true;
-        demoStep = 0;
-        state = 'DEMO';
-        resetDemoScene(0);
-        updateDemoUI();
-    }
-
-    function skipDemo() {
-        document.getElementById('demo-ui').style.display = 'none';
-        isDemoMode = false;
-        resetGame(true); 
-    }
-
-    function advanceDemo() {
-        demoStep++;
-        if (demoStep > 2) {
-            skipDemo();
-        } else {
-            state = 'DEMO'; 
-            resetDemoScene(demoStep);
-            updateDemoUI();
-        }
-    }
-
-    function updateDemoUI() {
-        const dt = document.getElementById('demo-text');
-        if (demoStep === 0) {
-            dt.innerHTML = "STEP 1:<br><br>Manually drive into dirt to carve tunnels! Digging is 50% slower than moving in empty space.";
-        } else if (demoStep === 1) {
-            dt.innerHTML = "STEP 2:<br><br>Enemies will randomly 'ghost' through dirt. Face them and press SPACE (or PUMP) to pop them!";
-        } else if (demoStep === 2) {
-            dt.innerHTML = "STEP 3:<br><br>Dig down to the correct answer block to clear the level!";
-        }
-    }
-
-    function processDemoLogic() {
-        demoSubFrame++;
-        
-        if (demoStep === 0) {
-            if (demoSubFrame === 1) { player.reqVx = 0; player.reqVy = 1; }
-            if (demoSubFrame > 150) resetDemoScene(0); 
-        } 
-        else if (demoStep === 1) {
-            if (demoSubFrame === 1) {
-                player.reqVx = 0; player.reqVy = 0; 
-                enemies[0].state = 'GHOST'; 
-            }
-            if (demoSubFrame === 50) firePump();
-            if (demoSubFrame === 80) firePump();
-            if (demoSubFrame === 110) firePump();
-            if (demoSubFrame === 140) firePump(); // Pop!
-            if (demoSubFrame > 200) resetDemoScene(1);
-        } 
-        else if (demoStep === 2) {
-            if (demoSubFrame === 1) {
-                player.reqVx = 0; player.reqVy = 1; 
-            }
-            if (demoSubFrame > 180) resetDemoScene(2);
-        }
-    }
-
-    function drawDemoHighlights() {
-        ctx.save();
-        ctx.strokeStyle = '#f1c40f';
-        ctx.lineWidth = 4;
-        let pulse = (Math.sin(Date.now() / 150) + 1) / 2 * 4;
-
-        if (demoStep === 0) {
-            ctx.strokeRect(player.x - pulse/2, player.y - pulse/2, TS + pulse, TS + pulse);
-        } else if (demoStep === 1) {
-            if(enemies[0] && enemies[0].state !== 'DEAD') ctx.strokeRect(enemies[0].x - pulse/2, enemies[0].y - pulse/2, TS + pulse, TS + pulse);
-        } else if (demoStep === 2) {
-            ctx.strokeRect(10*TS - pulse/2, 10*TS - pulse/2, 2*TS + pulse, 2*TS + pulse);
-        }
-        ctx.restore();
-    }
-
-    /* =========================================================================
-       GAME MAP GENERATION
-       ========================================================================= */
-    function generateMap(isDemo = false) {
-        map = [];
-        for (let r = 0; r < CONFIG.rows; r++) {
-            let row = [];
-            for (let c = 0; c < CONFIG.cols; c++) {
-                if (c === 0 || c === CONFIG.cols - 1 || r === CONFIG.rows - 1) row.push(3); // Bedrock
-                else if (r < 3) row.push(0); // Sky
-                else row.push(1); // Dirt
-            }
-            map.push(row);
-        }
-
-        if (!isDemo) {
-            let numCaves = 3 + Math.floor(level / 2);
-            for(let i=0; i<numCaves; i++) {
-                let caveW = 4 + Math.floor(Math.random() * 4);
-                let caveH = 2 + Math.floor(Math.random() * 2);
-                let startC = 2 + Math.floor(Math.random() * (CONFIG.cols - caveW - 4));
-                let startR = 5 + Math.floor(Math.random() * (CONFIG.rows - caveH - 8)); 
-
-                for(let cr = startR; cr < startR + caveH; cr++) {
-                    for(let cc = startC; cc < startC + caveW; cc++) {
-                        map[cr][cc] = 2; // Tunnel
-                    }
-                }
-            }
-
-            // Answer Blocks 
-            // one block per answer choice (2 to 4), spread across the bottom
-            let n = (currentQuestion && currentQuestion.opts) ? currentQuestion.opts.length : 4;
-            let blockPositions = n === 2 ? [7, 19] : n === 3 ? [5, 13, 21] : [4, 10, 16, 22];
-            let blockIds = [4, 5, 6, 7].slice(0, n); 
-            
-            let cur = blockIds.length, rand;
-            while(cur != 0) { rand = Math.floor(Math.random() * cur); cur--; [blockIds[cur], blockIds[rand]] = [blockIds[rand], blockIds[cur]]; }
-
-            for(let i=0; i<n; i++) {
-                let r = CONFIG.rows - 3;
-                let c = blockPositions[i];
-                map[r][c] = blockIds[i];
-                map[r][c+1] = blockIds[i];
-                map[r+1][c] = blockIds[i];
-                map[r+1][c+1] = blockIds[i];
-            }
-        }
-    }
-
-    function initLevel() {
-        currentQuestion = masterQuestionPool[Math.floor(Math.random() * masterQuestionPool.length)];
-        
-        let optsHtml = "";
-        let labels = ["A", "B", "C", "D"];
-        let cssClasses = ["lbl-a", "lbl-b", "lbl-c", "lbl-d"];
-        let colors = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f'];
-
-        if (isMobile) {
-            document.getElementById('question-text-mobile').innerText = currentQuestion.q;
-            const container = document.getElementById('options-container-mobile');
-            container.innerHTML = '';
-            currentQuestion.opts.forEach((optText, index) => {
-                optsHtml += `<div class="answer-option ${cssClasses[index]}">
-                                <span style="color:${colors[index]}; font-weight:bold;">[${labels[index]}]</span> <span>${optText}</span>
-                             </div>`;
-            });
-            container.innerHTML = optsHtml;
-        } else {
-            document.getElementById('question-text').innerText = currentQuestion.q;
-            const container = document.getElementById('options-container');
-            container.innerHTML = '';
-            currentQuestion.opts.forEach((optText, index) => {
-                optsHtml += `<div class="answer-option ${cssClasses[index]}">
-                                <span style="color:${colors[index]}; font-weight:bold;">[${labels[index]}]</span> <span>${optText}</span>
-                             </div>`;
-            });
-            container.innerHTML = optsHtml;
-        }
-
-        generateMap(false);
-        resetPositions();
-    }
-
-    function resetPositions() {
-        player.x = player.startX;
-        player.y = player.startY;
-        player.vx = 0;
-        player.vy = 0;
-        player.reqVx = 0;
-        player.reqVy = 0;
-        player.path = [];
-        player.facing = {x: 1, y: 0};
-        pump.active = false;
-
-        enemies = [];
-        let numEnemies = CONFIG.baseEnemies + Math.floor(level / 2);
-        let possibleSpawns = [];
-        
-        for(let r=5; r < CONFIG.rows - 5; r++) {
-            for(let c=2; c < CONFIG.cols - 2; c++) {
-                if(map[r][c] === 2) possibleSpawns.push({r, c});
-            }
-        }
-        
-        let cur = possibleSpawns.length, rand;
-        while (cur != 0) {
-            rand = Math.floor(Math.random() * cur); cur--;
-            [possibleSpawns[cur], possibleSpawns[rand]] = [possibleSpawns[rand], possibleSpawns[cur]];
-        }
-
-        for(let i=0; i<numEnemies; i++) {
-            if(possibleSpawns[i]) {
-                enemies.push({
-                    x: possibleSpawns[i].c * TS,
-                    y: possibleSpawns[i].r * TS,
-                    vx: CONFIG.enemySpeed,
-                    vy: 0,
-                    color: i % 2 === 0 ? '#e74c3c' : '#e67e22',
-                    animFrame: Math.random() * 10,
-                    state: 'WANDER', 
-                    ghostTimer: 300 + Math.random() * 500,
-                    inflate: 0,
-                    stunTimer: 0
-                });
-            }
-        }
-    }
-
-    function resetGame(fullReset = false) {
-        if(fullReset) {
-            score = 0;
-            level = 1;
-            questionsAnsweredThisLevel = 0;
-            nextExtraLife = 2000;
-            lives = selectedLives;
-            document.getElementById('game-over-modal').style.display = 'none';
-            
-            if (!isMobile) {
-                document.getElementById('sidebar').style.display = 'flex';
-            }
-        }
-        state = 'PLAY'; 
-        updateUI();
-        initLevel();
-    }
-
-    function addScore(pts) {
-        score += pts;
-        if (score >= nextExtraLife) {
-            lives++;
-            nextExtraLife += 2000;
-            let livesEl = document.getElementById('lives-display');
-            livesEl.style.transform = "scale(1.5)";
-            setTimeout(() => livesEl.style.transform = "scale(1)", 300);
-        }
-        updateUI();
-    }
-
-    function updateUI() {
-        document.getElementById('score-display').innerText = String(score).padStart(6, '0');
-        document.getElementById('level-display').innerText = `${String(level).padStart(2, '0')} (${questionsAnsweredThisLevel}/${selectedQPL})`;
-        document.getElementById('lives-display').innerText = '❤️'.repeat(lives);
-    }
-
-    /* =========================================================================
-       MOVEMENT EXECUTION
-       ========================================================================= */
-    function clearDirt() {
-        let pad = 2;
-        let leftC = Math.floor((player.x + pad) / TS);
-        let rightC = Math.floor((player.x + TS - pad) / TS);
-        let topR = Math.floor((player.y + pad) / TS);
-        let bottomR = Math.floor((player.y + TS - pad) / TS);
-
-        let dug = false;
-        for (let r = topR; r <= bottomR; r++) {
-            for (let c = leftC; c <= rightC; c++) {
-                if (map[r] && map[r][c] === 1) {
-                    map[r][c] = 2; // Vaporize dirt
-                    dug = true;
-                    if (!isDemoMode && state === 'PLAY') {
-                        addScore(5);
-                    }
-                }
-            }
-        }
-        if (dug) updateUI();
-    }
-
-    function handlePlayerMovement() {
-        if (pump.active) {
-            pump.timer--;
-            if (pump.timer <= 0) pump.active = false;
-            return; 
-        }
-
-        const onGridX = (player.x % TS === 0);
-        const onGridY = (player.y % TS === 0);
-
-        if (onGridX && onGridY) {
-            let tileC = Math.round(player.x / TS);
-            let tileR = Math.round(player.y / TS);
-
-            if (player.path && player.path.length > 0) {
-                let nextStep = player.path[0];
-                if (tileC === nextStep.c && tileR === nextStep.r) {
-                    player.path.shift();
-                    if (player.path.length > 0) {
-                        nextStep = player.path[0];
-                    } else {
-                        player.reqVx = 0; player.reqVy = 0;
-                        player.vx = 0; player.vy = 0;
-                        nextStep = null;
-                    }
-                }
-
-                if (nextStep) {
-                    let dc = nextStep.c - tileC;
-                    let dr = nextStep.r - tileR;
-                    player.reqVx = dc;
-                    player.reqVy = dr;
-                }
-            }
-
-            if (player.reqVx !== 0 || player.reqVy !== 0) {
-                player.facing = { x: player.reqVx > 0 ? 1 : player.reqVx < 0 ? -1 : 0, y: player.reqVy > 0 ? 1 : player.reqVy < 0 ? -1 : 0 };
-            }
-
-            let nextReqC = tileC + player.reqVx;
-            let nextReqR = tileR + player.reqVy;
-
-            let currentSpeed = CONFIG.playerSpeed;
-            if (map[nextReqR] && map[nextReqR][nextReqC] === 1) {
-                currentSpeed = 1; // Slow down in dirt
-            }
-
-            if (map[nextReqR] && map[nextReqR][nextReqC] !== 3) {
-                player.vx = (player.reqVx > 0 ? 1 : player.reqVx < 0 ? -1 : 0) * currentSpeed;
-                player.vy = (player.reqVy > 0 ? 1 : player.reqVy < 0 ? -1 : 0) * currentSpeed;
-            } else {
-                player.vx = 0; player.vy = 0;
-            }
-        }
-
-        player.x += player.vx;
-        player.y += player.vy;
-
-        clearDirt();
-
-        if (player.x % TS === 0 && player.y % TS === 0) {
-            let tc = Math.floor(player.x / TS);
-            let tr = Math.floor(player.y / TS);
-            let tile = map[tr][tc];
-
-            if (tile >= 4 && tile <= 7) { 
-                if(state === 'PLAY') checkAnswer(tile - 4); 
-                else if (state === 'DEMO') {
-                    map[tr][tc] = 2; map[tr][tc+1] = 2; map[tr+1][tc] = 2; map[tr+1][tc+1] = 2;
-                }
-            }
-        }
-    }
-
-    function handleEnemyMovement(ent) {
-        if (ent.state === 'DEAD') return;
-
-        if (ent.state === 'STUNNED') {
-            ent.stunTimer--;
-            if (ent.stunTimer <= 0) {
-                ent.state = 'WANDER';
-                ent.inflate = 0;
-            }
-            return;
-        }
-
-        ent.animFrame += 0.1; 
-
-        if (ent.state === 'WANDER') {
-            ent.ghostTimer--;
-            if (ent.ghostTimer <= 0) {
-                ent.state = 'GHOST';
-            }
-        }
-
-        if (ent.state === 'GHOST') {
-            let dx = player.x - ent.x;
-            let dy = player.y - ent.y;
-            let dist = Math.hypot(dx, dy);
-            
-            if (dist > 0) {
-                ent.x += (dx / dist) * (CONFIG.enemySpeed * 0.5); 
-                ent.y += (dy / dist) * (CONFIG.enemySpeed * 0.5);
-            }
-
-            const onGridX = (Math.abs(ent.x % TS) < 1.5);
-            const onGridY = (Math.abs(ent.y % TS) < 1.5);
-            
-            if (onGridX && onGridY) {
-                let tr = Math.round(ent.y / TS);
-                let tc = Math.round(ent.x / TS);
-                if (map[tr] && (map[tr][tc] === 2 || map[tr][tc] === 0)) {
-                    ent.x = tc * TS;
-                    ent.y = tr * TS;
-                    ent.state = 'WANDER';
-                    ent.vx = CONFIG.enemySpeed; ent.vy = 0; 
-                    ent.ghostTimer = 300 + Math.random() * 600;
-                }
-            }
-            return; 
-        }
-
-        const onGridX = (ent.x % TS === 0);
-        const onGridY = (ent.y % TS === 0);
-        
-        if (onGridX && onGridY) {
-            const tileC = Math.round(ent.x / TS);
-            const tileR = Math.round(ent.y / TS);
-
-            let validMoves = [];
-            const dirs = [
-                {x: CONFIG.enemySpeed, y: 0}, {x: -CONFIG.enemySpeed, y: 0}, 
-                {x: 0, y: CONFIG.enemySpeed}, {x: 0, y: -CONFIG.enemySpeed}
-            ];
-            
-            dirs.forEach(d => {
-                if(d.x === -ent.vx && d.y === -ent.vy && (ent.vx !== 0 || ent.vy !== 0)) return; 
-                let dirC = tileC + (d.x > 0 ? 1 : d.x < 0 ? -1 : 0);
-                let dirR = tileR + (d.y > 0 ? 1 : d.y < 0 ? -1 : 0);
-                
-                if(map[dirR] && (map[dirR][dirC] === 2 || map[dirR][dirC] === 0)) validMoves.push(d);
-            });
-
-            if(validMoves.length > 0) {
-                let canGoStraight = validMoves.find(m => m.x === ent.vx && m.y === ent.vy);
-                let isIntersection = validMoves.length > 1;
-                
-                if (canGoStraight && !isIntersection) {
-                    ent.vx = canGoStraight.x; ent.vy = canGoStraight.y;
-                } else {
-                    let move = validMoves[Math.floor(Math.random() * validMoves.length)];
-                    ent.vx = move.x; ent.vy = move.y;
-                }
-            } else {
-                ent.vx = -ent.vx;
-                ent.vy = -ent.vy;
-            }
-        }
-        ent.x += ent.vx;
-        ent.y += ent.vy;
-    }
-
-    function checkAnswer(selectedIndex) {
-        state = 'PAUSED'; 
-        clearPath(); 
-        
-        if (isMobile) document.getElementById('quiz-modal').style.display = 'flex';
-
-        if (selectedIndex === currentQuestion.ans) {
-            addScore(500);
-            questionsAnsweredThisLevel++;
-            
-            let flash = document.getElementById('green-flash');
-            flash.style.opacity = '1';
-
-            setTimeout(() => {
-                flash.style.opacity = '0';
-                if(isMobile) document.getElementById('quiz-modal').style.display = 'none';
-                
-                if (questionsAnsweredThisLevel >= selectedQPL) {
-                    level++;
-                    questionsAnsweredThisLevel = 0;
-                }
-                initLevel();
-                updateUI();
-                state = 'PLAY';
-            }, 1000);
-            
-        } else {
-            let flash = document.getElementById('red-flash');
-            flash.style.opacity = '1';
-            
-            setTimeout(() => {
-                flash.style.opacity = '0';
-                if(isMobile) document.getElementById('quiz-modal').style.display = 'none';
-                startDeathSequence(false); 
-            }, 1000);
-        }
-    }
-
-    function startDeathSequence(flashRed = false) {
-        state = 'DYING';
-        deathFrame = 0;
-        clearPath();
-        if (flashRed) {
-            redFlashElement.style.opacity = '1';
-            setTimeout(() => { redFlashElement.style.opacity = '0'; }, 400);
-        }
-    }
-
-    function finishDeath() {
-        if (isDemoMode) {
-            resetDemoScene(demoStep);
-            state = 'DEMO'; 
-            return;
-        }
-
-        lives--;
-        updateUI();
-        if(lives <= 0) {
-            state = 'GAMEOVER';
-            document.getElementById('final-score').innerText = String(score).padStart(6, '0');
-            document.getElementById('game-over-modal').style.display = 'flex';
-        } else {
-            player.x = player.startX;
-            player.y = player.startY;
-            player.vx = 0; player.vy = 0;
-            player.reqVx = 0; player.reqVy = 0;
-            state = 'PLAY';
-        }
-    }
-
-    // ==========================================
-    // RENDERING
-    // ==========================================
-    function drawMap() {
-        // Draw base background (Tunnel Black)
-        ctx.fillStyle = 'var(--tunnel-color)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        let textLabelsToDraw = [];
-
-        // Main Rendering Pass
-        for (let r = 0; r < CONFIG.rows; r++) {
-            for (let c = 0; c < CONFIG.cols; c++) {
-                let x = c * TS;
-                let y = r * TS;
-                let val = map[r][c];
-
-                if (val === 1) { 
-                    ctx.fillStyle = 'var(--dirt-color)';
-                    ctx.fillRect(x, y, TS, TS);
-                    if ((r * 13 + c * 7) % 3 === 0) {
-                        ctx.fillStyle = '#6e451f';
-                        ctx.fillRect(x + 2, y + 2, 4, 4);
-                    }
-                } else if (val === 3) { 
-                    ctx.fillStyle = '#444';
-                    ctx.fillRect(x, y, TS, TS);
-                    ctx.fillStyle = '#222';
-                    ctx.fillRect(x+2, y+2, TS-4, TS-4);
-                } else if (val >= 4 && val <= 7) {
-                    let colors = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f'];
-                    let labels = ['A', 'B', 'C', 'D'];
-                    let idx = val - 4;
-                    
-                    ctx.fillStyle = colors[idx];
-                    ctx.fillRect(x, y, TS, TS);
-                    
-                    if (map[r-1] && map[r-1][c] !== val && map[r][c-1] !== val) {
-                        textLabelsToDraw.push({ label: labels[idx], x: x + TS, y: y + TS + 2 });
-                    }
-                }
-            }
-        }
-        
-        // Second Rendering Pass: Labels strictly on top of blocks
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 24px "Segoe UI", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        textLabelsToDraw.forEach(txt => { ctx.fillText(txt.label, txt.x, txt.y); });
-        
-        // Draw Grass Line
-        ctx.fillStyle = 'var(--dirt-surface)';
-        ctx.fillRect(0, 3*TS, canvas.width, 4);
-
-        if (player.path && player.path.length > 0) {
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-            player.path.forEach(p => {
-                ctx.fillRect(p.c * TS + TS/2 - 2, p.r * TS + TS/2 - 2, 4, 4);
-            });
-        }
-    }
-
-    function drawExcavator(isDying = false) {
-        ctx.save();
-        ctx.translate(player.x + TS/2, player.y + TS/2);
-        
-        let angle = 0;
-        if (player.facing.x > 0) angle = 0; 
-        if (player.facing.x < 0) angle = Math.PI; 
-        if (player.facing.y > 0) angle = Math.PI / 2; 
-        if (player.facing.y < 0) angle = -Math.PI / 2; 
-        ctx.rotate(angle);
-
-        if (isDying) {
-            let scale = Math.max(0, 1 - (deathFrame / 40)); 
-            ctx.scale(scale, scale);
-            ctx.rotate(deathFrame * 0.5);
-        }
-
-        // Treads
-        ctx.fillStyle = '#555';
-        ctx.fillRect(-6, -8, 12, 4);
-        ctx.fillRect(-6, 4, 12, 4);
-
-        // Body Cab
-        ctx.fillStyle = '#f1c40f'; 
-        ctx.fillRect(-4, -6, 8, 12);
-        
-        // Window
-        ctx.fillStyle = '#87ceeb';
-        ctx.fillRect(0, -4, 4, 8);
-
-        // Arm & Scoop
-        ctx.fillStyle = '#222';
-        ctx.fillRect(4, -1, 6, 2); 
-        ctx.fillStyle = '#7f8c8d';
-        ctx.beginPath();
-        ctx.moveTo(10, -4);
-        ctx.lineTo(14, -4);
-        ctx.lineTo(14, 4);
-        ctx.lineTo(10, 4);
-        ctx.fill();
-
-        ctx.restore();
-
-        // Pump Line
-        if (pump.active) {
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(player.x + TS/2, player.y + TS/2);
-            let ext = 1 - (pump.timer / 15); 
-            ctx.lineTo(player.x + TS/2 + (player.facing.x * TS * 3 * ext), player.y + TS/2 + (player.facing.y * TS * 3 * ext));
-            ctx.stroke();
-        }
-    }
-
-    function drawPixelEnemy(e) {
-        if (e.state === 'DEAD') return;
-
-        ctx.save();
-        
-        if (e.state === 'STUNNED') {
-            ctx.translate(e.x + TS/2 + (Math.random()*4-2), e.y + TS/2 + (Math.random()*4-2));
-            let scale = 1 + (e.inflate * 0.3);
-            ctx.scale(scale, scale);
-        } else {
-            ctx.translate(e.x + TS/2, e.y + TS/2);
-        }
-
-        if (e.state === 'GHOST') {
-            ctx.globalAlpha = 0.7;
-            ctx.fillStyle = '#fff';
-            ctx.beginPath(); ctx.arc(-3, -2, 3, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(3, -2, 3, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#f00'; 
-            ctx.beginPath(); ctx.arc(-3, -2, 1, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(3, -2, 1, 0, Math.PI*2); ctx.fill();
-            ctx.restore();
-            return;
-        }
-        
-        ctx.fillStyle = e.color;
-        ctx.beginPath();
-        ctx.arc(0, 0, 7, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(-5, -4, 4, 4);
-        ctx.fillRect(1, -4, 4, 4);
-
-        ctx.fillStyle = '#000';
-        let ex = e.vx > 0 ? 1 : e.vx < 0 ? -1 : 0;
-        ctx.fillRect(-3 + ex, -3, 2, 2);
-        ctx.fillRect(3 + ex, -3, 2, 2);
-
-        ctx.restore();
-    }
-
-    // ==========================================
-    // MAIN GAME LOOP
-    // ==========================================
-    function gameLoop() {
-        if(state === 'PLAY' || state === 'DEMO') {
-            
-            if (state === 'DEMO') processDemoLogic();
-
-            handlePlayerMovement();
-            enemies.forEach(e => handleEnemyMovement(e));
-
-            // Enemy Collision
-            const hitDist = TS * 0.7; 
-            enemies.forEach(e => {
-                if(e.state === 'DEAD') return;
-                let dist = Math.hypot(e.x - player.x, e.y - player.y);
-                if(dist < hitDist) {
-                    if (e.state !== 'STUNNED') {
-                        startDeathSequence();
-                    }
-                }
-            });
-            
-            drawMap();
-            enemies.forEach(e => { drawPixelEnemy(e); });
-            drawExcavator();
-
-            if (state === 'DEMO') drawDemoHighlights();
-            
-        } else if (state === 'DYING') {
-            deathFrame++;
-            drawMap();
-            if (deathFrame < 20) {
-                enemies.forEach(e => { drawPixelEnemy(e); });
-                drawExcavator();
-            } else {
-                drawExcavator(true);
-            }
-            if (deathFrame > 60) {
-                finishDeath();
-            }
-        } else {
-            drawMap();
-            enemies.forEach(e => { drawPixelEnemy(e); });
-            if(state !== 'TITLE') drawExcavator();
-        }
-
-        requestAnimationFrame(gameLoop);
-    }
-
-    // Boot Sequence
-    if (!isMobile) document.getElementById('controls-setting').style.display = 'flex';
-    document.getElementById('title-modal').style.display = 'flex'; 
-    
-    generateMap(false);
-    resetPositions();
-    
-    requestAnimationFrame(gameLoop); 
-
+    ]
+};
 </script>
-<script>
-/* FIT TO WINDOW: shrinks the game (never below 300px wide) so the whole thing fits the window's height,
-   with no scrollbars, whether it's on a page, in a small window, full screen or saved to your desktop. */
+<!-- ============================== END OF EDIT ZONE ============================== -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+    /* ==================== SHARED QUIZCADE STYLES (same in every game) ==================== */
+    /* Colors come from the EDIT ZONE (colors.brand, colors.accent, ...) and are applied at startup. */
+    :root {
+        --brand: #3232FF;
+        --accent: #f1c40f;
+        --page-bg: #111111;
+        --good: #2ecc71;
+        --bad: #e74c3c;
+    }
+
+    /* html only fills the window; the page padding and min-height live on body alone
+       (on both, the page came out 20px taller than the window and always scrolled) */
+    html { margin: 0; padding: 0; background-color: var(--page-bg); }
+    body {
+        margin: 0;
+        padding: 10px;
+        background-color: var(--page-bg);
+        color: #fff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+        box-sizing: border-box;
+        overscroll-behavior-y: contain;
+    }
+    :fullscreen { background-color: var(--page-bg); }
+    button { font: inherit; }
+    .retro-text { font-family: 'Press Start 2P', 'Courier New', Courier, monospace; }
+
+    #game-wrapper {
+        width: 100%;
+        max-width: 950px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    h1 {
+        margin: 0 0 15px 0;
+        flex-shrink: 0;
+        font-size: clamp(16px, 4vw, 24px);
+        color: var(--accent);
+        text-align: center;
+        text-shadow: 2px 2px 0 var(--brand);
+    }
+
+    /* Game column + question sidebar */
+    #main-content {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        align-items: stretch;
+        justify-content: center;
+    }
+    #game-column {
+        flex: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 300px;
+    }
+    #ui-bar {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: clamp(8px, 1.5vw, 12px);
+        background: #222;
+        padding: 10px;
+        box-sizing: border-box;
+        border: 2px solid #555;
+        text-transform: uppercase;
+    }
+    #ui-bar .hud-value { color: var(--accent); }
+    #lives-display { display: inline-block; transition: transform 0.2s; }
+    #game-container {
+        position: relative;
+        width: 100%;
+        max-width: 560px;
+        box-shadow: 0 0 0 4px #444;
+        background-color: #000;
+    }
+    #gameCanvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        image-rendering: pixelated;
+    }
+    #active-controls-hud {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 10px;
+        color: #ccc;
+        background: #222;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #444;
+        line-height: 1.4;
+        width: 100%;
+        max-width: 560px;
+        box-sizing: border-box;
+    }
+
+    /* Fullscreen button (hidden automatically where full screen isn't allowed) */
+    #fs-toggle-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        border: 2px solid #fff;
+        border-radius: 5px;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 20;
+        transition: background 0.2s, transform 0.1s;
+    }
+    #fs-toggle-btn:hover { background: rgba(255, 255, 255, 0.3); }
+    #fs-toggle-btn:active { transform: scale(0.9); }
+
+    .flash {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        z-index: 5;
+    }
+    #red-flash { background-color: var(--bad); }
+    #green-flash { background-color: var(--good); }
+    .flash.on { opacity: 0.6; }
+
+    /* Title / game over screens */
+    .modal {
+        display: none;
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.95);
+        padding: 5%;
+        box-sizing: border-box;
+        z-index: 10;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        overflow-y: auto;
+    }
+    .modal.open { display: flex; }
+    /* centered when it fits, scrollable from the top when it doesn't (short screens) */
+    .modal > :first-child { margin-top: auto; }
+    .modal > :last-child { margin-bottom: auto; }
+    .modal h2 {
+        margin-top: 0;
+        color: var(--accent);
+        font-size: clamp(20px, 4vw, 30px);
+        line-height: 1.6;
+        text-shadow: 2px 2px 0 var(--brand);
+    }
+    #title-modal h2 { margin-bottom: 10px; }
+    #game-over-modal h2 { color: var(--bad); text-shadow: 2px 2px 0 #fff; }
+    .final-score { font-size: 10px; margin-top: 20px; }
+    #final-score { font-size: 20px; color: var(--accent); }
+
+    .settings-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+        font-size: 10px;
+        color: #ccc;
+    }
+    .toggle-group {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .toggle-btn {
+        background: #222;
+        color: #777;
+        border: 2px solid #444;
+        padding: 10px 15px;
+        font-size: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .toggle-btn.active {
+        background: var(--brand);
+        color: #fff;
+        border-color: #fff;
+    }
+    .action-btn {
+        background: var(--brand);
+        color: white;
+        border: 4px solid #fff;
+        padding: 15px 20px;
+        font-size: clamp(12px, 3vw, 16px);
+        cursor: pointer;
+        text-transform: uppercase;
+        margin-top: 20px;
+        width: 100%;
+        max-width: 350px;
+    }
+    .action-btn:hover { background: #fff; color: var(--brand); border-color: var(--brand); }
+    .action-btn:active { transform: scale(0.95); }
+
+    /* Credit line: pixel head + copyright, links to the portfolio */
+    .jv-credit {
+        margin-top: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 8px;
+        line-height: 1.4;
+        color: #aaa;
+        text-decoration: none;
+        letter-spacing: 1px;
+    }
+    .jv-credit img { width: 20px; height: 20px; image-rendering: pixelated; flex-shrink: 0; }
+    .jv-credit .jv-name { color: var(--accent); }
+    .jv-credit:hover .jv-name, .jv-credit:focus-visible .jv-name { text-decoration: underline; }
+
+    /* Question sidebar */
+    #sidebar {
+        flex: 1;
+        min-width: 250px;
+        background-color: #000;
+        padding: 20px;
+        box-sizing: border-box;
+        display: none;
+        flex-direction: column;
+        box-shadow: 0 0 0 4px #444, inset 0 0 0 2px #fff;
+    }
+    #sidebar.open { display: flex; }
+    #question-panel { flex-grow: 1; display: flex; flex-direction: column; }
+    #question-text {
+        font-size: 16px;
+        color: var(--accent);
+        margin-bottom: 20px;
+        line-height: 1.4;
+        font-weight: 600;
+    }
+    .answer-option {
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+        background: #111;
+        border: 2px solid #333;
+        border-left: 6px solid var(--answer-color, #444);
+        border-radius: 5px;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    .answer-option .answer-letter { color: var(--answer-color, #fff); font-weight: bold; }
+    .option-btn {
+        background: #111;
+        color: white;
+        border: 2px solid #444;
+        padding: 15px;
+        margin-bottom: 12px;
+        text-align: left;
+        font-size: 12px;
+        line-height: 1.6;
+        cursor: pointer;
+        transition: background 0.2s;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-weight: 500;
+        width: 100%;
+    }
+    .option-btn:hover { background: #333; border-color: #fff; }
+    .option-btn .answer-letter { color: var(--answer-color, #fff); }
+    .option-btn.correct { background: #27ae60 !important; border-color: #2ecc71 !important; color: #000; }
+    .option-btn.wrong { background: #c0392b !important; border-color: #e74c3c !important; }
+    .sidebar-section {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px dashed #444;
+        text-align: center;
+    }
+    .sidebar-heading { font-size: 8px; margin-bottom: 10px; color: #aaa; }
+    #extra-life-note { font-size: 12px; font-weight: bold; color: var(--good); }
+
+    /* Tutorial overlay */
+    #demo-ui {
+        display: none;
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 15;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 40px 20px;
+        box-sizing: border-box;
+    }
+    #demo-ui.open { display: flex; }
+    #demo-text {
+        background: rgba(0, 0, 0, 0.95);
+        color: var(--accent);
+        padding: 20px;
+        border: 2px solid var(--accent);
+        font-size: 14px;
+        font-weight: bold;
+        text-align: center;
+        border-radius: 5px;
+        width: 90%;
+        margin-bottom: 20px;
+        line-height: 1.5;
+        white-space: pre-line;
+    }
+    .demo-btn-row { display: flex; gap: 15px; width: 100%; justify-content: center; }
+    .demo-btn {
+        background: var(--bad);
+        color: white;
+        border: 2px solid #fff;
+        padding: 12px 25px;
+        font-size: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 5px;
+        text-transform: uppercase;
+    }
+    #next-demo-btn { background: var(--good); color: #000; animation: pulseBtn 1.5s infinite; }
+    @keyframes pulseBtn { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+    /* Touch-screen controls */
+    #mobile-controls {
+        display: none;
+        gap: 10px;
+        margin-top: 15px;
+        justify-content: center;
+        width: 100%;
+    }
+    body.touch #mobile-controls { display: grid; }
+    .dpad-btn {
+        background-color: rgba(255, 255, 255, 0.2);
+        border: 4px solid rgba(255, 255, 255, 0.5);
+        color: white;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: none;
+    }
+    .dpad-btn:active { background-color: var(--brand); border-color: #fff; }
+    #btn-action { background-color: var(--bad); border-radius: 5px; font-size: 14px; font-weight: bold; }
+    #btn-action:active { filter: brightness(0.8); }
+    body.touch .hide-on-touch { display: none !important; }
+    body.touch #active-controls-hud { margin-top: 8px; padding: 6px; font-size: 8px; }
+    body.touch #mobile-controls { margin-top: 8px; }
+
+    @media (max-width: 800px) {
+        #main-content { flex-direction: column; align-items: center; }
+        #game-column, #sidebar { width: 100%; max-width: 560px; }
+    }
+    /* ==================== END SHARED STYLES ==================== */
+
+    /* ==================== QUIZCAVATOR ==================== */
+    #gameCanvas { touch-action: manipulation; }
+    #mobile-controls { grid-template-columns: 54px 54px 54px 80px; grid-template-rows: repeat(3, 54px); gap: 8px; }
+    #btn-up { grid-column: 2; grid-row: 1; }
+    #btn-left { grid-column: 1; grid-row: 2; }
+    #btn-right { grid-column: 3; grid-row: 2; }
+    #btn-down { grid-column: 2; grid-row: 3; }
+    #btn-action { grid-column: 4; grid-row: 2; }
+    /* On narrow screens the question sits above the game so it's always in view while you dig */
+    @media (max-width: 800px) {
+        #sidebar { order: -1; padding: 12px; }
+        #question-text { font-size: 14px; margin-bottom: 10px; }
+        #options-container { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .answer-option { margin: 0; padding: 6px 8px; font-size: 13px; }
+        #sidebar .sidebar-section { display: none; }
+    }
+</style>
+</head>
+<body>
+
+<div id="game-wrapper">
+    <h1 class="retro-text" data-text="title">QUIZCAVATOR</h1>
+
+    <div id="main-content">
+        <div id="game-column">
+            <div id="ui-bar" class="retro-text">
+                <div><span data-text="labels.score">SCORE</span><br><span id="score-display" class="hud-value">000000</span></div>
+                <div><span data-text="labels.level">LEVEL</span><br><span id="level-display" class="hud-value">01 (0/5)</span></div>
+                <div><span data-text="labels.lives">LIVES</span><br><span id="lives-display">❤️❤️❤️</span></div>
+            </div>
+
+            <div id="game-container">
+                <canvas id="gameCanvas" width="560" height="640" aria-label="Game screen"></canvas>
+                <button id="fs-toggle-btn" type="button" title="Toggle full screen" aria-label="Toggle full screen">⛶</button>
+                <div id="red-flash" class="flash"></div>
+                <div id="green-flash" class="flash"></div>
+
+                <!-- TUTORIAL OVERLAY -->
+                <div id="demo-ui">
+                    <div id="demo-text"></div>
+                    <div class="demo-btn-row">
+                        <button id="skip-demo-btn" type="button" class="retro-text demo-btn" data-text="labels.skip">SKIP</button>
+                        <button id="next-demo-btn" type="button" class="retro-text demo-btn" data-text="labels.next">NEXT ➡</button>
+                    </div>
+                </div>
+
+                <!-- TITLE SCREEN -->
+                <div id="title-modal" class="modal open">
+                    <h2 class="retro-text" data-text="title">QUIZCAVATOR</h2>
+
+                    <div class="settings-row hide-on-touch">
+                        <div class="retro-text" data-text="labels.controls">CONTROLS</div>
+                        <div class="toggle-group control-group"></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="retro-text" data-text="labels.lives">LIVES</div>
+                        <div class="toggle-group" id="lives-group"></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="retro-text" data-text="labels.questionsPerLevel">QUESTIONS/LEVEL</div>
+                        <div class="toggle-group" id="questions-group"></div>
+                    </div>
+
+                    <button id="start-btn" type="button" class="action-btn retro-text" data-text="start">START GAME</button>
+                    <a class="jv-credit retro-text" href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">
+                        <img alt="" width="20" height="20" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACLUlEQVR4nM2UTUhUURiGn3PuwLSQGnWiGGYqS6uZiVoU5SQuchWFbiJaBQYSZC1aBAoO1KLIqGwT0ULIbVqbwJ39LkqEoaKfq2FaOuNUGI4ulGDmfi1Gb03nalvf3f1+3vN83+FcWO1SKyUTVZUiAqGKNWRnfiEIg+M/1cGtQXk5Nu3Z6xlMVFWKALsjAQ4d2MbzoTGys/PU7woxms7x5usMCsWrcdPUCCSqgrJnc4Bvs/PUx0OMTM5QEw4QDgV5NjTKj7kF6uIhPqdzvJ3I8S+pNvmEmkiA9WV+XryfomF/NaPpHL0D79i+qZzKMj+hDeV8n1vwXJNpqBRPX0/QdeMSdbGNPB78RHV4HY7jYI9P03X9Ik0nThIs83saGiPXbqmQgd5b7rfjSCmBLrZY2qLh+Hljjz4DWWtOn0u6Zt13rvzJKUVLa4eLoTyutCQ0dPOMHO18RKFQKBYLWD4f+UIBBHw+i3w+7+bQFv3tjdReuOv6GISO4zCSydKXyqC0Jtm4jy/9V7G0JnK4jeFMlgepDFpbdDTtNQgNQxHhfmoKUGgUBcdxxxNx6EtNIShAGfs1Rgb42NMu4Z07SkombRtEiMRii7MW4+nhYWLNnSUeni9lbrDHPVrp0hL5i2ptbbPRb4wMMGnbRKJRlFL0337onioiHDl7DKUWqT207M/hw702iUSjnjmvUZfk8fSKip+6pgwKpUjb9rJmKxIu6cnllpKrbEh2/7dndes3KNPMpND3uDEAAAAASUVORK5CYII=">
+                        <span>&copy; <span class="jv-years">2025&ndash;2026</span> <span class="jv-name">Joe VanWagner</span></span>
+                    </a>
+                </div>
+
+                <!-- GAME OVER SCREEN -->
+                <div id="game-over-modal" class="modal">
+                    <h2 class="retro-text" data-text="gameOver">GAME OVER</h2>
+                    <p class="retro-text final-score"><span data-text="finalScore">FINAL SCORE:</span><br><br><span id="final-score">0</span></p>
+                    <button id="play-again-btn" type="button" class="action-btn retro-text" data-text="playAgain">PLAY AGAIN</button>
+                    <a class="jv-credit retro-text" href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">
+                        <img alt="" width="20" height="20" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACLUlEQVR4nM2UTUhUURiGn3PuwLSQGnWiGGYqS6uZiVoU5SQuchWFbiJaBQYSZC1aBAoO1KLIqGwT0ULIbVqbwJ39LkqEoaKfq2FaOuNUGI4ulGDmfi1Gb03nalvf3f1+3vN83+FcWO1SKyUTVZUiAqGKNWRnfiEIg+M/1cGtQXk5Nu3Z6xlMVFWKALsjAQ4d2MbzoTGys/PU7woxms7x5usMCsWrcdPUCCSqgrJnc4Bvs/PUx0OMTM5QEw4QDgV5NjTKj7kF6uIhPqdzvJ3I8S+pNvmEmkiA9WV+XryfomF/NaPpHL0D79i+qZzKMj+hDeV8n1vwXJNpqBRPX0/QdeMSdbGNPB78RHV4HY7jYI9P03X9Ik0nThIs83saGiPXbqmQgd5b7rfjSCmBLrZY2qLh+Hljjz4DWWtOn0u6Zt13rvzJKUVLa4eLoTyutCQ0dPOMHO18RKFQKBYLWD4f+UIBBHw+i3w+7+bQFv3tjdReuOv6GISO4zCSydKXyqC0Jtm4jy/9V7G0JnK4jeFMlgepDFpbdDTtNQgNQxHhfmoKUGgUBcdxxxNx6EtNIShAGfs1Rgb42NMu4Z07SkombRtEiMRii7MW4+nhYWLNnSUeni9lbrDHPVrp0hL5i2ptbbPRb4wMMGnbRKJRlFL0337onioiHDl7DKUWqT207M/hw702iUSjnjmvUZfk8fSKip+6pgwKpUjb9rJmKxIu6cnllpKrbEh2/7dndes3KNPMpND3uDEAAAAASUVORK5CYII=">
+                        <span>&copy; <span class="jv-years">2025&ndash;2026</span> <span class="jv-name">Joe VanWagner</span></span>
+                    </a>
+                </div>
+            </div>
+
+            <div id="active-controls-hud" class="retro-text"></div>
+
+            <!-- Touch-screen controls -->
+            <div id="mobile-controls">
+                <button id="btn-up" type="button" class="dpad-btn" aria-label="Up">⬆️</button>
+                <button id="btn-left" type="button" class="dpad-btn" aria-label="Left">⬅️</button>
+                <button id="btn-right" type="button" class="dpad-btn" aria-label="Right">➡️</button>
+                <button id="btn-down" type="button" class="dpad-btn" aria-label="Down">⬇️</button>
+                <button id="btn-action" type="button" class="dpad-btn retro-text" data-text="actionButton">BLAST</button>
+            </div>
+        </div>
+
+        <!-- Question sidebar (shown during play) -->
+        <div id="sidebar">
+            <div id="question-panel">
+                <div id="question-text" data-text="prompt">DIG TO AN ANSWER BLOCK!</div>
+                <div id="options-container"></div>
+            </div>
+            <div class="sidebar-section hide-on-touch">
+                <div class="retro-text sidebar-heading" data-text="labels.activeControls">ACTIVE CONTROLS</div>
+                <div class="toggle-group control-group"></div>
+            </div>
+            <div class="sidebar-section" id="extra-life-section">
+                <span id="extra-life-note"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="quizcade-engine">
+"use strict";
+/* =========================================================================================
+   SHARED QUIZCADE ENGINE (same in every game): settings, screens, questions, sprites, loop.
+   ========================================================================================= */
+const CFG = QUIZCADE, T = CFG.text, S = CFG.settings, C = CFG.colors;
+const $ = id => document.getElementById(id);
+const getPath = (obj, path) => path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
+
+// Phones and tablets (a touch screen with no mouse) get the on-screen buttons
+const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+if (isTouch) document.body.classList.add('touch');
+
+// Words and colors from the EDIT ZONE
+document.title = T.pageTitle || T.title;
+document.querySelectorAll('[data-text]').forEach(el => {
+    const v = getPath(T, el.dataset.text);
+    if (typeof v === 'string') el.textContent = v;
+});
+[['--brand', C.brand], ['--accent', C.accent], ['--page-bg', C.pageBackground], ['--good', C.correct], ['--bad', C.wrong]]
+    .forEach(([name, value]) => { if (value) document.documentElement.style.setProperty(name, value); });
+
+// Credit years: 2025 (first made) through the current year, updated automatically
+document.querySelectorAll('.jv-years').forEach(el => {
+    const year = new Date().getFullYear();
+    el.textContent = year > 2025 ? '2025–' + year : '2025';
+});
+
+// Extra-life note in the sidebar
+if (S.extraLifeEvery > 0) $('extra-life-note').textContent = (T.extraLife || '').replace('{points}', S.extraLifeEvery);
+else $('extra-life-section').style.display = 'none';
+
+function showEl(id, on) {
+    $(id).classList.toggle('open', on);
+    if ($(id).classList.contains('modal')) sizeForModal();
+}
+// A title/game-over screen taller than the game screen (short mazes, phones) stretches the
+// game area to fit, instead of getting cut off.
+function sizeForModal() {
+    const box = $('game-container');
+    box.style.minHeight = '';
+    const open = box.querySelector('.modal.open');
+    if (open && open.scrollHeight > box.clientHeight) box.style.minHeight = open.scrollHeight + 'px';
+}
+
+// A row of toggle buttons (lives, questions per level, ...). onPick gets the chosen value.
+function buildChoices(group, values, current, onPick, label = v => String(v)) {
+    group.innerHTML = '';
+    values.forEach(v => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'toggle-btn retro-text' + (v === current ? ' active' : '');
+        b.textContent = label(v);
+        b.addEventListener('click', () => {
+            group.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+            b.blur();   // so SPACE fires in the game instead of pressing this button again
+            onPick(v);
+        });
+        group.appendChild(b);
+    });
+}
+
+// Control mode: 'mouse' | 'keyboard' | 'both' | 'mobile' (touch screens)
+let controlMode = isTouch ? 'mobile' : 'both';
+function setControlMode(mode) {
+    controlMode = mode;
+    document.querySelectorAll('.control-group button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    const hud = $('active-controls-hud'), b = document.createElement('b');
+    b.textContent = T.labels.controlsPrefix;
+    const key = { mobile: 'touch', mouse: 'mouse', keyboard: 'keys', both: 'both' }[mode];
+    hud.replaceChildren(b, ' ' + T.controls[key]);
+}
+document.querySelectorAll('.control-group').forEach(group => {
+    [['mouse', T.labels.mouse], ['keyboard', T.labels.keys], ['both', T.labels.both]].forEach(([mode, label]) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'toggle-btn retro-text';
+        b.dataset.mode = mode;
+        b.textContent = label;
+        b.addEventListener('click', () => { b.blur(); setControlMode(mode); });
+        group.appendChild(b);
+    });
+});
+setControlMode(controlMode);
+
+// Full screen (the button hides itself where the browser or the embedding page doesn't allow it)
+const fullscreenAllowed = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+function enterFullscreen() {
+    try {
+        const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+        const p = req && req.call(el);
+        if (p && p.catch) p.catch(() => {});
+    } catch (e) { /* blocked: keep playing in the page */ }
+}
+function toggleFullscreen() {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen;
+        if (exit) exit.call(document);
+    } else enterFullscreen();
+}
+if (!fullscreenAllowed) $('fs-toggle-btn').style.display = 'none';
+$('fs-toggle-btn').addEventListener('click', toggleFullscreen);
+
+// Score, level and lives
+let score = 0, lives = 3, level = 1, questionsAnsweredThisLevel = 0, nextExtraLife = S.extraLifeEvery;
+let selectedLives = S.defaultLives, selectedQPL = S.defaultQuestionsPerLevel;
+function updateUI() {
+    $('score-display').textContent = String(score).padStart(6, '0');
+    $('level-display').textContent = `${String(level).padStart(2, '0')} (${questionsAnsweredThisLevel}/${selectedQPL})`;
+    $('lives-display').textContent = lives > 5 ? '❤️×' + lives : '❤️'.repeat(Math.max(0, lives));
+}
+function addScore(pts) {
+    score += pts;
+    if (S.extraLifeEvery > 0 && score >= nextExtraLife) {
+        lives++;
+        nextExtraLife += S.extraLifeEvery;
+        const livesEl = $('lives-display');
+        livesEl.style.transform = 'scale(1.5)';
+        setTimeout(() => { livesEl.style.transform = 'scale(1)'; }, 300);
+    }
+    updateUI();
+}
+function resetScore() {
+    score = 0; level = 1; questionsAnsweredThisLevel = 0;
+    nextExtraLife = S.extraLifeEvery; lives = selectedLives;
+    updateUI();
+}
+buildChoices($('lives-group'), S.livesChoices, selectedLives, v => { selectedLives = v; });
+buildChoices($('questions-group'), S.questionsPerLevelChoices, selectedQPL, v => { selectedQPL = v; updateUI(); });
+
+// Screen flashes
+function flash(id, ms) {
+    const f = $(id);
+    f.classList.add('on');
+    if (ms) setTimeout(() => f.classList.remove('on'), ms);
+}
+function unflash(id) { $(id).classList.remove('on'); }
+
+// Questions: only well-formed ones are used, dealt from a shuffled deck so none repeat until all are used
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+const QUESTIONS = (CFG.questions || []).filter((item, i) => {
+    const ok = item && typeof item.q === 'string' && Array.isArray(item.opts) &&
+        item.opts.length >= 2 && item.opts.length <= 4 && Number.isInteger(item.ans) && item.ans >= 0 && item.ans < item.opts.length;
+    if (!ok) console.warn('Quizcade: skipping question #' + (i + 1) + ' (needs q, 2 to 4 opts and a valid ans).', item);
+    return ok;
+});
+if (!QUESTIONS.length) QUESTIONS.push({ q: 'No questions yet: add some in the EDIT ZONE.', opts: ['OK', 'Got it'], ans: 0 });
+let questionDeck = [];
+function nextQuestion() {
+    if (!questionDeck.length) questionDeck = S.shuffleQuestions ? shuffle(QUESTIONS.slice()) : QUESTIONS.slice().reverse();
+    const src = questionDeck.pop();
+    const q = { q: src.q, opts: src.opts.map(String), ans: src.ans };
+    if (S.shuffleAnswers) {
+        const order = shuffle(q.opts.map((_, i) => i));
+        q.opts = order.map(i => String(src.opts[i]));
+        q.ans = order.indexOf(src.ans);
+    }
+    return q;
+}
+const answerLabel = i => (T.answerLabels && T.answerLabels[i]) || 'ABCD'[i];
+const answerColor = i => C.answers[i % C.answers.length];
+
+// Show a question in the sidebar. With onPick the answers are buttons; otherwise they're a key to the game.
+function renderQuestion(q, onPick) {
+    $('question-text').textContent = q.q;
+    const box = $('options-container');
+    box.replaceChildren();
+    q.opts.forEach((text, i) => {
+        const row = document.createElement(onPick ? 'button' : 'div');
+        row.className = onPick ? 'option-btn' : 'answer-option';
+        row.style.setProperty('--answer-color', answerColor(i));
+        const letter = document.createElement('strong');
+        letter.className = 'answer-letter';
+        letter.textContent = '[' + answerLabel(i) + ']';
+        const label = document.createElement('span');
+        label.textContent = text;
+        row.append(letter, label);
+        if (onPick) { row.type = 'button'; row.addEventListener('click', () => onPick(i, row)); }
+        box.appendChild(row);
+    });
+}
+function showPrompt(text) {
+    $('question-text').textContent = text;
+    $('options-container').replaceChildren();
+}
+
+// Sprites: an "image" (link or data: URI) if one is set, otherwise the pixel art.
+function loadImage(src) {
+    if (!src) return null;
+    const img = new Image();
+    img.onerror = () => console.warn('Quizcade: could not load image', src.slice(0, 80));
+    img.src = src;
+    return img;
+}
+const imageReady = img => !!(img && img.complete && img.naturalWidth);
+function pixelArt(pixels, palette, tint) {
+    if (!pixels || !pixels.length) return null;
+    const c = document.createElement('canvas');
+    c.width = Math.max(...pixels.map(r => r.length));
+    c.height = pixels.length;
+    const g = c.getContext('2d');
+    pixels.forEach((row, y) => {
+        for (let x = 0; x < row.length; x++) {
+            let color = palette[row[x]];
+            if (color === 'answer' || color === 'tint') color = tint;
+            if (!color) continue;   // "." or any letter not in the palette = see-through
+            g.fillStyle = color;
+            g.fillRect(x, y, 1, 1);
+        }
+    });
+    return c;
+}
+function makeSprite(def, tint) {
+    def = def || {};
+    return { def, img: loadImage(def.image), art: pixelArt(def.pixels, def.palette || {}, tint) };
+}
+// Draws a sprite centered on (x, y), `width` game pixels wide (height follows the picture's shape).
+function drawSprite(g, spr, x, y, width) {
+    const src = imageReady(spr.img) ? spr.img : spr.art;
+    if (!src) return false;
+    const sw = src.naturalWidth || src.width, sh = src.naturalHeight || src.height;
+    const w = width || spr.def.size || sw, h = w * sh / sw;
+    g.imageSmoothingEnabled = sw > w;   // crisp when enlarging pixel art, smooth when shrinking big pictures
+    g.drawImage(src, x - w / 2, y - h / 2, w, h);
+    return true;
+}
+// Fills the whole canvas with a picture, cropping to keep its shape (like CSS background-size: cover)
+function drawCover(g, img, w, h) {
+    if (!imageReady(img)) return false;
+    const s = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+    const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+    g.imageSmoothingEnabled = true;
+    g.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+    return true;
+}
+
+// Fixed-speed game loop: the game logic runs 60 times a second on every screen
+// (120 Hz and 144 Hz monitors used to run the games at double speed), drawing once per frame.
+function startLoop(update, render) {
+    const STEP = 1000 / 60;
+    let last = performance.now(), acc = 0;
+    function frame(now) {
+        acc += Math.min(now - last, 250);
+        last = now;
+        let steps = Math.max(0, Math.round(acc / STEP));
+        acc -= steps * STEP;
+        if (steps > 5) { steps = 5; acc = 0; }
+        while (steps-- > 0) update();
+        render();
+        requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+}
+
+// FIT TO WINDOW: shrinks the game (never below 300px wide) so the whole thing fits the window's height,
+// with no scrollbars, whether it's on a page, in a small window, in an embed, full screen or saved to your desktop.
 (function () {
     function fit() {
-        var w = document.getElementById('game-wrapper');
-        if (!w) return;
-        var cs = getComputedStyle(document.body);
-        var avail = window.innerHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
+        sizeForModal();
+        const w = $('game-wrapper');
+        const cs = getComputedStyle(document.body);
+        const avail = window.innerHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
         w.style.maxWidth = '';
         if (w.offsetHeight <= avail) return;
-        var lo = 300, hi = w.offsetWidth;
-        for (var i = 0; i < 12; i++) {
-            var mid = (lo + hi) / 2;
+        let lo = 300, hi = w.offsetWidth;
+        for (let i = 0; i < 12; i++) {
+            const mid = (lo + hi) / 2;
             w.style.maxWidth = mid + 'px';
             if (w.offsetHeight > avail) hi = mid; else lo = mid;
         }
         w.style.maxWidth = Math.floor(lo) + 'px';
     }
-    var t;
-    window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(fit, 60); });
+    let t;
+    window.fitGame = () => { clearTimeout(t); t = setTimeout(fit, 60); };
+    window.addEventListener('resize', window.fitGame);
     window.addEventListener('load', fit);
-    document.addEventListener('fullscreenchange', function () { setTimeout(fit, 120); });
-    [0, 300, 1200].forEach(function (ms) { setTimeout(fit, ms); });
+    document.addEventListener('fullscreenchange', () => setTimeout(fit, 120));
+    [0, 300, 1200].forEach(ms => setTimeout(fit, ms));
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => window.fitGame());
 })();
+/* ============================== END SHARED ENGINE ============================== */
+
+
+/* =========================================================================================
+   QUIZCAVATOR
+   ========================================================================================= */
+const TS = 20;          // size of one square in game pixels
+const COLS = 28;
+const ROWS = 32;        // deep, for lots of digging
+const SKY_ROWS = 3;
+function speedOK(v, fallback, name) {
+    if (v > 0 && TS % v === 0) return v;
+    console.warn('Quizcade: ' + name + ' must divide evenly into ' + TS + ' (1, 2, 4 or 5). Using ' + fallback + '.');
+    return fallback;
+}
+const PLAYER_SPEED = speedOK(S.playerSpeed, 2, 'playerSpeed');
+const DIG_SPEED = speedOK(S.digSpeed, 1, 'digSpeed');
+const ENEMY_SPEED = speedOK(S.enemySpeed, 1, 'enemySpeed');
+
+// Tiles: 0 sky, 1 dirt, 2 tunnel, 3 bedrock, 4-7 answer blocks A-D
+const canvas = $('gameCanvas');
+canvas.width = COLS * TS;
+canvas.height = ROWS * TS;
+canvas.style.aspectRatio = canvas.width + ' / ' + canvas.height;
+const ctx = canvas.getContext('2d');
+
+let map = [];
+let state = 'TITLE';   // TITLE | DEMO | PLAY | PAUSED | DYING | GAMEOVER
+let isDemoMode = false;
+let currentQuestion = null;
+let deathFrame = 0;
+let demoStep = 0;
+let demoSubFrame = 0;
+
+const player = { x: 0, y: 0, vx: 0, vy: 0, reqVx: 0, reqVy: 0, startX: 13 * TS, startY: 2 * TS, path: [], facing: { x: 0, y: 1 } };
+let enemies = [];
+const blast = { active: false, timer: 0 };
+let particles = [];
+
+const SPR = {
+    player: makeSprite(CFG.sprites.player),
+    enemies: C.enemies.map(color => makeSprite(CFG.sprites.enemy, color)),
+    burrow: makeSprite(CFG.sprites.enemyBurrowing),
+    dirt: loadImage(CFG.sprites.dirt && CFG.sprites.dirt.image),
+    background: loadImage(CFG.sprites.background && CFG.sprites.background.image)
+};
+let dirtPattern = null;
+
+/* ---------- Input, blast & pathfinding ---------- */
+function clearPath() { player.path = []; }
+const inGame = () => state !== 'TITLE' && state !== 'GAMEOVER';
+
+function fireBlast() {
+    if (blast.active || (isDemoMode && state !== 'DEMO')) return;
+    if (state !== 'PLAY' && state !== 'DEMO') return;
+
+    let target = null;
+    const pC = Math.round(player.x / TS);
+    const pR = Math.round(player.y / TS);
+    for (let dist = 1; dist <= 3 && !target; dist++) {
+        const checkC = pC + player.facing.x * dist;
+        const checkR = pR + player.facing.y * dist;
+        // the blast can't reach through dirt or bedrock
+        if (map[checkR] && (map[checkR][checkC] === 1 || map[checkR][checkC] === 3)) break;
+        target = enemies.find(e => e.state !== 'DEAD' && Math.round(e.x / TS) === checkC && Math.round(e.y / TS) === checkR) || null;
+    }
+
+    blast.active = true;
+    blast.timer = 15;
+    if (target) {
+        target.state = 'STUNNED';
+        target.stunTimer = 120;   // 2 seconds
+        target.hits += 1;
+        if (target.hits >= S.hitsToDefeat) {   // knocked out: it bursts into a puff of debris
+            target.state = 'DEAD';
+            spawnDebris(target.x + TS / 2, target.y + TS / 2, C.enemies[target.sprite % C.enemies.length]);
+            if (!isDemoMode) addScore(S.pointsPerEnemy);
+        }
+    }
+}
+
+document.addEventListener('keydown', e => {
+    if (controlMode === 'mouse' || controlMode === 'mobile' || !inGame()) return;
+    const key = e.key.toLowerCase();
+    if (key === ' ') {
+        e.preventDefault();
+        fireBlast();
+        return;
+    }
+    if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
+        e.preventDefault();
+        clearPath();
+    }
+    if (key === 'arrowleft' || key === 'a') steer(-1, 0);
+    if (key === 'arrowright' || key === 'd') steer(1, 0);
+    if (key === 'arrowup' || key === 'w') steer(0, -1);
+    if (key === 'arrowdown' || key === 's') steer(0, 1);
+});
+function steer(dx, dy) {
+    player.reqVx = dx; player.reqVy = dy;
+    player.facing = { x: dx, y: dy };
+}
+
+// Dirt counts as walkable because the player digs through it; bedrock doesn't.
+function isWalkable(r, c) {
+    if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return false;
+    return map[r][c] !== 3;
+}
+
+function getNearestWalkable(r, c) {
+    if (isWalkable(r, c)) return { r, c };
+    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]];
+    for (const [dr, dc] of dirs) if (isWalkable(r + dr, c + dc)) return { r: r + dr, c: c + dc };
+    return null;
+}
+
+function findPath(startR, startC, endR, endC) {
+    const prev = new Map();
+    const startKey = startR * COLS + startC;
+    prev.set(startKey, -1);
+    const queue = [[startR, startC]];
+    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    for (let head = 0; head < queue.length && head < 2000; head++) {
+        const [r, c] = queue[head];
+        if (r === endR && c === endC) {
+            const path = [];
+            for (let k = r * COLS + c; k !== startKey; k = prev.get(k)) path.unshift({ r: Math.floor(k / COLS), c: k % COLS });
+            return path;
+        }
+        for (const [dr, dc] of dirs) {
+            const nr = r + dr, nc = c + dc, key = nr * COLS + nc;
+            if (isWalkable(nr, nc) && !prev.has(key)) {
+                prev.set(key, r * COLS + c);
+                queue.push([nr, nc]);
+            }
+        }
+    }
+    return [];
+}
+
+canvas.addEventListener('pointerdown', e => {
+    if (state !== 'PLAY' && state !== 'DEMO') return;
+    if (controlMode === 'keyboard') return;
+    const rect = canvas.getBoundingClientRect();
+    let targetC = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width) / TS);
+    let targetR = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height) / TS);
+
+    // Clicked an enemy: turn toward it and blast
+    for (const en of enemies) {
+        if (en.state !== 'DEAD' && Math.floor(en.x / TS) === targetC && Math.floor(en.y / TS) === targetR) {
+            const dx = targetC - Math.floor(player.x / TS), dy = targetR - Math.floor(player.y / TS);
+            player.facing = Math.abs(dx) > Math.abs(dy) ? { x: Math.sign(dx), y: 0 } : { x: 0, y: dy > 0 ? 1 : -1 };
+            fireBlast();
+            return;
+        }
+    }
+
+    if (!isWalkable(targetR, targetC)) {
+        const nearest = getNearestWalkable(targetR, targetC);
+        if (!nearest) return;
+        targetR = nearest.r; targetC = nearest.c;
+    }
+    const newPath = findPath(Math.round(player.y / TS), Math.round(player.x / TS), targetR, targetC);
+    if (newPath.length) player.path = newPath;
+});
+
+[['btn-up', 0, -1], ['btn-down', 0, 1], ['btn-left', -1, 0], ['btn-right', 1, 0]].forEach(([id, dx, dy]) => {
+    $(id).addEventListener('pointerdown', e => { e.preventDefault(); clearPath(); steer(dx, dy); });
+    $(id).addEventListener('contextmenu', e => e.preventDefault());
+});
+$('btn-action').addEventListener('pointerdown', e => { e.preventDefault(); fireBlast(); });
+
+/* ---------- Tutorial ---------- */
+function blankMap() {
+    map = [];
+    for (let r = 0; r < ROWS; r++) {
+        const row = [];
+        for (let c = 0; c < COLS; c++) {
+            if (c === 0 || c === COLS - 1 || r === ROWS - 1) row.push(3);   // bedrock frame
+            else if (r < SKY_ROWS) row.push(0);
+            else row.push(1);
+        }
+        map.push(row);
+    }
+}
+
+function newEnemy(x, y, i) {
+    return { x, y, vx: ENEMY_SPEED, vy: 0, face: 1, sprite: i % SPR.enemies.length, state: 'WANDER', burrowTimer: 300 + Math.random() * 500, hits: 0, stunTimer: 0 };
+}
+
+function resetDemoScene(step) {
+    demoSubFrame = 0;
+    blankMap();
+    player.vx = 0; player.vy = 0;
+    player.reqVx = 0; player.reqVy = 0;
+    player.path = [];
+    enemies = [];
+    deathFrame = 0;
+    blast.active = false;
+
+    if (step === 0) {
+        player.x = 13 * TS; player.y = 2 * TS;
+        player.facing = { x: 0, y: 1 };
+    } else if (step === 1) {
+        for (let c = 6; c < 22; c++) map[6][c] = 2;   // a pre-dug tunnel
+        player.x = 14 * TS; player.y = 6 * TS;
+        player.facing = { x: -1, y: 0 };
+        const e = newEnemy(9 * TS, 6 * TS, 0);
+        e.vx = 0;
+        e.burrowTimer = 100;
+        enemies.push(e);
+    } else if (step === 2) {
+        player.x = 10 * TS; player.y = 4 * TS;   // above the block
+        map[10][10] = 4; map[10][11] = 4; map[11][10] = 4; map[11][11] = 4;
+        player.facing = { x: 0, y: 1 };
+    }
+}
+
+function startGame() {
+    if (S.autoFullscreen) enterFullscreen();
+    showEl('title-modal', false);
+    if (!S.showTutorial || !T.tutorial || !T.tutorial.length) { resetGame(true); return; }
+    showEl('demo-ui', true);
+    isDemoMode = true;
+    demoStep = 0;
+    state = 'DEMO';
+    resetDemoScene(0);
+    updateDemoUI();
+}
+
+function skipDemo() {
+    showEl('demo-ui', false);
+    isDemoMode = false;
+    resetGame(true);
+}
+
+function advanceDemo() {
+    demoStep++;
+    if (demoStep >= Math.min(3, T.tutorial.length)) {
+        skipDemo();
+    } else {
+        state = 'DEMO';
+        resetDemoScene(demoStep);
+        updateDemoUI();
+    }
+}
+
+function updateDemoUI() {
+    $('demo-text').textContent = T.tutorial[demoStep] || '';
+}
+
+function processDemoLogic() {
+    demoSubFrame++;
+    if (demoStep === 0) {
+        if (demoSubFrame === 1) { player.reqVx = 0; player.reqVy = 1; }
+        if (demoSubFrame > 150) resetDemoScene(0);
+    } else if (demoStep === 1) {
+        if (demoSubFrame === 1) {
+            player.reqVx = 0; player.reqVy = 0;
+            if (enemies[0]) enemies[0].state = 'BURROW';
+        }
+        if ([50, 80, 110, 140].includes(demoSubFrame)) fireBlast();   // the 4th one knocks it out
+        if (demoSubFrame > 200) resetDemoScene(1);
+    } else if (demoStep === 2) {
+        if (demoSubFrame === 1) { player.reqVx = 0; player.reqVy = 1; }
+        if (demoSubFrame > 180) resetDemoScene(2);
+    }
+}
+
+function drawDemoHighlights() {
+    ctx.save();
+    ctx.strokeStyle = C.accent;
+    ctx.lineWidth = 4;
+    const pulse = (Math.sin(Date.now() / 150) + 1) / 2 * 4;
+    if (demoStep === 0) ctx.strokeRect(player.x - pulse / 2, player.y - pulse / 2, TS + pulse, TS + pulse);
+    else if (demoStep === 1) {
+        if (enemies[0] && enemies[0].state !== 'DEAD') ctx.strokeRect(enemies[0].x - pulse / 2, enemies[0].y - pulse / 2, TS + pulse, TS + pulse);
+    } else if (demoStep === 2) ctx.strokeRect(10 * TS - pulse / 2, 10 * TS - pulse / 2, 2 * TS + pulse, 2 * TS + pulse);
+    ctx.restore();
+}
+
+/* ---------- Map ---------- */
+function generateMap() {
+    blankMap();
+
+    // Random caves (more on later levels)
+    const numCaves = 3 + Math.floor(level / 2);
+    for (let i = 0; i < numCaves; i++) {
+        const caveW = 4 + Math.floor(Math.random() * 4);
+        const caveH = 2 + Math.floor(Math.random() * 2);
+        const startC = 2 + Math.floor(Math.random() * (COLS - caveW - 4));
+        const startR = 5 + Math.floor(Math.random() * (ROWS - caveH - 8));
+        for (let r = startR; r < startR + caveH; r++)
+            for (let c = startC; c < startC + caveW; c++) map[r][c] = 2;
+    }
+
+    // One 2x2 answer block per answer choice (2 to 4), in random order along the bottom
+    const n = currentQuestion ? currentQuestion.opts.length : 4;
+    const positions = n === 2 ? [7, 19] : n === 3 ? [5, 13, 21] : [4, 10, 16, 22];
+    const blockIds = shuffle([4, 5, 6, 7].slice(0, n));
+    for (let i = 0; i < n; i++) {
+        const r = ROWS - 3, c = positions[i];
+        map[r][c] = map[r][c + 1] = map[r + 1][c] = map[r + 1][c + 1] = blockIds[i];
+    }
+}
+
+function initLevel() {
+    currentQuestion = nextQuestion();
+    renderQuestion(currentQuestion);
+    generateMap();
+    resetPositions();
+    window.fitGame();
+}
+
+function resetPositions() {
+    player.x = player.startX;
+    player.y = player.startY;
+    player.vx = 0; player.vy = 0;
+    player.reqVx = 0; player.reqVy = 0;
+    player.path = [];
+    player.facing = { x: 1, y: 0 };
+    blast.active = false;
+
+    enemies = [];
+    const numEnemies = S.baseEnemies + Math.floor(level / 2);
+    const spawns = [];
+    for (let r = 5; r < ROWS - 5; r++)
+        for (let c = 2; c < COLS - 2; c++)
+            if (map[r][c] === 2) spawns.push({ r, c });
+    shuffle(spawns);
+    for (let i = 0; i < numEnemies && i < spawns.length; i++) enemies.push(newEnemy(spawns[i].c * TS, spawns[i].r * TS, i));
+}
+
+function resetGame(fullReset = false) {
+    if (fullReset) {
+        resetScore();
+        showEl('game-over-modal', false);
+        showEl('sidebar', true);
+    }
+    state = 'PLAY';
+    updateUI();
+    initLevel();
+}
+
+/* ---------- Movement ---------- */
+function clearDirt() {
+    const pad = 2;
+    const leftC = Math.floor((player.x + pad) / TS), rightC = Math.floor((player.x + TS - pad) / TS);
+    const topR = Math.floor((player.y + pad) / TS), bottomR = Math.floor((player.y + TS - pad) / TS);
+    for (let r = topR; r <= bottomR; r++) {
+        for (let c = leftC; c <= rightC; c++) {
+            if (map[r] && map[r][c] === 1) {
+                map[r][c] = 2;
+                if (!isDemoMode && state === 'PLAY') addScore(S.pointsPerDirt);
+            }
+        }
+    }
+}
+
+function handlePlayerMovement() {
+    if (blast.active) {   // standing still while blasting
+        blast.timer--;
+        if (blast.timer <= 0) blast.active = false;
+        return;
+    }
+
+    if (player.x % TS === 0 && player.y % TS === 0) {
+        const tileC = Math.round(player.x / TS);
+        const tileR = Math.round(player.y / TS);
+
+        if (player.path.length) {
+            let nextStep = player.path[0];
+            if (tileC === nextStep.c && tileR === nextStep.r) {
+                player.path.shift();
+                if (player.path.length) {
+                    nextStep = player.path[0];
+                } else {
+                    player.reqVx = 0; player.reqVy = 0;
+                    player.vx = 0; player.vy = 0;
+                    nextStep = null;
+                }
+            }
+            if (nextStep) {
+                player.reqVx = nextStep.c - tileC;
+                player.reqVy = nextStep.r - tileR;
+            }
+        }
+
+        if (player.reqVx !== 0 || player.reqVy !== 0) player.facing = { x: Math.sign(player.reqVx), y: Math.sign(player.reqVy) };
+
+        const nextR = tileR + player.reqVy, nextC = tileC + player.reqVx;
+        const speed = map[nextR] && map[nextR][nextC] === 1 ? DIG_SPEED : PLAYER_SPEED;   // slower in dirt
+        if (map[nextR] && map[nextR][nextC] !== undefined && map[nextR][nextC] !== 3) {
+            player.vx = Math.sign(player.reqVx) * speed;
+            player.vy = Math.sign(player.reqVy) * speed;
+        } else {
+            player.vx = 0; player.vy = 0;
+        }
+    }
+
+    player.x += player.vx;
+    player.y += player.vy;
+    clearDirt();
+
+    if (player.x % TS === 0 && player.y % TS === 0) {
+        const tc = Math.floor(player.x / TS), tr = Math.floor(player.y / TS);
+        const tile = map[tr][tc];
+        if (tile >= 4 && tile <= 7) {
+            if (state === 'PLAY') checkAnswer(tile - 4);
+            else if (state === 'DEMO') map[tr][tc] = map[tr][tc + 1] = map[tr + 1][tc] = map[tr + 1][tc + 1] = 2;
+        }
+    }
+}
+
+function handleEnemyMovement(ent) {
+    if (ent.state === 'DEAD') return;
+
+    if (ent.state === 'STUNNED') {
+        if (--ent.stunTimer <= 0) { ent.state = 'WANDER'; ent.hits = 0; }
+        return;
+    }
+
+    if (ent.state === 'WANDER' && --ent.burrowTimer <= 0) ent.state = 'BURROW';
+
+    if (ent.state === 'BURROW') {
+        // Drift straight at the player through the dirt, then settle into the next open square
+        const dx = player.x - ent.x, dy = player.y - ent.y, dist = Math.hypot(dx, dy);
+        if (dist > 0) {
+            ent.x += dx / dist * ENEMY_SPEED * 0.5;
+            ent.y += dy / dist * ENEMY_SPEED * 0.5;
+            if (Math.abs(dx) > 0.5) ent.face = Math.sign(dx);
+        }
+        if (Math.abs(ent.x % TS) < 1.5 && Math.abs(ent.y % TS) < 1.5) {
+            const tr = Math.round(ent.y / TS), tc = Math.round(ent.x / TS);
+            if (map[tr] && (map[tr][tc] === 2 || map[tr][tc] === 0)) {
+                ent.x = tc * TS;
+                ent.y = tr * TS;
+                ent.state = 'WANDER';
+                ent.vx = ENEMY_SPEED; ent.vy = 0;
+                ent.burrowTimer = 300 + Math.random() * 600;
+            }
+        }
+        return;
+    }
+
+    if (ent.x % TS === 0 && ent.y % TS === 0) {
+        const tileC = Math.round(ent.x / TS), tileR = Math.round(ent.y / TS);
+        const validMoves = [];
+        [{ x: ENEMY_SPEED, y: 0 }, { x: -ENEMY_SPEED, y: 0 }, { x: 0, y: ENEMY_SPEED }, { x: 0, y: -ENEMY_SPEED }].forEach(d => {
+            if (d.x === -ent.vx && d.y === -ent.vy && (ent.vx !== 0 || ent.vy !== 0)) return;   // no U-turns
+            const dirC = tileC + Math.sign(d.x), dirR = tileR + Math.sign(d.y);
+            if (map[dirR] && (map[dirR][dirC] === 2 || map[dirR][dirC] === 0)) validMoves.push(d);
+        });
+        if (validMoves.length) {
+            const straight = validMoves.find(m => m.x === ent.vx && m.y === ent.vy);
+            const move = straight && validMoves.length === 1 ? straight : validMoves[Math.floor(Math.random() * validMoves.length)];
+            ent.vx = move.x; ent.vy = move.y;
+        } else {
+            ent.vx = -ent.vx;
+            ent.vy = -ent.vy;
+        }
+    }
+    ent.x += ent.vx;
+    ent.y += ent.vy;
+    if (ent.vx) ent.face = Math.sign(ent.vx);
+}
+
+function checkAnswer(selectedIndex) {
+    state = 'PAUSED';
+    clearPath();
+    if (selectedIndex === currentQuestion.ans) {
+        addScore(S.pointsPerCorrect);
+        questionsAnsweredThisLevel++;
+        updateUI();
+        flash('green-flash');
+        setTimeout(() => {
+            unflash('green-flash');
+            if (questionsAnsweredThisLevel >= selectedQPL) {
+                level++;
+                questionsAnsweredThisLevel = 0;
+            }
+            initLevel();
+            updateUI();
+            state = 'PLAY';
+        }, 1000);
+    } else {
+        flash('red-flash');
+        setTimeout(() => {
+            unflash('red-flash');
+            startDeathSequence();
+        }, 1000);
+    }
+}
+
+function startDeathSequence() {
+    state = 'DYING';
+    deathFrame = 0;
+    clearPath();
+}
+
+function finishDeath() {
+    if (isDemoMode) {
+        resetDemoScene(demoStep);
+        state = 'DEMO';
+        return;
+    }
+    lives--;
+    updateUI();
+    if (lives <= 0) {
+        state = 'GAMEOVER';
+        $('final-score').textContent = String(score).padStart(6, '0');
+        showEl('game-over-modal', true);
+    } else {
+        player.x = player.startX;
+        player.y = player.startY;
+        player.vx = 0; player.vy = 0;
+        player.reqVx = 0; player.reqVy = 0;
+        blast.active = false;
+        state = 'PLAY';
+    }
+}
+
+function spawnDebris(x, y, color) {
+    for (let i = 0; i < 16; i++) {
+        const a = Math.random() * Math.PI * 2, sp = 1 + Math.random() * 2.5;
+        particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1, life: 1, col: i % 3 ? color : C.dirt });
+    }
+}
+function updateParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.life -= 0.03;
+        if (p.life <= 0) particles.splice(i, 1);
+    }
+}
+
+/* ---------- Update (60 times a second) ---------- */
+function update() {
+    updateParticles();
+    if (state === 'PLAY' || state === 'DEMO') {
+        if (state === 'DEMO') processDemoLogic();
+        handlePlayerMovement();
+        if (state !== 'PLAY' && state !== 'DEMO') return;   // just reached an answer block
+        enemies.forEach(handleEnemyMovement);
+
+        const hitDist = TS * 0.7;
+        for (const e of enemies) {
+            if (e.state !== 'DEAD' && e.state !== 'STUNNED' && Math.hypot(e.x - player.x, e.y - player.y) < hitDist) {
+                startDeathSequence();
+                break;
+            }
+        }
+    } else if (state === 'DYING') {
+        deathFrame++;
+        if (deathFrame > 60) finishDeath();
+    }
+}
+
+/* ---------- Drawing ---------- */
+function drawMap() {
+    ctx.fillStyle = C.sky;
+    ctx.fillRect(0, 0, canvas.width, SKY_ROWS * TS);
+    ctx.fillStyle = C.tunnel;
+    ctx.fillRect(0, SKY_ROWS * TS, canvas.width, canvas.height - SKY_ROWS * TS);
+    drawCover(ctx, SPR.background, canvas.width, canvas.height);
+
+    if (!dirtPattern && imageReady(SPR.dirt)) dirtPattern = ctx.createPattern(SPR.dirt, 'repeat');
+
+    const labels = [];
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            const x = c * TS, y = r * TS, val = map[r][c];
+            if (val === 1) {
+                if (dirtPattern) {
+                    ctx.fillStyle = dirtPattern;
+                    ctx.fillRect(x, y, TS, TS);
+                } else {
+                    ctx.fillStyle = C.dirt;
+                    ctx.fillRect(x, y, TS, TS);
+                    if ((r * 13 + c * 7) % 3 === 0) {
+                        ctx.fillStyle = C.dirtSpeckle;
+                        ctx.fillRect(x + 2, y + 2, 4, 4);
+                    }
+                }
+            } else if (val === 3) {
+                ctx.fillStyle = C.bedrock;
+                ctx.fillRect(x, y, TS, TS);
+                ctx.fillStyle = C.bedrockInner;
+                ctx.fillRect(x + 2, y + 2, TS - 4, TS - 4);
+            } else if (val >= 4 && val <= 7) {
+                const idx = val - 4;
+                ctx.fillStyle = answerColor(idx);
+                ctx.fillRect(x, y, TS, TS);
+                if (map[r - 1][c] !== val && map[r][c - 1] !== val) labels.push({ label: answerLabel(idx), x: x + TS, y: y + TS + 2 });
+            }
+        }
+    }
+
+    // Letters on top of the answer blocks
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 24px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    labels.forEach(t => ctx.fillText(t.label, t.x, t.y));
+
+    // Surface line
+    ctx.fillStyle = C.surface;
+    ctx.fillRect(0, SKY_ROWS * TS, canvas.width, 4);
+
+    if (player.path.length) {
+        ctx.fillStyle = C.path;
+        player.path.forEach(p => ctx.fillRect(p.c * TS + TS / 2 - 2, p.r * TS + TS / 2 - 2, 4, 4));
+    }
+}
+
+function drawExcavator(isDying = false) {
+    ctx.save();
+    ctx.translate(player.x + TS / 2, player.y + TS / 2);
+    let angle = 0;
+    if (player.facing.x < 0) angle = Math.PI;
+    if (player.facing.y > 0) angle = Math.PI / 2;
+    if (player.facing.y < 0) angle = -Math.PI / 2;
+    ctx.rotate(angle);
+    if (isDying) {
+        const scale = Math.max(0, 1 - deathFrame / 40);
+        ctx.scale(scale, scale);
+        ctx.rotate(deathFrame * 0.5);
+    }
+    drawSprite(ctx, SPR.player, 0, 0);
+    ctx.restore();
+
+    if (blast.active) {   // three rings of air rolling forward from the scoop
+        const cx = player.x + TS / 2, cy = player.y + TS / 2;
+        const dir = Math.atan2(player.facing.y, player.facing.x);
+        const ext = 1 - blast.timer / 15;
+        ctx.strokeStyle = C.blast;
+        ctx.lineWidth = 2;
+        for (let k = 0; k < 3; k++) {
+            const rad = TS * 0.6 + ext * TS * 2.4 - k * 9;
+            if (rad <= 4) continue;
+            ctx.globalAlpha = Math.max(0, 1 - ext) * (1 - k * 0.25);
+            ctx.beginPath();
+            ctx.arc(cx, cy, rad, dir - 0.6, dir + 0.6);
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+    }
+}
+
+function drawStar(x, y, r) {
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+        const a = i * Math.PI / 4, d = i % 2 ? r * 0.4 : r;
+        ctx.lineTo(x + Math.cos(a) * d, y + Math.sin(a) * d);
+    }
+    ctx.fill();
+}
+
+function drawParticles() {
+    particles.forEach(p => {
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.col;
+        ctx.fillRect(p.x - 1.5, p.y - 1.5, 3, 3);
+    });
+    ctx.globalAlpha = 1;
+}
+
+function drawEnemy(e) {
+    if (e.state === 'DEAD') return;
+    ctx.save();
+    if (e.state === 'STUNNED') {   // rattled: shaking, flashing, with a star circling for every hit
+        const cx = e.x + TS / 2, cy = e.y + TS / 2;
+        ctx.fillStyle = C.dizzyStars;
+        for (let i = 0; i < e.hits; i++) {
+            const a = Date.now() / 200 + i * Math.PI * 2 / e.hits;
+            drawStar(cx + Math.cos(a) * 9, cy - 11 + Math.sin(a) * 3, 2.5);
+        }
+        ctx.translate(cx + (Math.random() * 2 - 1), cy);
+        if (Math.floor(Date.now() / 80) % 2) ctx.globalAlpha = 0.55;
+    } else {
+        ctx.translate(e.x + TS / 2, e.y + TS / 2);
+    }
+    if (e.state === 'BURROW') {
+        ctx.globalAlpha = 0.7;
+        drawSprite(ctx, SPR.burrow, 0, 0);
+    } else {
+        if (e.face < 0) ctx.scale(-1, 1);
+        drawSprite(ctx, SPR.enemies[e.sprite], 0, 0);
+    }
+    ctx.restore();
+}
+
+function render() {
+    drawMap();
+    if (state === 'DYING') {
+        if (deathFrame < 20) { enemies.forEach(drawEnemy); drawExcavator(); }
+        else drawExcavator(true);
+        return;
+    }
+    enemies.forEach(drawEnemy);
+    drawParticles();
+    if (state !== 'TITLE') drawExcavator();
+    if (state === 'DEMO') drawDemoHighlights();
+}
+
+/* ---------- Start up ---------- */
+$('start-btn').addEventListener('click', startGame);
+$('play-again-btn').addEventListener('click', () => resetGame(true));
+$('skip-demo-btn').addEventListener('click', skipDemo);
+$('next-demo-btn').addEventListener('click', advanceDemo);
+updateUI();
+generateMap();
+resetPositions();
+startLoop(update, render);
 </script>
 </body>
 </html>

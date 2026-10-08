@@ -10,24 +10,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="page-version" content="79bddba7">
+    <meta name="page-version" content="6dd4e73b">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scenemaker</title>
     <meta name="description" content="Scenemaker by Joseph VanWagner: a node-graph branching-scenario and visual-novel authoring tool that exports SCORM 1.2. Try the live demo in your browser.">
     <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
     <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
     <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="css/classic.css?v=fa07d833">
     <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
-    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
-    <script src="../config/site-config.js?v=74d996dd"></script>
-    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
-    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <link rel="stylesheet" href="css/modern.css?v=cdfd7b86">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=11acaf42"></script>
+    <script src="../config/shared-content.js?v=e9eeb62c"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
     <script src="js/classic.js?v=1e0da1f0"></script>
     <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
     <script src="js/search.js?v=92eeb169"></script>
-    <script src="../shared/demo-controls.js?v=1d028047"></script>   <!-- Mute + Full screen above each demo -->
-    <script src="../shared/share.js?v=1caee827"></script>
+    <script src="../shared/demo-controls.js?v=01dee569"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=defb0451"></script>
 </head>
 <body data-title="Scenemaker" data-nav="my-projects.html">
     <a class="skip-link" href="#content">Skip to content</a>
@@ -60,10 +60,39 @@
                 <h2>Play a story made with it</h2>
                 <p>"The Whistleblower" is Scenemaker's built-in sample: seven scenes, branching choices, tracked variables, and three endings, exported as one web page.</p>
                 <div class="course-frame">
-                    <iframe data-demo src="../work/scenemaker/downloads/whistleblower-sample.html" title="The Whistleblower (sample story made with Scenemaker)" loading="lazy" allow="fullscreen; autoplay" allowfullscreen></iframe>
+                    <iframe data-demo data-demo-muted src="../work/scenemaker/downloads/whistleblower-sample.html" title="The Whistleblower (sample story made with Scenemaker)" loading="lazy" allow="fullscreen; autoplay" allowfullscreen></iframe>
                 </div>
                 <p class="course-note">Also available as a real <a href="../work/scenemaker/downloads/whistleblower-scorm.zip">SCORM 1.2 package</a> (the kind Scenemaker builds for an LMS).</p>
                 <ul class="tags section-tags" aria-label="Tags for this section"><li>Branching scenarios</li><li>SCORM</li><li>Playable demo</li></ul>
+
+                <h2 id="more-examples">More examples: one tool, very different stories</h2>
+                <p>Three short modules built with the same editor, each set up to look and play differently. Every one is a single
+                   self-contained web page, so it opens anywhere, offline included.</p>
+
+                <h3>The Group Chat</h3>
+                <p>A school scenario about a rumor: a classmate says you copied their essay, and it is all over the group chat. Decide how to handle it and see how it plays out the next day. Built for the kind of social-skills lesson a counselor or advisory class might use.</p>
+                <p class="course-note"><strong>Showcases:</strong> scores the player never sees (trust with a friend, reputation, and whether you showed proof) that quietly steer the story to one of four endings, a bright comic-book look with round portraits and color-coded names, and endings players can share.</p>
+                <div class="course-frame">
+                    <iframe data-demo data-demo-muted src="../work/scenemaker/examples/the-group-chat.html" title="The Group Chat (sample made with Scenemaker)" loading="lazy" allow="fullscreen; autoplay" allowfullscreen></iframe>
+                </div>
+                <p class="course-note"><a href="../work/scenemaker/examples/the-group-chat.html" target="_blank" rel="noopener">Open The Group Chat on its own page</a></p>
+
+                <h3>The Bridge Toll</h3>
+                <p>A short fantasy adventure: a wizard named Theodric gives you one item for the road, then a troll named Grum blocks the only bridge to Fernhollow. Talk, shove, or sneak your way across, or pay the toll, and pick how the night ends.</p>
+                <p class="course-note"><strong>Showcases:</strong> tabletop-style dice checks (a d20 plus the stat your item boosted, against a target number), a choice that stays greyed out until you have the trade goods to pay with, characters whose faces change with their mood, and a storybook look with framed portraits and name tabs.</p>
+                <div class="course-frame">
+                    <iframe data-demo data-demo-muted src="../work/scenemaker/examples/the-bridge-toll.html" title="The Bridge Toll (sample made with Scenemaker)" loading="lazy" allow="fullscreen; autoplay" allowfullscreen></iframe>
+                </div>
+                <p class="course-note"><a href="../work/scenemaker/examples/the-bridge-toll.html" target="_blank" rel="noopener">Open The Bridge Toll on its own page</a></p>
+
+                <h3>Front Desk</h3>
+                <p>A customer-service practice scenario: a frustrated customer at closing time, their order cancelled for the third time. Choose what to say and do, decide whether to call in your shift lead, and see whether you calm things down or end up escalating to a manager.</p>
+                <p class="course-note"><strong>Showcases:</strong> Scenemaker Lite, a stripped-down, text-only export a fraction of the size of a full one. It still keeps a hidden &ldquo;tension&rdquo; score behind every reply, routes to four graded endings, and includes a scroll-back message log and a sound toggle.</p>
+                <div class="course-frame">
+                    <iframe data-demo data-demo-muted src="../work/scenemaker/examples/front-desk.html" title="Front Desk (sample made with Scenemaker)" loading="lazy" allow="fullscreen; autoplay" allowfullscreen></iframe>
+                </div>
+                <p class="course-note"><a href="../work/scenemaker/examples/front-desk.html" target="_blank" rel="noopener">Open Front Desk on its own page</a></p>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Dice rolls</li><li>Hidden scores</li><li>Customer service</li><li>Social skills</li><li>Visual styles</li></ul>
 
                 <h2>What it does</h2>
                 <ul>

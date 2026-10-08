@@ -139,7 +139,7 @@ window.DesktopUndo = {
         if (df) {
             // the named steps (each ends in refresh(), which records too; recording twice is harmless)
             [['trash', 'move to Rubbish'], ['restore', 'restore'], ['moveInto', 'move into folder'],
-             ['fileInto', 'shortcut into folder'], ['emptyRubbish', 'empty Rubbish'], ['create', 'new item'],
+             ['fileInto', 'shortcut into folder'], ['emptyRubbishNow', 'empty Rubbish'], ['create', 'new item'],
              ['rename', 'rename']].forEach(([n, l]) => {
                 const orig = df[n];
                 if (typeof orig !== 'function') return;

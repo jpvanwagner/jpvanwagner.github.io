@@ -7,7 +7,7 @@
  * (double-click the file) and can be hosted on any website. "Test it here" loads it into the game
  * frame on the page.
  *
- * Markup:  <div data-quiz-builder="quiz-man" data-title="Quiz-Man"></div>   (id = folder in /games/)
+ * Markup:  <div data-quiz-builder="quiz-guy" data-title="Quiz-Guy"></div>   (id = folder in /games/)
  * The questions are swapped into the game's own question list (masterQuestionPool in the three
  * arcade games, RAW_QUESTIONS in Mall Run), with plain-English notes in the code explaining how to
  * add more. A visitor's draft is kept in their own browser (localStorage) until they clear it.
@@ -212,6 +212,39 @@
     }
 
     /** Swap the visitor's questions into the game's own source code, with notes for editing it later. */
+    // Find the end of a JS array literal that starts at src[open] === '[' (skips over strings).
+    function arrayEnd(src, open) {
+        var depth = 0, quote = null;
+        for (var i = open; i < src.length; i++) {
+            var ch = src[i];
+            if (quote) { if (ch === '\\') i++; else if (ch === quote) quote = null; continue; }
+            if (ch === '"' || ch === "'" || ch === '`') quote = ch;
+            else if (ch === '[') depth++;
+            else if (ch === ']' && --depth === 0) return i + 1;
+        }
+        return -1;
+    }
+
+    // Minified Mall Run: put the player's questions in the first list and point hard mode at the same list.
+    function replaceMinifiedLists(src, rows, notes) {
+        var re = /([A-Za-z_$][\w$]*)=\[\{q:"/g, found = [], m;
+        while ((m = re.exec(src)) && found.length < 2) {
+            var open = m.index + m[1].length + 1, close = arrayEnd(src, open);
+            if (close < 0) break;
+            found.push({ name: m[1], open: open, close: close });
+            re.lastIndex = close;
+        }
+        if (found.length < 2) throw new Error('question list not found');
+        var a = found[0], b = found[1];
+        return src.slice(0, a.open) +
+            '\n' + notes('', '     q = the question\n     a = the answer choices, in quotes, separated by commas\n' +
+                      '     c = which choice is right, counting from 0 (0 = first, 1 = second, 2 = third, 3 = fourth)\n') +
+            '[\n' + rows + '\n]' +
+            src.slice(a.close, b.open) +
+            a.name + ' /* hard mode uses the same questions */' +
+            src.slice(b.close);
+    }
+
     function makeGame(src, gameId, title, questions) {
         var top = '<!--\n' +
             '  YOUR OWN COPY OF ' + title.toUpperCase() + ', a quiz game by Joe VanWagner (' + SITE + ')\n' +
@@ -235,10 +268,15 @@
                 return '  { q:' + jsStr(q.q) + ', a:[' + q.answers.map(jsStr).join(', ') + '], c:' + q.correct + ' },';
             }).join('\n');
             var start = src.indexOf('var RAW_QUESTIONS=[');
+            if (start < 0) {
+                // Newer builds are minified: the two lists look like  Wc=[{q:"...",a:[...],c:0},...]
+                // (normal first, then hard) and their names change every build, so find them by shape.
+                out = replaceMinifiedLists(src, rows, notes);
+            } else {
             var end = src.indexOf('\n];', start) + 3;
             var hStart = src.indexOf('var HARD_QUESTIONS=[', end);
             var hEnd = src.indexOf('\n];', hStart) + 3;
-            if (start < 0 || hStart < 0) throw new Error('question list not found');
+            if (hStart < 0) throw new Error('question list not found');
             out = src.slice(0, start) +
                 notes('', '     q = the question\n     a = the answer choices, in quotes, separated by commas\n' +
                           '     c = which choice is right, counting from 0 (0 = first, 1 = second, 2 = third, 3 = fourth)\n') +
@@ -248,18 +286,30 @@
                 '// with a list just like the one above.\n' +
                 'var HARD_QUESTIONS=RAW_QUESTIONS;' +
                 src.slice(hEnd);
+            }
         } else {
             var qrows = questions.map(function (q) {
                 return '        { q: ' + jsStr(q.q) + ', opts: [' + q.answers.map(jsStr).join(', ') + '], ans: ' + q.correct + ' },';
             }).join('\n');
             var s = src.indexOf('    const masterQuestionPool = [');
+            if (s < 0) {
+                // Quizcade builds (2026+): the questions live in the EDIT ZONE as  questions: [ ... ]
+                var qs = src.search(/\n\s*questions\s*:\s*\[/);
+                if (qs < 0) throw new Error('question list not found');
+                var qOpen = src.indexOf('[', qs), qClose = arrayEnd(src, qOpen);
+                if (qClose < 0) throw new Error('question list not found');
+                out = src.slice(0, qOpen) + '[\n' +
+                    notes('        ', '           q    = the question\n           opts = the answer choices, in quotes, separated by commas\n' +
+                                  '           ans  = which choice is right, counting from 0 (0 = first, 1 = second, 2 = third, 3 = fourth)\n') +
+                    qrows + '\n    ]' + src.slice(qClose);
+            } else {
             var e = src.indexOf('\n    ];', s) + 7;
-            if (s < 0) throw new Error('question list not found');
             out = src.slice(0, s) +
                 notes('    ', '       q    = the question\n       opts = the answer choices, in quotes, separated by commas\n' +
                               '       ans  = which choice is right, counting from 0 (0 = first, 1 = second, 2 = third, 3 = fourth)\n') +
                 '    const masterQuestionPool = [\n' + qrows + '\n    ];' +
                 src.slice(e);
+            }
         }
         return out.replace(/^<!DOCTYPE html>\n?/i, '<!DOCTYPE html>\n' + top);
     }

@@ -215,6 +215,24 @@
 .fx-v-details .fx-type, .fx-v-details .fx-desc { display: block; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fx-v-details .fx-item:nth-child(odd) { background: #f3f3f3; }
 .fx-acts button { padding: 3px 12px; cursor: pointer; font: inherit; font-weight: bold; color: var(--ui-text); }
+/* Preview pane (Details view only; toggled by "Preview pane"): a looping clip or picture of the selected item */
+.fx-main { flex: 1; min-height: 0; display: flex; gap: 6px; margin: 0 6px; container-type: inline-size; }
+.fx-main .fx-grid { margin: 0; min-width: 0; }
+.fx-preview { display: none; flex: 0 0 210px; overflow: auto; padding: 8px; background: #fff; color: #000; }
+.fx-has-pv .fx-preview { display: block; }
+.fx-pv-empty { margin: 4px; color: #555; }
+.fx-pv-media { background: #111; border: 1px solid #808080; display: flex; align-items: center; justify-content: center; min-height: 110px; }
+.fx-pv-media video, .fx-pv-media img { display: block; max-width: 100%; max-height: 170px; width: auto; height: auto; }
+.fx-pv-media .fx-pv-icon { width: 64px; height: 64px; image-rendering: pixelated; margin: 20px; }
+.fx-pv-name { display: flex; align-items: center; gap: 5px; margin: 8px 0 1px; font-weight: bold; }
+.fx-pv-name img { width: 16px; height: 16px; image-rendering: pixelated; }
+.fx-pv-kind { margin: 0 0 5px; color: #555; font-style: italic; }
+.fx-pv-desc { margin: 0 0 8px; line-height: 1.35; }
+.fx-pv-open { padding: 3px 14px; cursor: pointer; font: inherit; font-weight: bold; color: var(--ui-text); }
+.fx-pv-toggle input { margin: 0 2px 0 0; }
+.fx-tools .fx-pv-toggle[hidden] { display: none; }
+/* A narrow window: the pane steps aside so the table stays readable */
+@container (max-width: 470px) { .fx-has-pv .fx-preview { display: none; } }
 
 /* --- MESSENGER (desktop/js/apps/messenger.js): "Messages from Joe", late-90s instant-messenger look --- */
 /* The tray bubble FLASHES until the message is read, like a late-90s messenger: it swaps between a lit

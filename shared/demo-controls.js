@@ -13,6 +13,10 @@
  * How mute reaches the sound: games make sound with Web Audio or <audio>/<video>. For a demo on
  * this site (same origin) we put a volume knob in front of every Web Audio context's speakers
  * and mute media elements, including ones that start later.
+ * No sound at all (a tool, not a game): add data-demo-nomute and only the full-screen button appears.
+ * Start muted: add data-demo-muted to the iframe. For that to catch sound made the moment the demo
+ * loads, the demo page calls DemoControls.early(window) first thing in its <head>:
+ *   <script>try{if(parent!==window&&parent.DemoControls)parent.DemoControls.early(window)}catch(e){}</script>
  * Styles: shared/share.css ("DEMO CONTROLS")
  */
 (function () {
@@ -30,7 +34,9 @@
         try {
             if (!win || win.__dcHooked) return !!win;
             win.__dcHooked = true;
-            win.__dcMuted = false;
+            // <iframe data-demo data-demo-muted>: the demo starts with its sound off (the visitor can turn it on)
+            var fe = null; try { fe = win.frameElement; } catch (e) {}
+            win.__dcMuted = !!(fe && fe.hasAttribute('data-demo-muted'));
             win.__dcMasters = [];
             var Base = win.BaseAudioContext || win.AudioContext || win.webkitAudioContext;
             var desc = Base && Base.prototype && Object.getOwnPropertyDescriptor(Base.prototype, 'destination');
@@ -52,6 +58,13 @@
                     }
                 });
             }
+            // <audio>/<video> and new Audio() objects (which never join the page) follow the setting when they play
+            win.__dcMedia = [];
+            var Media = win.HTMLMediaElement && win.HTMLMediaElement.prototype, realPlay = Media && Media.play;
+            if (realPlay) Media.play = function () {
+                try { this.muted = win.__dcMuted; if (win.__dcMedia.indexOf(this) < 0) win.__dcMedia.push(this); } catch (e) {}
+                return realPlay.apply(this, arguments);
+            };
             // media that starts playing later follows the current setting
             win.document.addEventListener('play', function (e) {
                 if (e.target && 'muted' in e.target) e.target.muted = win.__dcMuted;
@@ -80,7 +93,12 @@
             w.__dcMuted = on;
             (w.__dcMasters || []).forEach(function (g) { try { g.gain.value = on ? 0 : 1; } catch (e) {} });
             try { w.document.querySelectorAll('audio, video').forEach(function (m) { m.muted = on; }); } catch (e) {}
+            (w.__dcMedia || []).forEach(function (m) { try { m.muted = on; } catch (e) {} });
         },
+
+        /** Called from inside a demo page, first thing in its <head>, so the sound is hooked before the
+            demo's own code makes any (needed when the frame starts muted). */
+        early: function (win) { hook(win); },
 
         toggleMute: function (frame) {
             var on = !DC.isMuted(frame);
@@ -110,11 +128,14 @@
                 '<button type="button" class="demo-btn demo-mute"></button>' +
                 '<button type="button" class="demo-btn demo-fs"></button>';
             host.appendChild(ov);
+            // <iframe data-demo data-demo-nomute>: a demo with no sound (a tool) gets only the full-screen button
+            if (frame.hasAttribute('data-demo-nomute')) ov.querySelector('.demo-mute').remove();
 
             var muteBtn = ov.querySelector('.demo-mute'), fsBtn = ov.querySelector('.demo-fs');
             var label = function (b, t) { b.title = t; b.setAttribute('aria-label', t); };
             var refocus = function () { try { frame.contentWindow.focus(); } catch (e) {} };
             var showMute = function () {
+                if (!muteBtn) return;                               // data-demo-nomute: no speaker button
                 ov.classList.toggle('own-mute', ownMute(frame));   // the Midnight demo draws its own speaker
                 var m = DC.isMuted(frame);
                 muteBtn.innerHTML = m ? ICON.muted : ICON.sound;
@@ -128,8 +149,8 @@
                 label(fsBtn, on ? 'Exit full screen (or hold Esc)' : 'Full screen (this button or a long press of Esc exits)');
             };
             // keep keyboard focus in the game: the buttons don't take it on click
-            [muteBtn, fsBtn].forEach(function (b) { b.addEventListener('mousedown', function (e) { e.preventDefault(); }); });
-            muteBtn.addEventListener('click', function () { DC.toggleMute(frame); showMute(); refocus(); });
+            [muteBtn, fsBtn].forEach(function (b) { if (b) b.addEventListener('mousedown', function (e) { e.preventDefault(); }); });
+            if (muteBtn) muteBtn.addEventListener('click', function () { DC.toggleMute(frame); showMute(); refocus(); });
             fsBtn.addEventListener('click', function () { DC.toggleFullscreen(host); });
             document.addEventListener('fullscreenchange', function () { showFs(); refocus(); });
             frame.addEventListener('load', function () { hook(frameWin(frame)); showMute(); setTimeout(showMute, 400); });

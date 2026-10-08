@@ -13,11 +13,7 @@
 .df-empty { padding: 14px; font-size: 12px; opacity: .75; }
 /* Inline rename box on a desktop icon */
 .desktop-icon .rename-box { width: 100%; font: inherit; font-size: 12px; text-align: center; color: #000; background: #fff; border: 1px solid #000; }
-/* Rubbish bin with something in it: a little paper sticking out */
-.desktop-icon.rubbish-full .icon-art::after {
-    content: ''; position: absolute; left: 50%; top: 2px; width: 14px; height: 10px; margin-left: -7px;
-    background: #fff; border: 1px solid #555; transform: rotate(-12deg);
-}
+/* Rubbish bin with something in it: desktop-icons.js swaps in images/icons/os/rubbish-full.png */
 
 /* Dragging an icon over the Rubbish bin (or one of your folders) lights it up (desktop-icons.js) */
 .desktop-icon.drop-target { background: rgba(255, 255, 255, 0.28); outline: 2px dashed #fff; outline-offset: -2px; border-radius: 3px; }

@@ -229,8 +229,11 @@ Object.assign(window.Tools, {
         }, {passive: true});
     },
 
-    resetSystem() { 
-        if(!confirm("Reset all OS settings to default without restarting?")) return;
+    resetSystem() {
+        OSDialog.confirm({ title: 'Reset settings', message: 'Reset all OS settings to default without restarting?', ok: 'Reset', cancel: 'Cancel' })
+            .then(yes => { if (yes) this.resetSystemNow(); });
+    },
+    resetSystemNow() {
 
         this.primary = '#c0c0c0';
         this.secondary = '#000080';

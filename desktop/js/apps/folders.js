@@ -11,8 +11,10 @@
  * Where the lists come from (nothing to edit here when you add things):
  *   courses   the #courses cards on pages/projects.html
  *   games     `games` in config/site-config.js, plus the Midnight at the Multiplex demo
- *   projects  Scenemaker and Midnight at the Multiplex (the tools I'm building)
+ *   projects  Scenemaker, the LMS Course Catalog, Midnight at the Multiplex, and PeeDee's Dental Defense
  * View (large/small icons, list, details) and Sort by (A to Z, Z to A, type) are remembered per visitor.
+ * Details view adds a Preview pane (on by default; untick "Preview pane" to hide it): the selected item's
+ * short looping clip (preview: path without extension, .webm/.mp4 + .jpg poster), or its thumbnail.
  * Styles: desktop/css/apps.css ("FOLDERS")
  */
 window.FolderApp = {
@@ -29,20 +31,30 @@ window.FolderApp = {
     items(kind) {
         const midnight = { label: 'Midnight at the Multiplex', icon: 'images/icons/apps/midnight.png',
             thumb: 'images/projects/midnight/thumbs/title-screen.jpg', kind: 'Game demo',
+            preview: 'images/projects/midnight/title-screen-animated', poster: 'images/projects/midnight/title-screen-animated-poster.jpg',
             desc: 'My retro life-and-work sim set in a 1999 movie theater. The opening is playable.',
             open: () => MidnightApp.open(), openLabel: 'Play', page: 'project-midnight-multiplex.html' };
         const scenemaker = { label: 'Scenemaker', icon: 'images/icons/os/scenemaker.png',
-            thumb: 'work/scenemaker/shots/stage-graph.png', kind: 'Program',
+            thumb: 'work/scenemaker/shots/stage-graph.png', kind: 'Program', preview: 'images/previews/scenemaker',
             desc: 'My branching-story authoring tool: build scenario-based training and export SCORM.',
             open: () => SceneMakerApp.open(), openLabel: 'Launch', page: 'project-scenemaker.html' };
         if (kind === 'games') {
             const games = ((window.SiteConfig && SiteConfig.games) || []).map(g => ({
-                label: g.label, icon: 'images/icons/apps/' + g.id + '.png', thumb: 'images/games/' + g.id + '.jpg',
+                label: g.label, icon: 'images/icons/apps/' + g.id + '.png', thumb: g.thumb || ('images/games/' + g.id + '.jpg'),
+                preview: 'images/previews/' + g.id,
                 kind: 'Learning game', desc: g.tip || '', open: () => GamesApp.open(g.id), openLabel: 'Play',
                 page: 'project-game-' + g.id + '.html' }));
             return Promise.resolve(games.concat([midnight]));
         }
-        if (kind === 'projects') return Promise.resolve([scenemaker, midnight]);
+        const catalog = { label: 'LMS Course Catalog', icon: 'images/icons/apps/course-catalog.png',
+            thumb: 'images/projects/course-catalog/card.jpg', kind: 'Program', preview: 'images/previews/course-catalog',
+            desc: 'My course-code tool: one naming system for every course, plus a searchable catalog.',
+            open: () => CourseCatalogApp.open(), openLabel: 'Launch', page: 'project-course-catalog.html' };
+        const peedee = { label: "PeeDee's Dental Defense", icon: 'images/icons/apps/peedee.png',
+            thumb: 'images/projects/peedee/card.jpg', kind: 'Game', preview: 'images/previews/peedee',
+            desc: 'My pixel-art platformer: fill cavities, scrub plaque, zap germs, and beat bad breath.',
+            open: () => PeeDeeApp.open(), openLabel: 'Play', page: 'project-peedee.html' };
+        if (kind === 'projects') return Promise.resolve([scenemaker, catalog, midnight, peedee]);
         // courses: every course card on the Portfolio page
         return fetch('pages/projects.html', { cache: 'no-cache' })
             .then(r => r.text())
@@ -76,6 +88,7 @@ window.FolderApp = {
         const id = 'folder-' + kind;
         const opts = (list, cur) => list.map(([v, l]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${l}</option>`).join('');
         const view = this.pref('view') || 'large', sort = this.pref('sort') || 'none';
+        const pv = this.pref('preview') !== '0';            // preview pane: on unless the visitor turned it off
         const html = `
             <div class="fx">
                 <div class="fx-bar">
@@ -88,12 +101,17 @@ window.FolderApp = {
                         <select class="fx-view">${opts(this.views, view)}</select></label>
                     <label title="Put the items in order by name or by type">Sort by
                         <select class="fx-sort">${opts(this.sorts, sort)}</select></label>
+                    <label class="fx-pv-toggle" title="Show or hide the preview pane: a short clip or picture of whatever you select"${view === 'details' ? '' : ' hidden'}>
+                        <input type="checkbox" class="fx-pv"${pv ? ' checked' : ''}> Preview pane</label>
                     <span class="fx-hint">${f.hint}</span>
                 </div>
-                <div class="fx-grid bevel-in fx-v-${view}" role="listbox" aria-label="${f.title}"><p class="fx-loading">Loading...</p></div>
+                <div class="fx-main${view === 'details' && pv ? ' fx-has-pv' : ''}">
+                    <div class="fx-grid bevel-in fx-v-${view}" role="listbox" aria-label="${f.title}"><p class="fx-loading">Loading...</p></div>
+                    <aside class="fx-preview bevel-in" aria-live="polite"><p class="fx-pv-empty">Select an item to preview it here.</p></aside>
+                </div>
                 <div class="fx-status"><span class="fx-sel">Select an item to see what it is.</span></div>
             </div>`;
-        WM.open(id, f.title, html, 'images/icons/os/folder-full.png', { width: 660, height: 480, center: true });
+        WM.open(id, f.title, html, 'images/icons/os/folder-full.png', { width: Math.min(780, window.innerWidth - 30), height: 480, center: true });
         const win = WM.windows[id];
         if (!win || win._fxReady) return;
         win._fxReady = true;
@@ -116,7 +134,35 @@ window.FolderApp = {
                     </span>`;
                 status.querySelector('.fx-open').onclick = () => it.open();
                 status.querySelector('.fx-about').onclick = () => Browser.openPage(it.page);
+                showPreview(it);
             };
+
+            // Preview pane (Details view): a short looping clip of the item, or its picture
+            const pane = win.querySelector('.fx-preview'), main = win.querySelector('.fx-main');
+            const pvBox = win.querySelector('.fx-pv'), pvLabel = win.querySelector('.fx-pv-toggle');
+            const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const showPreview = (it) => {
+                if (!it) { pane.innerHTML = '<p class="fx-pv-empty">Select an item to preview it here.</p>'; return; }
+                const poster = it.poster || (it.preview ? it.preview + '.jpg' : it.thumb);
+                const media = it.preview && !still
+                    ? `<video autoplay muted loop playsinline preload="auto" poster="${poster}" aria-label="A few seconds of ${it.label}">
+                           <source src="${it.preview}.webm" type="video/webm"><source src="${it.preview}.mp4" type="video/mp4"></video>`
+                    : (poster ? `<img src="${poster}" alt="${it.label}" onerror="this.src='${it.thumb || it.icon}'">` : `<img class="fx-pv-icon" src="${it.icon}" alt="">`);
+                pane.innerHTML = `<div class="fx-pv-media">${media}</div>
+                    <p class="fx-pv-name"><img src="${it.icon}" alt=""> ${it.label}</p>
+                    <p class="fx-pv-kind">${it.kind}</p>
+                    <p class="fx-pv-desc">${it.desc}</p>
+                    <button type="button" class="bevel-out fx-pv-open">${it.openLabel}</button>`;
+                const v = pane.querySelector('video');
+                if (v) { v.muted = true; const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); }
+                pane.querySelector('.fx-pv-open').onclick = () => it.open();
+            };
+            const syncPane = () => {
+                const on = viewSel.value === 'details' && pvBox.checked;
+                pvLabel.hidden = viewSel.value !== 'details';
+                main.classList.toggle('fx-has-pv', on);
+            };
+            pvBox.onchange = () => { this.pref('preview', pvBox.checked ? '1' : '0'); syncPane(); };
 
             // Draw the items in the chosen order and view
             const render = () => {
@@ -139,18 +185,20 @@ window.FolderApp = {
                 grid.querySelectorAll('.fx-item').forEach(b => {
                     const i = +b.dataset.i;
                     b.addEventListener('click', () => select(i));
+                    b.addEventListener('focus', () => select(i));           // arrow/Tab through the list: the preview follows
                     b.addEventListener('dblclick', () => items[i].open());
                     b.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); items[i].open(); } });
                     b.addEventListener('pointerup', (e) => { if (e.pointerType === 'touch') items[i].open(); });   // touch: one tap opens
                 });
                 status.innerHTML = count();
             };
-            viewSel.onchange = () => { this.pref('view', viewSel.value); render(); };
+            viewSel.onchange = () => { this.pref('view', viewSel.value); render(); syncPane(); };
             sortSel.onchange = () => { this.pref('sort', sortSel.value); render(); };
             win.querySelector('.window-content').addEventListener('click', (e) => {
                 if (e.target === grid) {                     // clicking empty space clears the selection
                     grid.querySelectorAll('.fx-item').forEach(b => b.classList.remove('sel'));
                     status.innerHTML = count();
+                    showPreview(null);
                 }
             });
             render();

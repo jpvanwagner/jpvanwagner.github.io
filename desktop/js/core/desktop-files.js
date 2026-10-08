@@ -218,7 +218,10 @@ window.DesktopFiles = {
     },
 
     emptyRubbish() {
-        if (!confirm('Permanently delete everything in the Rubbish?')) return;
+        OSDialog.confirm({ title: 'Empty Rubbish', message: 'Permanently delete everything in the Rubbish?', ok: 'Empty it', cancel: 'Cancel' })
+            .then(yes => { if (yes) this.emptyRubbishNow(); });
+    },
+    emptyRubbishNow() {
         this.data.rubbish.slice().forEach(id => this.destroy(id));
         // Built-in icons can't be destroyed, so they stay binned until restored
         this.refresh();
@@ -348,7 +351,7 @@ window.DesktopFiles = {
         if (where === 'rubbish') {
             return [
                 { label: 'Restore', action: () => this.restore(id) },
-                { label: 'Delete permanently', disabled: !this.item(id), action: () => { if (confirm('Delete this for good?')) { this.destroy(id); this.refresh(); } } }
+                { label: 'Delete permanently', disabled: !this.item(id), action: () => OSDialog.confirm({ title: 'Delete', message: 'Delete this for good? It can\'t be restored.', ok: 'Delete', cancel: 'Cancel' }).then(yes => { if (yes) { this.destroy(id); this.refresh(); } }) }
             ];
         }
         return [

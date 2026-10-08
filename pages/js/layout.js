@@ -30,6 +30,12 @@
                '</div>';
     }
 
+    /** One webring arrow (prev / random / next) for the footer */
+    function ring(go, tip, alt) {
+        return '<a class="badge ring-btn" href="network.html?go=' + go + '" target="_blank" rel="noopener" title="' + tip + '">' +
+               '<img src="../images/network/the-network-' + go + '.png" width="31" height="31" alt="' + alt + '"></a>';
+    }
+
     function footer() {
         return '&copy; <span data-year></span> <span data-owner>' + (cfg.ownerName || '') + '</span>. ' +
                '<span class="footer-actions">' +
@@ -49,9 +55,16 @@
                    '<img src="' + String(cfg.hitCounter).replace(/"/g, '&quot;') + '" width="88" height="31" alt="Visitor counter"' +
                    (cfg.hitCounterFallback ? ' data-fallback="' + String(cfg.hitCounterFallback).replace(/"/g, '&quot;') + '"' : '') +
                    ' onerror="Layout.counterFallback(this)"></a>' : '') +
-                 // The Network webring: its home page (pages/network.html)
+               '</div>' +
+               // The Network webring, the whole set: its badge plus Previous / Full list / Random / Next
+               // (pages/network.html does the hopping; prev/next/random open the other site in a new tab)
+               '<div class="badges ring-badges retro-only" aria-label="The Network webring">' +
                  '<a class="badge network-badge" href="network.html" title="The Network: fellow professionals\' sites, linked together">' +
                    '<img src="../images/network/the-network-badge.png" width="88" height="31" alt="The Network"></a>' +
+                 ring('prev', 'Previous site in The Network (opens in a new tab)', 'Previous site') +
+                 '<a class="badge ring-btn" href="network.html#members" title="Every site in The Network"><img src="../images/network/the-network-list.png" width="31" height="31" alt="Full list"></a>' +
+                 ring('random', 'A random site in The Network (opens in a new tab)', 'Random site') +
+                 ring('next', 'Next site in The Network (opens in a new tab)', 'Next site') +
                '</div>';
     }
 

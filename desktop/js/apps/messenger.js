@@ -2,12 +2,12 @@
  * MESSENGER.JS - "Messages from Joe": a little instant-message that blinks in the system tray (global: Messenger).
  * A deliberately old-school, late-90s instant-messenger look and sound.
  *
- * Every 20 to 30 minutes (random) the Retro Desktop is open (busy or not), a new message arrives: a speech bubble
- * blinks in the tray and an "uh-oh!" plays, until the visitor opens it. Reading it and closing the
- * window makes it go away; another one arrives 20 to 30 minutes later. If several arrive before
- * the visitor reads them, they queue up (the tray bubble shows how many) and open one at a time, oldest
- * first, with a "Next message" button, like an old-school messenger. Each message is different (they
- * rotate through MESSAGES below, picking up where the visitor left off last time).
+ * Every 15 to 25 minutes (random) the Retro Desktop is open (busy or not), a new message arrives: a speech bubble
+ * blinks in the tray and an "uh-oh!" plays, until the visitor opens it. Unread messages wait in the tray (the
+ * bubble shows how many) and open one at a time, oldest first, with a "Next message" button, like an
+ * old-school messenger. At most 4 can be waiting: once 4 are unread, no more arrive (none are saved up).
+ * As soon as the visitor reads one and a spot opens, the 15 to 25 minute countdown starts again. Each
+ * message is different (they rotate through MESSAGES below, picking up where the visitor left off last time).
  *
  * The "Incoming Message" window lets visitors:
  *   - Reply in-app ("Send Message" view): sent to SiteConfig.messageEndpoint (a form service like
@@ -16,24 +16,23 @@
  *   - email Joe, share the site, or jump to whatever the message suggests (a game, a folder...)
  *   - turn messages off. Also: right-click the blinking tray bubble, or Settings > "Messages from Joe".
  *
- * Sound: plays sounds/uh-oh.mp3 if that file exists (drop one in to use it); otherwise a short
- * synthesized, voice-like "uh-oh!". Follows the tray volume / mute.
+ * Sound: a short synthesized, voice-like "uh-oh!" (no sound file needed). Follows the tray volume / mute.
  * Test quickly in the browser console: Messenger.deliver()
  * Styles: desktop/css/apps.css ("MESSENGER")
  */
 window.Messenger = {
-    minMs: 20 * 60 * 1000,                // a new message every 20 to 30 minutes (picked at random each time)
-    maxMs: 30 * 60 * 1000,                //   the desktop is open, until the visitor turns them off
+    minMs: 15 * 60 * 1000,                // a new message every 15 to 25 minutes (picked at random each time)
+    maxMs: 25 * 60 * 1000,                //   the desktop is open, until the visitor turns them off
+    maxUnread: 4,                         // at most this many waiting; the countdown pauses until one is read
     number: '15547384',                   // Joe's "#" shown on every message
     offKey: 'messenger-off',
     nextKey: 'messenger-next',
-    soundFile: 'sounds/uh-oh.mp3',
     icon: 'images/icons/apps/messenger.png',
 
     // What "Joe" says. Keep them short and friendly. `go` = an optional button that opens something.
     MESSAGES: [
         { text: 'Hey there! Thanks for stopping by my portfolio. How are you liking it so far?' },
-        { text: 'Psst... have you played any of the quiz games yet? Quiz-Man is my favorite. You can even make your own version with your own questions!',
+        { text: 'Psst... have you played any of the quiz games yet? Quiz-Guy is my favorite. You can even make your own version with your own questions!',
           go: { label: 'Open the Games folder', run: () => window.FolderApp && FolderApp.open('games') } },
         { text: 'Have you tried the Midnight at the Multiplex demo? It\'s the game I\'m building, set in a 1999 movie theater. I\'d love to hear what you think.',
           go: { label: 'Play the demo', run: () => window.MidnightApp && MidnightApp.open() } },
@@ -59,17 +58,25 @@ window.Messenger = {
     },
 
     init() {
-        const wait = () => this.minMs + Math.random() * (this.maxMs - this.minMs);
-        this.due = Date.now() + wait();
-        // Checked every 20 s (timers in background tabs are slowed down, so we compare clock time)
+        this.due = Date.now() + this.wait();
+        // Checked every 20 s (timers in background tabs are slowed down, so we compare clock time).
+        // due = null while the tray is full (maxUnread waiting): nothing is counted or saved up then.
         setInterval(() => {
-            if (Date.now() >= this.due) { this.due = Date.now() + wait(); this.deliver(); }
+            if (this.queue.length >= this.maxUnread) { this.due = null; return; }
+            if (this.due === null) { this.due = Date.now() + this.wait(); return; }   // a spot opened up
+            if (Date.now() >= this.due) {
+                this.deliver();
+                this.due = this.queue.length >= this.maxUnread ? null : Date.now() + this.wait();
+            }
         }, 20000);
     },
 
+    /** A random wait before the next message: 15 to 25 minutes. */
+    wait() { return this.minMs + Math.random() * (this.maxMs - this.minMs); },
+
     /** A new message arrives and joins the queue (skipped when messages are turned off). */
     deliver() {
-        if (this.isOff()) return;
+        if (this.isOff() || this.queue.length >= this.maxUnread) return;
         let i = 0;
         try { i = (parseInt(localStorage.getItem(this.nextKey), 10) || 0) % this.MESSAGES.length; localStorage.setItem(this.nextKey, i + 1); } catch (e) {}
         this.queue.push({ msg: this.MESSAGES[i], at: new Date() });
@@ -143,6 +150,8 @@ window.Messenger = {
     read() {
         const p = this.queue.shift();
         if (!p) return;
+        // The tray was full, so the countdown was paused: a spot just opened, so start a fresh 15 to 25 minutes now
+        if (this.due === null && this.queue.length < this.maxUnread) this.due = Date.now() + this.wait();
         this.showTray(this.queue.length > 0);
         if (typeof WM !== 'undefined' && WM.windows.messenger) WM.close('messenger');   // one message window at a time
         const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -250,46 +259,36 @@ window.Messenger = {
         };
     },
 
-    /** "Uh-oh!": the sound file if there is one, otherwise a two-note synthesized chirp. */
+    /** "Uh-oh!": a two-note synthesized chirp. */
     chime() {
         const vol = window.SiteVolume ? SiteVolume.effective() : 1;
         if (!vol) return;
-        let played = false;
         // A voice-like "uh-oh!": a buzzy source shaped by two vowel "formant" filters, "uh" then "oh",
         // at a high, cartoonish pitch that jumps up and then drops
-        const synth = () => {
-            if (played) return; played = true;
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const t0 = ctx.currentTime + 0.02;
-                const syllable = (start, len, pitch, pitchEnd, formants) => {
-                    const src = ctx.createOscillator(); src.type = 'sawtooth';
-                    src.frequency.setValueAtTime(pitch, t0 + start);
-                    src.frequency.exponentialRampToValueAtTime(pitchEnd, t0 + start + len);
-                    const out = ctx.createGain();
-                    out.gain.setValueAtTime(0.0001, t0 + start);
-                    out.gain.exponentialRampToValueAtTime(0.9 * vol, t0 + start + 0.025);
-                    out.gain.setValueAtTime(0.9 * vol, t0 + start + len * 0.6);
-                    out.gain.exponentialRampToValueAtTime(0.0001, t0 + start + len);
-                    formants.forEach(([f, q, g]) => {
-                        const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q;
-                        const fg = ctx.createGain(); fg.gain.value = g;
-                        src.connect(bp); bp.connect(fg); fg.connect(out);
-                    });
-                    out.connect(ctx.destination);
-                    src.start(t0 + start); src.stop(t0 + start + len + 0.03);
-                };
-                syllable(0, 0.16, 520, 600, [[700, 6, 0.9], [1250, 8, 0.45], [2600, 10, 0.15]]);    // "uh"
-                syllable(0.2, 0.34, 640, 400, [[520, 6, 1.0], [880, 8, 0.5], [2400, 10, 0.1]]);     // "oh!"
-                setTimeout(() => ctx.close(), 1000);
-            } catch (e) {}
-        };
         try {
-            const a = new Audio(this.soundFile);
-            a.volume = vol;
-            a.onerror = synth;
-            a.play().then(() => { played = true; }).catch(synth);
-        } catch (e) { synth(); }
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const t0 = ctx.currentTime + 0.02;
+            const syllable = (start, len, pitch, pitchEnd, formants) => {
+                const src = ctx.createOscillator(); src.type = 'sawtooth';
+                src.frequency.setValueAtTime(pitch, t0 + start);
+                src.frequency.exponentialRampToValueAtTime(pitchEnd, t0 + start + len);
+                const out = ctx.createGain();
+                out.gain.setValueAtTime(0.0001, t0 + start);
+                out.gain.exponentialRampToValueAtTime(0.9 * vol, t0 + start + 0.025);
+                out.gain.setValueAtTime(0.9 * vol, t0 + start + len * 0.6);
+                out.gain.exponentialRampToValueAtTime(0.0001, t0 + start + len);
+                formants.forEach(([f, q, g]) => {
+                    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q;
+                    const fg = ctx.createGain(); fg.gain.value = g;
+                    src.connect(bp); bp.connect(fg); fg.connect(out);
+                });
+                out.connect(ctx.destination);
+                src.start(t0 + start); src.stop(t0 + start + len + 0.03);
+            };
+            syllable(0, 0.16, 520, 600, [[700, 6, 0.9], [1250, 8, 0.45], [2600, 10, 0.15]]);    // "uh"
+            syllable(0.2, 0.34, 640, 400, [[520, 6, 1.0], [880, 8, 0.5], [2400, 10, 0.1]]);     // "oh!"
+            setTimeout(() => ctx.close(), 1000);
+        } catch (e) {}
     }
 };
 document.addEventListener('DOMContentLoaded', () => Messenger.init());

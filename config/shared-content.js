@@ -65,7 +65,7 @@ window.SharedContent = {
         <div class="stat"><strong>1,200+</strong><span>students taught as a classroom teacher, in person, live online &amp; hybrid</span></div>
         <div class="stat"><strong>500+</strong><span>students tutored privately</span></div>
         <div class="stat"><strong>11%+</strong><span>student achievement gains, 3 years running</span></div>
-        <div class="stat"><strong>140+</strong><span>administrative staff trained on new platforms</span></div>
+        <div class="stat"><strong>155+</strong><span>educators and staff trained on new platforms</span></div>
         <div class="stat"><strong>1,700+</strong><span>students onboarded to Canvas</span></div>
         <div class="stat"><strong>100%</strong><span>Canvas adoption in month one</span></div>
     `,

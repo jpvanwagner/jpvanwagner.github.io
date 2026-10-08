@@ -153,7 +153,7 @@ window.OSSettings = {
                     <label class="oss-row" title="The yellow help balloons shown to first-time visitors">
                         <input type="checkbox" id="oss-tips" ${window.FirstTips && !FirstTips.isOff() ? 'checked' : ''}> Show tips for new visitors</label>
                     <button type="button" class="bevel-out" data-act="tips" title="Show the tips again right now">Show tips now</button>
-                    <label class="oss-row" title="Now and then, a little message from Joe blinks in the tray (every 20 to 30 minutes the desktop is open)">
+                    <label class="oss-row" title="Now and then, a little message from Joe blinks in the tray (every 15 to 25 minutes the desktop is open, up to 4 waiting at a time)">
                         <input type="checkbox" id="oss-msgs" ${window.Messenger && !Messenger.isOff() ? 'checked' : ''}> Messages from Joe</label>
                 </fieldset>
                 <fieldset><legend>Desktop icons</legend>

@@ -103,7 +103,7 @@ window.SiteShare = {
             const id = title === 'Add to Favorites' ? 'favorites' : 'share';
             const icon = id === 'share' ? 'images/icons/os/socials.png' : 'images/icons/os/favorite.svg';
             WM.open(id, title, `<div class="share-win share-body">${bodyHtml}</div>`, icon,
-                { width: id === 'share' ? 560 : 440, height: id === 'share' ? 560 : 300, center: true });
+                { width: id === 'share' ? 560 : 440, height: id === 'share' ? 620 : 300, center: true });
             this._winId = id;
             return document.getElementById('window-' + id);
         }

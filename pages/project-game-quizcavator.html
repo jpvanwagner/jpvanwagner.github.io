@@ -10,26 +10,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="page-version" content="33150b1e">
+    <meta name="page-version" content="b363f0d1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quizcavator: learning game</title>
     <meta name="description" content="Quizcavator, a playable HTML/JavaScript learning game by Joseph VanWagner.">
     <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
     <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
     <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="css/classic.css?v=413ce56d">
+    <link rel="stylesheet" href="css/classic.css?v=fa07d833">
     <link rel="stylesheet" href="../shared/share.css?v=b6d946d8">
-    <link rel="stylesheet" href="css/modern.css?v=5e619e46">    <!-- Traditional View look (not used inside the Retro Desktop) -->
-    <script src="../config/site-config.js?v=74d996dd"></script>
-    <script src="../config/shared-content.js?v=0041db15"></script>   <!-- stats, colleague quotes (shared) -->
-    <script src="js/layout.js?v=9c77ff85"></script>               <!-- header, menu, footer, NOTE line -->
+    <link rel="stylesheet" href="css/modern.css?v=cdfd7b86">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=11acaf42"></script>
+    <script src="../config/shared-content.js?v=e9eeb62c"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
     <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/lightbox.js?v=af09d593"></script>          <!-- click a screenshot to see it full size -->
     <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
     <script src="js/game-frame.js?v=9300be14"></script>   <!-- fits the game frame to the game -->
-    <script src="js/quiz-builder.js?v=d1964de3"></script>   <!-- "Make your own quiz game!" -->
+    <script src="js/quiz-builder.js?v=e6a76d60"></script>   <!-- "Make your own quiz game!" -->
     <script src="js/search.js?v=92eeb169"></script>
-    <script src="../shared/demo-controls.js?v=1d028047"></script>   <!-- Mute + Full screen above each demo -->
-    <script src="../shared/share.js?v=1caee827"></script>
+    <script src="../shared/demo-controls.js?v=01dee569"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=defb0451"></script>
 </head>
 <body data-title="Quizcavator" data-nav="projects.html">
     <a class="skip-link" href="#content">Skip to content</a>
@@ -44,8 +45,8 @@
                 <p class="kicker">Learning game · HTML / JavaScript</p>
                 <h1>Quizcavator</h1>
                 <p class="lede">A digging quiz, built to turn software training review into something people want to replay.</p>
-                <p>Tunnel through the dirt and pump away enemies; each round is gated by a quick knowledge check.</p>
-                <p><strong>This demo:</strong> easy general trivia (geography, science, animals, history, and more). In training, it reviewed <a href="https://asana.com/" target="_blank" rel="noopener">Asana</a> basics.<br><strong>Controls:</strong> WASD or arrow keys to dig, Space to pump.</p>
+                <p>A digging game: carve tunnels through the dirt down to the block with the right answer. Enemies burrow through the dirt after you; rings of air from your blaster knock them dizzy, and enough hits burst them into debris.</p>
+                <p><strong>This demo:</strong> easy general trivia (geography, science, animals, history, and more). In training, it reviewed <a href="https://asana.com/" target="_blank" rel="noopener">Asana</a> basics.<br><strong>Controls:</strong> WASD or arrow keys to dig and Space to blast, or click anywhere to auto-dig and click an enemy to blast it. On a phone or tablet, use the D-pad and the BLAST button.</p>
                 <p class="media-note"></p>
                 <div class="btn-row">
                     <a class="btn primary" href="../games/quizcavator/index.html" target="_blank" rel="noopener">Play full screen</a>
@@ -63,8 +64,14 @@
                 </div>
                 <p class="course-note">Tip: click inside the game first so it can hear your keyboard. On a small screen, try the
                 <a href="../games/quizcavator/index.html" target="_blank" rel="noopener">full-screen version</a>.</p>
+                <h2>Screenshots</h2>
+                <div class="shots tall">
+                    <figure><a class="zoom" href="../images/games/quizcavator/title.webp" data-caption="The title screen: controls, lives, and questions per level."><img src="../images/games/quizcavator/thumbs/title.jpg" alt="Quizcavator: settings on the title screen" loading="lazy"></a><figcaption>Settings on the title screen</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/quizcavator/tutorial.webp" data-caption="The optional tutorial: digging, blasting burrowing enemies, and reaching the answer."><img src="../images/games/quizcavator/thumbs/tutorial.jpg" alt="Quizcavator: the three-step tutorial" loading="lazy"></a><figcaption>The three-step tutorial</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/quizcavator/gameplay.webp" data-caption="Dig down to the lettered answer blocks at the bottom while enemies burrow toward you."><img src="../images/games/quizcavator/thumbs/gameplay.jpg" alt="Quizcavator: digging toward the answer blocks" loading="lazy"></a><figcaption>Digging toward the answer blocks</figcaption></figure>
+                </div>
                 <h2>Design features</h2>
-                <ul class="tags"><li>Gamified learning</li><li>Knowledge checks</li><li>JavaScript</li><li>Arcade style</li><li>Difficulty settings</li><li>Keyboard controls</li></ul>
+                <ul class="tags"><li>Gamified learning</li><li>Knowledge checks</li><li>JavaScript</li><li>Arcade style</li><li>Difficulty settings</li><li>Keyboard controls</li><li>Mobile friendly</li></ul>
                 <div class="btn-row">
                     <a class="btn" href="projects.html#games">&larr; Back to Portfolio</a>
                 </div>
@@ -78,6 +85,9 @@
                 <p>Type in your own multiple-choice questions and get a copy of Quizcavator that asks them instead. Save it to your
                    desktop and double-click to play, send it to your students or team, or put it on your own website.
                    Each question can have 2 to 4 answer choices; click the circle next to the right one.</p>
+                <p>Want to change more than the questions? The <a href="../games/builder/index.html" target="_blank" rel="noopener" title="Opens the Quizcade Builder in a new tab">Quizcade Builder</a>
+                   edits everything in Quizcavator and its sister games: the on-screen words, rules, colors, sprites, and backgrounds. You can paste
+                   questions in from a spreadsheet, watch a live preview, and copy paste-ready HTML for a web page, an embed, or a Rise 360 Code block.</p>
                 <div data-quiz-builder="quizcavator" data-title="Quizcavator"></div>
             </div>
         </section>
