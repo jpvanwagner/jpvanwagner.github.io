@@ -27,7 +27,7 @@ window.FeatureHints = {
         games: {
             title: 'Playing a game',
             target: '.window[id^="window-game-"] .title-bar, #window-games-folder .title-bar',
-            text: 'Click inside a game first so it can hear your keyboard. Maximize the window (□) for a bigger screen.'
+            text: 'Click inside a game first so it can detect your keyboard. Maximize the window (□) for a bigger screen.'
         },
         tools: {
             title: 'TOOLS drawer',

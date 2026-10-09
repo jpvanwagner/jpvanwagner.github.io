@@ -45,7 +45,21 @@ const QUIZCADE = {
             questionsPerLevel: "QUESTIONS/LEVEL",
             skip: "SKIP", next: "NEXT ➡"
         },
-        answerLabels: ["A", "B", "C", "D"]
+        answerLabels: ["A", "B", "C", "D"],
+        share: {                                   // the SHARE YOUR SCORE button and score card on the game over screen
+            name: "Quizaga",                       // the game's name in posts
+            button: "TRANSMIT YOUR SCORE",
+            tagline: "SPACE-SHOOTER QUIZ",         // under the title on the score card
+            // {game} {score} {level} {correct} {answered} {accuracy} {ships} are filled in
+            message: "I scored {score} in {game}! I reached level {level} and blasted {correct} correct-answer ships. Can you beat it?",
+            modeLabel: "MODE", shipsLabel: "SHIPS DESTROYED",
+            heading: "SHARE YOUR SCORE",
+            hint: "Copy or save the image, then paste or attach it to your post or message.",
+            emailSubject: "My {game} score",
+            finalScore: "FINAL SCORE", levelLabel: "LEVEL REACHED", rightLabel: "QUESTIONS RIGHT", accuracyLabel: "ACCURACY",
+            copyImage: "COPY IMAGE", saveImage: "SAVE IMAGE", copyText: "COPY TEXT", more: "MORE…",
+            copied: "COPIED!", couldNotCopy: "COULDN'T COPY", useSave: "USE SAVE IMAGE", pasteIt: "Text copied: paste it in"
+        }
     },
 
     /* ---------- RULES ---------- */
@@ -65,7 +79,9 @@ const QUIZCADE = {
         playerSpeed: 4,
         bulletSpeed: 13,
         enemyBulletSpeed: 3.5,
-        starCount: 160                             // 0 = no starfield
+        starCount: 160,                            // 0 = no starfield
+        showShare: true,                           // SHARE YOUR SCORE on the game over screen
+        shareUrl: "https://jvanwagner.neocities.org/pages/project-game-quizaga.html"   // the link in shared posts
     },
 
     /* ---------- COLORS (any CSS color: "#ff0000", "red", "rgb(255,0,0)") ---------- */
@@ -338,6 +354,8 @@ const QUIZCADE = {
         overflow-y: auto;
     }
     .modal.open { display: flex; }
+    #game-container.tall-modal #gameCanvas { display: none; }
+    #game-container.tall-modal .modal.open { position: relative; inset: auto; }
     /* centered when it fits, scrollable from the top when it doesn't (short screens) */
     .modal > :first-child { margin-top: auto; }
     .modal > :last-child { margin-bottom: auto; }
@@ -555,6 +573,30 @@ const QUIZCADE = {
         #main-content { flex-direction: column; align-items: center; }
         #game-column, #sidebar { width: 100%; max-width: 560px; }
     }
+    /* Share your score (game over screen) */
+    .share-btn { background: var(--accent); color: #111; margin-top: 12px; }
+    .share-btn:hover { background: #fff; color: var(--brand); border-color: var(--accent); }
+    .share-panel {
+        width: 100%;
+        max-width: 470px;
+        margin-top: 12px;
+        padding: 12px;
+        box-sizing: border-box;
+        border: 2px solid #444;
+        background: #000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .share-panel[hidden] { display: none; }
+    .share-heading { font-size: 10px; color: var(--accent); }
+    .share-preview { width: 128px; align-self: center; border: 2px solid #444; }
+    .share-text { font-size: 13px; line-height: 1.4; color: #ddd; overflow-wrap: anywhere; }
+    .share-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+    .share-row .toggle-btn { color: #ddd; padding: 8px 10px; font-size: 9px; }
+    .share-row .toggle-btn:hover { border-color: var(--accent); color: #fff; }
+    .share-link { text-decoration: none; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px !important; font-weight: 600; }
+    .share-hint { font-size: 11px; color: #888; }
     /* ==================== END SHARED STYLES ==================== */
 
     /* ==================== QUIZAGA ==================== */
@@ -699,15 +741,16 @@ else $('extra-life-section').style.display = 'none';
 
 function showEl(id, on) {
     $(id).classList.toggle('open', on);
+    if (id === 'game-over-modal' && !on) window.shareOpen = false;
     if ($(id).classList.contains('modal')) sizeForModal();
 }
-// A title/game-over screen taller than the game screen (short mazes, phones) stretches the
-// game area to fit, instead of getting cut off.
+// A title/game-over screen taller than the game screen (short mazes, phones, the share panel)
+// takes the game screen's place at its full height, instead of getting cut off.
 function sizeForModal() {
     const box = $('game-container');
-    box.style.minHeight = '';
+    box.classList.remove('tall-modal');
     const open = box.querySelector('.modal.open');
-    if (open && open.scrollHeight > box.clientHeight) box.style.minHeight = open.scrollHeight + 'px';
+    if (open && open.scrollHeight > open.clientHeight + 1) box.classList.add('tall-modal');
 }
 
 // A row of toggle buttons (lives, questions per level, ...). onPick gets the chosen value.
@@ -787,10 +830,17 @@ function addScore(pts) {
     }
     updateUI();
 }
+// Totals for the score card: correct / answered, plus anything a game adds (dots, ghosts...)
+let runStats = { correct: 0, answered: 0 };
 function resetScore() {
     score = 0; level = 1; questionsAnsweredThisLevel = 0;
     nextExtraLife = S.extraLifeEvery; lives = selectedLives;
+    runStats = { correct: 0, answered: 0 };
     updateUI();
+}
+function countAnswer(right) {
+    runStats.answered++;
+    if (right) runStats.correct++;
 }
 buildChoices($('lives-group'), S.livesChoices, selectedLives, v => { selectedLives = v; });
 buildChoices($('questions-group'), S.questionsPerLevelChoices, selectedQPL, v => { selectedQPL = v; updateUI(); });
@@ -934,14 +984,17 @@ function startLoop(update, render) {
         const cs = getComputedStyle(document.body);
         const avail = window.innerHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
         w.style.maxWidth = '';
-        if (w.offsetHeight <= avail) return;
+        sizeForModal();
+        if (window.shareOpen || w.offsetHeight <= avail) return;   // an open share panel scrolls instead
         let lo = 300, hi = w.offsetWidth;
         for (let i = 0; i < 12; i++) {
             const mid = (lo + hi) / 2;
             w.style.maxWidth = mid + 'px';
+            sizeForModal();   // a narrower screen wraps the open screen's text taller
             if (w.offsetHeight > avail) hi = mid; else lo = mid;
         }
         w.style.maxWidth = Math.floor(lo) + 'px';
+        sizeForModal();
     }
     let t;
     window.fitGame = () => { clearTimeout(t); t = setTimeout(fit, 60); };
@@ -951,6 +1004,230 @@ function startLoop(update, render) {
     [0, 300, 1200].forEach(ms => setTimeout(fit, ms));
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => window.fitGame());
 })();
+
+/* ---------- SHARE YOUR SCORE (game over screen) ----------
+   Every link opens that site's compose box with the post already written. Facebook ignores any
+   text a site passes in, so its button copies the text first for the player to paste. Save image /
+   Copy image make a themed score card PNG (each game draws its own art in drawCardArt()).
+   Nothing leaves the page unless the player picks one of these. */
+const SHT = T.share || {};
+const shareOn = S.showShare !== false && !!S.shareUrl;
+const fillIn = (str, vals) => String(str || '').replace(/\{(\w+)\}/g, (m, k) => (k in vals ? vals[k] : m));
+const creditYears = () => { const y = new Date().getFullYear(); return y > 2025 ? '2025–' + y : '2025'; };
+
+function shareValues() {
+    const v = { game: SHT.name || T.title, score: score.toLocaleString(), level };
+    for (const [k, n] of Object.entries(runStats)) v[k] = typeof n === 'number' ? n.toLocaleString() : n;
+    v.accuracy = runStats.answered ? Math.round(100 * runStats.correct / runStats.answered) + '%' : '–';
+    return v;
+}
+
+function copyPlainText(text) {
+    return navigator.clipboard.writeText(text).then(() => true, () => {
+        // blocked (e.g. an embed without clipboard-write): the old way still works
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('readonly', '');
+        area.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+        document.body.append(area);
+        area.select();
+        let ok = false;
+        try { ok = document.execCommand('copy'); } catch (e) { /* unsupported */ }
+        area.remove();
+        return ok;
+    });
+}
+const canCopyImage = () => typeof ClipboardItem !== 'undefined' && !!(navigator.clipboard && navigator.clipboard.write);
+async function copyImage(png) {
+    try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]); return true; }
+    catch (e) { return false; }
+}
+async function saveImage(png) {
+    const blob = await png;
+    if (!blob) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (SHT.name || 'quizcade').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-score.png';
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+// The score card: the game's own art on top, then the score, the stats and the credit
+async function drawScoreCard(vals) {
+    try { await document.fonts.load('40px "Press Start 2P"'); } catch (e) { /* falls back to Courier */ }
+    const W = 1080, H = 1350, ART = 560;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    const F = px => px + 'px "Press Start 2P", "Courier New", monospace';
+    const fit = (text, max, px) => { g.font = F(px); while (g.measureText(text).width > max && px > 12) g.font = F(px -= 2); return px; };
+
+    g.fillStyle = C.pageBackground || '#111';
+    g.fillRect(0, 0, W, H);
+    g.save();
+    g.beginPath(); g.rect(0, 0, W, ART); g.clip();
+    drawCardArt(g, W, ART);
+    g.restore();
+
+    // Title over the art
+    g.textAlign = 'center';
+    g.textBaseline = 'alphabetic';
+    fit(T.title, W - 120, 72);
+    g.fillStyle = C.brand; g.fillText(T.title, W / 2 + 6, 126);
+    g.fillStyle = C.accent; g.fillText(T.title, W / 2, 120);
+    if (SHT.tagline) {
+        g.font = F(22);
+        g.fillStyle = 'rgba(0,0,0,0.55)';
+        const tw = g.measureText(SHT.tagline).width;
+        g.fillRect(W / 2 - tw / 2 - 16, 148, tw + 32, 42);
+        g.fillStyle = '#fff';
+        g.fillText(SHT.tagline, W / 2, 180);
+    }
+    g.fillStyle = C.brand;
+    g.fillRect(0, ART, W, 10);
+
+    // Final score
+    g.fillStyle = '#aaa';
+    g.font = F(26);
+    g.fillText(SHT.finalScore || 'FINAL SCORE', W / 2, ART + 80);
+    fit(vals.score, W - 120, 96);
+    g.fillStyle = C.brand; g.fillText(vals.score, W / 2 + 5, ART + 205);
+    g.fillStyle = C.accent; g.fillText(vals.score, W / 2, ART + 200);
+
+    // Stats
+    const rows = [
+        [SHT.levelLabel || 'LEVEL REACHED', vals.level],
+        [SHT.rightLabel || 'QUESTIONS RIGHT', vals.correct + ' / ' + vals.answered],
+        [SHT.accuracyLabel || 'ACCURACY', vals.accuracy],
+        ...cardRows(vals)
+    ];
+    let y = ART + 290;
+    for (const [label, value] of rows) {
+        g.textAlign = 'left'; g.fillStyle = '#ccc'; fit(String(label), 600, 24); g.fillText(label, 70, y);
+        g.textAlign = 'right'; g.fillStyle = '#fff'; fit(String(value), 300, 24); g.fillText(String(value), W - 70, y);
+        g.fillStyle = '#333'; g.fillRect(70, y + 20, W - 140, 3);
+        y += 64;
+    }
+
+    // Footer: where to play, then the credit with the pixel head
+    const link = S.shareUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    g.textAlign = 'center';
+    g.fillStyle = '#999';
+    fit(link, W - 140, 18);
+    g.fillText(link, W / 2, H - 92);
+    const credit = '© ' + creditYears() + ' Joe VanWagner';
+    g.font = F(18);
+    const cw = g.measureText(credit).width;
+    const iconEl = document.querySelector('.jv-credit img');
+    const icon = iconEl && await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = iconEl.src; });
+    const left = W / 2 - (cw + (icon ? 52 : 0)) / 2;
+    if (icon) {
+        g.imageSmoothingEnabled = false;
+        g.drawImage(icon, left, H - 70, 40, 40);
+    }
+    g.textAlign = 'left';
+    g.fillStyle = C.accent;
+    g.fillText(credit, left + (icon ? 52 : 0), H - 40);
+    return c;
+}
+
+const shareUI = (() => {
+    if (!shareOn) return null;
+    const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    const modal = $('game-over-modal');
+    const credit = modal.querySelector('.jv-credit');
+    const button = mk('button', 'action-btn retro-text share-btn', SHT.button || 'SHARE YOUR SCORE');
+    button.type = 'button';
+    const panel = mk('div', 'share-panel');
+    panel.hidden = true;
+    const preview = mk('img', 'share-preview');
+    preview.alt = SHT.previewAlt || 'Your score card';
+    preview.addEventListener('load', () => window.fitGame());
+    const text = mk('div', 'share-text');
+    const tools = mk('div', 'share-row');
+    const links = mk('div', 'share-row');
+    const hint = mk('div', 'share-hint', SHT.hint || '');
+    panel.append(mk('div', 'share-heading retro-text', SHT.heading || 'SHARE YOUR SCORE'), preview, text, tools, links, hint);
+    modal.insertBefore(button, credit);
+    modal.insertBefore(panel, credit);
+    return { button, panel, preview, text, tools, links };
+})();
+
+// Called when the game ends: writes the post and wires every button for this run
+function prepareShare() {
+    if (!shareUI) return;
+    const { button, panel, preview, text, tools, links } = shareUI;
+    const mobile = isTouch && !!navigator.share;
+    const vals = shareValues();
+    const message = fillIn(SHT.message || 'I scored {score} in {game}!', vals);
+    const url = S.shareUrl, full = message + ' ' + url, enc = encodeURIComponent;
+    let png = null;
+    const getPng = () => (png = png || drawScoreCard(vals).then(cv => new Promise(res => cv.toBlob(res, 'image/png'))));
+
+    panel.hidden = true;
+    window.shareOpen = false;
+    if (preview.src) URL.revokeObjectURL(preview.src);
+    preview.removeAttribute('src');
+    text.textContent = full;
+
+    const flashLabel = (btn, ok, fail) => {
+        const label = btn.dataset.label || (btn.dataset.label = btn.textContent);
+        btn.textContent = ok ? (SHT.copied || 'COPIED!') : (fail || SHT.couldNotCopy || "COULDN'T COPY");
+        clearTimeout(btn._t);
+        btn._t = setTimeout(() => { btn.textContent = label; }, 2200);
+    };
+    const small = (label, onClick) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'toggle-btn retro-text'; b.textContent = label;
+        b.addEventListener('click', onClick);
+        return b;
+    };
+    tools.replaceChildren(
+        ...(canCopyImage() ? [small(SHT.copyImage || 'COPY IMAGE', async e => flashLabel(e.currentTarget, await copyImage(getPng()), SHT.useSave || 'USE SAVE IMAGE'))] : []),
+        small(SHT.saveImage || 'SAVE IMAGE', () => saveImage(getPng())),
+        small(SHT.copyText || 'COPY TEXT', async e => flashLabel(e.currentTarget, await copyPlainText(full)))
+    );
+
+    const tag = enc('#' + (SHT.name || T.title).replace(/\W/g, ''));
+    const targets = [
+        ['Bluesky', 'https://bsky.app/intent/compose?text=' + enc(full)],
+        ['X', 'https://x.com/intent/post?text=' + enc(message) + '&url=' + enc(url)],
+        ['Threads', 'https://www.threads.net/intent/post?text=' + enc(full)],
+        ['Facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + enc(url) + '&hashtag=' + tag, true],
+        ['Reddit', 'https://www.reddit.com/submit?url=' + enc(url) + '&title=' + enc(message)],
+        ['WhatsApp', 'https://wa.me/?text=' + enc(full)],
+        ['Email', 'mailto:?subject=' + enc(fillIn(SHT.emailSubject || 'My {game} score', vals)) + '&body=' + enc(message + '\n\n' + url)],
+        ...(mobile ? [['Text', 'sms:?&body=' + enc(full)]] : [])
+    ];
+    links.replaceChildren(...targets.map(([label, href, copyFirst]) => {
+        const a = document.createElement('a');
+        a.className = 'toggle-btn share-link';
+        a.href = href; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label;
+        // Facebook won't take pre-written text: it goes on the clipboard as the link opens
+        if (copyFirst) a.addEventListener('click', () => { copyPlainText(full); flashLabel(a, true, null); a.textContent = SHT.pasteIt || 'Text copied: paste it in'; });
+        return a;
+    }));
+    if (mobile) links.append(small(SHT.more || 'MORE…', () => shareNative()));
+
+    // Phones and tablets open their own share sheet (with the picture when they can)
+    async function shareNative() {
+        try {
+            const file = new File([await getPng()], 'score.png', { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: SHT.name || T.title, text: full });
+            else await navigator.share({ title: SHT.name || T.title, text: message, url });
+        } catch (e) { /* cancelled: fine */ }
+    }
+    button.onclick = async () => {
+        if (mobile) await shareNative();
+        panel.hidden = false;
+        window.shareOpen = true;
+        if (!preview.src) { const blob = await getPng(); if (blob) preview.src = URL.createObjectURL(blob); }
+        window.fitGame();
+    };
+    setTimeout(getPng, 300);   // draw the card in the background so Save / Copy image are instant
+}
 /* ============================== END SHARED ENGINE ============================== */
 
 
@@ -1237,6 +1514,7 @@ function finishDeath() {
         state = 'GAMEOVER';
         $('final-score').textContent = String(score).padStart(6, '0');
         showEl('game-over-modal', true);
+        prepareShare();
     } else {
         player.x = GW / 2;
         player.tx = GW / 2;
@@ -1264,6 +1542,10 @@ function checkWinCondition() {
 function hitEnemy(en) {
     en.alive = false;
     spawnParticles(en.x, en.y, en.col, 18);
+    if (!isDemoMode) {
+        runStats.ships = (runStats.ships || 0) + 1;
+        countAnswer(en.isCorrect);
+    }
     if (!en.isCorrect) { startDeathSequence(); return; }
 
     enemies.forEach(e2 => { if (e2.alive) { spawnParticles(e2.x, e2.y, e2.col, 10); e2.alive = false; } });
@@ -1438,6 +1720,30 @@ function render() {
     drawPlayer();
     drawParticles();
     if (state === 'DEMO') drawDemoHighlights();
+}
+
+/* ---------- Score card art (SHARE YOUR SCORE) ---------- */
+function drawCardArt(g, W, H) {
+    g.fillStyle = C.space;
+    g.fillRect(0, 0, W, H);
+    drawCover(g, SPR.background, W, H);
+    g.fillStyle = C.stars;
+    for (let i = 0; i < 220; i++) {
+        g.globalAlpha = 0.3 + Math.random() * 0.7;
+        const sz = Math.random() < 0.15 ? 4 : 2;
+        g.fillRect(Math.random() * W, Math.random() * H, sz, sz);
+    }
+    g.globalAlpha = 1;
+    for (let i = 0; i < 4; i++) drawSprite(g, SPR.enemies[i % SPR.enemies.length], W / 2 + (i - 1.5) * 210, 285 + (i % 2) * 34, 130);
+    g.fillStyle = C.laser;
+    g.fillRect(W / 2 - 6, 372, 12, 46);
+    drawSprite(g, SPR.player, W / 2, 492, 150);
+}
+function cardRows() {
+    return [
+        [SHT.modeLabel || 'MODE', isHardMode ? T.labels.hard : T.labels.normal],
+        [SHT.shipsLabel || 'SHIPS DESTROYED', (runStats.ships || 0).toLocaleString()]
+    ];
 }
 
 /* ---------- Start up ---------- */

@@ -22,8 +22,12 @@ window.SiteShare = {
     },
 
     /**
-     * Every place to share, in three groups (work first). Simple brand-colored badges
-     * (letters/symbols, not the companies' logos).
+     * Every place to share, in three groups (work first).
+     *   site      the platform's own web address: its real, current icon (favicon) is loaded live from
+     *             Google's favicon service (DuckDuckGo's if that fails), so it stays up to date when a
+     *             platform changes its logo. Shown small and doubled with hard pixel edges, on a raised
+     *             Win95-style button. If neither service answers, the colored letter badge (color + mark) shows.
+     *   color, mark  that fallback badge (and the look for Email / Text / Copy link, which have no platform)
      *   href      opens that site's own "share" or "compose" page with the link filled in
      *   copyThen  sites with no share page (Slack, Discord, Instagram...): copy the link,
      *             then open the site so the visitor can paste it
@@ -36,27 +40,40 @@ window.SiteShare = {
         const mobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
         return [
             // Work
-            { group: 'Work', id: 'linkedin', name: 'LinkedIn', color: '#0a66c2', mark: 'in', href: `https://www.linkedin.com/sharing/share-offsite/?url=${u}` },
-            { group: 'Work', id: 'teams', name: 'Teams', color: '#4b53bc', mark: 'T', href: `https://teams.microsoft.com/share?href=${u}&msgText=${t}` },
-            { group: 'Work', id: 'slack', name: 'Slack', color: '#4a154b', mark: '#', copyThen: 'https://app.slack.com/client' },
-            { group: 'Work', id: 'outlook', name: 'Outlook', color: '#0078d4', mark: 'O', href: `https://outlook.office.com/mail/deeplink/compose?subject=${t}&body=${body}` },
-            { group: 'Work', id: 'gmail', name: 'Gmail', color: '#d93025', mark: 'M', href: `https://mail.google.com/mail/?view=cm&fs=1&su=${t}&body=${body}` },
+            { group: 'Work', id: 'linkedin', site: 'linkedin.com', name: 'LinkedIn', color: '#0a66c2', mark: 'in', href: `https://www.linkedin.com/sharing/share-offsite/?url=${u}` },
+            { group: 'Work', id: 'teams', site: 'teams.microsoft.com', name: 'Teams', color: '#4b53bc', mark: 'T', href: `https://teams.microsoft.com/share?href=${u}&msgText=${t}` },
+            { group: 'Work', id: 'slack', site: 'slack.com', name: 'Slack', color: '#4a154b', mark: '#', copyThen: 'https://app.slack.com/client' },
+            { group: 'Work', id: 'outlook', site: 'outlook.live.com', name: 'Outlook', color: '#0078d4', mark: 'O', href: `https://outlook.office.com/mail/deeplink/compose?subject=${t}&body=${body}` },
+            { group: 'Work', id: 'gmail', site: 'mail.google.com', name: 'Gmail', color: '#d93025', mark: 'M', href: `https://mail.google.com/mail/?view=cm&fs=1&su=${t}&body=${body}` },
             { group: 'Work', id: 'email', name: 'Email app', color: '#5f6b7a', mark: '✉', href: `mailto:?subject=${t}&body=${body}` },
             // Messaging
-            { group: 'Messaging', id: 'whatsapp', name: 'WhatsApp', color: '#25d366', mark: 'W', href: `https://wa.me/?text=${t}%20${u}` },
-            { group: 'Messaging', id: 'telegram', name: 'Telegram', color: '#229ed9', mark: '➤', href: `https://t.me/share/url?url=${u}&text=${t}` },
-            { group: 'Messaging', id: 'discord', name: 'Discord', color: '#5865f2', mark: 'D', copyThen: 'https://discord.com/channels/@me' },
+            { group: 'Messaging', id: 'whatsapp', site: 'whatsapp.com', name: 'WhatsApp', color: '#25d366', mark: 'W', href: `https://wa.me/?text=${t}%20${u}` },
+            { group: 'Messaging', id: 'telegram', site: 'telegram.org', name: 'Telegram', color: '#229ed9', mark: '➤', href: `https://t.me/share/url?url=${u}&text=${t}` },
+            { group: 'Messaging', id: 'discord', site: 'discord.com', name: 'Discord', color: '#5865f2', mark: 'D', copyThen: 'https://discord.com/channels/@me' },
             ...(mobile ? [{ group: 'Messaging', id: 'sms', name: 'Text message', color: '#34c759', mark: '💬', href: `sms:?&body=${body}` }] : []),
             // Social
-            { group: 'Social', id: 'facebook', name: 'Facebook', color: '#1877f2', mark: 'f', href: `https://www.facebook.com/sharer/sharer.php?u=${u}` },
-            { group: 'Social', id: 'x', name: 'X', color: '#000000', mark: 'X', href: `https://x.com/intent/post?url=${u}&text=${t}` },
-            { group: 'Social', id: 'bluesky', name: 'Bluesky', color: '#1185fe', mark: '\u{1F98B}', href: `https://bsky.app/intent/compose?text=${t}%20${u}` },
-            { group: 'Social', id: 'threads', name: 'Threads', color: '#101010', mark: '@', href: `https://www.threads.net/intent/post?text=${t}%20${u}` },
-            { group: 'Social', id: 'reddit', name: 'Reddit', color: '#ff4500', mark: 'r/', href: `https://www.reddit.com/submit?url=${u}&title=${t}` },
-            { group: 'Social', id: 'instagram', name: 'Instagram', color: 'linear-gradient(45deg,#f58529,#dd2a7b,#8134af)', mark: '◎', copyThen: 'https://www.instagram.com/' },
-            { group: 'Social', id: 'tiktok', name: 'TikTok', color: '#010101', mark: '♪', copyThen: 'https://www.tiktok.com/' },
+            { group: 'Social', id: 'facebook', site: 'facebook.com', name: 'Facebook', color: '#1877f2', mark: 'f', href: `https://www.facebook.com/sharer/sharer.php?u=${u}` },
+            { group: 'Social', id: 'x', site: 'x.com', name: 'X', color: '#000000', mark: 'X', href: `https://x.com/intent/post?url=${u}&text=${t}` },
+            { group: 'Social', id: 'bluesky', site: 'bsky.app', name: 'Bluesky', color: '#1185fe', mark: '\u{1F98B}', href: `https://bsky.app/intent/compose?text=${t}%20${u}` },
+            { group: 'Social', id: 'threads', site: 'threads.net', name: 'Threads', color: '#101010', mark: '@', href: `https://www.threads.net/intent/post?text=${t}%20${u}` },
+            { group: 'Social', id: 'reddit', site: 'reddit.com', name: 'Reddit', color: '#ff4500', mark: 'r/', href: `https://www.reddit.com/submit?url=${u}&title=${t}` },
+            { group: 'Social', id: 'instagram', site: 'instagram.com', name: 'Instagram', color: 'linear-gradient(45deg,#f58529,#dd2a7b,#8134af)', mark: '◎', copyThen: 'https://www.instagram.com/' },
+            { group: 'Social', id: 'tiktok', site: 'tiktok.com', name: 'TikTok', color: '#010101', mark: '♪', copyThen: 'https://www.tiktok.com/' },
             { group: 'Social', id: 'copy', name: 'Copy link', color: '#2f855a', mark: '\u{1F517}', copy: true }
         ];
+    },
+
+    /** A platform icon didn't load: try DuckDuckGo's icon service, then fall back to the letter badge. */
+    iconFail(img) {
+        if (!img.dataset.tried) {
+            img.dataset.tried = '1';
+            img.src = 'https://icons.duckduckgo.com/ip3/' + img.dataset.site + '.ico';
+            return;
+        }
+        const b = img.parentNode;
+        b.classList.remove('share-fav'); b.classList.add('share-glyph');
+        b.style.background = b.dataset.color;
+        b.textContent = b.dataset.mark;
     },
 
     copy(text) {
@@ -131,7 +148,11 @@ window.SiteShare = {
     open() {
         if (this.handOff('open')) return;
         const item = x => {
-            const badge = `<span class="share-badge" style="background:${x.color}">${x.mark}</span><span>${x.name}</span>`;
+            // A platform's live icon (see targets()); its fallback badge is built by SiteShare.iconFail
+            const fav = x.site
+                ? `<span class="share-badge share-fav" data-color="${x.color}" data-mark="${x.mark}"><img src="https://www.google.com/s2/favicons?domain=${x.site}&sz=16" width="16" height="16" alt="" data-site="${x.site}" onerror="SiteShare.iconFail(this)"></span>`
+                : `<span class="share-badge share-glyph" style="background:${x.color}">${x.mark}</span>`;
+            const badge = `${fav}<span>${x.name}</span>`;
             return x.href
                 ? `<a class="share-item" href="${x.href}" target="_blank" rel="noopener" data-id="${x.id}" title="Share with ${x.name}">${badge}</a>`
                 : `<button type="button" class="share-item" data-id="${x.id}" title="${x.copy ? 'Copy the link' : 'Copies the link, then opens ' + x.name + ' so you can paste it'}">${badge}</button>`;

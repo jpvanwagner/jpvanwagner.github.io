@@ -28,7 +28,7 @@ window.GamesApp = {
         const winId = 'game-' + id;
         const html = `
             <div class="game-window">
-                <iframe src="games/${id}/index.html" title="${g.label}" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe>
+                <iframe src="games/${id}/index.html" title="${g.label}" allow="fullscreen; autoplay; gamepad; clipboard-write" allowfullscreen></iframe>
             </div>`;
         const small = window.innerWidth < 768;
         WM.open(winId, g.label, html, 'images/icons/apps/' + id + '.png', { width: g.width || 800, height: g.height || 600, center: true, fullscreen: true });

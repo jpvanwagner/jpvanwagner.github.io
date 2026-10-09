@@ -226,7 +226,7 @@
             </div>
             <div id="status" style="margin-top:6px"></div>
         </section>
-        <div id="preview-frame-wrap"><iframe id="preview-frame" title="Game preview" sandbox="allow-scripts"></iframe></div>
+        <div id="preview-frame-wrap"><iframe id="preview-frame" title="Game preview" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-downloads"></iframe></div>
 
         <section>
             <h2 class="retro">GET THE HTML</h2>
@@ -580,7 +580,9 @@ const SETTING_HELP = {
     ghostSpeed: '1, 2, 4 or 5',
     digSpeed: '1, 2, 4 or 5',
     enemySpeed: 'Quizcavator: 1, 2, 4 or 5',
-    starCount: '0 = no stars'
+    starCount: '0 = no stars',
+    showShare: 'The share-your-score button on the game over screen',
+    shareUrl: 'The web address included in shared posts and on the score card'
 };
 function buildSettings() {
     const box = $('settings-fields');
@@ -588,7 +590,10 @@ function buildSettings() {
     const Sx = cfg.settings;
     for (const [key, v] of Object.entries(Sx)) {
         const help = SETTING_HELP[key] ? h('span', { class: 'field-help' }, SETTING_HELP[key]) : null;
-        if (typeof v === 'boolean') {
+        if (typeof v === 'string') {
+            box.append(h('label', { class: 'field', style: 'grid-column: 1 / -1' }, humanize(key),
+                h('input', { type: 'text', value: v, oninput: e => { Sx[key] = e.target.value.trim(); changed(); } }), help));
+        } else if (typeof v === 'boolean') {
             box.append(h('div', null, h('label', { class: 'field check' },
                 h('input', { type: 'checkbox', checked: v, onchange: e => { Sx[key] = e.target.checked; changed(); } }), humanize(key)), help));
         } else if (typeof v === 'number') {

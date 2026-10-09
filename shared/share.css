@@ -32,9 +32,15 @@
 .share-overlay a.share-item, .share-overlay a.share-item:hover, .share-win a.share-item, .share-win a.share-item:hover { text-decoration: none !important; color: #1c2433 !important; }
 .share-overlay .share-item:focus-visible, .share-win .share-item:focus-visible { outline: 2px solid #14286b !important; outline-offset: 1px; }
 .share-badge {
-    width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;
     color: #fff; font: bold 17px system-ui, sans-serif;
+    /* a raised Win95-style button */
+    border: 2px solid; border-color: #fff #404040 #404040 #fff; box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf;
 }
+/* The platform's real icon, loaded small (16px) and shown at double size with hard pixel edges */
+.share-fav { background: #c0c0c0; }
+.share-fav img { width: 32px; height: 32px; image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+.share-item:active .share-badge { border-color: #404040 #fff #fff #404040; box-shadow: inset 1px 1px 0 #808080; }
 .share-link { display: flex; gap: 6px; margin-top: 12px; }
 .share-link input { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid #cfd6e2; border-radius: 6px; font: 13px system-ui, sans-serif; }
 .share-link button, .share-more {

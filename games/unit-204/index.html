@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>/* portfolio demo: lets the page around this game mute it (shared/demo-controls.js) */try{if(parent!==window&&parent.DemoControls)parent.DemoControls.early(window)}catch(e){}</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unit 204</title>
+<meta name="description" content="A point-and-click move-out inspection. Look, touch, smell and measure your way through Unit 204, then mark every finding on your clipboard.">
+<meta name="theme-color" content="#14111c">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="game" class="cur-look">
+  <canvas id="scene" width="480" height="270" aria-label="Unit 204 game screen"></canvas>
+
+  <div id="labels" aria-hidden="true"></div>
+  <div id="speech" aria-live="polite"></div>
+  <div id="verbline" aria-hidden="true"></div>
+  <div id="roomname" aria-hidden="true"></div>
+
+  <!-- TOOLBAR: hover near the top edge to reveal it -->
+  <div id="tb-trigger"></div>
+  <div id="tb-tab" aria-hidden="true">&#9660; TOOLS &#9660;</div>
+  <nav id="toolbar" aria-label="Tools">
+    <div class="tb-group" id="tb-verbs"></div>
+    <div class="tb-sep"></div>
+    <div class="tb-group" id="tb-items"></div>
+    <div class="tb-sep"></div>
+    <div class="tb-group tb-right">
+      <button class="tb-btn tb-text" id="tbReport" type="button" data-tip="Clipboard report|Findings marked so far. Submit when you're done."><span class="ico ico-report"></span><span id="tbProgress">0/0</span></button>
+      <button class="tb-btn tb-text" id="tbSop" type="button" data-tip="SOP manual|How to tell wear, damage and hazards apart."><span class="ico ico-sop"></span>SOP</button>
+      <button class="tb-btn" id="tbSettings" type="button" data-tip="Settings|Sound, hints, feedback mode and display."><span class="ico ico-gear"></span></button>
+      <button class="tb-btn" id="tbMenu" type="button" data-tip="Menu (Esc)|Pause, submit your report or quit."><span class="ico ico-menu"></span></button>
+    </div>
+  </nav>
+  <button id="touchCycle" type="button" aria-label="Change cursor"><span></span></button>
+
+  <div id="tooltip" role="tooltip"></div>
+
+  <!-- TITLE -->
+  <section id="titleScreen" class="overlay on">
+    <canvas id="titleArt" width="480" height="270" aria-hidden="true"></canvas>
+    <div class="title-inner">
+      <div class="title-door"><span class="door-num">204</span></div>
+      <h1 class="logo">UNIT 204</h1>
+      <p class="tag">A Move-Out Inspection Adventure</p>
+      <div class="btn-col">
+        <button class="btn primary" id="btnStart" type="button">Start Shift</button>
+        <button class="btn" id="btnSkipIntro" type="button">Skip Briefing</button>
+        <div class="btn-row">
+          <button class="btn small" id="btnTitleSettings" type="button">Settings</button>
+          <button class="btn small" id="btnCredits" type="button">Credits</button>
+        </div>
+      </div>
+      <a class="jv-credit" href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">
+        <img alt="" width="20" height="20" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACLUlEQVR4nM2UTUhUURiGn3PuwLSQGnWiGGYqS6uZiVoU5SQuchWFbiJaBQYSZC1aBAoO1KLIqGwT0ULIbVqbwJ39LkqEoaKfq2FaOuNUGI4ulGDmfi1Gb03nalvf3f1+3vN83+FcWO1SKyUTVZUiAqGKNWRnfiEIg+M/1cGtQXk5Nu3Z6xlMVFWKALsjAQ4d2MbzoTGys/PU7woxms7x5usMCsWrcdPUCCSqgrJnc4Bvs/PUx0OMTM5QEw4QDgV5NjTKj7kF6uIhPqdzvJ3I8S+pNvmEmkiA9WV+XryfomF/NaPpHL0D79i+qZzKMj+hDeV8n1vwXJNpqBRPX0/QdeMSdbGNPB78RHV4HY7jYI9P03X9Ik0nThIs83saGiPXbqmQgd5b7rfjSCmBLrZY2qLh+Hljjz4DWWtOn0u6Zt13rvzJKUVLa4eLoTyutCQ0dPOMHO18RKFQKBYLWD4f+UIBBHw+i3w+7+bQFv3tjdReuOv6GISO4zCSydKXyqC0Jtm4jy/9V7G0JnK4jeFMlgepDFpbdDTtNQgNQxHhfmoKUGgUBcdxxxNx6EtNIShAGfs1Rgb42NMu4Z07SkombRtEiMRii7MW4+nhYWLNnSUeni9lbrDHPVrp0hL5i2ptbbPRb4wMMGnbRKJRlFL0337onioiHDl7DKUWqT207M/hw702iUSjnjmvUZfk8fSKip+6pgwKpUjb9rJmKxIu6cnllpKrbEh2/7dndes3KNPMpND3uDEAAAAASUVORK5CYII=">
+        <span><span class="jv-years">2026</span> <span class="jv-name">Joe VanWagner</span></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- BRIEFING (tutorial) -->
+  <section id="introScreen" class="overlay dim">
+    <div class="panel memo">
+      <div class="memo-head"><span>BRICKROAD PROPERTY MGMT.</span><span id="introPage">1/6</span></div>
+      <canvas id="introArt" width="160" height="64" aria-hidden="true"></canvas>
+      <h2 id="introTitle"></h2>
+      <p id="introText"></p>
+      <div class="btn-row spread">
+        <button class="btn small" id="introBack" type="button">&lt; Back</button>
+        <button class="btn small ghost" id="introSkip" type="button">Skip</button>
+        <button class="btn small primary" id="introNext" type="button">Next &gt;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSPECT (zoomed close-up) -->
+  <section id="inspectScreen" class="overlay dim">
+    <div class="panel inspect" id="inspectPanel">
+      <div class="win-bar"><span id="inspectTitle">Item</span><span class="win-room" id="inspectRoom"></span><button class="win-x" id="inspectClose" type="button" aria-label="Back to the room" data-tip="Back (Esc)|Return to the room.">&times;</button></div>
+      <div class="inspect-body">
+        <div class="zoom-wrap">
+          <canvas id="zoomCanvas" width="240" height="135" aria-label="Close-up view"></canvas>
+          <div id="zoomLabel"></div>
+        </div>
+        <div class="inspect-side">
+          <h3>Field notes</h3>
+          <ul id="notesList"></ul>
+          <p class="notes-empty" id="notesEmpty">Use your senses and tools on parts of the close-up. Anything useful gets written down here.</p>
+        </div>
+      </div>
+      <div class="inspect-desc" id="inspectDesc"></div>
+      <div class="inspect-tools" id="inspectTools"></div>
+      <div class="inspect-actions">
+        <span class="mark-status" id="inspectStatus"></span>
+        <button class="btn small" id="inspectPhoto" type="button" data-tip="Camera|Snap a photo of this close-up for the report."><span class="ico ico-camera"></span> Photo</button>
+        <button class="btn small primary" id="inspectMark" type="button" data-tip="Clipboard|Mark this finding on your inspection form."><span class="ico ico-clipboard"></span> Mark it</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIPBOARD FORM -->
+  <section id="markScreen" class="overlay dim">
+    <div class="clipboard">
+      <div class="clip"></div>
+      <div class="paper">
+        <div class="form-head"><b>MOVE-OUT INSPECTION</b><span>UNIT 204 &middot; <span id="markRoom"></span></span></div>
+        <div class="form-item">Item: <b id="markName"></b></div>
+        <fieldset class="form-cats" id="markCats">
+          <legend>Condition</legend>
+        </fieldset>
+        <div class="form-row">
+          <div class="form-photo">
+            <div class="photo-slot" id="markPhotoSlot"><span>NO PHOTO</span></div>
+            <button class="btn small" id="markTakePhoto" type="button"><span class="ico ico-camera"></span> Take photo</button>
+          </div>
+          <div class="form-notes"><b>Notes</b><ul id="markNotes"></ul></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn small ghost" id="markCancel" type="button">Cancel</button>
+          <button class="btn small primary" id="markFile" type="button" disabled>File it</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIGITAL CAMERA -->
+  <section id="cameraScreen" class="overlay dim">
+    <div class="camera">
+      <div class="cam-top"><span class="cam-brand">PIXTRA</span><span class="cam-model">DX-480 &middot; 8.1 MEGAPIXEL</span><button class="cam-shutter" id="camShutter" type="button" aria-label="Take the picture" data-tip="Shutter|Click to take the picture."></button></div>
+      <div class="cam-body">
+        <div class="cam-lcd">
+          <canvas id="camCanvas" width="240" height="135"></canvas>
+          <div class="cam-osd">
+            <span class="osd-tl">&#9673; AUTO</span><span class="osd-tr"><span class="batt"></span> <span id="camShots">042</span></span>
+            <span class="osd-focus"></span>
+            <span class="osd-bl">8M &middot; F</span><span class="osd-br" id="camDate"></span>
+          </div>
+          <div class="cam-flash" id="camFlash"></div>
+          <div class="cam-saved" id="camSaved">IMG_0042.JPG<br>SAVED</div>
+        </div>
+        <div class="cam-buttons">
+          <button class="cam-btn" id="camTake" type="button">SNAP</button>
+          <button class="cam-btn" id="camCancel" type="button">BACK</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOP MANUAL -->
+  <section id="sopScreen" class="overlay dim">
+    <div class="panel binder">
+      <div class="win-bar green"><span>SOP 4.2 &middot; Move-Out Condition Codes</span><button class="win-x" data-close type="button" aria-label="Close">&times;</button></div>
+      <div class="sop-body scroll">
+        <div class="sop-cat c0"><b>0 &middot; Clean / No Action</b><p>Functional, sanitary and as expected. Nothing to do.</p></div>
+        <div class="sop-cat c1"><b>1 &middot; Normal Wear &amp; Tear</b><p>The slow, unavoidable decline that comes from living somewhere: faded or matted carpet in walking paths, small nail or anchor holes (&frac14;&Prime; or less), worn finishes, aged caulk, rubber parts that wear out. <em>Never charged to the deposit.</em></p></div>
+        <div class="sop-cat c2"><b>2 &middot; Tenant Damage</b><p>Harm caused by accident, neglect or abuse: stains, burns, holes bigger than &frac14;&Prime;, broken glass or fixtures, drawing on walls. <em>Charged to the deposit, and only if it's documented with a photo.</em></p></div>
+        <div class="sop-cat c3"><b>3 &middot; Maintenance Hazard</b><p>Anything that threatens safety or the building: active leaks, gas odor, electrical heat or sparking, disabled smoke alarms, mold, fixtures that could fall. <em>File an emergency work order and photograph it.</em> A hazard is coded 3 even if a tenant caused it.</p></div>
+        <div class="sop-tips">
+          <b>Field method</b>
+          <ul>
+            <li><b>Look</b> at a feature to bring up a close-up. Then <b>touch</b>, <b>smell</b> and <b>use tools</b> on its parts.</li>
+            <li><b>Measure</b> holes and stains. Size often decides between wear and damage.</li>
+            <li><b>Smell</b> catches what eyes miss: gas, urine, mildew, burning.</li>
+            <li>Use the <b>clipboard</b> on a feature to mark it. Attach a <b>photo</b> to every damage or hazard finding.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="settingsScreen" class="overlay dim">
+    <div class="panel settings">
+      <div class="win-bar"><span>Settings</span><button class="win-x" data-close type="button" aria-label="Close">&times;</button></div>
+      <div class="settings-body scroll" id="settingsBody"></div>
+      <div class="btn-row spread">
+        <button class="btn small ghost" id="setReset" type="button">Reset to defaults</button>
+        <button class="btn small" id="setFullscreen" type="button">Fullscreen</button>
+        <button class="btn small primary" data-close type="button">Done</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CREDITS -->
+  <section id="creditsScreen" class="overlay dim">
+    <div class="panel credits">
+      <div class="win-bar"><span>Credits</span><button class="win-x" data-close type="button" aria-label="Close">&times;</button></div>
+      <div class="credits-body scroll">
+        <h3>Unit 204</h3>
+        <p>Game design, writing, art and code by <a href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener">Joe VanWagner</a>. The rooms, characters and close-ups are drawn in code, so there are no image files.</p>
+        <h3>Sound effects</h3>
+        <p><b>Kenney</b> (<a href="https://kenney.nl/" target="_blank" rel="noopener">kenney.nl</a>). Footsteps, clicks, chime, knock, ratchet and city ambience, released under <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>. They come from Kenney's open-source starter kits:</p>
+        <ul>
+          <li><a href="https://github.com/KenneyNL/Starter-Kit-3D-Platformer" target="_blank" rel="noopener">Starter Kit 3D Platformer</a>: footsteps, chime, knock</li>
+          <li><a href="https://github.com/KenneyNL/Starter-Kit-City-Builder" target="_blank" rel="noopener">Starter Kit City Builder</a>: clicks, tick, swish, city ambience</li>
+          <li><a href="https://github.com/KenneyNL/Starter-Kit-FPS" target="_blank" rel="noopener">Starter Kit FPS</a>: ratchet</li>
+        </ul>
+        <p>The camera shutter, pencil, tape measure, alarm beeps and lounge music are synthesized live in the browser.</p>
+        <h3>Fonts</h3>
+        <ul>
+          <li><a href="https://fonts.google.com/specimen/Pixelify+Sans" target="_blank" rel="noopener">Pixelify Sans</a> by Stefie Justprince (<a href="https://github.com/eifetx/Pixelify-Sans" target="_blank" rel="noopener">source</a>), SIL Open Font License</li>
+          <li><a href="https://fonts.google.com/specimen/Silkscreen" target="_blank" rel="noopener">Silkscreen</a> by Jason Kottke (<a href="https://github.com/googlefonts/silkscreen" target="_blank" rel="noopener">source</a>), SIL Open Font License</li>
+        </ul>
+        <h3>Inspiration</h3>
+        <p>The pixel art style is inspired by <i>The Darkside Detective</i> (Spooky Doorway). The right-click cursor cycling comes from the Sierra adventure games of the '90s.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIALOGUE -->
+  <section id="dialogueScreen" class="overlay dim">
+    <div class="panel dialogue">
+      <canvas id="danaPortrait" width="40" height="40" aria-hidden="true"></canvas>
+      <div class="dlg-main">
+        <div class="dlg-name">Dana <span>Leasing Assistant</span></div>
+        <p id="dlgText"></p>
+        <div id="dlgOptions"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENU -->
+  <section id="menuScreen" class="overlay dim">
+    <div class="panel menu">
+      <h2>Paused</h2>
+      <div class="btn-col">
+        <button class="btn primary" data-close type="button">Resume</button>
+        <button class="btn" id="menuSop" type="button">SOP Manual</button>
+        <button class="btn" id="menuSettings" type="button">Settings</button>
+        <button class="btn" id="menuSubmit" type="button">Submit Report &amp; End Shift</button>
+        <button class="btn ghost" id="menuQuit" type="button">Quit to Title</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONFIRM -->
+  <section id="confirmScreen" class="overlay dim">
+    <div class="panel confirm">
+      <p id="confirmText"></p>
+      <div class="btn-row spread">
+        <button class="btn small ghost" id="confirmNo" type="button">Not yet</button>
+        <button class="btn small primary" id="confirmYes" type="button">Yes</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEEDBACK TOAST (immediate feedback mode) -->
+  <div id="feedback" role="status"></div>
+
+  <!-- END OF SHIFT REPORT -->
+  <section id="endScreen" class="overlay dim">
+    <div class="panel report scroll">
+      <div class="report-grid">
+        <div class="report-main">
+          <div class="report-head">
+            <div><span class="small-caps">Brickroad Property Mgmt.</span><h2>Move-Out Report: Unit 204</h2><span class="small-caps" id="endDate"></span></div>
+            <div class="stamp" id="endStamp">A</div>
+          </div>
+          <p class="rank" id="endRank"></p>
+          <div class="final"><span class="lbl">SCORE</span><span class="num" id="endScore">0</span><span class="of" id="endOf"></span></div>
+          <div class="stats" id="endStats"></div>
+          <h3>Itemized findings</h3>
+          <div id="endItems"></div>
+        </div>
+        <div class="report-side">
+          <div id="endPhotos" class="photo-strip"></div>
+          <button class="btn small" id="saveImgBtn" type="button">&#11015; Save Image</button>
+          <div class="share-box">
+            <h3 class="share-h">SHARE YOUR SCORE</h3>
+            <p class="share-text" id="shareText"></p>
+            <div class="share-links" id="shareLinks"></div>
+            <p class="share-note">Facebook won't let sites fill in a post, so its button copies the text for you to paste. Instagram's button saves your score card and copies the text (on phones it opens your share menu so you can pick Instagram).</p>
+          </div>
+          <div class="btn-col">
+            <button class="btn primary" id="btnAgain" type="button">New Shift</button>
+            <button class="btn ghost" id="btnEndTitle" type="button">Title Screen</button>
+          </div>
+          <a class="jv-credit" href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">
+            <img alt="" width="20" height="20" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACLUlEQVR4nM2UTUhUURiGn3PuwLSQGnWiGGYqS6uZiVoU5SQuchWFbiJaBQYSZC1aBAoO1KLIqGwT0ULIbVqbwJ39LkqEoaKfq2FaOuNUGI4ulGDmfi1Gb03nalvf3f1+3vN83+FcWO1SKyUTVZUiAqGKNWRnfiEIg+M/1cGtQXk5Nu3Z6xlMVFWKALsjAQ4d2MbzoTGys/PU7woxms7x5usMCsWrcdPUCCSqgrJnc4Bvs/PUx0OMTM5QEw4QDgV5NjTKj7kF6uIhPqdzvJ3I8S+pNvmEmkiA9WV+XryfomF/NaPpHL0D79i+qZzKMj+hDeV8n1vwXJNpqBRPX0/QdeMSdbGNPB78RHV4HY7jYI9P03X9Ik0nThIs83saGiPXbqmQgd5b7rfjSCmBLrZY2qLh+Hljjz4DWWtOn0u6Zt13rvzJKUVLa4eLoTyutCQ0dPOMHO18RKFQKBYLWD4f+UIBBHw+i3w+7+bQFv3tjdReuOv6GISO4zCSydKXyqC0Jtm4jy/9V7G0JnK4jeFMlgepDFpbdDTtNQgNQxHhfmoKUGgUBcdxxxNx6EtNIShAGfs1Rgb42NMu4Z07SkombRtEiMRii7MW4+nhYWLNnSUeni9lbrDHPVrp0hL5i2ptbbPRb4wMMGnbRKJRlFL0337onioiHDl7DKUWqT207M/hw702iUSjnjmvUZfk8fSKip+6pgwKpUjb9rJmKxIu6cnllpKrbEh2/7dndes3KNPMpND3uDEAAAAASUVORK5CYII=">
+            <span><span class="jv-years">2026</span> <span class="jv-name">Joe VanWagner</span></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/util.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/sounds.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/features.js"></script>
+<script src="js/decor.js"></script>
+<script src="js/zoomart.js"></script>
+<script src="js/rooms.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/inspect.js"></script>
+<script src="js/mark.js"></script>
+<script src="js/dialogue.js"></script>
+<script src="js/report.js"></script>
+<script src="js/share.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

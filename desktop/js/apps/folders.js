@@ -10,8 +10,8 @@
  *
  * Where the lists come from (nothing to edit here when you add things):
  *   courses   the #courses cards on pages/projects.html
- *   games     `games` in config/site-config.js, plus the Midnight at the Multiplex demo
- *   projects  Scenemaker, the LMS Course Catalog, Midnight at the Multiplex, and PeeDee's Dental Defense
+ *   games     `games` in config/site-config.js, plus Midnight at the Multiplex and PeeDee's Dental Defense
+ *   projects  Scenemaker, the LMS Course Catalog, Midnight at the Multiplex, PeeDee's Dental Defense, and Unit 204
  * View (large/small icons, list, details) and Sort by (A to Z, Z to A, type) are remembered per visitor.
  * Details view adds a Preview pane (on by default; untick "Preview pane" to hide it): the selected item's
  * short looping clip (preview: path without extension, .webm/.mp4 + .jpg poster), or its thumbnail.
@@ -22,7 +22,7 @@ window.FolderApp = {
         courses:  { title: 'Sample Courses', path: 'C:\\Portfolio\\Sample Courses', page: 'courses.html',
                     hint: 'Interactive e-learning I built in Articulate Rise 360. Double-click a course to open it.' },
         games:    { title: 'Games', path: 'C:\\Portfolio\\Games', page: 'games.html',
-                    hint: 'Learning games I programmed, plus the demo of the game I\'m building. Double-click to play.' },
+                    hint: 'Learning games I programmed, plus my own games. Double-click to play.' },
         projects: { title: 'Projects', path: 'C:\\Portfolio\\Projects', page: 'my-projects.html',
                     hint: 'What I\'m building now. Double-click to launch one as its own program.' }
     },
@@ -38,23 +38,29 @@ window.FolderApp = {
             thumb: 'work/scenemaker/shots/stage-graph.png', kind: 'Program', preview: 'images/previews/scenemaker',
             desc: 'My branching-story authoring tool: build scenario-based training and export SCORM.',
             open: () => SceneMakerApp.open(), openLabel: 'Launch', page: 'project-scenemaker.html' };
+        const peedee = { label: "PeeDee's Dental Defense", icon: 'images/icons/apps/peedee.png',
+            thumb: 'images/projects/peedee/card.jpg', kind: 'Game', preview: 'images/previews/peedee',
+            desc: 'My pixel-art platformer: fill cavities, scrub plaque, zap germs, and beat bad breath.',
+            open: () => PeeDeeApp.open(), openLabel: 'Play', page: 'project-peedee.html' };
         if (kind === 'games') {
             const games = ((window.SiteConfig && SiteConfig.games) || []).map(g => ({
                 label: g.label, icon: 'images/icons/apps/' + g.id + '.png', thumb: g.thumb || ('images/games/' + g.id + '.jpg'),
                 preview: 'images/previews/' + g.id,
                 kind: 'Learning game', desc: g.tip || '', open: () => GamesApp.open(g.id), openLabel: 'Play',
                 page: 'project-game-' + g.id + '.html' }));
-            return Promise.resolve(games.concat([midnight]));
+            return Promise.resolve(games.concat([midnight, peedee]));
         }
         const catalog = { label: 'LMS Course Catalog', icon: 'images/icons/apps/course-catalog.png',
             thumb: 'images/projects/course-catalog/card.jpg', kind: 'Program', preview: 'images/previews/course-catalog',
             desc: 'My course-code tool: one naming system for every course, plus a searchable catalog.',
             open: () => CourseCatalogApp.open(), openLabel: 'Launch', page: 'project-course-catalog.html' };
-        const peedee = { label: "PeeDee's Dental Defense", icon: 'images/icons/apps/peedee.png',
-            thumb: 'images/projects/peedee/card.jpg', kind: 'Game', preview: 'images/previews/peedee',
-            desc: 'My pixel-art platformer: fill cavities, scrub plaque, zap germs, and beat bad breath.',
-            open: () => PeeDeeApp.open(), openLabel: 'Play', page: 'project-peedee.html' };
-        if (kind === 'projects') return Promise.resolve([scenemaker, catalog, midnight, peedee]);
+        // Unit 204 is also a learning game (SiteConfig.games); it shows here too, opened the same way
+        const unit = ((window.SiteConfig && SiteConfig.games) || []).find(g => g.id === 'unit-204');
+        const unit204 = unit && { label: unit.label, icon: 'images/icons/apps/unit-204.png', thumb: unit.thumb,
+            kind: 'Learning game', preview: 'images/previews/unit-204',
+            desc: 'My pixel-art point-and-click move-out inspection: gather evidence, then call wear, damage or hazard.',
+            open: () => GamesApp.open('unit-204'), openLabel: 'Play', page: 'project-game-unit-204.html' };
+        if (kind === 'projects') return Promise.resolve([scenemaker, catalog, midnight, peedee, unit204].filter(Boolean));
         // courses: every course card on the Portfolio page
         return fetch('pages/projects.html', { cache: 'no-cache' })
             .then(r => r.text())

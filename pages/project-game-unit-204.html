@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-GAME-UNIT-204.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+    The game lives in /games/unit-204/ (synced from the GAME--Unit-204 repo by its sync-to-portfolio workflow).
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="9f78766e">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit 204: learning game</title>
+    <meta name="description" content="Unit 204, a playable learning game by Joseph VanWagner: a pixel-art point-and-click move-out inspection about telling normal wear from tenant damage and maintenance hazards.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=fa07d833">
+    <link rel="stylesheet" href="../shared/share.css?v=ebba4e48">
+    <link rel="stylesheet" href="css/modern.css?v=cdfd7b86">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=6696cace"></script>
+    <script src="../config/shared-content.js?v=e9eeb62c"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/lightbox.js?v=af09d593">        </script>   <!-- click a screenshot to see it full size -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=01dee569"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=726959f6"></script>
+</head>
+<body data-title="Unit 204" data-nav="projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="projects.html#games">&larr; Back to Portfolio</a></p>
+                <p class="kicker">Learning game · A point-and-click move-out inspection · HTML / JavaScript / Canvas</p>
+                <h1>Unit 204</h1>
+                <p class="lede">A pixel-art point-and-click adventure about a move-out inspection: look, touch, smell and
+                   measure your way through an empty apartment, then mark every finding on your clipboard.</p>
+                <p>The hardest calls in a move-out inspection are the ones that decide money and safety. Is that worn
+                   carpet normal wear (never charged), tenant damage (charged, but only with a photo), or a maintenance
+                   hazard that needs a work order today? I built Unit 204 as a demo piece for a learning design role in
+                   property management. It makes you gather evidence before you decide, then grades every call with the
+                   reasoning from the standard operating procedure. You walk the unit with Dana from the leasing office,
+                   zoom into each feature, and use your senses and a toolbelt of 2008-vintage gear: tape measure, flashlight,
+                   screwdriver, hammer, pencil, and a silver point-and-shoot camera.</p>
+                <p><strong>Controls:</strong> left-click to use the current verb or tool; <strong>right-click</strong> to cycle
+                   Walk, Look, Touch, Smell and Talk, like the Sierra adventure games of the '90s (or press <kbd>1</kbd>&ndash;<kbd>5</kbd>,
+                   or <kbd>C</kbd>). Hover over the top edge for the toolbar of tools, the SOP manual and settings; <kbd>Esc</kbd>
+                   opens the menu. Best with a mouse, but it works on a phone or tablet too (tap the top edge for tools; a
+                   corner button cycles the cursor).</p>
+                <div class="btn-row">
+                    <a class="btn primary" href="../games/unit-204/index.html" target="_blank" rel="noopener">Play full screen</a>
+                    <!-- Retro Desktop only: open the game in its own desktop window -->
+                    <button class="btn retro-only" type="button" onclick="parent.GamesApp.open('unit-204')" title="Opens the game as its own program on the desktop, with a full-screen button">Open as a desktop program</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- The game itself: /games/unit-204/index.html (plain HTML, CSS and JavaScript; sounds embedded in js/sounds.js) -->
+        <section class="panel">
+            <div class="panel-body course-panel">
+                <div class="course-frame" style="aspect-ratio: 16 / 9; height: auto; max-height: 90vh;">
+                    <iframe data-demo src="../games/unit-204/index.html" title="Unit 204 (playable game)" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
+                </div>
+                <p class="course-note">Tip: right-click inside the game to change your cursor. On a small screen, try the
+                <a href="../games/unit-204/index.html" target="_blank" rel="noopener">full-screen version</a>.</p>
+
+                <h2>Screenshots</h2>
+                <div class="shots">
+                    <figure><a class="zoom" href="../images/games/unit-204/title.webp" data-caption="The title screen: you and Dana in the hallway outside Unit 204, with Settings and Credits for the free sounds and fonts."><img src="../images/games/unit-204/thumbs/title.jpg" alt="A pixel-art apartment hallway with a burgundy carpet runner, the inspector and Dana on either side of the Unit 204 logo" loading="lazy"></a><figcaption>The hallway outside Unit 204</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/living-room.webp" data-caption="The living room at golden hour: an accent wall, a ceiling fan, vertical blinds, and a dark stain on the carpet. Hover outlines show what you can interact with."><img src="../images/games/unit-204/thumbs/living-room.jpg" alt="A living room in one-point perspective with a red accent wall, a ceiling fan, and a stain on the beige carpet outlined by the Look cursor" loading="lazy"></a><figcaption>Looking over the living room</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/close-up.webp" data-caption="Looking at a feature zooms into a close-up. Here the flashlight finds a weeping supply line under the kitchen sink, and every useful observation lands in the field notes."><img src="../images/games/unit-204/thumbs/close-up.jpg" alt="A close-up window of an open sink cabinet lit by a flashlight beam, with handwritten field notes beside it" loading="lazy"></a><figcaption>A close-up, with field notes</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/clipboard.webp" data-caption="The clipboard form: pick one of the four SOP condition codes, attach a photo, and file it. Your field notes come along."><img src="../images/games/unit-204/thumbs/clipboard.jpg" alt="A clipboard with a move-out inspection form: four condition checkboxes, a photo of the sink, and notes" loading="lazy"></a><figcaption>Marking it on the clipboard</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/camera.webp" data-caption="A silver 2008 point-and-shoot. Damage can only be charged to the deposit with a photo, and hazards always need one."><img src="../images/games/unit-204/thumbs/camera.jpg" alt="A silver digital camera with an LCD screen showing the sink cabinet and an orange date stamp" loading="lazy"></a><figcaption>Documenting it with the camera</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/bedroom-toolbar.webp" data-caption="The hover toolbar: five verbs, seven tools, the clipboard report, the SOP manual, settings and the menu. The bedroom on a rainy day."><img src="../images/games/unit-204/thumbs/bedroom-toolbar.jpg" alt="A bedroom with floorboards, closet doors and a rainy window, with a toolbar of pixel icons along the top" loading="lazy"></a><figcaption>The toolbar, on a rainy day</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/bathroom.webp" data-caption="Every shift rolls new conditions, light, paint, floors and leftover junk, so no two inspections look alike."><img src="../images/games/unit-204/thumbs/bathroom.jpg" alt="A seafoam bathroom with a tiled tub, a vanity mirror and a toilet, the inspector and Dana in the middle" loading="lazy"></a><figcaption>The bathroom in the morning</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/report.webp" data-caption="The end-of-shift report: a grade, score, hazards caught, deposit charged (and wrongly charged), and the SOP reasoning for every item, plus a score card to save and share."><img src="../images/games/unit-204/thumbs/report.jpg" alt="A move-out report with a red grade stamp, stats, itemized findings, a photo, and share buttons" loading="lazy"></a><figcaption>The move-out report</figcaption></figure>
+                </div>
+
+                <h2>How it plays</h2>
+                <ul>
+                    <li><strong>Fourteen features, four rooms.</strong> Carpet, a TV wall, a ceiling fan, the sink, the gas range,
+                        the countertop, the mirror and vanity light, the tub, the toilet, a GFCI outlet, the smoke detector, the
+                        closet doors, a window and a bedroom wall.</li>
+                    <li><strong>Look closer.</strong> Looking at a feature zooms into a close-up. Touch, smell and use tools on its
+                        parts: measure a hole, tap tile with the hammer, pull an outlet cover with the screwdriver, get a light
+                        under the sink. Useful findings go into your field notes.</li>
+                    <li><strong>Four calls.</strong> Use the clipboard to mark each feature <em>Clean</em>, <em>Normal Wear &amp;
+                        Tear</em>, <em>Tenant Damage</em> or <em>Maintenance Hazard</em>. The SOP manual is a click away.</li>
+                    <li><strong>Document it.</strong> Damage is only chargeable with a photo, and hazards always need one, so the
+                        camera is part of the job.</li>
+                    <li><strong>Dana.</strong> Your assistant from the leasing office gives room hints and SOP refreshers (never
+                        the answer), and nudges you if you stall.</li>
+                    <li><strong>A different unit every shift.</strong> Each feature gets one of its possible conditions at random,
+                        and the light (morning, afternoon, golden hour or rain), paint, floors and leftover junk change too.</li>
+                    <li><strong>Feedback your way.</strong> Get graded right after each mark, or only in the final report (and change
+                        your mind until you submit).</li>
+                    <li><strong>The report.</strong> Points for the right call, for finding real evidence, and for photos; a penalty
+                        for missing a hazard. Wrongful charges (billing a tenant for wear) are counted, and every item explains why.</li>
+                </ul>
+
+                <h2>What it trains</h2>
+                <ul class="tags"><li>Move-out inspections</li><li>Wear vs. damage</li><li>Hazard recognition</li><li>Evidence and documentation</li><li>Fair deposit charges</li><li>Scenario practice</li><li>Gamified learning</li></ul>
+                <p>Like my other <a href="games.html">learning games</a>, it's plain HTML and JavaScript that drops right into a
+                   course. Sound effects are by <a href="https://kenney.nl/" target="_blank" rel="noopener">Kenney</a> (CC0), and
+                   the pixel fonts are Pixelify Sans and Silkscreen (SIL Open Font License); everything else is drawn in code.</p>
+
+                <div class="btn-row">
+                    <a class="btn" href="projects.html#games">&larr; Back to Portfolio</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>
