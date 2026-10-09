@@ -56,12 +56,18 @@ function loadLevel(idx) {
   G.nodes = L.nodes.map(n => new HealNode(n)); G.bubbles = []; G.drops = []; G.fight = false; G.wind = 0; G.special = null;
   G.specials = def.special ? 2 : 0; G.hints = {};
   G.gems = L.gems.map(g => ({ x: g.x, y: g.y, taken: false }));
+  for (const g of G.gems) {        // a droplet hanging just above head height would need an awkward hop in place: bring it down
+    let floor = null;
+    for (const t of L.terrain) if ((t.solid || t.oneway) && t.kind !== 'ceil' && g.x >= t.x && g.x < t.x + t.w && t.y >= g.y - 2 && (floor == null || t.y < floor)) floor = t.y;
+    if (L.tongue) { const ty = tongueY(L.tongue, g.x, 0); if (ty >= g.y - 2 && (floor == null || ty < floor)) floor = ty; }
+    if (floor != null && floor - g.y > 20 && floor - g.y < 52) g.y = floor - 12;
+  }
   G.mints = L.mints.map(m => ({ x: m.x, y: m.y, taken: false }));
   G.nerves = L.nerves.map(n => Object.assign({ t: Math.floor(n.x) % 170 }, n));
   G.signs = L.signs; refreshSigns();
   G.bolts = []; G.foes = []; G.parts = []; G.pops = [];
   G.rot = 0; G.boss = null; G.lock = null; G.clean = false; G.noHit = true; G.cleanTimer = 0; G.exitT = 0; G.bossBar = 0;
-  G.gingiMet = false; G.cleanTalkT = 0; G.arenaWall = null; G.cleanMsg = null;
+  G.gingiMet = false; G.cleanTalkT = 0; G.pendingTalk = null; G.lockT = 0; G.arenaWall = null; G.cleanMsg = null;
   const sx = L.start.x, surf = surfaceUnder(sx), floor = surf ? surf.y : tongueY(L.tongue, sx, G.t);
   G.player = new Player(sx, L.start.y != null ? L.start.y : floor - PHYS.PH);
   G.player.lastSafe = { x: sx, y: floor - PHYS.PH };

@@ -144,6 +144,16 @@ h2.title { font-family: var(--px); font-weight: normal; font-size: clamp(16px, 4
 .jv-credit:hover .jv-name, .jv-credit:focus-visible .jv-name { text-decoration: underline; }
 #endPd { display: block; width: calc(44px * var(--pdz, 3)); height: calc(36px * var(--pdz, 3)); image-rendering: pixelated; margin: -.4em 0 .2em -6px; }
 @media (max-height: 520px) { #endPd { --pdz: 2; } }
+/* ---------- between-level fact card ---------- */
+.fact-panel { max-width: min(92vw, 640px); }
+.fact-kicker { font-family: var(--px); font-size: clamp(12px, 2.6vmin, 18px); color: var(--cyan); margin: 0 0 .9em; letter-spacing: .05em; }
+.fact-text { font-size: clamp(20px, 4vmin, 30px); line-height: 1.15; color: #fff; margin: 0 0 .6em; }
+.fact-src { font-size: clamp(14px, 2.4vmin, 18px); color: #b9a6e0; margin: 0 0 1.2em; }
+.fact-bar { height: 10px; border: 2px solid #fff; background: #1b0f2e; margin: 0 0 .8em; }
+#factFill { height: 100%; width: 0; background: linear-gradient(90deg, var(--cyan), var(--green)); }
+.fact-next { font-family: var(--px); font-size: clamp(10px, 2vmin, 13px); color: #e2d3ff; margin: 0; display: flex; justify-content: space-between; gap: 1em; flex-wrap: wrap; }
+.fact-skip { color: var(--cyan); opacity: 0; transition: opacity .3s; }
+.fact-skip.on { opacity: 1; animation: blink 1s steps(2) infinite; }
 .end-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 3vmin, 28px); align-items: start; }
 .end-grid > div:last-child { border-left: 3px dashed rgba(255,255,255,.2); padding-left: clamp(14px, 3vmin, 28px); }
 @media (max-width: 680px) {

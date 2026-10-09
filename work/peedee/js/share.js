@@ -2,7 +2,9 @@
 /* ============================== SHARING ==============================
    Every button opens the platform's compose box with the post already written (like Bluesky's intent
    link). Facebook ignores pre-written text, so its button copies the post first for the player to
-   paste. Save Image downloads a score card. Nothing is sent unless the player picks one. */
+   paste. Instagram has no web link for posting at all: on phones its button hands the score card and text
+   to the phone's share menu (pick Instagram there); elsewhere it saves the score card, copies the text and
+   opens Instagram. Save Image downloads a score card. Nothing is sent unless the player picks one. */
 const copyrightYears = (now = new Date()) => now.getFullYear() > 2026 ? '2026–' + now.getFullYear() : '2026';
 document.querySelectorAll('.jv-years').forEach(el => { el.textContent = copyrightYears(); });
 function shareLink() {
@@ -55,6 +57,21 @@ function setupShare(r) {
     if (t.copy) a.addEventListener('click', () => { copyText(full); flash(a, 'TEXT COPIED - PASTE IT IN'); });
     row.append(a);
   }
+  const insta = document.createElement('button');   // Instagram: share the score card image itself
+  insta.type = 'button'; insta.textContent = 'Instagram';
+  insta.addEventListener('click', () => {
+    let files = null;
+    try { const f = new File([''], 'x.png', { type: 'image/png' }); if (navigator.canShare && navigator.canShare({ files: [f] })) files = true; } catch (e) { /* no file sharing */ }
+    copyText(full);
+    if (files) {
+      scoreCardBlob(r).then(blob => navigator.share({ files: [new File([blob], 'peedees-dental-defense-score.png', { type: 'image/png' })], text: full }))
+        .catch(() => { saveScoreImage(r); flash(insta, 'IMAGE SAVED + TEXT COPIED'); });
+    } else {
+      window.open('https://www.instagram.com/', '_blank', 'noopener');
+      saveScoreImage(r); flash(insta, 'IMAGE SAVED + TEXT COPIED');
+    }
+  });
+  row.insertBefore(insta, row.children[4] || null);    // right after Facebook
   const copy = document.createElement('button');
   copy.type = 'button'; copy.textContent = 'COPY TEXT';
   copy.addEventListener('click', async () => flash(copy, (await copyText(full)) ? 'COPIED!' : "COULDN'T COPY"));
@@ -123,15 +140,17 @@ function drawScoreCard(r) {
   g.textAlign = 'left'; g.fillStyle = '#c9b8ec'; g.fillText(credit, x0 + 52, 996);
   return c;
 }
+/* The score card as a PNG blob (both fonts loaded at card sizes first). */
+function scoreCardBlob(r) {
+  const ready = document.fonts && document.fonts.load
+    ? Promise.all([document.fonts.load("40px 'Press Start 2P'"), document.fonts.load("44px 'VT323'")]).catch(() => {}) : Promise.resolve();
+  return ready.then(() => new Promise((ok, fail) => drawScoreCard(r).toBlob(b => b ? ok(b) : fail(new Error('no image')), 'image/png')));
+}
 function saveScoreImage(r) {
-  const go = () => drawScoreCard(r).toBlob(blob => {
-    if (!blob) return;
+  scoreCardBlob(r).then(blob => {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = 'peedees-dental-defense-score.png';
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-  }, 'image/png');
-  // make sure both fonts are ready at card sizes before drawing
-  if (document.fonts && document.fonts.load) Promise.all([document.fonts.load("40px 'Press Start 2P'"), document.fonts.load("44px 'VT323'")]).then(go, go);
-  else go();
+  }, () => {});
 }

@@ -11,6 +11,7 @@ function press(k, on) {
   if (on && k === 'jump') {
     if (G.state === 'dialog') { advanceDialog(); return; }
     if (G.state === 'clear') { continueAfterClear(); return; }
+    if (G.state === 'facts') { skipFacts(); return; }
   }
   if (k === 'jump' && on && !keys.jump) input.jumpEdge = true;
   if (k === 'med' && on && !keys.med) input.medEdge = true;
@@ -18,14 +19,14 @@ function press(k, on) {
   keys[k] = on;
 }
 function releaseAll() { for (const k in keys) keys[k] = false; document.querySelectorAll('.tb.on').forEach(b => b.classList.remove('on')); }
-const inGame = () => ['play', 'dialog', 'dying', 'clear', 'pause'].includes(G.state);
+const inGame = () => ['play', 'dialog', 'dying', 'clear', 'facts', 'pause'].includes(G.state);
 
 window.addEventListener('keydown', e => {
   AudioSys.init();
   if (document.body.classList.contains('touch') && !e.repeat && KEYMAP[e.code]) setTouchMode(false);
   if (e.code === 'KeyP' || e.code === 'Escape') { if (!e.repeat && (G.state === 'play' || G.state === 'pause')) { togglePause(); e.preventDefault(); } return; }
   if (e.code === 'KeyM' && !e.repeat) { toggleMute(); return; }
-  if (e.code === 'Enter' && !e.repeat && (G.state === 'dialog' || G.state === 'clear')) { e.preventDefault(); press('jump', true); keys.jump = false; return; }
+  if (e.code === 'Enter' && !e.repeat && (G.state === 'dialog' || G.state === 'clear' || G.state === 'facts')) { e.preventDefault(); press('jump', true); keys.jump = false; return; }
   const k = KEYMAP[e.code];
   if (!k) return;
   if (inGame()) e.preventDefault();

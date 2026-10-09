@@ -131,7 +131,7 @@ function drawPortrait(who) {
 
 /* ---------- screens ---------- */
 function showOverlay(id) {
-  ['titleScreen', 'helpScreen', 'pauseScreen', 'clearScreen', 'endScreen'].forEach(o => $(o).classList.toggle('on', o === id));
+  ['titleScreen', 'helpScreen', 'pauseScreen', 'clearScreen', 'factScreen', 'endScreen'].forEach(o => $(o).classList.toggle('on', o === id));
   const first = id && $(id).querySelector('button');
   if (first && !document.body.classList.contains('touch')) setTimeout(() => first.focus({ preventScroll: true }), 30);
 }
@@ -198,14 +198,8 @@ function levelClear() {
 }
 function continueAfterClear() {
   if (G.state !== 'clear') return;
-  AudioSys.play('select'); showOverlay(null);
-  G.state = 'transition';
-  const next = G.levelIdx + 1;
-  G.fade = 0.01; G.fadeTo = () => {
-    loadLevel(next); G.state = 'play'; setBodyState();
-    const intro = LEVEL_INTRO[LEVEL_DEFS[next].id];
-    if (intro) dialog(LINES[intro], null);
-  };
+  AudioSys.play('select');
+  showFacts(G.levelIdx + 1);                 // a quick "did you know?" card, then the next level
 }
 function lockArena() {
   const A = G.L.arena;
@@ -219,13 +213,13 @@ function startBoss() {
   AudioSys.music(null); AudioSys.play('roar'); shake(6);
   G.boss = new Hal(clamp(G.player.x + VW * 0.3, A.x1 + 16, A.x2 - 76));
   G.boss.state = 'intro';
-  G.coats = [A.x1 + 70, (A.x1 + A.x2) / 2, A.x2 - 70].map(x => new Coat(x));
-  dialog(LINES.hal, () => {
+  G.coats = [A.x1 + (A.x2 - A.x1) * 0.3, A.x1 + (A.x2 - A.x1) * 0.7].map(x => new Coat(x));   // two patches to scrub
+  G.pendingTalk = { t: 55, lines: LINES.hal, done: () => {
     G.boss.go('enter'); G.fight = true;
     showBossBar(G.boss.name, false);
     G.bossBar = 0; G.bossFillT = 0;
     AudioSys.music('boss');
-  });
+  } };
 }
 function showBossBar(name, rr) {
   $('bossName').textContent = name;

@@ -6,8 +6,10 @@ function killEnemy(e) {
   const col = { blob: '#f2e14c', germ: '#ff2e63', crab: '#efe2b0', mite: '#b05cff', bug: '#ff7ad9', spitter: '#8cff3c' }[e.kind] || '#fff';
   burst(e.x + e.w / 2, e.y + e.h / 2, 16, [col, '#ffffff'], 2.2);
   AudioSys.play('pop');
-  // very rarely, a germ coughs up an extra special-attack charge
-  if (G.L.def.special && Math.random() < 0.07) G.drops.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, vy: -2.6, life: 720 });
+  // once in a while a germ coughs up an extra special-attack charge, or a healing mint leaf
+  const r = Math.random();
+  if (G.L.def.special && r < 0.06) G.drops.push({ kind: 'sp', x: e.x + e.w / 2, y: e.y + e.h / 2, vy: -2.6, life: 720 });
+  else if (r > 0.94) G.drops.push({ kind: 'hp', x: e.x + e.w / 2, y: e.y + e.h / 2, vy: -2.6, life: 720 });
 }
 
 /* ---------- effects ---------- */
@@ -28,4 +30,4 @@ function dust(x, y, n, color) { for (let i = 0; i < n; i++) spawnP(x + rand(-4, 
 function popup(x, y, text, color, life) { G.pops.push({ x, y, text, color, life: life || 50, max: life || 50 }); }
 function shake(n) { if (!reduceMotion) G.shake = Math.max(G.shake, n); }
 const onScreen = (x, y, m) => x > G.cam.x - m && x < G.cam.x + VW + m && y > G.cam.y - m && y < G.cam.y + VH + m;
-function dentAt(g, x) { const d = g.dent; if (!d || Math.abs(d.d) < 0.05) return 0; const k = (x - d.x) / 13; return d.d * Math.exp(-k * k); }
+function dentAt(g, x) { const d = g.dent; if (!d || Math.abs(d.d) < 0.05) return 0; const k = (x - d.x) / (13 * WS); return d.d * Math.exp(-k * k); }   // the squish scales with the mouth

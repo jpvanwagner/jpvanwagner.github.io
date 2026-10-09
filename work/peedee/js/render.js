@@ -14,7 +14,26 @@ function ell(x, y, rx, ry, c) { if (PIXMODE) return pixEll(x, y, rx, ry, c); ctx
 /* The pixel layer: the whole world (backdrop, teeth, gums, characters, pickups, effects) is drawn here at one
    canvas pixel per game pixel, then scaled up with hard edges for a late-Genesis look. Only text (tips, score
    popups, prompts, banners) is drawn straight to the screen, so it stays sharp. */
-const pixCvs = document.createElement('canvas'), pixCtx = pixCvs.getContext('2d');
+const pixCvs = document.createElement('canvas'), pixCtx = pixCvs.getContext('2d', { willReadFrequently: true });
+/* Genesis colour: each channel is cut down to 8 levels (the Mega Drive's 9-bit palette), so edges come out
+   as hard pixels and gradients as flat bands of colour, with only a light ordered dither where two bands meet;
+   see-through effects become a checkerboard. The pattern is pinned to the world, so it doesn't crawl as the camera scrolls. */
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(v => (v + 0.5) / 16);
+const DITHER = 0.18;   // 0 = flat colour bands, 1 = full dithering; just a thin seam where two bands meet
+const QLUT = BAYER.map(b => { const a = new Uint8Array(256); for (let v = 0; v < 256; v++) a[v] = Math.round(Math.min(7, Math.floor(v * 7 / 255 + 0.5 - DITHER / 2 + b * DITHER)) * 255 / 7); return a; });
+function genesisColors(ox, oy) {
+  const w = pixCvs.width, h = pixCvs.height, img = pixCtx.getImageData(0, 0, w, h), d = img.data;
+  for (let y = 0; y < h; y++) {
+    const row = ((y + oy) & 3) * 4;
+    for (let x = 0, i = y * w * 4; x < w; x++, i += 4) {
+      const a = d[i + 3]; if (!a) continue;
+      const k = row + ((x + ox) & 3), lut = QLUT[k];
+      d[i] = lut[d[i]]; d[i + 1] = lut[d[i + 1]]; d[i + 2] = lut[d[i + 2]];
+      d[i + 3] = a / 255 > BAYER[k] ? 255 : 0;
+    }
+  }
+  pixCtx.putImageData(img, 0, 0);
+}
 function beginPixels(camX, camY, screenSpace) {
   const w = Math.ceil(VW) + 3, h = VH + 3;
   if (pixCvs.width !== w || pixCvs.height !== h) { pixCvs.width = w; pixCvs.height = h; }
@@ -23,6 +42,7 @@ function beginPixels(camX, camY, screenSpace) {
   ctx = pixCtx; PIXMODE = true;
 }
 function endPixels(camX, camY) {
+  genesisColors(Math.floor(camX) & 3, Math.floor(camY) & 3);
   ctx = screenCtx; PIXMODE = false;
   ctx.imageSmoothingEnabled = false; ctx.drawImage(pixCvs, Math.floor(camX), Math.floor(camY));
 }
@@ -128,7 +148,7 @@ function render() {
   drawParticles();
   endPixels(pcx, pcy);
   drawPrompts();
-  for (const q of G.pops) ptext(q.text, q.x, q.y, q.color, 8, 'center');
+  for (const q of G.pops) { const hw = q.text.length * 4 + 4; ptext(q.text, clamp(q.x, G.cam.x + hw, G.cam.x + VW - hw), q.y, q.color, 8, 'center'); }   // popups stay on screen
   ctx.restore();
   if (G.L.def.dark && G.player) drawDarkness();
   if (G.special) { beginPixels(0, 0, true); drawSpecial(); endPixels(0, 0); drawSpecial(); }   // the effect in pixels, its name sharp
@@ -229,11 +249,16 @@ function drawUpperArch(th, cx, cy) {
   ctx.fillStyle = th.sky[0]; ctx.globalAlpha = 0.18; ctx.fillRect(0, 0, VW, gumY + crown * sc + 4); ctx.globalAlpha = 1;
 }
 function drawGum(t) {
-  let ga = 1;
-  if (t.off) { if (!t.dis || t.dis > 50) return; ga = (50 - t.dis) / 50 * 0.5; }
-  ctx.globalAlpha = ga;
+  if (t.off) {                     // melted: once it starts regrowing, it knits back together from the middle outward
+    if (!t.dis || t.dis > GUM_GROW) return;
+    const g = 1 - t.dis / GUM_GROW, half = t.w / 2 * g, mid = t.x + t.w / 2;
+    ctx.save(); ctx.beginPath(); ctx.rect(mid - half, G.cam.y - 10, half * 2, VH + 40); ctx.clip();
+    ctx.translate(0, (1 - g) * 5 * WS);
+    drawGumBody(t); ctx.restore();
+    if (G.t % 5 === 0 && onScreen(t.x, t.y, 10)) { const sx = Math.random() < 0.5 ? mid - half : mid + half; spawnP(sx, t.y + (1 - g) * 5 * WS, { vx: rand(-0.3, 0.3), vy: -0.5, color: '#ffd6e8', life: 16, size: 1, g: 0 }); }
+    return;
+  }
   drawGumBody(t);
-  ctx.globalAlpha = 1;
 }
 /* Fills the current path with gum shading that fades from the gum's own surface downward, column by column,
    so slopes and joins between pieces always match. anchor(x) = the surface height at x. */
@@ -540,14 +565,19 @@ function drawGate(t) {
 }
 function drawGumpad(t) {
   let a = 1;
-  if (t.off) { if (!t.dis || t.dis > 50) return; a = (50 - t.dis) / 50 * 0.5; }
+  ctx.save();
+  if (t.off) {                     // regrowing gum pads swell back into place
+    if (!t.dis || t.dis > GUM_GROW) { ctx.restore(); return; }
+    const g = 1 - t.dis / GUM_GROW;
+    ctx.translate(t.x + t.w / 2, t.y + 4); ctx.scale(g, 0.4 + 0.6 * g); ctx.translate(-(t.x + t.w / 2), -(t.y + 4));
+  }
   ctx.globalAlpha = a;
   ctx.fillStyle = '#7a1a48'; ctx.beginPath(); ctx.roundRect(t.x - 1, t.y - 1, t.w + 2, 9, 4); ctx.fill();
   const gr = ctx.createLinearGradient(0, t.y, 0, t.y + 7); gr.addColorStop(0, '#ffb6d6'); gr.addColorStop(1, '#e0508a');
   ctx.fillStyle = gr; ctx.beginPath(); ctx.roundRect(t.x, t.y, t.w, 7, 3); ctx.fill();
   ctx.fillStyle = '#ffd6e8'; ctx.fillRect(t.x + 3, t.y + 1, t.w - 6, 1);
   ctx.fillStyle = '#d8417a'; for (let k = 5; k < t.w - 3; k += 8) ctx.fillRect(t.x + k, t.y + 4, 2, 1);
-  ctx.globalAlpha = 1;
+  ctx.globalAlpha = 1; ctx.restore();
 }
 function drawArenaWall(wl) {
   const fl = 190 * WS, h = fl - G.L.top, y = fl - h * wl.rise + (G.L.tongue ? 30 * WS : 0);
@@ -774,6 +804,7 @@ function drawBubble(b) {
 }
 function drawDrop(d) {
   if (d.life < 120 && d.life % 8 < 4) return;
+  if (d.kind === 'hp') { drawMint({ x: d.x, y: d.y - 2 }); return; }
   const x = Math.round(d.x), y = Math.round(d.y + Math.sin(G.t * 0.12) * 1.5);
   ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4);
   ctx.fillStyle = '#1b0f2e'; ctx.fillRect(-5, -5, 10, 10);

@@ -55,10 +55,10 @@ class Player {
     this.squash = Math.min(0.5, v * 0.08);
     if (!g) return;
     const gd = g.mound || g;                       // landing on a gum mound squishes the whole mound
-    if (g.kind === 'gum' && gd.dent) { gd.dent.x = this.x + this.w / 2; gd.dent.v += Math.min(5, v * 0.75); AudioSys.play('squish', v); dust(this.x + this.w / 2, this.y + this.h, 3, '#ffc2da'); }
+    if (g.kind === 'gum' && gd.dent) { gd.dent.x = this.x + this.w / 2; gd.dent.v += Math.min(3.5 * WS, v * 0.7); AudioSys.play('squish', v); dust(this.x + this.w / 2, this.y + this.h, 3, '#ffc2da'); }
     else if (g.kind === 'floss') { g.sag.x = this.x + this.w / 2; g.sag.v += Math.min(4, v * 0.6); AudioSys.play('boing'); }
     else if (g.kind === 'wire') { g.sag.x = this.x + this.w / 2; g.sag.v += Math.min(0.8, v * 0.1); AudioSys.play('tap'); }
-    else if (g.kind === 'tongue') { g.dent.x = this.x + this.w / 2; g.dent.v += Math.min(6, v * 0.9); AudioSys.play('squish', v); }
+    else if (g.kind === 'tongue') { g.dent.x = this.x + this.w / 2; g.dent.v += Math.min(6 * WS, v * 0.95); AudioSys.play('squish', v); }
     else if (v > 2) { AudioSys.play('tap'); dust(this.x + this.w / 2, this.y + this.h, 3); }
   }
   fell() {
@@ -187,6 +187,7 @@ class Walker {
   }
   update() {
     this.t++; if (this.flash > 0) this.flash--;
+    if (this.sucked) return;                 // being inhaled by Hal
     const p = G.player;
     if (this.state === 'hang') {
       if (p && Math.abs(p.x + p.w / 2 - (this.x + this.w / 2)) < 26 && p.y > this.y) { this.state = 'shake'; this.st = 0; AudioSys.play('warn'); }
@@ -258,6 +259,7 @@ class Bug {
   constructor(o) { Object.assign(this, { kind: 'bug', w: 14, h: 10, x0: o.x, range: o.range || 120, x: o.x, baseY: o.y, y: o.y, dir: 1, hp: 1, dmg: 15, score: 120, t: Math.floor(rand(0, 100)), flash: 0, stompable: true }); }
   update() {
     this.t++; if (this.flash > 0) this.flash--;
+    if (this.sucked) return;
     this.x += this.dir * 0.8;
     if (this.x > this.x0 + this.range) this.dir = -1; else if (this.x < this.x0) this.dir = 1;
     this.y = this.baseY + Math.sin(this.t * 0.06) * 10;

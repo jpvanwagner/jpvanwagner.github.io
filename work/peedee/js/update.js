@@ -6,6 +6,7 @@ function update() {
   if (G.state === 'title') updateTitle();
   else if (G.state === 'dialog') { updateDialog(); updateAmbient(); }
   else if (G.state === 'play' || G.state === 'dying') updatePlay();
+  else if (G.state === 'facts') { updateAmbient(); updateFacts(); }
   else if (G.state === 'clear' || G.state === 'pause' || G.state === 'over' || G.state === 'won') { if (G.state !== 'pause') updateAmbient(); }
   if (G.fade > 0 && G.fadeTo) { G.fade += 0.06; if (G.fade >= 1) { const f = G.fadeTo; G.fadeTo = null; f(); } }
   else if (G.fade > 0) G.fade = Math.max(0, G.fade - 0.05);
@@ -27,7 +28,7 @@ function updateTerrain() {
     if (s) {
       const on = p && p.grounded && (p.ground === t || (p.ground && p.ground.mound === t));
       if (on) s.x = lerp(s.x, p.x + p.w / 2, 0.5);
-      s.v = (s.v + ((on ? (t.kind === 'gum' || t.kind === 'mound' ? 2.2 : t.kind === 'wire' ? 0.4 : 3) : 0) - s.d) * 0.22) * 0.82;      // braces wire barely gives s.d += s.v;
+      s.v = (s.v + ((on ? (t.kind === 'gum' || t.kind === 'mound' ? 2.4 * WS : t.kind === 'wire' ? 0.4 : 3) : 0) - s.d) * 0.22) * 0.82; s.d += s.v;      // gums squish, floss sags, the braces wire barely gives
     }
   }
   const T = G.L.tongue;
@@ -35,7 +36,7 @@ function updateTerrain() {
     G.world.time = G.t;
     const d = T.dent, on = p && p.grounded && p.ground === T;
     if (on) d.x = lerp(d.x, p.x + p.w / 2, 0.5);
-    d.v = (d.v + ((on ? 2.5 : 0) - d.d) * 0.2) * 0.8; d.d += d.v;
+    d.v = (d.v + ((on ? 2.5 * WS : 0) - d.d) * 0.2) * 0.8; d.d += d.v;
     // every so often a big surge rolls along the tongue toward PeeDee
     if (p && G.state === 'play' && --G.pulseT <= 0) {
       const dir = Math.random() < 0.5 ? 1 : -1, inArena = !!G.lock;
@@ -79,6 +80,7 @@ function updatePlay() {
   if (G.state !== 'play') { updateParticles(); return; }
   if (G.cleanTimer > 0) G.cleanTimer--;
   if (G.cleanTalkT > 0 && --G.cleanTalkT === 0) { dialog(LINES.gap, null); return; }
+  if (G.pendingTalk && --G.pendingTalk.t <= 0) { const k = G.pendingTalk; G.pendingTalk = null; dialog(k.lines, k.done); return; }   // after the camera has panned over
 
   for (const e of G.enemies) {
     if (e.dead) continue;
@@ -120,7 +122,7 @@ function updatePlay() {
     const gnd = groundAt(f.x, f.y + f.r * 0.5);
     if ((gnd && (gnd.solid || gnd.kind === 'tongue')) || f.y > L.deathY) {
       f.life = 0;
-      if (f.kind === 'gunk' && G.boss && gnd && gnd.kind === 'tongue' && G.coats.length < 4) {
+      if (f.kind === 'gunk' && G.boss && gnd && gnd.kind === 'tongue' && G.coats.length < 2) {
         G.coats.push(new Coat(clamp(f.x, L.arena.x1 + 16, L.arena.x2 - 16))); AudioSys.play('squish', 2);
         for (let i = 0; i < 8; i++) spawnP(f.x, f.y, { vx: rand(-1.2, 1.2), vy: rand(-1.6, -0.3), color: '#f4ecd0', life: 20, size: 2 });
         continue;
@@ -133,7 +135,7 @@ function updatePlay() {
   G.foes = G.foes.filter(f => f.life > 0);
 
   // pickups
-  for (const g of G.gems) if (!g.taken && Math.abs(g.x - (p.x + p.w / 2)) < 8 && Math.abs(g.y - (p.y + p.h / 2)) < 12) {
+  for (const g of G.gems) if (!g.taken && Math.abs(g.x - (p.x + p.w / 2)) < 9 && Math.abs(g.y - (p.y + p.h / 2)) < 14) {
     g.taken = true; G.score += 10; G.stats.gems++; AudioSys.play('gem'); burst(g.x, g.y, 6, ['#2ce8f5', '#fff'], 1.2);
   }
   for (const m of G.mints) if (!m.taken && Math.abs(m.x - (p.x + p.w / 2)) < 9 && Math.abs(m.y - (p.y + p.h / 2)) < 13) {
@@ -180,7 +182,7 @@ function updateBubbles() {
     b.x += b.vx; b.y += b.vy;
     if (b.x - b.r < A.x1) { b.x = A.x1 + b.r; b.vx = Math.abs(b.vx); }
     if (b.x + b.r > A.x2) { b.x = A.x2 - b.r; b.vx = -Math.abs(b.vx); }
-    const top = G.L.def.id === 'root' ? 62 * WS : G.cam.y + 8;
+    const top = G.cam.y + 8;
     if (b.y - b.r < top) { b.y = top + b.r; b.vy = Math.abs(b.vy) * 0.8; }
     if (b.vy > 0) { const g = groundAt(b.x, b.y + b.r); if (g) { b.y = g.y - b.r; b.vy = -Math.max(3.3 * WS, b.vy * 0.9); AudioSys.play('bloop'); } }
     if (b.y > G.L.deathY) { b.life = 0; continue; }
@@ -202,8 +204,9 @@ function updateDrops() {
     const g = groundAt(d.x, d.y + 5); if (g && d.vy > 0) { d.y = g.y - 5; d.vy = 0; }
     if (d.y > G.L.deathY) d.life = 0;
     if (Math.abs(d.x - (p.x + p.w / 2)) < 9 && Math.abs(d.y - (p.y + p.h / 2)) < 13) {
-      d.life = 0; G.specials = Math.min(3, G.specials + 1); AudioSys.play('mint');
-      popup(d.x, d.y - 12, '+1 SPECIAL!', '#ff6fb1', 70); burst(d.x, d.y, 12, ['#ff6fb1', '#ffcc00', '#fff'], 1.8);
+      d.life = 0; AudioSys.play('mint');
+      if (d.kind === 'hp') { p.hp = Math.min(100, p.hp + 25); popup(d.x, d.y - 12, '+25 HP', '#7dffb0', 70); burst(d.x, d.y, 12, ['#3dff8a', '#fff'], 1.8); }
+      else { G.specials = Math.min(3, G.specials + 1); popup(d.x, d.y - 12, '+1 SPECIAL!', '#ff6fb1', 70); burst(d.x, d.y, 12, ['#ff6fb1', '#ffcc00', '#fff'], 1.8); }
     }
   }
   G.drops = G.drops.filter(d => d.life > 0);
@@ -262,7 +265,7 @@ function updateTriggers() {
     const gi = G.enemies.find(e => e.kind === 'gingi');
     if (gi) {
       lockArena(); AudioSys.music(null);
-      dialog(LINES.gingi, () => { gi.go('drift'); G.fight = true; showBossBar(gi.name, true); AudioSys.music('boss'); });
+      G.pendingTalk = { t: 55, lines: LINES.gingi, done: () => { gi.go('drift'); G.fight = true; showBossBar(gi.name, true); AudioSys.music('boss'); } };
       return;
     }
   }
@@ -291,10 +294,11 @@ function followCam() {
   if (L.def.keepInView != null) ty = Math.min(Math.max(ty, L.def.keepInView * WS + 14 - VH), p.y - VH * 0.36);   // show the gumline under tall teeth, but never crowd PeeDee up under the HUD
   if (p.y - 34 < ty) ty = p.y - 34;                       // keep headroom above
   if (p.y + p.h > ty + VH - 24) ty = p.y + p.h - VH + 24;  // and room below when falling
-  G.cam.x += (tx - G.cam.x) * 0.12; G.cam.y += (ty - G.cam.y) * 0.1;
-  let x1 = 0, x2 = L.width;
-  if (G.lock) { x1 = G.lock.x1; x2 = G.lock.x2; }
-  G.cam.x = clamp(G.cam.x, x1, Math.max(x1, x2 - VW));
+  if (G.lock) tx = clamp(tx, G.lock.x1, Math.max(G.lock.x1, G.lock.x2 - VW));   // aim inside a locked boss arena...
+  G.lockT = G.lock ? (G.lockT || 0) + 1 : 0;
+  const glide = G.lock && G.lockT < 100;                                         // ...gliding over gently when it first locks
+  G.cam.x += (tx - G.cam.x) * (glide ? 0.045 : 0.12); G.cam.y += (ty - G.cam.y) * (glide ? 0.045 : 0.1);
+  G.cam.x = clamp(G.cam.x, 0, Math.max(0, L.width - VW));
   G.cam.y = clamp(G.cam.y, L.top, L.poolY + 28 - VH);
 }
 

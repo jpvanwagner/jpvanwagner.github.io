@@ -105,6 +105,15 @@
   <button class="btn green" id="btnContinue" type="button">Continue</button>
 </div></div>
 
+<!-- BETWEEN LEVELS: a quick dental fact while the next level loads -->
+<div id="factScreen" class="overlay"><div class="panel fact-panel">
+  <p class="fact-kicker">&#9733; DID YOU KNOW? &#9733;</p>
+  <p class="fact-text" id="factText"></p>
+  <p class="fact-src" id="factSrc"></p>
+  <div class="fact-bar"><div id="factFill"></div></div>
+  <p class="fact-next"><span id="factNext"></span> <span class="fact-skip" id="factSkip">&#9654; JUMP / TAP</span></p>
+</div></div>
+
 <!-- GAME OVER / VICTORY -->
 <div id="endScreen" class="overlay"><div class="panel wide">
   <div class="end-grid">
@@ -126,7 +135,7 @@
         <h3 class="share-h">SHARE YOUR SCORE</h3>
         <p class="share-text" id="shareText"></p>
         <div class="share-links" id="shareLinks"></div>
-        <p class="share-note">Facebook won't let sites fill in a post, so its button copies the text for you to paste.</p>
+        <p class="share-note">Facebook won't let sites fill in a post, so its button copies the text for you to paste. Instagram's button saves your score card and copies the text (on phones it opens your share menu, so you can pick Instagram).</p>
       </div>
       <a class="jv-credit" href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio">
         <img alt="" width="20" height="20" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACLUlEQVR4nM2UTUhUURiGn3PuwLSQGnWiGGYqS6uZiVoU5SQuchWFbiJaBQYSZC1aBAoO1KLIqGwT0ULIbVqbwJ39LkqEoaKfq2FaOuNUGI4ulGDmfi1Gb03nalvf3f1+3vN83+FcWO1SKyUTVZUiAqGKNWRnfiEIg+M/1cGtQXk5Nu3Z6xlMVFWKALsjAQ4d2MbzoTGys/PU7woxms7x5usMCsWrcdPUCCSqgrJnc4Bvs/PUx0OMTM5QEw4QDgV5NjTKj7kF6uIhPqdzvJ3I8S+pNvmEmkiA9WV+XryfomF/NaPpHL0D79i+qZzKMj+hDeV8n1vwXJNpqBRPX0/QdeMSdbGNPB78RHV4HY7jYI9P03X9Ik0nThIs83saGiPXbqmQgd5b7rfjSCmBLrZY2qLh+Hljjz4DWWtOn0u6Zt13rvzJKUVLa4eLoTyutCQ0dPOMHO18RKFQKBYLWD4f+UIBBHw+i3w+7+bQFv3tjdReuOv6GISO4zCSydKXyqC0Jtm4jy/9V7G0JnK4jeFMlgepDFpbdDTtNQgNQxHhfmoKUGgUBcdxxxNx6EtNIShAGfs1Rgb42NMu4Z07SkombRtEiMRii7MW4+nhYWLNnSUeni9lbrDHPVrp0hL5i2ptbbPRb4wMMGnbRKJRlFL0337onioiHDl7DKUWqT207M/hw702iUSjnjmvUZfk8fSKip+6pgwKpUjb9rJmKxIu6cnllpKrbEh2/7dndes3KNPMpND3uDEAAAAASUVORK5CYII=">
@@ -155,6 +164,7 @@
 <script src="js/physics.js"></script>
 <script src="js/levels.js"></script>
 <script src="js/util.js"></script>
+<script src="js/zzfxm.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/input.js"></script>
 <script src="js/layout.js"></script>
@@ -165,6 +175,7 @@
 <script src="js/effects.js"></script>
 <script src="js/update.js"></script>
 <script src="js/flow.js"></script>
+<script src="js/facts.js"></script>
 <script src="js/share.js"></script>
 <script src="js/hud.js"></script>
 <script src="js/render.js"></script>

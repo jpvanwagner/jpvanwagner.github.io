@@ -1,7 +1,9 @@
 'use strict';
-/* ============================== AUDIO (all synthesized, no files) ============================== */
+/* ============================== AUDIO ==============================
+   Sound effects are synthesized on the spot. Music is ZzFXM songs in music/*.js (edit them in the ZzFXM
+   Tracker), each fetched and rendered the first time it's needed. */
 const AudioSys = (() => {
-  let ac = null, master, sfxBus, musBus, noiseBuf, song = null, step = 0, nextT = 0, timer = null;
+  let ac = null, master, sfxBus, musBus, noiseBuf;
   let muted = store.get('pdd-muted') === '1';
   function init() {
     if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
@@ -10,11 +12,11 @@ const AudioSys = (() => {
     ac = new AC();
     master = ac.createGain(); master.gain.value = muted ? 0 : 0.9; master.connect(ac.destination);
     sfxBus = ac.createGain(); sfxBus.gain.value = 0.55; sfxBus.connect(master);
-    musBus = ac.createGain(); musBus.gain.value = 0.14; musBus.connect(master);
+    musBus = ac.createGain(); musBus.gain.value = 0.6; musBus.connect(master);
     noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
     const d = noiseBuf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    if (song) startSeq();
+    if (wanted) startSong(wanted);
   }
   function tone(type, f0, f1, dur, vol, when, bus) {
     if (!ac) return;
@@ -76,60 +78,67 @@ const AudioSys = (() => {
     special: () => { noise(0.5, 0.12, 2400, 0, 600); arp([523, 784, 1047, 1568], 0.05, 'square', 0.08, 0.12); }
   };
 
-  /* ---- tiny step sequencer: each token is an 8th note, '.' = rest ---- */
-  const SONGS = {
-    main: { bpm: 140,
-      lead: 'E5 . G5 . C6 . G5 E5 A5 . C6 . A5 . E5 . F5 . A5 . C6 . A5 F5 G5 . B5 . D6 . B5 G5 E5 G5 C6 E6 D6 C6 B5 G5 A5 C6 E6 C6 A5 . G5 . F5 A5 C6 F6 E6 C6 A5 . G5 . D6 . B5 . C6 .',
-      bass: 'C3 . C4 . G2 . C4 . A2 . A3 . E2 . A3 . F2 . F3 . C3 . F3 . G2 . G3 . D3 . G3 .' },
-    back: { bpm: 132,
-      lead: 'F5 . A5 . C6 . A5 F5 G5 . A#5 . D6 . A#5 G5 A5 . C6 . F6 . C6 A5 G5 . E5 . C5 . . . F5 A5 C6 A5 F5 . E5 . D5 F5 A#5 F5 D5 . C5 . A4 C5 F5 C5 A4 . A#4 . C5 . E5 . G5 . C6 .',
-      bass: 'F2 . F3 . C3 . F3 . G2 . G3 . D3 . G3 . F2 . F3 . C3 . F3 . C3 . C4 . G2 . C4 .' },
-    cave: { bpm: 108,
-      lead: 'A4 . . C5 . . E5 . . . D5 . C5 . B4 . F4 . . A4 . . C5 . . . B4 . G#4 . E4 . A4 . C5 E5 A5 . G5 . F5 . E5 . D5 . . . F4 . A4 . D5 . C5 . B4 . G#4 . B4 . E5 .',
-      bass: 'A2 . . A2 . . A2 . G2 . . G2 . . G2 . F2 . . F2 . . F2 . E2 . . E2 . . E2 .' },
-    tongue: { bpm: 150,
-      lead: 'D5 F#5 A5 F#5 D6 . A5 . B4 D5 G5 D5 B5 . G5 . A4 C#5 E5 C#5 A5 . E5 . D5 . F#5 . A5 . D6 . F#5 A5 D6 A5 F#5 . E5 . G5 B5 D6 B5 G5 . F#5 . E5 A5 C#6 A5 E5 . G5 . F#5 . E5 . D5 . . .',
-      bass: 'D3 . D4 . A2 . D4 . G2 . G3 . D3 . G3 . A2 . A3 . E3 . A3 . D3 . D4 . A2 . D4 .' },
-    boss: { bpm: 160,
-      lead: 'E5 E5 G5 E5 B5 A5 G5 F#5 E5 E5 G5 E5 C6 B5 A5 B5 E5 E5 G5 E5 B5 A5 G5 F#5 G5 F#5 E5 D5 E5 . . .',
-      bass: 'E2 E3 E2 E3 E2 E3 E2 E3 C2 C3 C2 C3 C2 C3 C2 C3 D2 D3 D2 D3 D2 D3 D2 D3 B1 B2 B1 B2 B1 B2 B1 B2' }
-  };
-  const NOTE = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-  const freq = n => { const m = /^([A-G])(#?)(\d)$/.exec(n); if (!m) return 0; return 440 * Math.pow(2, (12 * (+m[3] + 1) + NOTE[m[1]] + (m[2] ? 1 : 0) - 69) / 12); };
-  const parsed = {};
-  for (const k in SONGS) parsed[k] = { bpm: SONGS[k].bpm, lead: SONGS[k].lead.split(/\s+/), bass: SONGS[k].bass.split(/\s+/) };
-  function startSeq() {
-    if (!ac || timer) return;
-    nextT = ac.currentTime + 0.06;
-    timer = setInterval(() => {
-      if (!song || !ac) return;
-      const sp = 60 / song.bpm / 2;
-      while (nextT < ac.currentTime + 0.15) {
-        const when = nextT - ac.currentTime;
-        const ln = song.lead[step % song.lead.length], bn = song.bass[step % song.bass.length];
-        if (ln && ln !== '.') tone('square', freq(ln), 0, sp * 0.85, 0.32, when, musBus);
-        if (bn && bn !== '.') tone('triangle', freq(bn), 0, sp * 0.95, 0.75, when, musBus);
-        if (step % 2 === 1) noise(0.03, 0.12, 7000, when, 0, musBus);
-        step++; nextT += sp;
-      }
-    }, 30);
+  /* ---- music: ZzFXM songs, one file per tune in music/, fetched the first time they're needed ---- */
+  const SONG_FILES = { main: 'bite-club', cave: 'tartarus', back: 'dark-side-of-the-molar', tongue: 'tongue-fu', boss: 'boss' };
+  const loaded = {};               // name -> Promise of { left, right, loopEnd } (rendered once, then reused)
+  let wanted = null, current = null;
+  // The tracker saves "short JSON" (empty slots, numbers like .5); this is the same clean-up its loader does.
+  const parseSong = text => JSON.parse(text.trim()
+    .replace(/\[,/g, '[null,').replace(/,,\]/g, ',null]').replace(/,\s*(?=[,\]])/g, ',null')
+    .replace(/([\[,]-?)(?=\.)/g, '$10').replace(/-\./g, '-0.'), (k, v) => v === null ? undefined : v);
+  function loadSong(name) {
+    if (!loaded[name] && location.protocol === 'file:') {     // opened straight from disk: browsers won't let a page read music/
+      if (!loadSong.told) { loadSong.told = true; console.info('Music is off when the game is opened from disk; serve the folder over http(s) to hear it.'); }
+      return Promise.reject(new Error('file://'));
+    }
+    if (!loaded[name]) loaded[name] = fetch('music/' + SONG_FILES[name] + '.js')
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(text => {
+        const [instruments, patterns, sequence, bpm] = parseSong(text);
+        const [left, right] = zzfxM(instruments, patterns, sequence, bpm);
+        const rows = sequence.reduce((n, p) => n + patterns[p][0].length - 2, 0);     // the loop point, before the last notes ring out
+        return { left, right, loopEnd: rows * (zzfxR / bpm * 60 >> 2) / zzfxR };
+      })
+      .catch(e => { delete loaded[name]; console.info('Music "' + name + '" is unavailable (the game needs to be served over http(s) to load music/ files).', e); throw e; });
+    return loaded[name];
+  }
+  function startSong(name) {
+    if (!ac || !name || !SONG_FILES[name]) return;
+    loadSong(name).then(data => {
+      if (wanted !== name || !ac || (current && current.name === name)) return;
+      stopSong();
+      const buf = ac.createBuffer(2, data.left.length, zzfxR);
+      buf.getChannelData(0).set(data.left); buf.getChannelData(1).set(data.right);
+      const src = ac.createBufferSource(), g = ac.createGain();
+      src.buffer = buf; src.loop = true; src.loopStart = 0; src.loopEnd = Math.min(data.loopEnd, buf.duration);
+      g.gain.setValueAtTime(0.0001, ac.currentTime); g.gain.exponentialRampToValueAtTime(1, ac.currentTime + 0.25);
+      src.connect(g); g.connect(musBus); src.start();
+      current = { name, src, g };
+    }, () => {});
+  }
+  function stopSong() {
+    if (!current || !ac) { current = null; return; }
+    const { src, g } = current, t = ac.currentTime;
+    g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+    src.stop(t + 0.22); current = null;
   }
   return {
     init,
     play(name, a) { if (ac && S[name]) S[name](a); },
     music(name) {
-      const next = name ? parsed[name] : null;
-      if (next === song) return;
-      song = next; step = 0;
-      if (!song) { clearInterval(timer); timer = null; return; }
-      if (ac) { clearInterval(timer); timer = null; startSeq(); }
+      wanted = name || null;
+      if (!wanted) { stopSong(); return; }
+      if (current && current.name === wanted) return;
+      startSong(wanted);
     },
+    preload(name) { if (SONG_FILES[name]) loadSong(name).catch(() => {}); },   // fetch + render ahead of time
     get muted() { return muted; },
+    get playing() { return current ? current.name : null; },     // which song is on (for testing)
     toggle() {
       muted = !muted; store.set('pdd-muted', muted ? '1' : '0');
       if (master) master.gain.setTargetAtTime(muted ? 0 : 0.9, ac.currentTime, 0.02);
       return muted;
     },
-    duck(on) { if (musBus) musBus.gain.setTargetAtTime(on ? 0.05 : 0.14, ac.currentTime, 0.1); }
+    duck(on) { if (musBus) musBus.gain.setTargetAtTime(on ? 0.22 : 0.6, ac.currentTime, 0.1); }
   };
 })();

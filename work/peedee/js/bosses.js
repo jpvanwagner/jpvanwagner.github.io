@@ -40,16 +40,17 @@ class Gingi {
     switch (this.state) {
       case 'sleep': this.y = this.homeY + Math.sin(this.t * 0.04) * 3; break;
       case 'drift':
-        this.x += clamp(this.tx - this.x, -0.9 * WS, 0.9 * WS);
+        this.x += clamp(this.tx - this.x, -0.7 * WS, 0.7 * WS);
         this.y += (this.homeY + Math.sin(this.t * 0.07) * 8 * WS - this.y) * 0.08;
         if (Math.abs(this.tx - this.x) < 2) this.tx = rand(this.x1, this.x2 - this.w);
-        if (this.st > (fast ? 95 : 140)) { this.go(this.n++ % 2 ? 'aim' : 'rise'); AudioSys.play('charge'); }
+        if (this.st > (fast ? 110 : 160)) { this.go(this.n++ % 2 ? 'aim' : 'rise'); AudioSys.play('charge'); }
         break;
       case 'rise':                       // climbs, then sweeps a beam along the gum floor
-        this.y += (70 * WS - this.y) * 0.08;
+        this.y += (92 * WS - this.y) * 0.08;
         if (this.st > 40) {
-          const fromLeft = p.x + p.w / 2 > (this.x1 + this.x2) / 2;
-          this.beam = { kind: 'sweep', a: fromLeft ? this.x1 + 2 : this.x2 - 2, b: fromLeft ? this.x2 - 2 : this.x1 + 2, t: 0, dur: fast ? 80 : 100, ex: 0, ey: 192 * WS };
+          const span = (this.x2 - this.x1) * 0.2, mid = clamp(p.x + p.w / 2, this.x1 + span / 2, this.x2 - span / 2);
+          const fromLeft = Math.random() < 0.5;          // a shorter sweep across the floor near PeeDee, not the whole arena
+          this.beam = { kind: 'sweep', a: mid + (fromLeft ? -span : span) / 2, b: mid + (fromLeft ? span : -span) / 2, t: 0, dur: fast ? 34 : 42, ex: 0, ey: 192 * WS };
           this.go('fire'); AudioSys.play('laser');
         }
         break;
@@ -108,20 +109,21 @@ class Gingi {
     if (this.beam) {
       const B = this.beam;
       ctx.lineCap = 'round';
-      ctx.strokeStyle = 'rgba(255,77,210,.35)'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(cx, cy + 6); ctx.lineTo(B.ex, B.ey); ctx.stroke();
+      ctx.strokeStyle = '#8a1a6a'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(cx, cy + 6); ctx.lineTo(B.ex, B.ey); ctx.stroke();   // solid colours: no dither haze
       ctx.strokeStyle = '#ff4dd2'; ctx.lineWidth = 3; ctx.stroke();
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.stroke();
       ctx.lineCap = 'butt';
-      circ(B.ex, B.ey - 1, 4 + (t % 3), 'rgba(255,225,77,.8)');
+      circ(B.ex, B.ey - 1, 4 + (t % 3), '#ffe14d'); circ(B.ex, B.ey - 1, 2, '#ffffff');
     }
     // sticky biofilm halo
     if (this.armor > 0 && this.state !== 'flee') {
-      ctx.fillStyle = 'rgba(190,230,90,.25)'; ctx.beginPath(); ctx.arc(cx, cy, 21 + Math.sin(t * 0.1), 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = 'rgba(190,230,90,.5)'; for (let i = 0; i < 3; i++) ctx.fillRect(cx - 10 + i * 9, cy + 18, 2, 3 + ((t / 8 + i * 3) % 6));
+      const hr = 21 + Math.round(Math.sin(t * 0.1));             // a ring of sticky slime, drawn in solid pixels
+      for (let k = 0; k < 40; k++) { const a = k / 40 * Math.PI * 2 + t * 0.01; if ((k + (t >> 3)) % 5 === 0) continue; ctx.fillStyle = k % 3 ? '#6f9a2c' : '#a8d64a'; ctx.fillRect(Math.round(cx + Math.cos(a) * hr), Math.round(cy + Math.sin(a) * hr * 0.92), 2, 2); }
+      ctx.fillStyle = '#8cbf3a'; for (let i = 0; i < 3; i++) ctx.fillRect(cx - 10 + i * 9, cy + 18, 2, 3 + ((t / 8 + i * 3) % 6));
     }
     // the germ: a deep-purple coccobacillus with wiggly fimbriae
-    ctx.strokeStyle = '#c58bff'; ctx.lineWidth = 1;
-    for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * 10, cy + Math.sin(a) * 7); ctx.lineTo(cx + Math.cos(a) * (13 + Math.sin(t * 0.3 + i) * 2), cy + Math.sin(a) * (10 + Math.sin(t * 0.3 + i) * 2)); ctx.stroke(); }
+    ctx.fillStyle = '#c58bff';                                     // fimbriae as little pixel whiskers
+    for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, w = Math.sin(t * 0.3 + i) * 2; for (const r of [11, 12.5 + w * 0.5, 14 + w]) ctx.fillRect(Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r * 0.72), 1, 1); }
     ell(cx, cy, 11, 8, '#2a0a4a'); ell(cx, cy, 10, 7, this.flash % 4 > 1 ? '#ffffff' : '#5a1a9a'); ell(cx - 3, cy - 3, 4, 2, '#9a5ad8');
     // engineer goggles (eyes go red while charging)
     const charge = this.state === 'rise' || this.state === 'aim';
@@ -135,18 +137,20 @@ class Gingi {
     const plates = [-Math.PI / 2, Math.PI, 0, Math.PI / 2];
     for (let i = 0; i < this.armor; i++) {
       const a = plates[4 - this.armor + i];
-      ctx.strokeStyle = '#5a4520'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(cx, cy, 15, a - 0.62, a + 0.62); ctx.stroke();
-      ctx.strokeStyle = '#e2c870'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(cx, cy, 15, a - 0.58, a + 0.58); ctx.stroke();
+      for (let s = -0.62; s <= 0.62; s += 0.05)                     // each plate built from solid pixels: dark rim, golden face
+        for (let r = 11; r <= 19; r++) { const edge = r === 11 || r === 19 || Math.abs(s) > 0.56; ctx.fillStyle = edge ? '#5a4520' : r === 12 ? '#f2dc8a' : '#e2c870'; ctx.fillRect(Math.round(cx + Math.cos(a + s) * r), Math.round(cy + Math.sin(a + s) * r), 1, 1); }
       ctx.fillStyle = '#a88a4a'; ctx.fillRect(Math.round(cx + Math.cos(a) * 15), Math.round(cy + Math.sin(a) * 15), 2, 1);
       ctx.fillStyle = '#fff6c0'; ctx.fillRect(Math.round(cx + Math.cos(a - 0.3) * 16), Math.round(cy + Math.sin(a - 0.3) * 16), 1, 1);
     }
     if (this.state === 'sleep') ptext('z', cx + 16, cy - 20 - (t / 6 % 8), '#d9b8ff', 8);
   }
 }
+/* Melted gum stays gone for a moment, then grows back up from below at a steady, visible pace. */
+const GUM_REGROW = 240, GUM_GROW = 150;          // frames until solid again; the last GUM_GROW of them are the regrowth
 function meltAt(x, y) {
   for (const t of G.L.terrain) {
     if (!t.melt || t.off || x < t.x - 2 || x > t.x + t.w + 2 || Math.abs(t.y - y) > 10 * WS) continue;
-    t.off = true; t.dis = 300;
+    t.off = true; t.dis = GUM_REGROW;
     if (t.dent) { t.dent.d = 0; t.dent.v = 0; }
     AudioSys.play('sizzle');
     for (let i = 0; i < 14; i++) spawnP(t.x + rand(0, t.w), t.y + rand(0, 4), { vx: rand(-0.6, 0.6), vy: rand(-1.4, 0.4), color: ['#ff9cc6', '#d8417a', '#ff4dd2'][i % 3], life: 30, size: 2, g: 0.12 });
@@ -178,7 +182,7 @@ class Coat {
 }
 class Hal {
   constructor(x) {
-    Object.assign(this, { kind: 'hal', name: 'HAL-9001', w: 60, h: 50, x, y: -80, hp: 50, max: 50, dmg: 25, t: 0, st: 0, state: 'enter', flash: 0, homeY: 84 * WS, tx: x, n: 0, marks: [], score: 5000, gustDir: 1, bareT: 0 });
+    Object.assign(this, { kind: 'hal', name: 'HAL-9001', w: 60, h: 50, x, y: -80, hp: 25, max: 25, dmg: 25, t: 0, st: 0, state: 'enter', flash: 0, homeY: 118 * WS, tx: x, n: 0, marks: [], score: 5000, gustDir: 1, bareT: 0, wanderT: 300, inhaleCd: 420 });
   }
   go(s) { this.state = s; this.st = 0; }
   get cx() { return this.x + this.w / 2; }
@@ -189,20 +193,26 @@ class Hal {
     const A = G.L.arena, p = G.player, p2 = this.hp <= this.max / 2, T = G.L.tongue;
     this.t++; this.st++; if (this.flash > 0) this.flash--;
     if (this.exposed) this.bareT++; else this.bareT = 0;
+    // germs keep wandering into the arena to join the fight (and to become Hal's snacks)
+    if (G.fight && !this.busy && this.state !== 'dying') {
+      if (this.inhaleCd > 0) this.inhaleCd--;
+      if (--this.wanderT <= 0) { this.spawnWanderer(p2); this.wanderT = p2 ? rand(420, 600) : rand(540, 720); }
+    }
     switch (this.state) {
       case 'enter': this.y += (this.homeY - this.y) * 0.05; if (this.st > 80) this.go('drift'); break;
       case 'drift':
-        this.x += clamp(this.tx - this.x, -1.1 * WS, 1.1 * WS);
-        this.y += (this.homeY + Math.sin(this.t * 0.05) * 14 * WS - this.y) * 0.1;
+        this.x += clamp(this.tx - this.x, -1 * WS, 1 * WS);                      // ~10% slower than before
+        this.y += (this.homeY + Math.sin(this.t * 0.05) * 10 * WS - this.y) * 0.1;
         if (Math.abs(this.tx - this.x) < 2) this.tx = clamp(p.x + rand(-VW * 0.38, VW * 0.38) - this.w / 2, A.x1 + 16, A.x2 - this.w - 16);   // hovers near PeeDee, so he stays on screen
         if (this.st > (p2 ? 80 : 115)) {
           let next;
           if (this.exposed && this.bareT > (p2 ? 170 : 230)) next = 'recoat';      // he won't stay bare for long
+          else if (this.inhaleCd <= 0 && this.hp < this.max && G.enemies.some(e => !e.dead && e.x > A.x1 - 40 && onScreen(e.x, e.y, 20))) next = 'inhale';   // snack time
           else {
             const seq = p2 ? ['spread', 'gust', 'recoat', 'swoop', 'rain', 'summon', 'spread', 'gust', 'swoop'] : ['spread', 'recoat', 'rain', 'spread', 'swoop'];
             next = seq[this.n++ % seq.length];
           }
-          if (next === 'recoat' && G.coats.length >= 3) next = 'spread';
+          if (next === 'recoat' && G.coats.length >= 2) next = 'spread';      // never more than two patches to scrub
           if (next === 'summon' && G.enemies.filter(e => e.kind === 'bug' && !e.dead).length >= 2) next = 'rain';
           this.go(next + 'Warn'); AudioSys.play('warn');
         }
@@ -210,7 +220,7 @@ class Hal {
       case 'recoatWarn':                 // gurgles up a mouthful of gunk and spits it back onto the tongue
         this.y += (this.homeY - 16 - this.y) * 0.06;
         if (this.st > 36) {
-          const n = p2 ? 3 : 2, g = 0.1, F = 70;
+          const n = Math.max(1, 2 - G.coats.length), g = 0.1, F = 70;
           for (let i = 0; i < n; i++) {
             const tx = rand(A.x1 + 24, A.x2 - 24), ty = tongueY(T, tx, G.t) - 4, sx = this.cx, sy = this.cy + 10;
             G.foes.push({ kind: 'gunk', x: sx, y: sy, vx: (tx - sx) / F, vy: (ty - sy - 0.5 * g * F * F) / F, g, r: 5, life: 300 });
@@ -237,11 +247,11 @@ class Hal {
         break;
       case 'swoop': {
         const dx = this.sx - this.x, dy = this.sy - this.y, d = Math.hypot(dx, dy);
-        if (d < 4 || this.st > 70) { shake(3); this.go('recover'); } else { this.x += dx / d * 4.2 * WS; this.y += dy / d * 4.2 * WS; }
+        if (d < 4 || this.st > 70) { shake(3); this.go('recover'); } else { this.x += dx / d * 3.8 * WS; this.y += dy / d * 3.8 * WS; }
         break;
       }
       case 'recover': this.y += (this.homeY - this.y) * 0.05; if (this.st > 50) this.go('drift'); break;
-      case 'reel': this.y += (112 * WS - this.y) * 0.08; this.x += Math.sin(this.st * 1.2) * 0.8; if (this.st > 55) this.go('drift'); break;
+      case 'reel': this.y += (140 * WS - this.y) * 0.08;     // sinks low while he's reeling this.x += Math.sin(this.st * 1.2) * 0.8; if (this.st > 55) this.go('drift'); break;
       case 'gustWarn':                   // inhales... then blasts bad breath across the arena
         this.gustDir = p.x + p.w / 2 > this.cx ? 1 : -1;
         if (this.st > 32) { this.go('gust'); AudioSys.play('roar'); }
@@ -252,8 +262,32 @@ class Hal {
         if (this.st % 22 === 0) G.foes.push({ x: this.cx, y: this.cy + 6, vx: this.gustDir * 2.6, vy: rand(-0.4, 0.8), r: 4, life: 200, g: 0, kind: 'stink' });
         if (this.st > 100) { G.wind = 0; this.go('drift'); }
         break;
+      case 'inhaleWarn':                 // takes a huge breath in...
+        this.y += (this.homeY + 8 - this.y) * 0.06;
+        if (this.st > 30) { this.go('inhale'); AudioSys.play('roar'); if (!G.hints.inhale) { G.hints.inhale = true; popup(p.x + p.w / 2, p.y - 26, "ZAP GERMS BEFORE HAL EATS 'EM!", '#ffcc00', 130); } }
+        break;
+      case 'inhale': {                   // ...and sucks in every germ around to heal himself (PeeDee feels the pull too)
+        const mx = this.cx, my = this.cy + 10;
+        G.wind = Math.sign(mx - (p.x + p.w / 2)) * 0.5;
+        if (this.st % 2 === 0) { const a = rand(0, Math.PI * 2), r = rand(50, 110); spawnP(mx + Math.cos(a) * r, my + Math.sin(a) * r, { vx: -Math.cos(a) * 3.2, vy: -Math.sin(a) * 3.2, color: 'rgba(220,255,180,.8)', life: Math.floor(r / 3.4), size: 1, g: 0 }); }
+        for (const e of G.enemies) {
+          if (e.dead || e.kind === 'gingi' || e.x < G.L.arena.x1 - 40 || !onScreen(e.x + e.w / 2, e.y, 60)) continue;   // only germs in the arena
+          const ex = e.x + e.w / 2, ey = e.y + e.h / 2, dx = mx - ex, dy = my - ey, d = Math.hypot(dx, dy);
+          e.sucked = true;
+          const spd = Math.min(d, (1 + 60 / Math.max(30, d)) * WS);
+          e.x += dx / d * spd; e.y += dy / d * spd;
+          if (d < 16) {                  // gulp!
+            e.dead = true; const heal = 2;
+            this.hp = Math.min(this.max, this.hp + heal); this.flash = 0;
+            burst(mx, my, 12, ['#7bd132', '#d4ff8a', '#ffffff'], 1.6); sparkle(mx, my - 6, 3);
+            popup(mx, this.y - 8, 'GULP! +' + heal, '#7dff6a', 60); AudioSys.play('squish', 3);
+          }
+        }
+        if (this.st > 100) { G.wind = 0; for (const e of G.enemies) e.sucked = false; this.inhaleCd = p2 ? 420 : 540; this.go('drift'); }
+        break;
+      }
       case 'summonWarn':
-        if (this.st > 30) { for (let i = 0; i < 2; i++) G.enemies.push(new Bug({ x: this.cx - 60 + i * 50, y: this.cy + 10, range: 100 })); burst(this.cx, this.cy, 16, ['#86e23a', '#ff7ad9'], 2); this.go('drift'); }
+        if (this.st > 30) { G.enemies.push(new Bug({ x: this.cx - 35, y: this.cy + 10, range: 100 })); burst(this.cx, this.cy, 16, ['#86e23a', '#ff7ad9'], 2); this.go('drift'); }
         break;
       case 'dying':
         this.y += 0.15;
@@ -271,7 +305,7 @@ class Hal {
       if (!G.hints.aura) { G.hints.aura = true; popup(this.cx, this.y - 12, 'ZAPS FIZZLE! SCRUB THE TONGUE!', '#c6ff3b', 130); }
       return 'absorb';
     }
-    return this.damage(d);
+    return this.damage(d * 0.5);         // zaps do half damage, even with the shield down
   }
   auraDown(bonus) {
     if (this.busy) return;
@@ -282,16 +316,31 @@ class Hal {
     this.damage(bonus || 3);
     if (this.state !== 'dying') this.go('reel');
   }
-  mouthwash() {                        // the Mouthwash Wave rinses every patch of gunk away at once
+  mouthwash() {                        // the Mouthwash Wave rinses the gunk away and always hurts him: more if he's already bare
     if (this.busy) return;
+    const bare = this.exposed;
     for (const c of G.coats) burst(c.x, c.y - 2, 10, ['#ffffff', '#3dd6ff'], 2);
     G.coats = []; G.foes = G.foes.filter(f => f.kind !== 'gunk');
-    this.auraDown(6);
+    if (bare) {
+      popup(this.cx, this.y - 12, 'MINTY SLAM! -8', '#7dffb0', 90); burst(this.cx, this.cy, 30, ['#7dffb0', '#ffffff', '#2ce8f5'], 3);
+      this.damage(8); if (this.state !== 'dying') this.go('reel');
+    } else this.auraDown(4);
   }
   damage(d) {
     this.hp -= d; this.flash = 6; AudioSys.play('hit');
-    if (this.hp <= 0) { this.hp = 0; this.go('dying'); G.bossDone = true; G.fight = false; G.wind = 0; G.coats = []; G.score += this.score; popup(this.cx, this.y - 6, '+' + this.score, '#ffcc00', 90); AudioSys.music(null); AudioSys.play('roar'); }
+    if (this.hp <= 0) { this.hp = 0; this.go('dying'); G.bossDone = true; G.fight = false; G.wind = 0; G.coats = [];
+      for (const e of G.enemies) if (!e.dead) { e.dead = true; burst(e.x + e.w / 2, e.y + e.h / 2, 8, ['#ffffff', '#7bd132'], 1.4); } G.score += this.score; popup(this.cx, this.y - 6, '+' + this.score, '#ffcc00', 90); AudioSys.music(null); AudioSys.play('roar'); }
     return 'hit';
+  }
+  spawnWanderer(p2) {                 // a germ drifts in from just off-screen and heads for PeeDee
+    const A = G.L.arena, T = G.L.tongue, alive = G.enemies.filter(e => !e.dead && e.x > A.x1 - 40).length;
+    if (alive >= (p2 ? 2 : 1)) return;
+    const fromLeft = Math.random() < 0.5, x = fromLeft ? Math.max(A.x1 + 6, G.cam.x - 14) : Math.min(A.x2 - 22, G.cam.x + VW + 6);
+    const type = ['blob', 'germ', 'bug', 'germ', 'blob'][Math.floor(rand(0, 5))];
+    let e;
+    if (type === 'bug') { e = makeEnemy({ type, x, y: tongueY(T, x, G.t) - 26, range: 150 }); e.x0 = fromLeft ? x : x - 150; e.x = x; e.dir = fromLeft ? 1 : -1; }
+    else { e = makeEnemy({ type, x, y: tongueY(T, x, G.t) - 4 }); e.dir = fromLeft ? 1 : -1; }
+    e.wander = true; G.enemies.push(e);
   }
   draw() {
     const cx = Math.round(this.cx), cy = Math.round(this.cy), t = this.t, warn = this.state.endsWith('Warn');
@@ -316,7 +365,7 @@ class Hal {
     ctx.fillStyle = '#1b0f2e'; ctx.save(); ctx.translate(cx, cy - 15);
     ctx.rotate(0.35); ctx.fillRect(-20, -1, 13, 3); ctx.rotate(-0.7); ctx.fillRect(7, -1, 13, 3); ctx.restore();
     // grimy grin
-    const open = warn || this.state === 'gust' ? 8 : 5;
+    const open = this.state === 'inhale' ? 11 + Math.sin(t * 0.6) : warn || this.state === 'gust' ? 8 : 5;
     if (this.state === 'gustWarn' || this.state === 'recoatWarn') { circ(cx - 22, cy + 8, 6 + this.st / 6, '#7bd132'); circ(cx + 22, cy + 8, 6 + this.st / 6, '#7bd132'); }
     ctx.fillStyle = '#2a0a1a'; ctx.beginPath(); ctx.ellipse(cx, cy + 10, 16, open, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#e8d36a'; for (let i = 0; i < 5; i++) ctx.fillRect(cx - 12 + i * 5 + (i % 2), cy + 10 - open + 1, 3, 3 + (i % 2));

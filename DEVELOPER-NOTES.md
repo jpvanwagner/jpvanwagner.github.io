@@ -129,7 +129,9 @@ work/                      Sample e-learning (unmodified Rise 360 web exports, o
                            file names, narration that says them, logos blurred).
 
 games/                     Playable learning games, one self-contained index.html each
-  mall-run/  quiz-guy/  quizaga/  quizcavator/
+  mall-run/  quiz-guy/  quizaga/  quizcavator/  right-this-way/
+  unit-204/  (Unit 204: index.html + css/ js/ assets/fonts/, synced from the GAME--Unit-204 repo by its
+             sync-to-portfolio workflow; its sounds are embedded in js/sounds.js, so no audio files)
                            Listed in config/site-config.js (games); Traditional View page for each is
                            pages/project-game-<id>.html. To add one: drop it in games/<id>/index.html,
                            add it to `games` in the config, copy a project-game page, add a card to

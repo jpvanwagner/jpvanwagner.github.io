@@ -46,18 +46,19 @@ const LEVEL_DEFS = [
         .tooth('m1', 106, true)
         .at((x, top) => { L.enemy('blob', x - 40, top - 6); L.sign(x - 128, 112, 'GERM! {SHOOT} to zap it.'); })
         .gap().tooth('p2', 100)
-        .at(x => L.sign(x - 70, 112, 'You can also bop\ngerms on the head!'))
+        .at((x, top) => { L.sign(x - 70, 112, 'You can also bop\ngerms on the head!'); L.enemy('blob', x - 40, top - 6); })
         .gap().tooth('p1', 96, true)
         .at((x, top) => L.enemy('blob', x - 50, top - 6))
         .pocket(24, 200, 'R')
-        .at(x => L.sign(x - 10, 112, 'First rule of Bite Club:\nnever let the ROT meter fill!'))
+        .at(x => L.sign(x - 10, 112, 'Third rule of Bite Club:\nnever let the ROT meter fill!'))
         .tooth('c', 88).gap().tooth('i2', 100).gap().tooth('i1', 100)
-        .at((x, top) => { L.sign(x - 120, 112, 'Gingivitis germs hop!'); L.enemy('germ', x - 100, top - 6); L.gems(x - 60, top - 14, x - 20, top - 14, 3); })
+        .at((x, top) => { L.sign(x - 120, 112, 'Gingivitis germs hop!'); L.enemy('germ', x - 100, top - 6); L.enemy('bug', x - 190, top - 34, { range: 140 }); L.gems(x - 60, top - 14, x - 20, top - 14, 3); })
         .pocket(28, 200, 'L')                            // the gap between the two front teeth
         .midline()
-        .tooth('i1', 100).gap().tooth('i2', 100, true).gap().tooth('c', 88)
+        .tooth('i1', 100).at((x, top) => L.enemy('bug', x - 40, top - 38, { range: 150 }))
+        .gap().tooth('i2', 100, true).gap().tooth('c', 88)
         .at((x, top) => { L.sign(x - 170, 112, 'Too many germs? {SPECIAL} unleashes\nFLOSS FRENZY! Only 2 per level.'); L.enemy('blob', x - 120, top + 6); L.enemy('germ', x - 60, top); })
-        .pocket(24, 200, 'R')
+        .pocket(24, 200, 'R').at(x => L.enemy('blob', x - 12, 196, { range: 4 }))      // a germ guarding the plaque
         .tooth('p1', 96).gap().tooth('p2', 100, true)
         .at((x, top) => { L.enemy('germ', x - 50, top - 6); L.mint(x - 120, top - 20); L.sign(x - 150, 112, 'Mint leaves heal you.'); })
         .gap().tooth('m1', 106, true)
@@ -66,7 +67,7 @@ const LEVEL_DEFS = [
         .tooth('m2', 108, true)
         .at((x, top) => { L.enemy('germ', x - 70, top - 6); L.sign(x - 150, 112, 'Clean every spot to\nbreak the tartar plug.'); })
         .crevice(34)                                     // the gum has pulled away between the last two molars
-        .tooth('m3', 112);
+        .tooth('m3', 112).at((x, top) => L.enemy('germ', x - 70, top - 6));
       const end = R.x;
       L.mound(end, 110, 194, 164, 0.5);                  // the retromolar pad again, at the very back of the jaw
       L.finish(end + 110);
@@ -76,7 +77,7 @@ const LEVEL_DEFS = [
     id: 'root', name: 'TARTARUS', tag: 'LEVEL 2', theme: 'root', width: 2080, top: -200, poolY: 218,
     rotRate: 0.07, music: 'cave', special: null, start: { x: 50, y: 0 }, dark: true,
     exit: { x: 1960, y: -230, w: 120, h: 200, kind: 'up' },
-    arena: { x1: 1640, x2: 1960, lockR: 2080, safe: { x: 1652, y: 176 }, camY: 50 },
+    arena: { x1: 1640, x2: 1960, lockR: 2080, safe: { x: 1652, y: 176 }, camY: 74 },   // framed so the whole gum floor is in view
     build(L) {
       L.ceil(0, 30, 60); L.ceil(90, 1870, 60);
       L.rock(0, 260, 190);
@@ -119,9 +120,7 @@ const LEVEL_DEFS = [
       L.mint(1060, 176);
       L.mint(1620, 172);
 
-      L.sign(110, 110, 'Welcome to TARTARUS...');
-      L.sign(330, 120, 'Nerves spark on and off.\nTime your jump!');
-      L.sign(560, 124, "Too deep for specials.\nNo signal down here!");
+      L.sign(318, 150, 'Nerves spark on and off.\nTime your jump!');     // the one new hazard down here gets a tip
     }
   },
   {
