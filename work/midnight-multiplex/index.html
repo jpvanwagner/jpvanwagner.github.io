@@ -142,7 +142,10 @@ html, body {
 /* The body holds BOTH the canvas (#stage) and the terminal (#terminal).
    Section 3's rules show one and hide the other based on .terminal-active. */
 #terminal {
-  padding: 8px 24px calc(var(--term-font-size) * 3.8 + 22px);   /* bottom room scales with font to hug the fixed bottom stack (#7/#13) — no fixed dead gap (#2) */
+  /* bottom room = the fixed bottom stack's REAL height (measured into
+     --bottom-stack-h by game.js), so the bars never cover the frame; the calc()
+     is the fallback before the first measurement. */
+  padding: 8px 24px calc(var(--bottom-stack-h, calc(var(--term-font-size) * 4.8 + 48px)) + 8px);
   /* Center the terminal column horizontally in the browser window at every
      scale (not just fullscreen). Cap the column width so very wide monitors
      don't stretch the text to silly proportions; the terminal renders at a
@@ -444,15 +447,17 @@ body.map-screen #game-container { display: block; }
   padding: 6px 16px;
   background: rgba(0,0,0,0.88);
   font-family: var(--font);
-  font-size: clamp(9px, 1.15vw, 14px);   /* shrinks in narrow windows/embeds instead of clipping */
+  font-size: var(--term-font-size);   /* same size as the terminal text (was a tiny clamp) */
   color: #9fb6c9;
-  white-space: nowrap;
-  overflow-x: auto;
+  white-space: normal;                 /* wraps between items in narrow windows/embeds instead of clipping */
+  overflow: hidden;
+  line-height: 1.35;
 }
+#controls-bar .ck { white-space: nowrap; }
 body.map-screen #controls-bar { display: block; }
 #controls-bar .ck-key { color: var(--bright); font-weight: bold; padding: 0 2px; }
 #controls-bar .ck { color: var(--fg); }
-#controls-bar .ck-sep { color: #444; margin: 0 9px; }
+#controls-bar .ck-sep { color: #444; margin: 0 4px; }
 /* #3: COMMAND TICKER — a bottom frame listing the words you can TYPE right now
    (basic verbs, toggleable in Settings, + any scene-specific actions). If the
    line is wider than the screen it scrolls like a TV ticker (the .tk-track is
@@ -464,7 +469,7 @@ body.map-screen #controls-bar { display: block; }
   padding: 4px 16px;
   background: rgba(0,0,0,0.82);
   font-family: var(--font);
-  font-size: var(--term-font-size);   /* PORTFOLIO EDIT: same size as the rest of the text (was 9 to 12px) */
+  font-size: var(--term-font-size);   /* the TYPE: command words — same size as the terminal text (was clamp 9–12px) */
   color: #8aa0b2;
   white-space: nowrap;
   overflow: hidden;            /* the ticker scrolls inside; no scrollbar */
@@ -484,20 +489,21 @@ body.map-screen #command-ticker { display: block; }
   padding: 8px 16px;
   background: rgba(0,0,0,0.85);
   font-family: var(--font);
-  font-size: clamp(10px, 1.25vw, 15px);  /* shrinks in narrow windows/embeds instead of clipping */
+  font-size: var(--term-font-size);     /* same size as the terminal text */
   font-weight: 500;
   color: #aaa;
-  white-space: nowrap;
-  overflow-x: auto;
+  white-space: normal;                  /* wraps between items instead of clipping */
+  overflow: hidden;
+  line-height: 1.35;
 }
-#hotkey-bar .hk { color: var(--fg); }
+#hotkey-bar .hk { color: var(--fg); white-space: nowrap; }
 #hotkey-bar .hk-key {
   color: var(--bright);
   font-weight: bold;
   /* Tiny breathing room around each keycap label */
   padding: 0 3px;
 }
-#hotkey-bar .hk-sep { color: #444; margin: 0 10px; }
+#hotkey-bar .hk-sep { color: #444; margin: 0 4px; }
 
 /* ─────── 10b. MINIGAME OVERLAY ─────────────────────────────────────────
    When a minigame is launched in-game (openMinigame()), it loads in an
@@ -812,8 +818,8 @@ body.minigame-active.crt { text-shadow: none; }
   <script src="core/items.js"></script>
   <script src="core/tokens.js"></script>
   <script src="core/display.js"></script>
-  <script src="music/crawlMusic.js"></script>
-  <script src="music/titleMusic.js"></script>
+  <script src="vendor/zzfxm/zzfxm.js"></script>   <!-- ZzFXM song renderer (MIT) -->
+  <script src="music/musicPlayer.js"></script>   <!-- loads music/songs/*.js (ZzFXM Tracker files) when needed -->
   <script src="core/game.js"></script>
   <script src="core/debugroom.js"></script>
   <script src="core/tutorial.js"></script>
@@ -878,7 +884,7 @@ body.minigame-active.crt { text-shadow: none; }
       // #2: kick off the spooky-pop title theme RIGHT HERE, so it plays with the
       // Brickroad splash and carries through the title menu (no long delay). If the
       // browser is still blocking autoplay, TitleMusic arms itself to start on the
-      // first key/click (e.g. the "skip splash" key) — see music/titleMusic.js.
+      // first key/click (e.g. the "skip splash" key) — see music/musicPlayer.js.
       try { if (window.TitleMusic) window.TitleMusic.start(); } catch (e) {}
       const g = canvas.getContext('2d');
       const W = canvas.width, H = canvas.height;

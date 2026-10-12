@@ -31,6 +31,8 @@ function cutOut(g, pts) { g.save(); g.globalCompositeOperation = 'destination-ou
 
 /* ---------- shared pieces ---------- */
 function shell(g, r) {
+  // a room can paint its own shell instead (an outdoor area: sky, ground, fences), then its fixtures go on top as usual
+  if (r.shell) { r.shell(g, r); r.walls && r.walls(g, r); Anomalies.draw(g, r); Decor.drawExtras(g, r); return; }
   const { x0, x1, h, zb } = r.box, zn = 1.6, p = Decor.pal(r.id), sh = Decor.time.shadow;
   fillPoly(g, [P(x0, h, zn), P(x1, h, zn), P(x1, h, zb), P(x0, h, zb)], p.ceil);
   fillPoly(g, [P(x0, h, zb - 1.2), P(x1, h, zb - 1.2), P(x1, h, zb), P(x0, h, zb)], p.ceilBand);
@@ -56,11 +58,13 @@ function shell(g, r) {
   lineW(g, P(x0, 0, zb), P(x0, h, zb), 'rgba(40,30,40,0.35)'); lineW(g, P(x1, 0, zb), P(x1, h, zb), 'rgba(40,30,40,0.35)');
   lineW(g, P(x0, h, zb), P(x1, h, zb), 'rgba(40,30,40,0.25)');
   r.walls && r.walls(g, r);
+  if (r.id === 'living') Openables.drawRug(g);
+  Anomalies.draw(g, r);
   Decor.drawExtras(g, r);
 }
 function carpetFloor(g, r, p) {
   const f = p.floor;
-  for (let i = 0; i < 7; i++) { const cx = (hash(i + 3) - .5) * 10, cz = 4 + hash(i + 8) * 8; fillPoly(g, floorEllipse(cx, cz, 1 + hash(i) * 1.6, .6 + hash(i + 1) * .8), rgba(i % 2 ? f.lt : f.dk, .35)); }   // tonal patches
+  for (let i = 0; i < 7; i++) { const cx = (hash(i + 3) - .5) * 10, cz = 4 + hash(i + 8) * 8, rx = 1 + hash(i) * 1.6, rz = .6 + hash(i + 1) * .8; for (const k of [1, .82, .64, .46]) fillPoly(g, floorBlob(cx, cz, rx * k, rz * k, i * 7 + 3, .3, 18), rgba(i % 2 ? f.lt : f.dk, .1)); }   // tonal patches, feathered so there's no hard oval
   speckle(g, 0, CAM.hy, SW, SH - CAM.hy, f.dk, 4200, 11); speckle(g, 0, CAM.hy, SW, SH - CAM.hy, f.lt, 3000, 12);
 }
 function boardsFloor(g, r, p) {
@@ -75,7 +79,9 @@ function boardsFloor(g, r, p) {
 }
 function tileFloor(size) {
   return (g, r, p) => {
-    const { x0, x1, zb } = r.box, [a, b, grout] = p.floor;
+    const { x0, x1, zb } = r.box, [a, b, g0] = p.floor;
+    // every tile floor gets grout lines; a palette without its own grout color gets a soft dark one from the darker tile
+    const grout = g0 || rgba(mix(b, '#2a1a10', .55), .45);
     for (let z = zb; z > 1.8; z -= size) for (let x = x0, i = 0; x < x1; x += size, i++) {
       const pts = [P(x, 0, z - size), P(x + size, 0, z - size), P(x + size, 0, z), P(x, 0, z)];
       fillPoly(g, pts, (Math.round(x / size) + Math.round(z / size)) % 2 ? a : b);
@@ -97,12 +103,23 @@ function doorOnSide(g, r, side, za, zb2, inside, label) {
 function sixPanelDoor(g, r, xa, xb, ajar) {
   const zb = r.box.zb, w = xb - xa;
   fillPoly(g, Q.back(r.box, xa - .14, xb + .14, 0, 3.05), '#f6f3ea');
+  if (ajar) {                                      // open a crack: the leaf swings into the room on its left hinges, the dark room shows past its edge
+    fillPoly(g, Q.back(r.box, xa, xb, 0, 2.9), '#2a2630'); fillPoly(g, Q.back(r.box, xb - .5, xb, 0, 2.9), '#3a3540');
+    const th = .32, ex = xa + w * Math.cos(th), ez = zb - w * Math.sin(th), leaf = [P(xa, 0, zb), P(ex, 0, ez), P(ex, 2.9, ez), P(xa, 2.9, zb)];
+    fillPoly(g, leaf, '#ece7da'); strokePoly(g, leaf, 'rgba(120,110,95,0.5)');
+    for (let c = 0; c < 2; c++) for (const [ya, yb] of [[.25, 1.25], [1.45, 2.2], [2.35, 2.75]]) {   // panels, foreshortened with the leaf
+      const a = .12 + c * .44, b = a + .32, pt = (k, y) => P(xa + w * k * Math.cos(th), y, zb - w * k * Math.sin(th));
+      fillPoly(g, [pt(a, ya), pt(b, ya), pt(b, yb), pt(a, yb)], '#e0dacb'); lineW(g, pt(a, yb), pt(b, yb), '#c8c1b0');
+    }
+    const e0 = P(ex, 0, ez), e1 = P(ex, 2.9, ez); pxLine(g, e0[0], e0[1], e1[0], e1[1], '#cfc8b6', 2);   // the leaf's edge, catching the light
+    const k = P(xa + (w - .18) * Math.cos(th), 1.2, zb - (w - .18) * Math.sin(th)); pxRect(g, k[0] - 1, k[1] - 1, 3, 3, '#c9a227'); pxRect(g, k[0] - 1, k[1] - 1, 1, 1, '#f2d870');
+    return;
+  }
   fillPoly(g, Q.back(r.box, xa, xb, 0, 2.9), '#ece7da');
   for (let c = 0; c < 2; c++) for (const [ya, yb] of [[.25, 1.25], [1.45, 2.2], [2.35, 2.75]]) {
     const pa = xa + w * (.12 + c * .44), pb = pa + w * .32;
     fillPoly(g, Q.back(r.box, pa, pb, ya, yb), '#e0dacb'); lineW(g, P(pa, yb, zb), P(pb, yb, zb), '#c8c1b0'); lineW(g, P(pa, ya, zb), P(pa, yb, zb), '#c8c1b0');
   }
-  if (ajar) fillPoly(g, Q.back(r.box, xb - .08, xb, 0, 2.9), '#2a2630');
   const k = P(xb - .18, 1.2, zb); pxRect(g, k[0] - 1, k[1] - 1, 3, 3, '#c9a227'); pxRect(g, k[0] - 1, k[1] - 1, 1, 1, '#f2d870');
 }
 function windowBack(g, r, xa, xb, ya, yb, opts = {}) {
@@ -112,10 +129,24 @@ function windowBack(g, r, xa, xb, ya, yb, opts = {}) {
   cutOut(g, Q.back(r.box, xa, xb, ya, yb));
   if (opts.mullion) { const ym = (ya + yb) / 2; fillPoly(g, Q.back(r.box, xa, xb, ym - .05, ym + .05), tr); }
 }
-function lightSwitch(g, r, x, y) { const q = Q.back(r.box, x, x + .18, y, y + .3); fillPoly(g, q, '#f2ecdc'); strokePoly(g, q, '#a8a08c'); const c = polyBox(q); pxRect(g, c.cx - 1, c.cy - 2, 2, 3, '#e6dcc4'); }
+function toggleIn(g, q, on) {                     // a rocker inside a switch plate: lit side up when it's on
+  const c = polyBox(q), h = Math.max(3, Math.round((c.y1 - c.y0) * .5));
+  pxRect(g, c.cx - 1, c.cy - h / 2, 2, h, '#d8cfb6'); pxRect(g, c.cx - 1, on ? c.cy - h / 2 : c.cy, 2, Math.ceil(h / 2), '#ffffff');
+}
+function lightSwitch(g, r, x, y, on = true) { const q = Q.back(r.box, x, x + .18, y, y + .3); fillPoly(g, q, '#f2ecdc'); strokePoly(g, q, '#a8a08c'); toggleIn(g, q, on); }
+function sideSwitch(g, r, side, za, zb2, ya, yb, on = true) { const q = (side === 'left' ? Q.left : Q.right)(r.box, za, zb2, ya, yb); fillPoly(g, q, '#f2ecdc'); strokePoly(g, q, '#a8a08c'); toggleIn(g, q, on); }
+function ring(cx, y, cz, rx, rz, n = 20) { const o = []; for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; o.push(P(cx + Math.cos(a) * rx, y, cz + Math.sin(a) * rz)); } return o; }
+function cobweb(g, x, y, dx, dy, seed) {         // a little web tucked into a corner
+  for (let i = 0; i < 4; i++) { const a = i / 3 * Math.PI / 2; pxLine(g, x, y, x + Math.cos(a) * 9 * dx, y + Math.sin(a) * 7 * dy, 'rgba(240,240,240,0.35)'); }
+  for (const k of [.45, .8]) for (let i = 0; i < 3; i++) { const a = i / 3 * Math.PI / 2, b = (i + 1) / 3 * Math.PI / 2; pxLine(g, x + Math.cos(a) * 9 * dx * k, y + Math.sin(a) * 7 * dy * k, x + Math.cos(b) * 9 * dx * k, y + Math.sin(b) * 7 * dy * k, 'rgba(240,240,240,0.25)'); }
+}
+function floorVent(g, xa, xb, za, zb2) { fillPoly(g, Q.floor(xa, xb, za, zb2), '#c8c4b8'); for (let z = za + .05; z < zb2; z += .08) lineW(g, P(xa + .04, 0, z), P(xb - .04, 0, z), '#6e6a60'); }
+function scuffs(g, r, seed) {                       // faint scuffs above the baseboard on the back wall
+  for (let i = 0; i < 4; i++) { const x = r.box.x0 + 1 + hash(seed + i) * (r.box.x1 - r.box.x0 - 2), y = .34 + hash(seed + i + 9) * .25, a = P(x, y, r.box.zb), b = P(x + .15 + hash(i) * .25, y + (hash(i + 3) - .5) * .05, r.box.zb); pxLine(g, a[0], a[1], b[0], b[1], 'rgba(60,50,40,0.18)'); }
+}
 function outletBack(g, r, x, y) { const q = Q.back(r.box, x, x + .16, y, y + .24); fillPoly(g, q, '#f2ecdc'); strokePoly(g, q, '#a8a08c'); }
 
-/* ---------- outside: sky, buildings and a swaying oak, seen through every window ---------- */
+/* ---------- outside: sky, buildings, and a swaying oak, seen through every window ---------- */
 function drawOutside(g, pts, t, seed, opts = {}) {
   const b = polyBox(pts);
   clipDo(g, pts, () => {
@@ -137,10 +168,10 @@ function drawOutside(g, pts, t, seed, opts = {}) {
     pxLine(g, tx, ty, tx + 6 + sway * .4, b.y0 + h * .35, '#5a3f2a', 3);
     pxLine(g, tx + 4 + sway * .3, b.y0 + h * .55, tx + w * .4 + sway, b.y0 + h * .3, '#5a3f2a', 2);
     pxLine(g, tx + 2, b.y0 + h * .7, tx - w * .2 + sway, b.y0 + h * .45, '#5a3f2a', 2);
-    for (let i = 0; i < 34; i++) {
-      const lx = tx - w * .25 + hash(seed + i) * w * .75 + sway * (.6 + hash(i + 3) * .7) + sway2 * hash(i + 5), ly = b.y0 - 2 + hash(seed + i + 9) * h * .62;
-      const lc = Decor.pal(Game.room).leaves;
-      pxEllipse(g, lx, ly, 3 + hash(i + 4) * 3, 2 + hash(i + 7) * 2, lc[(i * 7 + seed) % lc.length]);
+    const lc = Decor.pal(Game.room).leaves;
+    for (let i = 0; i < 7; i++) {                                  // leafy clumps along the branches
+      const lx = tx - w * .2 + hash(seed + i) * w * .65, ly = b.y0 + hash(seed + i + 9) * h * .5, s = 1 + hash(i + 4) * .6;
+      foliage(g, lx, ly, 9 * s, 6 * s, lc, seed * 31 + i * 7, sway * (.6 + hash(i + 3) * .7) + sway2 * hash(i + 5));
     }
     if (mo && !T.rain) for (let i = 0; i < 3; i++) {             // a leaf letting go now and then
       const ft = (t * .12 + hash(seed + i * 5)) % 1, lc = Decor.pal(Game.room).leaves;
@@ -164,14 +195,19 @@ function drawSun(g, r, t, w) {
   const T = Decor.time; if (!T.sun || r.lightsOff && w.frosted) return;
   const patch = sunPatch(r, w.xa, w.xb, w.ya, w.yb), a = T.sunA * (w.level ?? 5) / 5;
   const glass = Q.back(r.box, w.xa, w.xb, w.ya, w.yb);
-  if (w.shaft !== false) fillPoly(g, hull([...glass, ...patch]), rgba(T.sun, .07));
+  if (w.shaft !== false) {                       // the shaft of light fades out on its way to the floor
+    const gb = polyBox(glass), pb = polyBox(patch), lg = g.createLinearGradient(gb.cx, gb.cy, pb.cx, pb.cy);
+    lg.addColorStop(0, rgba(T.sun, .08)); lg.addColorStop(.7, rgba(T.sun, .03)); lg.addColorStop(1, rgba(T.sun, 0));
+    fillPoly(g, hull([...glass, ...patch]), lg);
+  }
   const pools = w.slats ? Array.from({ length: w.slats }, (_, i) => { const st = (w.xb - w.xa) / w.slats; return sunPatch(r, w.xa + i * st + st * .55, w.xa + (i + 1) * st, w.ya, w.yb); }) : [patch];
-  for (const pp of pools) { fillPoly(g, pp, rgba(T.sun, a * .55)); fillPoly(g, shrink(pp, .78), rgba(T.sun, a * .6)); }   // two flat bands
+  for (const pp of pools) for (const k of [1.08, 1, .92, .84, .74]) fillPoly(g, shrink(pp, k), rgba(T.sun, a * .24));   // feathered: brightest in the middle, no hard rim
   if (Settings.get('motion') && !w.frosted) clipDo(g, patch, () => {
     const b = polyBox(patch);
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < 9; i++) {                 // dappled leaf shadows, soft and broken up
       const lx = b.x0 + hash(i + w.xa) * (b.x1 - b.x0) + Math.sin(t * .8 + i) * 3, ly = b.y0 + hash(i + 7 + w.xa) * (b.y1 - b.y0) + Math.cos(t * .6 + i) * 1.5;
-      g.fillStyle = rgba(T.shadow, .2); g.beginPath(); g.ellipse(lx, ly, 6 + hash(i) * 6, 2 + hash(i + 1) * 2, 0, 0, 7); g.fill();
+      // drawn as flecks of brighter sun, never dark blobs, so the dappling can't be mistaken for dirt or wear on the floor
+      for (let k = 0; k < 5; k++) fillPoly(g, blobPts(lx + (hash(i * 5 + k) - .5) * 12, ly + (hash(i * 7 + k) - .5) * 3, 2 + hash(i + k) * 3, 1 + hash(i + k + 3), i * 9 + k, .5, 7), rgba(T.sun, a * .22));
     }
   });
   if (Settings.get('motion')) {                  // dust motes drifting in the shaft
@@ -183,6 +219,113 @@ function drawSun(g, r, t, w) {
   }
 }
 
+/* ---------- the living room's ceiling fan, built so every part hangs off the one above it:
+   ceiling -> canopy -> downrod -> motor housing (blade irons -> blades) -> switch cup -> light bowl, pull chain ---------- */
+const FAN = { x: .4, z: 9.4, y: 3.42, rest: .4, tieBlade: 3 };
+function tieSpot() {          // where the tie hangs (on a blade) or lies (on the floor after the fan flung it)
+  if (Game.opened.tieFell) return { floor: true, x: -1.4, z: 7.4 };
+  const a = FAN.rest + FAN.tieBlade * Math.PI * 2 / 5;
+  return { x: FAN.x + Math.cos(a) * 1.25, z: FAN.z + Math.sin(a) * 1.25 };
+}
+function tieOnFan() { return Decor.cur && Decor.cur.tie && !Game.taken.has('tie') && !Game.opened.tieFell; }
+function drawTie(g) {
+  if (!Decor.cur || !Decor.cur.tie || Game.taken.has('tie')) return;
+  const sp = tieSpot();
+  if (sp.floor) {                                            // lying flat on the carpet where the fan flung it
+    const p = P(sp.x, 0, sp.z); drawTieFlat(g, p[0], p[1] - 2, 1, -1.38);   // the whole length of it, flung out flat
+    return;
+  }
+  // looped over the blade: find the blade's slant and width on screen at the tie, and wrap the tie around it
+  const a = FAN.rest + FAN.tieBlade * Math.PI * 2 / 5, p = P(sp.x, FAN.y - .02, sp.z);
+  const along = P(sp.x + Math.cos(a) * .2, FAN.y - .02, sp.z + Math.sin(a) * .2), across = P(sp.x - Math.sin(a) * .13, FAN.y - .02, sp.z + Math.cos(a) * .13);
+  const dl = Math.hypot(along[0] - p[0], along[1] - p[1]) || 1;
+  drawTieOverBlade(g, p, [across[0] - p[0], Math.max(1, Math.abs(across[1] - p[1])) * Math.sign(across[1] - p[1] || 1)], [(along[0] - p[0]) / dl, (along[1] - p[1]) / dl], 1, Game.t);
+}
+function drawFan(g, r, t) {
+  const fv = cond('fan'), fl = flags('fan'), h = r.box.h, haz = fv === 2, droop = fv === 1 ? .05 : 0;
+  const wobT = haz && fl.wobble ? t - fl.wobble : 99, wob = wobT < 2.6 ? Math.sin(t * 22) * .09 * (1 - wobT / 2.6) : 0;
+  const spinning = (fl.spin && !haz) || wobT < 2.6;
+  const cx = FAN.x, cz = FAN.z, x = cx + wob, drop = haz ? .1 : 0;
+  // canopy, flush to the ceiling (on the bad fan it hangs low, with a dark gap above it)
+  const ceil = P(cx, h, cz), cTop = P(cx, h - drop, cz), cBot = P(cx, h - drop - .16, cz);
+  if (haz) pxRect(g, ceil[0] - 6, ceil[1], 12, Math.max(1, cTop[1] - ceil[1]), '#2a221c');
+  pxRect(g, cTop[0] - 6, cTop[1], 12, Math.max(2, cBot[1] - cTop[1]), '#c4c7ce'); pxRect(g, cTop[0] - 6, cTop[1], 3, Math.max(2, cBot[1] - cTop[1]), '#e0e3ea');
+  pxRect(g, cBot[0] - 4, cBot[1] - 1, 8, 2, '#9ea2ac');
+  // downrod to the motor housing
+  const hTop = P(x, FAN.y + .1, cz), hMid = P(x, FAN.y, cz), hBot = P(x, FAN.y - .08, cz);
+  pxLine(g, cBot[0], cBot[1], hTop[0], hTop[1], '#8d93a1', 2);
+  // blades on their irons, far ones first
+  const ang = spinning ? t * 9 : FAN.rest, blades = [];
+  for (let i = 0; i < 5; i++) blades.push(ang + i * Math.PI * 2 / 5);
+  blades.sort((a, b) => Math.sin(b) - Math.sin(a));
+  for (const a of blades) {
+    const c = Math.cos(a), sn = Math.sin(a), at = rr => P(x + c * rr, FAN.y - (rr > .5 ? droop * (rr - .5) : 0), cz + sn * rr);
+    const iron0 = at(.16), iron1 = at(.48), root = at(.42), tip = at(1.7);
+    pxLine(g, iron0[0], iron0[1], iron1[0], iron1[1], '#5d626e', 2);
+    const near = sn < 0, col = fv === 1 ? (near ? '#b99c76' : '#9c805c') : (near ? '#a0703c' : '#7a5228');
+    pxLine(g, root[0], root[1], tip[0], tip[1], col, 3); pxLine(g, root[0], root[1] - 1, tip[0], tip[1] - 1, near ? '#c08a50' : '#5e3e20');
+  }
+  // motor housing: a squat drum the downrod drops into and the blade irons bolt onto
+  pxRect(g, hTop[0] - 9, hTop[1], 18, Math.max(3, hBot[1] - hTop[1]), '#a9adb7'); pxRect(g, hTop[0] - 9, hTop[1], 4, Math.max(3, hBot[1] - hTop[1]), '#c8ccd4');
+  pxEllipse(g, hBot[0], hBot[1], 9, 2, '#8d93a1'); pxRect(g, hTop[0] - 9, hTop[1], 18, 1, '#d9dce4');
+  // switch cup right under the housing, the light bowl under that, and the pull chain hanging from the cup
+  const cup = P(x, FAN.y - .12, cz);
+  pxRect(g, cup[0] - 4, hBot[1] + 1, 8, 3, '#9ea2ac'); pxRect(g, cup[0] - 4, hBot[1] + 1, 2, 3, '#c4c8d0');
+  const bowlY = hBot[1] + 4, lit = !r.lightsOff;
+  pxRect(g, cup[0] - 6, bowlY, 12, 1, '#8d93a1');
+  pxEllipse(g, cup[0], bowlY + 3, 7, 4, '#8a8478'); pxRect(g, cup[0] - 7, bowlY, 14, 3, '#8a8478');             // a gray rim, so the white glass doesn't melt into the white ceiling
+  pxEllipse(g, cup[0], bowlY + 3, 6, 3, lit ? '#f6e8c0' : '#d8d0bc'); pxRect(g, cup[0] - 6, bowlY + 1, 12, 2, lit ? '#fff8e0' : '#e4ded0'); pxRect(g, cup[0] - 3, bowlY + 2, 3, 2, '#ffffff');
+  pxRect(g, cup[0] - 4, bowlY + 5, 8, 1, lit ? '#e2cc98' : '#bab29e');                                              // the frosted bowl's lower curve, a shade darker
+  const sw = spinning ? Math.sin(t * 6) * 1.2 : 0;
+  pxLine(g, cup[0] + 3, hBot[1] + 4, cup[0] + 4 + sw, hBot[1] + 15, '#c9a227'); pxRect(g, cup[0] + 3 + sw, hBot[1] + 15, 2, 2, '#e8c34a');
+  if (lit) softGlow(g, cup[0], bowlY + 10, 70, 28, '#fff6d8', .12);
+  drawTie(g);
+}
+
+/* the toilet, side-on against the bathroom's left wall. What makes it read as a toilet from across the room:
+   a slim tank with a flush lever, the lid standing up against the tank, an open oval seat with water in it, and a
+   bowl that pinches in to a narrow foot. Every piece gets a soft gray outline so the white doesn't melt into the tub. */
+function drawToilet(g, v) {
+  const T = '#f8f8f4', S = '#d6d8d2', W = '#ffffff', O = '#868ba0', cz = 8.3;
+  fillPoly(g, ring(-3.36, .004, cz, .5, .36, 18), 'rgba(40,40,70,0.16)');                                // contact shadow
+  box3(g, -4, -3.72, .74, 1.36, 8, 8.6, { front: T, side: S, top: W });                                   // tank
+  strokePoly(g, hull([P(-3.72, .74, 8), P(-3.72, .74, 8.6), P(-3.72, 1.36, 8.6), P(-3.72, 1.36, 8), P(-4, 1.36, 8), P(-4, 1.36, 8.6)]), O);
+  const lidT = hull([...ring(-3.85, 1.42, cz, .17, .34, 16), ...ring(-3.85, 1.36, cz, .17, .34, 16)]);
+  fillPoly(g, lidT, W); strokePoly(g, lidT, O);                                                           // tank lid, rounded ends
+  if (v === 2) { const c = P(-3.86, 1.42, 8.08); pxCrack(g, c[0], c[1], .2, 9, '#6a6a62', 5, 2); }
+  { const h = P(-3.72, 1.27, 8.08); pxRect(g, h[0], h[1], 4, 1, '#9aa0ae'); pxRect(g, h[0], h[1] - 1, 2, 1, '#c9ccd4'); }   // chrome flush lever
+  const rim = ring(-3.24, .6, cz, .46, .29, 24), mid = ring(-3.3, .34, cz, .32, .2, 18), foot = ring(-3.42, 0, cz, .2, .15, 14);
+  const footP = hull([...mid, ...foot]), bowlP = hull([...rim, ...mid]);
+  fillPoly(g, footP, '#e2e3dc'); strokePoly(g, footP, O);                                                // the narrow foot
+  fillPoly(g, bowlP, S); strokePoly(g, bowlP, O);                                                        // the bowl, curving in
+  fillPoly(g, hull([...ring(-3.16, .46, cz, .32, .2, 16), ...rim]), T);                                   // the lit side of the bowl
+  fillPoly(g, rim, W); strokePoly(g, rim, O);                                                            // seat
+  const hole = ring(-3.2, .605, cz, .3, .17, 20);
+  fillPoly(g, hole, '#c4ccd4'); fillPoly(g, ring(-3.18, .607, cz, .2, .11, 16), v === 3 ? '#b8c8a0' : '#9cc4dc');   // the opening, and water
+  { const b = P(-3.42, .62, cz); pxRect(g, b[0] - 1, b[1], 3, 1, '#9aa0ae'); }                          // a seat hinge
+  // the lid, raised and leaning back on the tank: as wide as the seat and as long, so it would close right over it
+  const lid = [P(-3.6, .64, cz - .27), P(-3.6, .64, cz + .27)];
+  for (let i = 0; i <= 12; i++) { const a = i / 12 * Math.PI; lid.push(P(-3.71, 1.13 + Math.sin(a) * .27, cz + Math.cos(a) * .28)); }
+  const lidP = hull(lid); fillPoly(g, lidP, '#f2f2ec'); strokePoly(g, lidP, O);
+  { const m = [P(-3.62, .72, cz - .19), P(-3.62, .72, cz + .19)]; for (let i = 0; i <= 8; i++) { const a = i / 8 * Math.PI; m.push(P(-3.705, 1.11 + Math.sin(a) * .19, cz + Math.cos(a) * .2)); } strokePoly(g, hull(m), 'rgba(134,139,160,0.45)'); }   // its recessed panel
+}
+
+/* the bedroom wall's drawing, projected from the close-up onto the left wall: each screen column of the wall
+   picks up the matching slice of the close-up (averaged, then inked twice so thin pencil and marker lines survive) */
+function drawWallArt(g, r, v) {
+  const src = document.createElement('canvas'); src.width = 240; src.height = 108; bwallDrawing(src.getContext('2d'), v);
+  // kid-sized: the whole sheet spans about 2.5 units of wall and 1.1 high (the drawing itself about 1.5 by .9), centered at a five-year-old's reach
+  const K = 1.5 / 146, zOf = x => 10.4 + (x - 117) * K, yOf = y => 1.3 - (y - 54) * K, x0 = r.box.x0;
+  const X0 = Math.round(P(x0, 1, zOf(0))[0]), X1 = Math.round(P(x0, 1, zOf(240))[0]);
+  const sxAt = X => { const z = CAM.f * x0 / (X - CAM.cx); return 117 + (z - 10.4) / K; };
+  g.save(); g.imageSmoothingEnabled = true;
+  for (let X = Math.min(X0, X1); X < Math.max(X0, X1); X++) {
+    const a = clamp(sxAt(X), 0, 240), b = clamp(sxAt(X + 1), 0, 240), z = zOf((a + b) / 2), top = P(x0, yOf(0), z)[1], bot = P(x0, yOf(108), z)[1];
+    if (Math.abs(b - a) < .01) continue;
+    for (let n = 0; n < 2; n++) g.drawImage(src, Math.min(a, b), 0, Math.max(.5, Math.abs(b - a)), 108, X, top, 1, bot - top);
+  }
+  g.restore();
+}
 /* ---------- the four rooms ---------- */
 const ROOMS = {
   living: {
@@ -193,22 +336,20 @@ const ROOMS = {
     doors: [
       { id: 'toBed', side: 'left', za: 8.2, zb: 9.8, to: 'bedroom', name: 'Hallway to the bedroom', walk: { x: -5.2, z: 9 }, spawn: { x: 5, z: 9.2 } },
       { id: 'toKitchen', side: 'right', za: 8.6, zb: 10.6, to: 'kitchen', name: 'Kitchen', walk: { x: 5.2, z: 9.6 }, spawn: { x: -4.2, z: 9 } },
-      { id: 'frontDoor', back: [-5.4, -3.6], name: 'Front door', exit: true, walk: { x: -4.5, z: 12 } }
     ],
     features: {
       carpet: { pts: () => Q.floor(-2.7, 2.7, 7, 10.6), walk: { x: 0, z: 6.6 } },
       tvwall: { pts: () => Q.back(ROOMS.living.box, -2.1, 2.2, .9, 3.25), walk: { x: .1, z: 11.8 } },
-      fan: { pts: () => [P(-1.4, 4, 9.4), P(2.2, 4, 9.4), P(2.2, 2.8, 9.4), P(-1.4, 2.8, 9.4)], walk: { x: .4, z: 8 } }
+      fan: { pts: () => [P(-1.4, 4, 9.4), P(2.2, 4, 9.4), P(2.2, 2.8, 9.4), P(-1.4, 2.8, 9.4)], walk: { x: .4, z: 8 } },
+      frontdoor: { pts: () => Q.back(ROOMS.living.box, -5.4, -3.6, 0, 2.95), walk: { x: -4.5, z: 12 } },
+      thermostat: { pts: () => Q.back(ROOMS.living.box, -2.85, -2.35, 1.75, 2.15), walk: { x: -2.6, z: 11.8 } },
+      patio: { pts: () => Q.back(ROOMS.living.box, 2.6, 5.6, 0, 3.05), walk: { x: 4, z: 11.6 } }
     },
     scenery: [
-      { id: 'thermo', name: 'Thermostat', pts: () => Q.back(ROOMS.living.box, -2.85, -2.35, 1.75, 2.15), walk: { x: -2.6, z: 11.8 },
-        look: 'A beige digital thermostat, set to a responsible 68.', touch: 'You nudge it to 70. Then back to 68. Company policy.', smell: 'Smells like warm plastic.' },
-      { id: 'switch', name: 'Light switch', pts: () => Q.back(ROOMS.living.box, -3.4, -3.05, 1.2, 1.7), walk: { x: -3.2, z: 11.8 }, light: true,
-        look: 'A rocker switch for the overhead lights. Very 2008.' },
-      { id: 'blinds', name: 'Vertical blinds', pts: () => Q.back(ROOMS.living.box, 2.6, 5.6, 0, 3.05), walk: { x: 4, z: 11.6 },
-        look: 'Vertical blinds over the sliding door to the balcony. The oak out there never sits still.', touch: 'Clack-clack-clack. All the slats are still there. A minor miracle.', smell: 'Dust and sunshine.', talk: 'You tell the blinds they look great. They clatter shyly.' },
-      { id: 'dvd', name: 'DVD case', pts: () => Q.floor(-3.6, -2.8, 10.2, 10.9), walk: { x: -3.2, z: 9.6 },
-        look: "An empty blue-and-yellow rental case. 'Transformers.' Seventeen days overdue.", touch: 'You pick it up. Empty. You put it back. Not your problem.', smell: 'Movie-night popcorn, faintly.' }
+      { id: 'switch', name: 'Light switch', pts: () => Q.back(ROOMS.living.box, -3.48, -3.24, 1.22, 1.68), walk: { x: -3.2, z: 11.8 }, light: true,
+        look: 'The switch for the ceiling fan light.' },
+      { id: 'fanswitch', name: 'Fan switch', pts: () => Q.back(ROOMS.living.box, -3.24, -3, 1.22, 1.68), walk: { x: -3.1, z: 11.8 }, fan: true,
+        look: 'The switch for the ceiling fan. Worth a try: an inspection means checking that things work.' },
     ],
     walls(g, r) {
       const zb = r.box.zb;
@@ -218,47 +359,36 @@ const ROOMS = {
       if (v === 0) for (const x of [-1, -.4, .3, 1]) { const p = P(x, 2.95, zb); pxRect(g, p[0], p[1], 1, 1, '#5a4a38'); }
       if (v === 1 && !flags('tvwall').removed) for (const [x, y] of [[-.6, 2.5], [.8, 2.5], [-.6, 1.8], [.8, 1.8]]) { const p = P(x, y, zb); pxRect(g, p[0] - 1, p[1] - 1, 2, 2, '#ffffff'); }
       if (v === 1 && flags('tvwall').removed) for (const [x, y] of [[-.6, 2.5], [.8, 2.5], [-.6, 1.8], [.8, 1.8]]) { const p = P(x, y, zb); pxRect(g, p[0], p[1], 1, 1, '#4a3a2a'); }
-      if (v === 2) for (const [x, y] of [[-.4, 2.2], [.7, 2.2]]) { const p = P(x, y, zb); pxEllipse(g, p[0], p[1], 3, 2, '#f2e8d4'); pxEllipse(g, p[0], p[1], 2, 1, '#3a2f28'); }
+      if (v === 2) for (const [i, [x, y]] of [[-.4, 2.2], [.7, 2.2]].entries()) { const p = P(x, y, zb); fillPoly(g, blobPts(p[0], p[1], 4, 3, 7 + i * 5, .6, 10), '#f2e8d4'); fillPoly(g, blobPts(p[0] + .5, p[1], 2.4, 1.6, 3 + i * 9, .6, 9), '#3a2f28'); }
       outletBack(g, r, 1.3, .45);
       sixPanelDoor(g, r, -5.4, -3.6);
       { const p = P(-4.5, 2.15, zb); pxRect(g, p[0], p[1], 1, 1, '#555'); const d = P(-3.78, 1.55, zb); pxRect(g, d[0] - 1, d[1], 2, 2, '#c9a227'); }
-      lightSwitch(g, r, -3.32, 1.3);
-      fillPoly(g, Q.back(r.box, -2.8, -2.4, 1.8, 2.1), '#ece2c8'); { const c = polyBox(Q.back(r.box, -2.75, -2.45, 1.92, 2.04)); pxRect(g, c.x0, c.y0, c.x1 - c.x0, c.y1 - c.y0, '#8fc49a'); }
+      { const q = Q.back(r.box, -3.45, -3.03, 1.28, 1.62); fillPoly(g, q, '#f2ecdc'); strokePoly(g, q, '#a8a08c');   // two-gang plate: light, fan
+        toggleIn(g, Q.back(r.box, -3.42, -3.26, 1.3, 1.6), !r.lightsOff); toggleIn(g, Q.back(r.box, -3.22, -3.06, 1.3, 1.6), !!flags('fan').spin); }
+      scuffs(g, r, 3); cobweb(g, ...P(r.box.x0, r.box.h, zb), 1, 1, 2); floorVent(g, 4.5, 5.3, 5, 5.35);
+      { const tv = cond('thermostat');                      // thermostat
+        if (tv === 3) { fillPoly(g, Q.back(r.box, -2.74, -2.46, 1.84, 2.06), '#9a9a92'); const a = P(-2.6, 1.95, zb), b = P(-2.66, 1.84, zb); pxLine(g, a[0], a[1], b[0], b[1], '#d64545'); pxLine(g, a[0] + 1, a[1], b[0] + 3, b[1] + 1, '#e8e8e2'); }
+        else if (tv === 2) { fillPoly(g, [P(-2.8, 1.8, zb), P(-2.4, 1.86, zb), P(-2.43, 2.14, zb), P(-2.82, 2.08, zb)], '#ece2c8'); const a = P(-2.78, 1.96, zb), b = P(-2.45, 2.0, zb); pxLine(g, a[0], a[1], b[0], b[1], '#8a7a5a'); }
+        else { fillPoly(g, Q.back(r.box, -2.8, -2.4, 1.8, 2.1), tv === 1 ? '#e2d4a2' : '#ece2c8'); const c = polyBox(Q.back(r.box, -2.75, -2.45, 1.92, 2.04)); pxRect(g, c.x0, c.y0, c.x1 - c.x0, c.y1 - c.y0, '#8fc49a'); } }
       // sliding door frame + blinds
       fillPoly(g, Q.back(r.box, 2.6, 5.6, 0, 3.05), '#c0c4cc'); cutOut(g, Q.back(r.box, 2.7, 5.5, .05, 2.95));
       fillPoly(g, Q.back(r.box, 4.06, 4.14, .05, 2.95), '#a9aeb8');
       fillPoly(g, Q.back(r.box, 2.55, 5.65, 2.9, 3.1), '#f2efe6');
-      for (let i = 0; i < 9; i++) { const xa = 2.7 + i * (2.8 / 9); fillPoly(g, Q.back(r.box, xa, xa + 2.8 / 9 * .55, .12, 2.9), i % 2 ? '#efeadf' : '#e6e0d2'); }
+      // the blinds themselves are drawn live (they open and close): see Openables.vblinds
       doorOnSide(g, r, 'left', 8.2, 9.8, '#6e6a72');
       doorOnSide(g, r, 'right', 8.6, 10.6, '#d9c890');
       // carpet condition seen from the room
       const c = cond('carpet');
       if (c === 0) for (let x = -5.5; x < 5.5; x += 1.1) fillPoly(g, Q.floor(x, x + .55, 3.5, 12.8), dither('#efe0bb', 3));
-      if (c === 1) fillPoly(g, [P(-5.1, 0, 12.8), P(-3.9, 0, 12.8), P(.9, 0, 4.2), P(-.7, 0, 4.2)], dither('#857a66', 6));
-      if (c === 2) { fillPoly(g, floorEllipse(.2, 8.7, 1.1, .7), dither('#7a6642', 9)); fillPoly(g, floorEllipse(.15, 8.7, .7, .45), '#7d6a44'); }
-      if (c === 3) for (const [x, z] of [[3.4, 11.9], [3.9, 12.2], [4.3, 11.7]]) { const p = P(x, 0, z); pxRect(g, p[0], p[1], 2, 1, '#2a1a10'); }
-      // the DVD case
-      fillPoly(g, Q.floor(-3.55, -2.85, 10.25, 10.85), '#1a3a8a'); fillPoly(g, Q.floor(-3.5, -2.9, 10.65, 10.8), '#f2c418');
-    },
-    dynamic(g, r, t) {
-      // ceiling fan
-      const fv = cond('fan'), fl = flags('fan'), cx = .4, cz = 9.4, h = r.box.h;
-      const wob = (fv === 2 && fl.wobble && t - fl.wobble < 2.6) ? Math.sin(t * 22) * .12 : 0, drop = fv === 2 ? .07 : 0;
-      const spinning = fl.spin || (fv === 2 && fl.wobble && t - fl.wobble < 2.6);
-      const c0 = P(cx, h - drop, cz), c1 = P(cx + wob, 3.45, cz);
-      pxRect(g, c0[0] - 5, c0[1], 10, 3, '#b9bcc4'); if (fv === 2) pxRect(g, c0[0] - 5, c0[1] - 2, 10, 2, '#3a3430');
-      pxLine(g, c0[0], c0[1] + 2, c1[0], c1[1], '#8d93a1', 2);
-      const ang = spinning ? t * 9 : .4, blades = [];
-      for (let i = 0; i < 5; i++) blades.push(ang + i * Math.PI * 2 / 5);
-      blades.sort((a, b) => Math.sin(a) - Math.sin(b));
-      for (const a of blades) {
-        const tip = P(cx + wob + Math.cos(a) * 1.7, 3.42 - (fv === 1 ? .06 : 0), cz + Math.sin(a) * 1.7), base = P(cx + wob + Math.cos(a) * .3, 3.44, cz + Math.sin(a) * .3);
-        const side = Math.sin(a) < 0 ? (fv === 1 ? '#b99c76' : '#a0703c') : (fv === 1 ? '#9c805c' : '#7a5228');
-        pxLine(g, base[0], base[1], tip[0], tip[1], side, 3); pxLine(g, base[0], base[1] - 1, tip[0], tip[1] - 1, '#5e3e20');
+      if (c === 1) {                         // a worn traffic lane: matted, flattened pile, a little grayer and shinier than the rest, soft at the edges
+        const f = Decor.pal('living').floor, worn = mix(f.base, '#9a968c', .45), path = [[-4.5, 12.5], [-4, 11.6], [-3.2, 10.5], [-2.3, 9.3], [-1.5, 8.1], [-.8, 6.8], [-.3, 5.4], [0, 4.2]];
+        for (const [k, a] of [[1.5, .14], [1.15, .2], [.85, .28]]) for (const [i, [x, z]] of path.entries()) fillPoly(g, floorBlob(x, z, .55 * k + (i === 3 ? .15 : 0), .5 * k, i * 5 + 1, .35, 14), rgba(worn, a));
+        for (const [i, [x, z]] of path.entries()) { const q = P(x, 0, z); speckle(g, q[0] - 12, q[1] - 3, 24, 6, rgba(f.lt, .55), 26, i + 40); speckle(g, q[0] - 10, q[1] - 2, 20, 4, rgba(f.dk, .35), 14, i + 60); }   // crushed fibers catching the light
       }
-      pxEllipse(g, c1[0], c1[1], 6, 2, '#9ea2ac'); pxEllipse(g, c1[0], c1[1] + 5, 5, 3, '#f1ece0');
-      if (!r.lightsOff) { g.fillStyle = dither('#fff6d8', 1); g.beginPath(); g.ellipse(c1[0], c1[1] + 12, 50, 18, 0, 0, 7); g.fill(); }
-    }
+      if (c === 2) stain(g, floorBlob(.2, 8.7, 1.15, .72, 31, .5, 22), rgba('#7a6642', .6), '#7d6a44', 31);
+      if (c === 3) for (const [i, [x, z]] of [[3.4, 11.9], [3.9, 12.2], [4.3, 11.7]].entries()) { const p = P(x, 0, z); fillPoly(g, blobPts(p[0], p[1], 1.6, .8, i * 7, .7, 7), '#2a1a10'); }
+    },
+    dynamic(g, r, t) { drawFan(g, r, t); }
   },
   kitchen: {
     name: 'Kitchen', box: { x0: -5, x1: 5, h: 4, zb: 12 }, amb: .45,
@@ -269,19 +399,29 @@ const ROOMS = {
     features: {
       counter: { pts: () => hull(boxPts(-4.95, -1.15, .1, 1.02, 10.9, 12)), walk: { x: -3, z: 10.2 } },
       sink: { pts: () => hull(boxPts(-1.1, 1.7, 0, 1.15, 10.9, 12)), walk: { x: .3, z: 10.2 } },
-      stove: { pts: () => hull(boxPts(2.15, 3.45, 0, 1.2, 11.1, 12)), walk: { x: 2.8, z: 10.2 } }
+      stove: { pts: () => hull(boxPts(2.15, 3.45, 0, 1.2, 11.1, 12)), walk: { x: 2.8, z: 10.2 } },
+      fridge: { pts: () => hull(boxPts(3.6, 5, 0, 2.85, 10.9, 12)), walk: { x: 3.9, z: 10.2 } },
+      dishwasher: { pts: () => [P(-2.5, 0, 11.05), P(-1.2, 0, 11.05), P(-1.2, .86, 11.05), P(-2.5, .86, 11.05)], walk: { x: -1.9, z: 10.2 } },
+      kfloor: { pts: () => Q.floor(-1.6, 4.5, 7.6, 10.75), walk: { x: 1, z: 8.4 } },   // reaches the fridge, so the whole traffic path is clickable
+      ucab: { when: () => isOpen(Openables.hostOf('ucab')), pts: () => shrink(Openables.opening(DOOR[Openables.hostOf('ucab')]), .86), get walk() { const d = DOOR[Openables.hostOf('ucab')]; return d.walk || doorWalk(d); } },
+      lcab: { when: () => isOpen(Openables.hostOf('lcab')), pts: () => shrink(Openables.opening(DOOR[Openables.hostOf('lcab')]), .86), get walk() { const d = DOOR[Openables.hostOf('lcab')]; return d.walk || doorWalk(d); } }
     },
     scenery: [
-      { id: 'fridge', name: 'Fridge', pts: () => hull(boxPts(3.6, 5, 0, 2.85, 10.9, 12)), walk: { x: 4, z: 10.2 },
-        look: 'A black side-by-side fridge. Empty, except for a single packet of soy sauce.', touch: 'The door seals with a satisfying fwump. Cold and clean.', smell: 'Baking soda. Someone left the box in. Bless them.', talk: "You ask the fridge what's new. It hums." },
-      { id: 'calendar', name: 'Wall calendar', pts: () => Q.left(ROOMS.kitchen.box, 10.2, 11, 1.5, 2.5), walk: { x: -4.2, z: 10.2 },
-        look: "A free pizza-place calendar, still on October 2008. Someone circled the 9th: 'MOVE OUT!!!'", touch: 'You flip ahead a month. Nobody will know.' },
+      { id: 'hood', name: 'Range hood', pts: () => hull([...boxPts(2.15, 3.45, 2.3, 2.7, 11.45, 12)]), walk: { x: 2.8, z: 10.2 }, hood: true,
+        look: 'A stainless range hood over the stove, with a fan and a little light. The filter is greasy, like every range hood filter.' },
       { id: 'kswitch', name: 'Light switch', pts: () => Q.left(ROOMS.kitchen.box, 7.4, 7.8, 1.15, 1.6), walk: { x: -4.2, z: 7.6 }, light: true,
-        look: 'The switch for the fluorescent light.' }
+        look: 'The switch for the fluorescent light.' },
+      { id: 'breaker', name: 'Breaker panel', pts: () => Q.left(ROOMS.kitchen.box, PANEL_Z[0], PANEL_Z[1], PANEL_Y[0], PANEL_Y[1]), walk: { x: -4.2, z: 7 }, panel: true,
+        look: "The unit's breaker panel. Every circuit in the apartment, labeled in somebody's handwriting. Open it (just click it) to cut the power to one.",
+        smell: 'Dust and warm metal. No burning smell here, at least.', talk: 'You ask the panel how it is. It hums.' }
     ],
     walls(g, r) {
       const zb = r.box.zb;
       fillPoly(g, Q.back(r.box, -5, 2.1, .9, 1.45), '#d8cfb8');                 // backsplash
+      for (let x = -5; x < 2.1; x += .3) lineW(g, P(x, .96, zb), P(x, 1.45, zb), '#cbc1a8');
+      // range hood, drawn before the cabinets so its hidden side never shows through the one beside it; a little light under it
+      box3(g, 2.15, 3.45, 2.3, 2.7, 11.45, zb, { front: '#c3c7ce', side: '#9a9ea8', bottom: '#7d8290' });
+      { const a = P(2.45, 2.3, 11.5), b = P(3.15, 2.3, 11.5); pxRect(g, a[0], a[1] - 1, Math.max(2, b[0] - a[0]), 1, Game.hoodOn ? '#fff4c8' : '#6a6e78'); }
       // upper cabinets
       for (const [xa, xb] of [[-5, -.95], [1.55, 2.15]]) {
         box3(g, xa, xb, 2.05, 3.55, 11.6, zb, { front: '#b48048', side: '#9a6a38' });
@@ -289,11 +429,15 @@ const ROOMS = {
       }
       windowBack(g, r, -.7, 1.3, 1.5, 2.85, { mullion: true });
       fillPoly(g, Q.back(r.box, -.85, 1.45, 2.85, 3.05), '#c2603a');           // a valance, very 2008
-      // range hood
-      box3(g, 2.15, 3.45, 2.3, 2.7, 11.45, zb, { front: '#c3c7ce', side: '#9a9ea8', bottom: '#7d8290' });
       // lower cabinets + countertop
       box3(g, -5, 2.1, 0, .88, 11.05, zb, { front: '#b48048', side: '#9a6a38' });
-      for (let x = -4.95; x < 2; x += .8) { fillPoly(g, [P(x + .06, .1, 11.05), P(x + .74, .1, 11.05), P(x + .74, .62, 11.05), P(x + .06, .62, 11.05)], '#a8743f'); fillPoly(g, [P(x + .06, .67, 11.05), P(x + .74, .67, 11.05), P(x + .74, .84, 11.05), P(x + .06, .84, 11.05)], '#a8743f'); }
+      for (const [xa, xb] of [[-.89, .25], [.25, 1.39]]) {                       // the sink's two tall doors, with the same raised panels as every other cabinet
+        fillPoly(g, [P(xa + .03, .1, 11.05), P(xb - .03, .1, 11.05), P(xb - .03, .84, 11.05), P(xa + .03, .84, 11.05)], '#a8743f');
+        fillPoly(g, [P(xa + .12, .18, 11.05), P(xb - .12, .18, 11.05), P(xb - .12, .76, 11.05), P(xa + .12, .76, 11.05)], '#b98a52');
+        lineW(g, P(xa + .12, .76, 11.05), P(xb - .12, .76, 11.05), '#8a5a2c'); lineW(g, P(xa + .12, .18, 11.05), P(xa + .12, .76, 11.05), '#8a5a2c');
+      }
+      for (let x = -4.95; x < 2; x += .8) { if (x > -1 && x < 1) continue;   // the sink's doors stand in for these three bays
+        fillPoly(g, [P(x + .06, .1, 11.05), P(x + .74, .1, 11.05), P(x + .74, .62, 11.05), P(x + .06, .62, 11.05)], '#a8743f'); fillPoly(g, [P(x + .06, .67, 11.05), P(x + .74, .67, 11.05), P(x + .74, .84, 11.05), P(x + .06, .84, 11.05)], '#a8743f'); }
       box3(g, -5.05, 2.15, .88, .96, 10.95, zb, { front: '#8a8174', top: '#7d7468', side: '#6e665a' });
       speckPoly(g, [P(-5.05, .96, 10.95), P(2.15, .96, 10.95), P(2.15, .96, zb), P(-5.05, .96, zb)], '#5e564c', .5, 8);
       const sv = cond('sink');
@@ -301,14 +445,29 @@ const ROOMS = {
       fillPoly(g, [P(-.55, .96, 11.25), P(1.15, .96, 11.25), P(1.15, .96, 11.8), P(-.55, .96, 11.8)], '#a9aeb7');
       fillPoly(g, [P(-.5, .96, 11.32), P(.25, .96, 11.32), P(.25, .96, 11.74), P(-.5, .96, 11.74)], '#7f848e');
       fillPoly(g, [P(.35, .96, 11.32), P(1.1, .96, 11.32), P(1.1, .96, 11.74), P(.35, .96, 11.74)], '#7f848e');
-      { const a = P(.3, .96, 11.9), b = P(.3, 1.45, 11.9), c = P(.3, 1.45, 11.55); pxLine(g, a[0], a[1], b[0], b[1], '#d9dce4', 2); pxLine(g, b[0], b[1], c[0], c[1], '#d9dce4', 2); }
+      // the faucet: the gooseneck reaches over the left basin
+      { const a = P(.3, .96, 11.9), b = P(.3, 1.45, 11.9), c = P(flags('sink').spout ? .72 : -.1, 1.45, 11.55); pxLine(g, a[0], a[1], b[0], b[1], '#d9dce4', 2); pxLine(g, b[0], b[1], c[0], c[1], '#d9dce4', 2); }
       if (sv === 2) { const p = P(1.85, 1.15, zb); pxRect(g, p[0], p[1], 3, 4, '#ece2c8'); pxRect(g, p[0] + 1, p[1] + 1, 1, 1, '#5a5040'); } else { const p = P(1.85, 1.15, zb); pxRect(g, p[0], p[1], 3, 4, '#ece2c8'); pxRect(g, p[0] + 1, p[1], 1, 2, '#d8ccb0'); }
       const cv = cond('counter');
-      if (cv === 2) fillPoly(g, [P(-3.4, .961, 11.3), P(-2.6, .961, 11.3), P(-2.6, .961, 11.75), P(-3.4, .961, 11.75)], dither('#3a2410', 9));
+      if (cv === 2) { const rg = blobPts(-3, 11.52, .42, .24, 17, .3, 18).map(([x, z]) => P(x, .961, z)), hole = blobPts(-3, 11.52, .26, .14, 23, .3, 14).map(([x, z]) => P(x, .961, z)); fillPoly(g, rg, rgba('#3a2410', .62)); fillPoly(g, hole, '#7a7064'); }
       if (cv === 3) fillPoly(g, [P(-2, .88, 10.95), P(-1.7, .88, 10.95), P(-1.75, .96, 10.95), P(-1.95, .96, 10.95)], '#c8a878');
-      if (cv === 1) fillPoly(g, [P(1.2, .961, 11.1), P(2, .961, 11.1), P(2, .961, 11.6), P(1.2, .961, 11.6)], dither('#b0a898', 5));
-      // the red DVD-by-mail envelope
-      fillPoly(g, [P(-4.4, .962, 11.3), P(-3.9, .962, 11.3), P(-3.9, .962, 11.6), P(-4.4, .962, 11.6)], '#c1121f');
+      if (cv === 1) fillPoly(g, blobPts(1.6, 11.35, .4, .22, 5, .35, 14).map(([x, z]) => P(x, .961, z)), rgba('#b0a898', .32));
+      // dishwasher, in place of two cabinet doors
+      { const dv = cond('dishwasher'), z = 11.05;
+        {
+          fillPoly(g, [P(-2.5, .02, z), P(-1.2, .02, z), P(-1.2, .86, z), P(-2.5, .86, z)], '#ecebe6');
+          fillPoly(g, [P(-2.5, .74, z), P(-1.2, .74, z), P(-1.2, .86, z), P(-2.5, .86, z)], '#d8d6ce');
+          lineW(g, P(-2.4, .68, z), P(-1.3, .68, z), '#9a9ea8'); { const p = P(-1.35, .8, z); pxRect(g, p[0], p[1], 1, 1, '#d64545'); }
+          if (dv === 2) { const c = P(-1.8, .38, z); fillPoly(g, blobPts(c[0], c[1], 4, 3, 8, .6, 10), '#c8c6be'); }
+        }
+        if (dv === 3) fillPoly(g, floorBlob(-1.85, 10.75, .6, .25, 12, .5, 14), rgba('#7a6a50', .45)); }
+      { const kv = cond('kfloor');                            // the floor in front of the sink and stove
+        if (kv === 1) {                                    // the worn lane from the sink to the fridge: dull, a little gray, with scuffs (matches the close-up)
+          fillPoly(g, [P(-.4, 0, 10.6), P(.6, 0, 10.6), P(4.3, 0, 9.6), P(3.6, 0, 9.0)], 'rgba(120,110,90,0.3)');
+          for (let i = 0; i < 7; i++) { const x = -.1 + i * .6, z = 10.2 - i * .17, a = P(x, 0, z), b = P(x + .25, 0, z - .05); lineW(g, a, b, 'rgba(80,70,56,0.35)'); }
+        }
+        if (kv === 2) stain(g, floorBlob(2.4, 9.6, .38, .26, 44, .4, 16), 'rgba(40,24,12,0.55)', 'rgba(20,12,6,0.6)', 44);
+        if (kv === 3) { const a = P(.2, 0, 9.4), b = P(1.2, 0, 9.4), c = P(1.2, .04, 9.0), d = P(.2, .04, 9.0); fillPoly(g, [a, b, c, d], 'rgba(20,10,0,0.25)'); lineW(g, P(.2, .04, 9.0), P(1.2, .04, 9.0), '#fff8e8'); } }
       // range
       const stv = cond('stove');
       box3(g, 2.15, 3.45, 0, .92, 11.15, zb, { front: '#1c1d21', top: '#2a2b30', side: '#141518' });
@@ -316,22 +475,31 @@ const ROOMS = {
       for (const [x, z] of [[2.45, 11.4], [3.15, 11.4], [2.45, 11.8], [3.15, 11.8]]) { const p = P(x, .93, z); pxEllipse(g, p[0], p[1], 3, 1, '#3c3e44'); }
       fillPoly(g, [P(2.3, .2, 11.15), P(3.3, .2, 11.15), P(3.3, .65, 11.15), P(2.3, .65, 11.15)], '#0f1013');
       for (let i = 0; i < 4; i++) { const p = P(2.3 + i * .32, .8, 11.15); pxRect(g, p[0], p[1], 2, 2, stv === 2 && i === 0 ? '#3a2a1a' : '#c9ccd4'); }
-      // fridge
+      // fridge (a side-by-side: freezer on the left, fresh food on the right)
+      const fv = cond('fridge');
+      if (fv === 3) fillPoly(g, floorBlob(4.2, 10.45, .75, .4, 9, .5, 16), rgba('#9fc8dc', .55));
       box3(g, 3.6, 5, 0, 2.85, 10.9, zb, { front: '#23252b', side: '#1a1b20', top: '#2e3038' });
       fillPoly(g, [P(4.27, 0, 10.9), P(4.33, 0, 10.9), P(4.33, 2.85, 10.9), P(4.27, 2.85, 10.9)], '#0f1013');
       for (const x of [4.15, 4.45]) { const a = P(x, 1.1, 10.88), b = P(x, 2.1, 10.88); pxLine(g, a[0], a[1], b[0], b[1], '#c9ccd4', 2); }
       fillPoly(g, [P(3.75, 1.6, 10.9), P(4.05, 1.6, 10.9), P(4.05, 1.95, 10.9), P(3.75, 1.95, 10.9)], '#3a3c44');
+      fillPoly(g, [P(3.62, .05, 10.9), P(4.98, .05, 10.9), P(4.98, .16, 10.9), P(3.62, .16, 10.9)], '#141518');   // kick plate
+      if (fv === 2) { const c = P(3.95, 1.25, 10.9); fillPoly(g, blobPts(c[0], c[1], 3.5, 2.5, 4, .6, 10), '#3a3d46'); pxLine(g, c[0] - 3, c[1] - 1, c[0] + 2, c[1] + 1, '#5a5e68'); }
+      for (const [x, y, col] of [[3.72, 2.3, '#e8c34a'], [3.95, 2.45, '#d64545'], [3.8, .9, '#4a8fe0'], [4.05, 2.15, '#f4f4ec']]) { const p = P(x, y, 10.9); pxRect(g, p[0], p[1], 2, 2, col); }   // fridge magnets
       // calendar + switch on the left wall
-      fillPoly(g, Q.left(r.box, 10.25, 10.95, 1.55, 2.45), '#ffffff'); fillPoly(g, Q.left(r.box, 10.25, 10.95, 2.1, 2.45), '#d64545');
-      for (let i = 0; i < 4; i++) fillPoly(g, Q.left(r.box, 10.3, 10.9, 1.62 + i * .12, 1.66 + i * .12), '#c8ccd8');
-      fillPoly(g, Q.left(r.box, 7.45, 7.75, 1.2, 1.55), '#f2ecdc');
+      drawWallCalendar(g, r);                                       // js/calendar.js: this shift's calendar, on its month
+      sideSwitch(g, r, 'left', 7.45, 7.75, 1.2, 1.55, !r.lightsOff);
+      outletBack(g, r, -2.4, 1.05); scuffs(g, r, 8);
       doorOnSide(g, r, 'left', 8, 9.8, '#cdb996');
+      drawBreakerPanel(g, r);                                       // after the doorway: an open panel door sticks out in front of its trim
       // fluorescent ceiling box
       fillPoly(g, Q.ceil(r.box, -1, 1.2, 7.5, 9.5), '#d0d4d8'); fillPoly(g, Q.ceil(r.box, -.9, 1.1, 7.6, 9.4), '#f8fbff');
     },
     dynamic(g, r, t) {
-      if (!r.lightsOff && Settings.get('motion') && Math.sin(t * 13) > .985) fillPoly(g, Q.ceil(r.box, -.9, 1.1, 7.6, 9.4), '#c8ccd2');   // fluorescent flutter
-      if (!r.lightsOff) { g.fillStyle = dither('#f6fbff', 2); fillPoly(g, Q.floor(-2, 2.3, 5, 10), dither('#f6fbff', 2)); }
+      r.flickerDark = !r.lightsOff && flickerDark(t, 120, 3, .35);       // the old fluorescent stutters now and then
+      if (Game.hoodOn) { const c = P(2.8, .95, 11.4); softGlow(g, c[0], c[1], 34, 10, '#fff2c0', .22); }   // the hood light, warm on the stovetop
+      if (r.lightsOff || r.flickerDark) fillPoly(g, Q.ceil(r.box, -.9, 1.1, 7.6, 9.4), '#b8bcc4');
+      else fillPoly(g, Q.floor(-2, 2.3, 5, 10), rgba('#f6fbff', .1));
+      Sink.drawRoom(g, t);                                              // the faucet, if it's running
     }
   },
   bath: {
@@ -343,13 +511,15 @@ const ROOMS = {
     features: {
       mirror: { pts: () => Q.back(ROOMS.bath.box, 1.2, 3.55, 1.3, 3.05), walk: { x: 2.4, z: 9.4 } },
       tub: { pts: () => hull([...boxPts(-4, .45, 0, .58, 9.45, 11), ...Q.back(ROOMS.bath.box, -4, .45, .58, 2.5)]), walk: { x: -1.6, z: 9 } },
-      toilet: { pts: () => hull([...boxPts(-4, -3.65, .7, 1.5, 7.8, 8.8), ...boxPts(-3.7, -2.95, 0, .78, 7.95, 8.65)]), walk: { x: -2.4, z: 8.3 } },
-      outlet: { pts: () => Q.back(ROOMS.bath.box, 3.5, 3.92, .92, 1.42), walk: { x: 3.1, z: 9.4 } }
+      toilet: { pts: () => hull([...boxPts(-4, -3.65, .7, 1.48, 7.95, 8.65), ...boxPts(-3.72, -2.76, 0, .66, 7.98, 8.62), P(-3.66, 1.26, 8.3)]), walk: { x: -2.4, z: 8.3 } },
+      outlet: { pts: () => Q.back(ROOMS.bath.box, 3.5, 3.92, .92, 1.42), walk: { x: 3.1, z: 9.4 } },
+      vent: { pts: () => Q.ceil(ROOMS.bath.box, 1.1, 2.1, 7.4, 8.3), walk: { x: 1.6, z: 7 } },
+      towelbar: { pts: () => Q.right(ROOMS.bath.box, 9.9, 10.6, 1.3, 1.9), walk: { x: 3, z: 9 } },
+      vanitycab: { when: () => isOpen(Openables.hostOf('vanitycab')), pts: () => shrink(Openables.opening(DOOR[Openables.hostOf('vanitycab')]), .86), get walk() { const d = DOOR[Openables.hostOf('vanitycab')]; return d.walk || doorWalk(d); } }
     },
     scenery: [
-      { id: 'towel', name: 'Towel bar', pts: () => Q.right(ROOMS.bath.box, 9, 10.5, 1.4, 1.8), walk: { x: 3, z: 9 },
-        look: 'A towel bar with no towel. They took the towels. And the toilet paper. And the roll.', touch: 'Solidly anchored. One thing in here nobody broke.' },
       { id: 'bswitch', name: 'Light switch', pts: () => Q.right(ROOMS.bath.box, 8.6, 9, 1.15, 1.6), walk: { x: 3, z: 8.6 }, light: true, look: 'The switch for the vanity light.' },
+      { id: 'vswitch', name: 'Vent fan switch', pts: () => Q.right(ROOMS.bath.box, 9.05, 9.45, 1.15, 1.6), walk: { x: 3, z: 8.8 }, vent: true, look: 'The switch for the vent fan.' },
       { id: 'curtain', name: 'Shower curtain', pts: () => [P(.2, .6, 9.45), P(.5, .6, 9.45), P(.5, 2.75, 9.45), P(.2, 2.75, 9.45)], walk: { x: .2, z: 8.8 },
         look: 'A sea-foam shower curtain with little seashells. The previous tenant left it. Kindly? Or lazily?', smell: 'Mildew, faintly. Curtains are disposable. Not a finding.', touch: 'Vinyl. Slightly slimy. You regret this.' }
     ],
@@ -360,7 +530,9 @@ const ROOMS = {
       for (let y = .55; y < 2.5; y += .22) lineW(g, P(-4, y, zb), P(.45, y, zb), tv === 3 && y < 1 ? '#6a6658' : '#cfcfc6');
       for (let x = -4; x < .45; x += .4) lineW(g, P(x, .55, zb), P(x, 2.5, zb), '#d8d8d0');
       for (let y = .55; y < 2.5; y += .22) lineW(g, P(-4, y, 9.45), P(-4, y, zb), '#d0d0c8');
-      if (tv === 2) for (const [x, y] of [[-2.6, 1.6], [-.9, 1.2]]) { const p = P(x, y, zb); pxLine(g, p[0] - 2, p[1] - 2, p[0] + 2, p[1] + 2, '#8a8a80'); pxLine(g, p[0] + 2, p[1] - 2, p[0] - 2, p[1] + 2, '#8a8a80'); }
+      if (tv === 2) for (const [i, [x, y]] of [[-2.6, 1.6], [-.9, 1.2]].entries()) { const p = P(x, y, zb), n = 3 + i; pxRect(g, p[0], p[1], 1, 1, '#8a8a80');   // uneven cracks out of one impact point
+        for (let k = 0; k < n; k++) pxCrack(g, p[0], p[1], i * 1.3 + k * 6.28 / n + (hash(k * 5 + i) - .5) * 1.1, 3 + hash(k + i * 4) * 8, '#8a8a80', 3 + k * 7 + i * 31, 2); }
+      if (tv === 4) { const p = P(-1.8, 1.25, zb); pxEllipse(g, p[0], p[1], 3, 3, '#b8b8ae'); pxEllipse(g, p[0], p[1], 2, 2, '#9a9a90'); pxRect(g, p[0] - 1, p[1] - 1, 1, 1, '#6a6a62'); pxRect(g, p[0] + 1, p[1] - 1, 1, 1, '#6a6a62'); pxRect(g, p[0], p[1] + 1, 1, 1, '#6a6a62'); }
       // tub
       box3(g, -4, .45, 0, .58, 9.45, zb, { front: '#f6f6f2', top: '#ffffff', side: '#e2e2da' });
       fillPoly(g, [P(-3.8, .58, 9.6), P(.25, .58, 9.6), P(.25, .58, 10.85), P(-3.8, .58, 10.85)], '#dfe3e3');
@@ -382,27 +554,44 @@ const ROOMS = {
       for (const x of [1.2, 2.5]) fillPoly(g, [P(x, .1, 10.2), P(x + 1.2, .1, 10.2), P(x + 1.2, .74, 10.2), P(x, .74, 10.2)], '#e6e3d6');
       { const p = P(2.45, .86, 10.6); pxEllipse(g, p[0], p[1], 7, 2, '#ffffff'); pxEllipse(g, p[0], p[1], 5, 1, '#dfe3e3'); }
       // GFCI outlet
-      const ov = cond('outlet'), oq = Q.back(r.box, 3.58, 3.8, 1, 1.32); fillPoly(g, oq, ov === 3 ? '#e6d59a' : '#f6f3ea'); strokePoly(g, oq, '#8b8574');
-      if (ov === 1) { const c = polyBox(oq); pxRect(g, c.cx - 1, c.cy - 2, 2, 3, '#5a3a1a'); }
+      // a few pixels bigger than a plain outlet, so the scorched one reads from across the room
+      const ov = cond('outlet'), oq = Q.back(r.box, 3.54, 3.84, .96, 1.38); fillPoly(g, oq, ov === 3 ? '#e6d59a' : '#f6f3ea'); strokePoly(g, oq, '#8b8574');
+      { const c = polyBox(oq); pxRect(g, c.cx - 2, c.cy - 3, 4, 2, '#c8c2b2'); pxRect(g, c.cx - 2, c.cy + 1, 4, 2, '#c8c2b2'); }   // TEST and RESET
+      if (ov === 1) { const c = polyBox(oq); pxRect(g, c.cx - 3, c.cy - 4, 6, 7, 'rgba(90,58,26,0.45)'); pxRect(g, c.cx - 2, c.cy - 3, 4, 5, '#5a3a1a'); pxRect(g, c.cx - 1, c.cy - 2, 2, 2, '#2a1a0a'); }
       // toilet against the left wall
       const tlv = cond('toilet');
-      if (tlv === 3) fillPoly(g, floorEllipse(-3.4, 8.3, .8, .55), dither('#6b5232', 9));
-      box3(g, -4, -3.65, .72, 1.45, 7.85, 8.75, { front: '#f6f6f2', side: '#e2e2da', top: '#ffffff' });
-      box3(g, -4, -3.6, 1.45, 1.52, 7.82, 8.78, { front: '#ffffff', side: '#e8e8e2', top: '#f6f6f2' });
-      if (tlv === 2) { const a = P(-3.8, 1.52, 8.1), b = P(-3.8, 1.52, 8.5); pxLine(g, a[0], a[1], b[0], b[1], '#6a6a62'); }
-      box3(g, -3.7, -3.0, 0, .55, 8.05, 8.55, { front: '#f2f2ec', side: '#e2e2da', top: '#f6f6f2' });
-      box3(g, -3.75, -2.92, .55, .66, 7.95, 8.65, { front: '#ffffff', side: '#ececE6', top: '#f8f8f4' });
+      if (tlv === 3) fillPoly(g, floorBlob(-3.35, 8.3, .78, .52, 13, .45, 18), rgba('#6b5232', .55));
+      drawToilet(g, tlv);
       // towel bar + switch on the right wall
-      lineW(g, P(4, 1.6, 9.1), P(4, 1.6, 10.4), '#c9ccd4');
-      fillPoly(g, Q.right(r.box, 8.65, 8.95, 1.2, 1.55), '#f2ecdc');
+      { const bv = cond('towelbar'), a = P(4, 1.6, 9.95), b = bv === 2 ? P(4, 1.2, 10.5) : P(4, 1.6, 10.55);
+        pxLine(g, a[0], a[1], b[0], b[1], bv === 1 ? '#a8acb4' : '#c9ccd4');
+        pxRect(g, a[0] - 1, a[1] - 2, 2, 4, '#b9bcc4');
+        if (bv === 2) { const h = P(4, 1.6, 10.55); fillPoly(g, blobPts(h[0], h[1], 2, 3, 6, .6, 8), '#d8d2c0'); pxRect(g, h[0], h[1], 1, 1, '#5a5040'); }
+        else pxRect(g, b[0] - 1, b[1] - 2, 2, 4, '#b9bcc4'); }
+      sideSwitch(g, r, 'right', 8.65, 8.95, 1.2, 1.55, !r.lightsOff); sideSwitch(g, r, 'right', 9.1, 9.4, 1.2, 1.55, !!r.ventOn);
+      { const vv = cond('vent');                              // the vent fan in the ceiling
+        if (vv === 3) for (let i = 0; i < 40; i++) { const p = P(.8 + hash(i) * 1.6, r.box.h, 7.1 + hash(i + 5) * 1.5); pxRect(g, p[0], p[1], 1, 1, i % 3 ? '#3a4030' : '#5a6a40'); }
+        fillPoly(g, Q.ceil(r.box, 1.05, 2.15, 7.35, 8.35), '#9a968a'); fillPoly(g, Q.ceil(r.box, 1.1, 2.1, 7.4, 8.3), '#e4e2da');   // its frame, edged in gray fillPoly(g, Q.ceil(r.box, 1.2, 2, 7.5, 8.2), vv === 2 ? '#2a2826' : '#cfccc2');
+        if (vv !== 2) for (let z = 7.55; z < 8.2; z += .1) lineW(g, P(1.22, r.box.h, z), P(1.98, r.box.h, z), vv === 1 ? '#a8a49a' : '#8a877e');
+        if (vv === 2) fillPoly(g, [P(1.2, r.box.h, 7.5), P(2, r.box.h, 7.5), P(2.05, r.box.h - .35, 7.8), P(1.25, r.box.h - .3, 7.85)], '#d8d6ce');
+        if (vv === 1) fillPoly(g, Q.ceil(r.box, 1.2, 2, 7.5, 8.2), 'rgba(140,136,128,0.4)'); }
+      cobweb(g, ...P(r.box.x1, r.box.h, r.box.zb), -1, 1, 5);
       doorOnSide(g, r, 'right', 6.6, 8.4, '#97a7b8');
     },
     dynamic(g, r, t) {
       const zb = r.box.zb, mv = cond('mirror'), mo = Settings.get('motion');
-      const flick = mv === 3 && mo && (Math.sin(t * 31) > .55 || Math.sin(t * 7.3) > .9);
+      const flick = mv === 3 && !r.lightsOff && flickerDark(t, 26, 11, .75);   // the bad light bar stutters every so often
+      if (r.ventOn && mo) { const k = Math.floor(t * 14) % 2; for (let z = 7.55 + k * .05; z < 8.2; z += .1) lineW(g, P(1.24, r.box.h, z), P(1.96, r.box.h, z), '#5a574e'); }
       [1.65, 2.15, 2.65, 3.15].forEach((x, i) => { const p = P(x, 2.8, zb); pxEllipse(g, p[0], p[1] + 1, 2, 2, r.lightsOff ? '#b8b2a0' : (flick && i ? '#a8a28e' : '#fff4c8')); });
-      if (!r.lightsOff && !flick) { g.fillStyle = dither('#fff4c8', 2); g.beginPath(); const p = P(2.4, 2.8, zb); g.ellipse(p[0], p[1] + 10, 46, 24, 0, 0, 7); g.fill(); }
+      if (!r.lightsOff && !flick) { const p = P(2.4, 2.8, zb); softGlow(g, p[0], p[1] + 8, 64, 32, '#fff4c8', .16); }
       r.flickerDark = flick;
+      // the scorched GFCI spits a spark every so often while its breaker is on
+      if (cond('outlet') === 1 && Utilities.on('bgfci') && mo && (t * 1.7) % 1 < .12) {
+        const c = polyBox(Q.back(r.box, 3.54, 3.84, .96, 1.38)), k = Math.floor(t * 30) % 3;
+        softGlow(g, c.cx, c.cy, 10, 8, '#ffe08a', .35);
+        for (const [dx, dy] of [[-4, -3], [4, -2], [-3, 3], [5, 3], [0, -5]].slice(k, k + 3)) pxLine(g, c.cx, c.cy, c.cx + dx, c.cy + dy, '#fff6c0');
+        pxRect(g, c.cx - 1, c.cy - 1, 2, 2, '#ffffff');
+      }
     }
   },
   bedroom: {
@@ -418,13 +607,12 @@ const ROOMS = {
       closet: { pts: () => Q.back(ROOMS.bedroom.box, -5.45, -2.15, 0, 2.85), walk: { x: -3.8, z: 11.4 } },
       window: { pts: () => Q.back(ROOMS.bedroom.box, 1.25, 4.75, .75, 3.15), walk: { x: 3, z: 11.4 } },
       bwall: { pts: () => Q.left(ROOMS.bedroom.box, 8.4, 12.3, .35, 2.7), walk: { x: -4.8, z: 10.2 } },
-      smoke: { pts: () => { const c = P(1.2, 4, 8.6); return [[c[0] - 14, c[1] - 6], [c[0] + 14, c[1] - 6], [c[0] + 14, c[1] + 8], [c[0] - 14, c[1] + 8]]; }, walk: { x: 1.2, z: 7.4 } }
+      smoke: { pts: () => { const c = P(1.2, 4, 8.6); return [[c[0] - 14, c[1] - 6], [c[0] + 14, c[1] - 6], [c[0] + 14, c[1] + 8], [c[0] - 14, c[1] + 8]]; }, walk: { x: 1.2, z: 7.4 } },
+      dome: { pts: () => { const c = P(-1, 4, 9.6); return [[c[0] - 16, c[1] - 4], [c[0] + 16, c[1] - 4], [c[0] + 16, c[1] + 8], [c[0] - 16, c[1] + 8]]; }, walk: { x: -1, z: 8.4 } },
+      bfloor: { pts: () => Q.floor(-4.8, -.6, 8.4, 11.6), walk: { x: -2.6, z: 8 } },
+      closetin: { when: () => isOpen(Openables.hostOf('closetin')), pts: () => shrink(Openables.opening(DOOR[Openables.hostOf('closetin')]), .86), get walk() { const d = DOOR[Openables.hostOf('closetin')]; return d.walk || doorWalk(d); } }
     },
     scenery: [
-      { id: 'ceilLight', name: 'Ceiling light', pts: () => { const c = P(-1, 4, 9.6); return [[c[0] - 16, c[1] - 4], [c[0] + 16, c[1] - 4], [c[0] + 16, c[1] + 7], [c[0] - 16, c[1] + 7]]; }, walk: { x: -1, z: 8.4 },
-        look: 'A frosted dome ceiling light. Builders bought these by the shipping container.', touch: "You can't reach it. You're an inspector, not a basketball player." },
-      { id: 'dents', name: 'Floor dents', pts: () => Q.floor(-4.2, -1.8, 9.6, 11.4), walk: { x: -3, z: 9.2 },
-        look: 'Four little dents in the laminate where a bed frame stood. Furniture feet. Expected.', touch: 'Shallow. They come with any floor that had furniture on it.' },
       { id: 'rswitch', name: 'Light switch', pts: () => Q.right(ROOMS.bedroom.box, 7.7, 8.1, 1.15, 1.6), walk: { x: 5, z: 8 }, light: true, look: 'The switch for the ceiling light.' }
     ],
     walls(g, r) {
@@ -439,21 +627,36 @@ const ROOMS = {
         fillPoly(g, Q.back(r.box, xa + .1, xa + .7, .2, 1.4), '#e6e8ea');
         lineW(g, P(xa + .8, 0, zb), P(xa + .8, 2.85, zb), '#b8bcc4');
       }
-      if (cv === 2) { const p = P(-4.9, 1, zb); pxEllipse(g, p[0], p[1], 3, 3, '#3a2a1a'); }
+      if (cv === 2) { const p = P(-4.21, .85, zb); fillPoly(g, blobPts(p[0], p[1], 3.4, 3.8, 5, .5, 12), '#d6cfbd'); fillPoly(g, blobPts(p[0], p[1], 2.4, 2.8, 7, .5, 10), '#3a2a1a'); }   // lower panel of the second leaf, as in the close-up
       { const k = P(-3.6, 1.3, zb); pxRect(g, k[0], k[1], 2, 2, '#c9a227'); }
       sixPanelDoor(g, r, -1.6, .05, true);
       // window
       const wv = cond('window');
       windowBack(g, r, 1.4, 4.6, 1, 3, { sill: true, mullion: true });
-      if (wv === 3) { const a = P(1.2, .86, zb - .2), b = P(4.8, .86, zb - .2); speckle(g, a[0], a[1] - 2, b[0] - a[0], 4, '#1a1a14', 50, 3); }
+      if (wv === 3) {                                                // mildew along the sill, thickest in its corners; nothing on the glass
+        const a = P(1.3, .9, zb - .2), b = P(4.7, .9, zb - .2);
+        speckle(g, a[0], a[1], b[0] - a[0], 2, 'rgba(36,40,28,0.6)', 22, 3);
+        for (const x of [a[0], b[0] - 6]) speckle(g, x, a[1] - 1, 6, 3, 'rgba(40,52,30,0.75)', 9, 4);
+        for (const x of [1.9, 3, 4.1]) { const s = P(x, .82, zb); g.fillStyle = dither('#8a7a4a', 6); g.fillRect(s[0], s[1], 2, 6); }   // water streaks under the sill
+      }
       // the wall where the bed was
       const bw = cond('bwall');
       if (bw === 1) fillPoly(g, Q.left(r.box, 9, 11.6, 1.1, 1.4), dither('#6d7784', 5));
-      if (bw === 2) { const pts = Q.left(r.box, 9.6, 11.2, .9, 2.1), b = polyBox(pts); g.save(); poly(g, pts); g.clip(); for (let i = 0; i < 9; i++) pxLine(g, b.x0 + hash(i) * (b.x1 - b.x0), b.y0 + hash(i + 4) * (b.y1 - b.y0), b.x0 + hash(i + 8) * (b.x1 - b.x0), b.y0 + hash(i + 2) * (b.y1 - b.y0), '#7b3fc4'); g.restore(); }
+      if (bw >= 2) drawWallArt(g, r, bw);                          // the marker dinosaur or the liger: the close-up's own drawing, in perspective
       // smoke detector + dome light
-      { const c = P(1.2, 4, 8.6); pxEllipse(g, c[0], c[1] + 1, 7, 2, cond('smoke') === 1 ? '#ddd2a2' : '#f4f4ee'); pxRect(g, c[0] - 7, c[1] + 2, 14, 1, '#b8b8b0'); }
-      { const c = P(-1, 4, 9.6); pxEllipse(g, c[0], c[1] + 2, 12, 3, '#f8f4e8'); pxRect(g, c[0] - 12, c[1] + 4, 24, 1, '#c8c2b0'); }
-      fillPoly(g, Q.right(r.box, 7.75, 8.05, 1.2, 1.55), '#f2ecdc');
+      // both ceiling fixtures are soft, ceiling-toned shapes with a faint shadow rim (like the fan and the bath vent), not hard gray outlines
+      { const c = P(1.2, 4, 8.6); pxEllipse(g, c[0], c[1] + 1, 8, 3, 'rgba(110,104,90,0.28)'); pxEllipse(g, c[0], c[1] + 1, 7, 2, cond('smoke') === 1 ? '#e6dcb4' : '#efece4'); pxRect(g, c[0] - 6, c[1] + 2, 12, 1, 'rgba(120,112,96,0.3)'); pxRect(g, c[0] + 3, c[1], 1, 1, 'rgba(63,154,58,0.7)'); }   // with its little green light
+      { const dv = cond('dome'), c = P(-1, 4, 9.6);
+        if (dv === 3) fillPoly(g, blobPts(c[0], c[1] + 1, 17, 4, 31, .4, 16), 'rgba(110,70,30,0.45)');
+        pxEllipse(g, c[0], c[1] + 2, 13, 4, 'rgba(110,100,84,0.3)'); pxEllipse(g, c[0], c[1] + 2, 12, 3, dv === 1 ? '#ece2c2' : '#f3f0e6'); pxRect(g, c[0] - 11, c[1] + 4, 22, 1, 'rgba(150,140,120,0.35)'); pxRect(g, c[0] - 6, c[1] + 1, 5, 1, 'rgba(255,255,255,0.7)');   // a faint rim against the ceiling
+        if (dv === 1) for (const dx of [-4, 1, 5]) pxRect(g, c[0] + dx, c[1] + 3, 1, 1, 'rgba(58,48,32,0.6)');
+        if (dv === 2) { pxLine(g, c[0] - 7, c[1] + 1, c[0] + 3, c[1] + 4, 'rgba(110,100,84,0.6)'); pxRect(g, c[0] + 9, c[1] + 2, 3, 2, '#c8c2b0'); } }
+      { const fv = cond('bfloor');
+        if (fv === 1) for (const [x, z] of [[-3.9, 9.9], [-2.1, 9.9], [-3.9, 11.2], [-2.1, 11.2]]) { const p = P(x, 0, z); pxRect(g, p[0], p[1], 2, 1, 'rgba(40,20,10,0.5)'); }
+        if (fv === 2) for (let i = 0; i < 6; i++) { const a = P(-4.4 + i * .2, 0, 9 + hash(i) * .3), b = P(-2.4 + i * .25, 0, 10.6 + hash(i + 3) * .4); pxLine(g, a[0], a[1], b[0], b[1], 'rgba(240,210,170,0.6)'); }
+        if (fv === 3) { fillPoly(g, floorBlob(-1.4, 10.6, .9, .7, 51, .4, 16), 'rgba(40,20,10,0.25)'); lineW(g, P(-2.1, .06, 10.8), P(-.7, .06, 10.8), '#e8a870'); lineW(g, P(-2.1, .03, 10.95), P(-.7, .03, 10.95), 'rgba(30,10,0,0.5)'); } }
+      sideSwitch(g, r, 'right', 7.75, 8.05, 1.2, 1.55, !r.lightsOff);
+      outletBack(g, r, 4.9, .45); scuffs(g, r, 12); floorVent(g, -5.4, -4.6, 5.4, 5.75); cobweb(g, ...P(r.box.x0, r.box.h, zb), 1, 1, 9);
       doorOnSide(g, r, 'right', 8.4, 10, '#c9b693');
     },
     dynamic(g, r, t) {
@@ -462,7 +665,8 @@ const ROOMS = {
       if (wv === 2) { const c = P(2.4, 1.5, r.box.zb); for (let a = 0; a < 6.28; a += .7) pxLine(g, c[0], c[1], c[0] + Math.cos(a) * 9, c[1] + Math.sin(a) * 6, '#ffffff'); }
       const sv = cond('smoke'), c = P(1.2, 4, 8.6);
       if (sv !== 3 && (t % 1.4) < .18) pxRect(g, c[0] + 4, c[1] + 2, 1, 1, '#7bff6b');
-      if (!r.lightsOff) { g.fillStyle = dither('#fff8e6', 2); g.beginPath(); const p = P(-1, 4, 9.6); g.ellipse(p[0], p[1] + 22, 70, 26, 0, 0, 7); g.fill(); }
+      r.flickerDark = !r.lightsOff && cond('dome') === 3 && flickerDark(t, 30, 21, .75);
+      if (!r.lightsOff && !r.flickerDark) { const p = P(-1, 4, 9.6); softGlow(g, p[0], p[1] + 16, 96, 36, '#fff8e6', .15); }
     }
   }
 };
@@ -497,13 +701,18 @@ const Rooms = {
   /* everything you can point at in a room, smallest first so small things win over big ones */
   hotspots(id) {
     const r = ROOMS[id], out = [];
-    for (const [fid, f] of Object.entries(r.features)) out.push({ kind: 'feature', id: fid, name: FEATURE[fid].name, pts: f.pts(), walk: f.walk });
-    for (const s of r.scenery) out.push({ kind: 'scenery', id: s.id, name: s.name, pts: s.pts(), walk: s.walk, data: s });
+    for (const [fid, f] of Object.entries(r.features)) if (!f.when || f.when()) out.push({ kind: 'feature', id: fid, name: FEATURE[fid].name, pts: f.pts(), walk: f.walk });
+    for (const s of r.scenery) if (!s.when || s.when()) out.push({ kind: 'scenery', id: s.id, name: s.name, pts: s.pts(), walk: s.walk, data: s });
     for (const d of r.doors) {
       const pts = d.back ? Q.back(r.box, d.back[0], d.back[1], 0, 2.95) : (d.side === 'left' ? Q.left : Q.right)(r.box, d.za, d.zb, 0, 2.9);
       out.push({ kind: 'door', id: d.id, name: d.name, pts, walk: d.walk, data: d });
     }
-    out.push(...Decor.clutterHots(id));
+    out.push(...Decor.clutterHots(id), ...Openables.hots(id), ...Anomalies.hots(id));
+    if (id === 'living' && Decor.cur && Decor.cur.tie && !Game.taken.has('tie')) {
+      const sp = tieSpot(), p = sp.floor ? P(sp.x, 0, sp.z) : P(sp.x, FAN.y, sp.z);
+      out.push({ kind: 'scenery', id: 'tie', name: 'Necktie', pts: sp.floor ? [[p[0] - 19, p[1] - 8], [p[0] + 19, p[1] - 8], [p[0] + 19, p[1] + 4], [p[0] - 19, p[1] + 4]] : [[p[0] - 6, p[1] - 4], [p[0] + 9, p[1] - 4], [p[0] + 9, p[1] + SPR_TIE_DRAPE.length], [p[0] - 6, p[1] + SPR_TIE_DRAPE.length]],
+        walk: sp.floor ? { x: sp.x, z: sp.z - .6 } : { x: sp.x, z: sp.z - .4 }, data: { ...CLUTTER.tie, item: 'tie', look: sp.floor ? 'A loud necktie in a heap on the carpet, right where the fan flung it.' : CLUTTER.tie.look } });
+    }
     for (const h of out) { const b = polyBox(h.pts); h.area = (b.x1 - b.x0) * (b.y1 - b.y0); h.box = b; }
     return out.sort((a, b) => a.area - b.area);
   },
@@ -511,14 +720,20 @@ const Rooms = {
     const r = ROOMS[id];
     for (const [i, w] of r.windows.entries()) drawOutside(g, Q.back(r.box, w.xa, w.xb, w.ya, w.yb), t, i * 7 + id.length, { frosted: w.frosted });
     g.drawImage(this.layer(id), 0, 0);
-    for (const w of r.windows) drawSun(g, r, t, w);
+    for (const w of r.windows) {                 // open blinds let in more light
+      if (id === 'living') drawSun(g, r, t, Openables.amt('blinds') > .5 ? { ...w, slats: 0 } : w);
+      else if (id === 'bedroom') drawSun(g, r, t, { ...w, level: (w.level ?? 5) * (.25 + .75 * Openables.amt('bblinds')) });
+      else drawSun(g, r, t, w);
+    }
     r.dynamic && r.dynamic(g, r, t);
+    Openables.drawLive(g, r, t);
   },
   overlay(g, id, t) {
     const r = ROOMS[id];
+    if (r.overlay) r.overlay(g, r, t);                              // weather over everything, outdoors (js/ambient-fx.js)
     if (r.lightsOff) { g.fillStyle = id === 'bath' ? 'rgba(14,10,24,0.62)' : 'rgba(14,10,24,0.42)'; g.fillRect(0, 0, SW, SH); for (const w of r.windows) if (!w.frosted && Decor.time.sun) fillPoly(g, sunPatch(r, w.xa, w.xb, w.ya, w.yb), rgba(Decor.time.sun, .22)); }
     Decor.tint(g, SW, SH);
-    if (r.flickerDark) { g.fillStyle = 'rgba(14,10,24,0.45)'; g.fillRect(0, 0, SW, SH); }
+    if (r.flickerDark) { g.fillStyle = id === 'bath' ? 'rgba(14,10,24,0.3)' : 'rgba(14,10,24,0.22)'; g.fillRect(0, 0, SW, SH); }
     g.drawImage(vignette(), 0, 0);
   }
 };

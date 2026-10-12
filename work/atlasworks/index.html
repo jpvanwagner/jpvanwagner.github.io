@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlasworks</title>
+<style>
+  :root {
+    --ega-0: #000000; --ega-1: #0000AA; --ega-2: #00AA00; --ega-3: #00AAAA;
+    --ega-4: #AA0000; --ega-5: #AA00AA; --ega-6: #AA5500; --ega-7: #AAAAAA;
+    --ega-8: #555555; --ega-9: #5555FF; --ega-A: #55FF55; --ega-B: #55FFFF;
+    --ega-C: #FF5555; --ega-D: #FF55FF; --ega-E: #FFFF55; --ega-F: #FFFFFF;
+    --win-bg: #008080; --panel-bg: #c0c0c0; --border-light: #ffffff;
+    --border-dark: #808080; --border-darker: #000000; --title-bg: #000080;
+  }
+
+  body {
+    background-color: var(--win-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0; padding: 0; overflow: hidden; user-select: none; color: black; font-size: 13px;
+  }
+
+  .win95-window {
+    background-color: var(--panel-bg);
+    border-top: 2px solid var(--border-light); border-left: 2px solid var(--border-light);
+    border-right: 2px solid var(--border-darker); border-bottom: 2px solid var(--border-darker);
+    box-shadow: inset -1px -1px var(--border-dark), inset 1px 1px #dfdfdf; padding: 2px;
+  }
+  .win95-title {
+    background-color: var(--title-bg); color: white; font-weight: bold; padding: 2px 4px;
+    display: flex; justify-content: space-between; align-items: center; font-size: 13px; cursor: default;
+  }
+  .win95-button {
+    background-color: var(--panel-bg);
+    border-top: 2px solid var(--border-light); border-left: 2px solid var(--border-light);
+    border-right: 2px solid var(--border-darker); border-bottom: 2px solid var(--border-darker);
+    box-shadow: inset -1px -1px var(--border-dark), inset 1px 1px #dfdfdf;
+    padding: 4px 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    font-family: inherit; font-size: 12px; font-weight: bold; gap: 6px; color: black; position: relative;
+  }
+  .win95-button:active, .win95-button.active {
+    border-top: 2px solid var(--border-darker); border-left: 2px solid var(--border-darker);
+    border-right: 2px solid var(--border-light); border-bottom: 2px solid var(--border-light);
+    box-shadow: inset -1px -1px #dfdfdf, inset 1px 1px var(--border-dark); background-color: #dfdfdf;
+  }
+  .win95-button:disabled { color: #888; text-shadow: 1px 1px 0 #fff; pointer-events: none; }
+  .win95-input, .win95-select {
+    background-color: white; color: black;
+    border-top: 2px solid var(--border-darker); border-left: 2px solid var(--border-darker);
+    border-right: 2px solid var(--border-light); border-bottom: 2px solid var(--border-light);
+    padding: 2px 4px; outline: none; font-family: inherit; font-size: 12px; width: 100%; box-sizing: border-box;
+  }
+  .win95-panel {
+    background-color: white; padding: 6px;
+    border-top: 2px solid var(--border-dark); border-left: 2px solid var(--border-dark);
+    border-right: 2px solid var(--border-light); border-bottom: 2px solid var(--border-light);
+    overflow-y: auto; max-height: 100%;
+  }
+
+  .help-icon {
+    display: inline-block; width: 16px; height: 16px; border-radius: 50%;
+    background-color: var(--title-bg); color: white; text-align: center; line-height: 16px;
+    font-size: 11px; font-weight: bold; cursor: help; margin-left: auto;
+    border: 1px solid var(--border-light); box-shadow: 1px 1px 0 #000;
+  }
+
+  .app-container { display: flex; flex-direction: column; height: 100vh; }
+  .menu-bar { background-color: var(--panel-bg); padding: 4px 8px; display: flex; gap: 10px; border-bottom: 2px solid var(--border-dark); z-index: 50; align-items: center; }
+  .workspace { display: flex; flex: 1; overflow: hidden; position: relative; }
+  .sidebar { width: 230px; display: flex; flex-direction: column; gap: 5px; margin: 5px; z-index: 10; flex-shrink: 0; }
+  .right-sidebar { width: 300px; display: flex; flex-direction: column; gap: 5px; margin: 5px; z-index: 10; flex-shrink: 0; }
+  .tool-content { padding: 6px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; overflow-x: hidden; }
+  
+  .brush-subtool { display: none; flex-direction: column; gap: 4px; padding-left: 10px; margin-top: 4px; }
+  .brush-btn { display: flex; align-items: center; gap: 6px; padding: 2px 4px; cursor: pointer; border: 1px solid transparent; }
+  .brush-btn:hover { background-color: var(--title-bg); color: white; }
+  .brush-btn.active { background-color: var(--title-bg); color: white; border: 1px dotted yellow; }
+  .color-swatch { width: 16px; height: 16px; border: 1px solid #000; flex-shrink: 0; display: flex; flex-wrap: wrap; box-sizing: border-box; }
+  
+  #map-viewport {
+    flex: 1; background-color: transparent; position: relative; overflow: hidden;
+    border: 2px solid var(--border-darker); border-right-color: var(--border-light); border-bottom-color: var(--border-light);
+    box-shadow: inset 2px 2px #000; margin: 5px 0;
+  }
+  #map-transform-wrapper { position: absolute; transform-origin: top left; transition: transform 0.1s ease-out; }
+  
+  #grid-container {
+    position: relative; display: flex; flex-wrap: wrap; background-color: transparent; gap: 0;
+  }
+  
+  .grid-cell { box-sizing: border-box; position: absolute; background-color: transparent; display: flex; flex-wrap: wrap; align-content: flex-start; }
+  /* (A) TILE DIVIDERS — the 'grid-lines-on' class was toggled but nothing drew the
+     grid, so tile boundaries were invisible. This overlay paints a 1px line at
+     every TILE_PIXELS (64px) boundary, ABOVE the (opaque) tiles but below the
+     selection/conflict outlines. HOW TO MODIFY: tweak the rgba colours / 64px. */
+  #map-viewport.grid-lines-on #grid-container::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 7;
+    background-image:
+      repeating-linear-gradient(to right, rgba(0,0,0,0.45) 0 1px, transparent 1px 64px),
+      repeating-linear-gradient(to bottom, rgba(0,0,0,0.45) 0 1px, transparent 1px 64px),
+      repeating-linear-gradient(to right, transparent 0 1px, transparent 1px 63px, rgba(255,255,255,0.10) 63px 64px),
+      repeating-linear-gradient(to bottom, transparent 0 1px, transparent 1px 63px, rgba(255,255,255,0.10) 63px 64px);
+  }
+  .sub-pixel { box-sizing: border-box; border: none !important; outline: none !important; margin: 0; padding: 0; position: relative; background-color: var(--ega-A); }
+  
+  #traffic-canvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 8; }
+
+  .selected-tile-outline { position: absolute; inset: 0; pointer-events: none; z-index: 25; outline: 2px dashed cyan; background-color: rgba(0, 255, 255, 0.15); }
+  .selected-road-outline { outline: 2px dashed cyan !important; z-index: 20 !important; filter: brightness(1.3); }
+  .conflict-highlight { outline: 3px solid red !important; box-shadow: 0 0 10px red; animation: flashQuest 0.5s infinite; z-index: 40 !important; }
+
+  @keyframes wavePulse { 0% { filter: brightness(1); } 50% { filter: brightness(1.3) saturate(1.2); } 100% { filter: brightness(1); } }
+  @keyframes foamPulse { 0%, 100% { opacity: 0; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1); box-shadow: inset 0 0 8px 3px rgba(255,255,255,0.8); } }
+  @keyframes flashQuest { 0% { outline: 2px solid yellow; box-shadow: 0 0 10px yellow; } 50% { outline: 2px solid red; box-shadow: 0 0 10px red; } 100% { outline: 2px solid yellow; box-shadow: 0 0 10px yellow; } }
+  @keyframes targetPulse { 0% { transform: scale(1); box-shadow: 0 0 10px cyan; background-color: cyan; } 50% { transform: scale(1.5); box-shadow: 0 0 20px cyan; background-color: white; } 100% { transform: scale(1); box-shadow: 0 0 10px cyan; background-color: cyan; } }
+  @keyframes tutGlow { 0% { box-shadow: 0 0 5px 2px yellow; border: 2px solid yellow; z-index:999; } 50% { box-shadow: 0 0 15px 5px yellow; border: 2px solid yellow; z-index:999; } 100% { box-shadow: 0 0 5px 2px yellow; border: 2px solid yellow; z-index:999; } }
+
+  .water-anim { animation: wavePulse 4s infinite ease-in-out; }
+  .shore-anim::after { content: ''; position: absolute; inset: 0; background-color: transparent; animation: foamPulse 3s infinite ease-in-out; pointer-events: none; }
+  .quest-key { animation: flashQuest 1s infinite; z-index: 40 !important; }
+  .pulse-target { animation: targetPulse 0.5s infinite; z-index: 60 !important; color: black !important; }
+  .tut-highlight { animation: tutGlow 1s infinite; position: relative; z-index: 300; }
+
+  .draggable-ui { position: absolute; background-color: var(--panel-bg); border: 2px solid var(--border-light); border-right-color: var(--border-darker); border-bottom-color: var(--border-darker); box-shadow: 2px 2px 8px rgba(0,0,0,0.7); z-index: 60; user-select: none; display: flex; flex-direction: column; }
+  .drag-handle { background-color: var(--title-bg); color: white; font-weight: bold; font-size: 10px; padding: 2px; text-align: center; cursor: grab; }
+  .drag-handle:active { cursor: grabbing; }
+
+  #compass { top: 10px; right: 10px; width: 60px; height: 60px; border-radius: 50%; align-items: center; justify-content: center; font-weight: bold; cursor: grab; padding:0; flex-direction: row; }
+  #compass:active { cursor: grabbing; }
+  #compass span.n { position: absolute; top: 2px; color: var(--ega-4); font-size: 12px; }
+  #compass span.s { position: absolute; bottom: 2px; font-size: 12px; }
+  #compass span.w { position: absolute; left: 4px; font-size: 12px; }
+  #compass span.e { position: absolute; right: 4px; font-size: 12px; }
+
+  #zoom-slider-ui { top: 80px; right: 10px; width: 40px; }
+  #zoom-slider-ui input[type=range] { writing-mode: vertical-lr; direction: rtl; height: 100px; margin: 5px auto; cursor: pointer; }
+
+  .map-road { position: absolute; display: flex; align-items: center; justify-content: center; overflow: hidden; pointer-events: auto; z-index: 5; }
+  .map-road.gravel { background-color: var(--ega-7); background-image: radial-gradient(#333 15%, transparent 16%), radial-gradient(#333 15%, transparent 16%); background-size: 6px 6px; background-position: 0 0, 3px 3px; }
+  .map-road.dirt { background-color: var(--ega-6); }
+  .map-road.concrete { background-color: var(--ega-7); }
+  .map-road.asphalt { background-color: var(--ega-8); }
+  .map-road.bridge { background-color: var(--ega-6); border-top: 2px solid #000; border-bottom: 2px solid #000; z-index: 6; }
+  
+  .hide-traffic #traffic-canvas { display: none !important; }
+  .stop-anim .water-anim, .stop-anim .shore-anim::after { animation-play-state: paused !important; }
+
+  #shape-preview { position: absolute; border: 2px dashed var(--ega-E); background-color: rgba(255,255,85,0.3); pointer-events: none; display: none; z-index: 25; }
+  #line-preview { position: absolute; background-color: rgba(255,255,255,0.5); transform-origin: 0 50%; pointer-events: none; display: none; z-index: 25; box-shadow: 0 0 4px #000; }
+  #overlays-container { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+
+  .poi-container { position: absolute; inset: 0; display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: flex-start; gap: 1px; pointer-events: none; z-index: 15; padding: 2px; overflow: hidden; }
+  .poi-box { background-color: var(--ega-0); color: var(--ega-F); border: 1px solid var(--ega-F); font-weight: bold; pointer-events: auto; display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex-shrink: 0; box-shadow: 1px 1px 0 rgba(0,0,0,0.8); cursor: grab; overflow: hidden; }
+  .poi-box:active { cursor: grabbing; }
+  .poi-emoji { background: transparent !important; border: none !important; box-shadow: none !important; font-size: 18px !important; text-shadow: 1px 1px 0 #000; width: auto; height: auto; padding: 2px; }
+  
+  .res-box { border-radius: 50%; background-color: #333; color: white; display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; font-size: 9px; font-weight: bold; pointer-events: auto; box-shadow: 1px 1px 2px black; cursor: grab; flex-shrink:0; }
+  .res-subpixel { position: absolute; z-index: 14; box-shadow: inset 1px 1px rgba(255,255,255,0.5), 1px 1px 2px rgba(0,0,0,0.8); cursor: grab; pointer-events: auto; }
+  .bus-stop { background-color: transparent !important; border: 1px solid cyan !important; font-size: 14px; width:auto; height:auto; padding:1px; border-radius:4px; }
+
+  .hide-res .res-box, .hide-res .res-subpixel { display: none !important; }
+  .hide-bus .bus-stop, .hide-bus .bus-line { display: none !important; }
+
+  .district-label { position: absolute; color: white; font-family: 'Arial Black', sans-serif; font-size: 24px; text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; pointer-events: none; z-index: 20; transform: translate(-50%, -50%); opacity: 0.8; }
+
+  #ingame-hud { display: none; position: absolute; inset: 0; pointer-events: none; z-index: 55; overflow: hidden; }
+  .hud-topbar { position: absolute; top: 0; left: 0; right: 0; background: rgba(0,0,80,0.8); color: white; padding: 4px 10px; display: flex; justify-content: space-between; font-family: monospace; font-size: 14px; border-bottom: 2px solid var(--ega-F); pointer-events: auto; }
+  .hud-weather { position: absolute; top: 40px; right: 10px; background: rgba(0,0,0,0.7); color: var(--ega-B); padding: 8px; border: 1px solid var(--ega-B); font-family: monospace; width: 150px; pointer-events: auto; }
+  #preview-legend { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; border: 1px solid var(--border-light); padding: 6px; font-family: monospace; pointer-events: auto; max-width: 200px; max-height: 200px; overflow-y: auto; }
+  .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; cursor: pointer; padding: 2px; transition: background 0.2s; }
+  .legend-item:hover { background: rgba(255,255,255,0.2); }
+
+  #time-filter { position: absolute; inset: 0; pointer-events: none; z-index: 54; display: none; mix-blend-mode: multiply; transition: background-color 1s; }
+  .time-morning { background-color: #ffecd2; display: block !important; }
+  .time-day { background-color: #ffffff; display: block !important; }
+  .time-evening { background-color: #ff9a9e; display: block !important; }
+  .time-night { background-color: #1e3c72; display: block !important; }
+
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; }
+
+  #tutorial-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; z-index: 400; display: none; animation: badgePop 0.4s ease-out; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  
+  <div class="menu-bar">
+    <span style="font-weight:bold; color:var(--title-bg); margin-right:10px;">Atlasworks</span>
+    <button type="button" class="win95-button" onclick="exportMap()">Export File</button>
+    <button type="button" class="win95-button" onclick="openModal('settings-modal')">Settings</button>
+    <button type="button" class="win95-button tut-step-dist" onclick="toggleDistricts()">Toggle Districts</button>
+    <button type="button" class="win95-button tut-step-3" onclick="togglePreview()" id="btn-preview">Preview Mode</button>
+    <div style="width: 1px; height: 16px; background: var(--border-dark); margin: 0 5px;"></div>
+    <button type="button" class="win95-button" onclick="undo()" id="btn-undo" title="Undo (Ctrl+Z)" disabled><span>↩️</span> Undo</button>
+    <button type="button" class="win95-button" onclick="redo()" id="btn-redo" title="Redo (Ctrl+Y)" disabled><span>↪️</span> Redo</button>
+    <div style="flex:1"></div>
+    <button type="button" class="win95-button" style="color:var(--ega-1)" onclick="showGenericHelp()">Help</button>
+  </div>
+
+  <div class="workspace" id="workspace">
+    
+    <div class="sidebar win95-window" id="left-sidebar">
+      <div class="win95-title">Tools</div>
+      <div class="tool-content">
+        <button type="button" class="win95-button tut-step-0" onclick="setTool('hand', this)"><span>✋</span> Pan Map <span class="help-icon" onclick="event.stopPropagation(); showHelp('Pan Map', 'Click and drag to move your view. Scroll the mousewheel anywhere over the map to zoom in and out.')">i</span></button>
+        <button type="button" class="win95-button" onclick="setTool('inspect', this)"><span>🔍</span> Inspector (Select) <span class="help-icon" onclick="event.stopPropagation(); showHelp('Inspector', 'Click objects to edit metadata. Click and drag POIs to move them. Hold SHIFT to multi-select tiles or roads.')">i</span></button>
+        
+        <div style="height:2px; background:var(--border-dark); border-bottom:1px solid var(--border-light); margin:5px 0;"></div>
+        
+        <button type="button" class="win95-button active tut-step-1" onclick="setTool('paint', this)"><span>🖌️</span> Paint Terrain <span class="help-icon" onclick="event.stopPropagation(); showHelp('Paint', 'Freehand paint terrain. Select brush size in the right panel. Whole-tile brushes snap to edges and use the variability setting.')">i</span></button>
+        <button type="button" class="win95-button" onclick="setTool('river', this)"><span>🌊</span> Rivers <span class="help-icon" onclick="event.stopPropagation(); showHelp('Rivers', 'Draw organic waterways that smoothly curve and deposit sandbars.')">i</span></button>
+        
+        <div class="brush-subtool" id="brush-palette" style="display:flex;">
+            <div class="brush-btn active" data-brush="grass" onclick="setBrush('grass', this)"><div class="color-swatch"></div> Grass / Lawn</div>
+            <div class="brush-btn" data-brush="forest" onclick="setBrush('forest', this)"><div class="color-swatch"></div> Forest / Trees</div>
+            <div class="brush-btn" data-brush="dirt" onclick="setBrush('dirt', this)"><div class="color-swatch"></div> Dirt / Mud</div>
+            <div class="brush-btn" data-brush="concrete" onclick="setBrush('concrete', this)"><div class="color-swatch"></div> Concrete</div>
+            <div class="brush-btn" data-brush="asphalt" onclick="setBrush('asphalt', this)"><div class="color-swatch"></div> Asphalt</div>
+            <div class="brush-btn" data-brush="beach" onclick="setBrush('beach', this)"><div class="color-swatch"></div> Sand / Beach</div>
+            <div class="brush-btn" data-brush="shallows" onclick="setBrush('shallows', this)"><div class="color-swatch"></div> Shallows</div>
+            <div class="brush-btn" data-brush="water" onclick="setBrush('water', this)"><div class="color-swatch"></div> Deep Water</div>
+        </div>
+
+        <button type="button" class="win95-button" onclick="setTool('shape', this)"><span>🟩</span> Shapes <span class="help-icon" onclick="event.stopPropagation(); showHelp('Shapes', 'Click and drag to draw geometry across tiles. You can paint terrain OR drop a colored overlay graphic on top.')">i</span></button>
+        
+        <div style="height:2px; background:var(--border-dark); border-bottom:1px solid var(--border-light); margin:5px 0;"></div>
+        
+        <button type="button" class="win95-button" onclick="setTool('elevation', this)"><span>🏔️</span> Elevation <span class="help-icon" onclick="event.stopPropagation(); showHelp('Elevation', 'Paint terrain height. Alterations dynamically shift terrain brightness (valleys are dark, peaks are bright).')">i</span></button>
+        
+        <div style="height:2px; background:var(--border-dark); border-bottom:1px solid var(--border-light); margin:5px 0;"></div>
+        
+        <button type="button" class="win95-button tut-step-2" onclick="setTool('road', this)"><span>🛣️</span> Roads <span class="help-icon" onclick="event.stopPropagation(); showHelp('Roads', 'Paint roads that automatically snap to grid boundaries. Width scales visually based on Map Scale.')">i</span></button>
+        <button type="button" class="win95-button" onclick="setTool('dock', this)"><span>⚓</span> Docks <span class="help-icon" onclick="event.stopPropagation(); showHelp('Docks', 'Paint wooden docks that are safe for foot travel over deep water.')">i</span></button>
+        <button type="button" class="win95-button" onclick="setTool('poi', this)"><span>📍</span> Manage POIs <span class="help-icon" onclick="event.stopPropagation(); showHelp('POIs', 'Place interactive map points. Quest Keys flash to draw player attention.')">i</span></button>
+        <button type="button" class="win95-button" onclick="setTool('residence', this)"><span>🏠</span> Residences <span class="help-icon" onclick="event.stopPropagation(); showHelp('Residences', 'Place living spaces. Choose to show them as POI icons, or physically paint them as roofs on specific sub-pixels.')">i</span></button>
+        <button type="button" class="win95-button" onclick="setTool('bus', this)"><span>🚌</span> Bus Routes <span class="help-icon" onclick="event.stopPropagation(); showHelp('Busses', 'Name a route and place stops near roads. The engine snaps them to roads and uses A* pathfinding to connect them!')">i</span></button>
+      </div>
+    </div>
+
+    <div id="map-viewport" class="grid-lines-on">
+      <div id="time-filter"></div>
+      <div id="map-transform-wrapper">
+        <div id="grid-container"></div>
+        <div id="overlays-container"></div>
+        <div id="district-labels"></div>
+        <div id="shape-preview"></div>
+        <div id="line-preview"></div>
+        <div id="roads-container"></div>
+        <canvas id="traffic-canvas"></canvas>
+      </div>
+      
+      <div id="compass" class="draggable-ui">
+        <span class="n">N</span><span class="s">S</span><span class="w">W</span><span class="e">E</span>
+        <div style="width:4px;height:4px;background:black;border-radius:50%"></div>
+      </div>
+
+      <div id="zoom-slider-ui" class="draggable-ui">
+        <div class="drag-handle" id="zoom-drag-handle">ZOOM</div>
+        <input type="range" id="zoom-range" min="20" max="300" value="100" oninput="STATE.view.zoom=parseInt(this.value); updateTransform();">
+        <span id="zoom-val" style="font-size:10px; text-align:center; padding-bottom:2px;">100%</span>
+      </div>
+
+      <div id="ingame-options" class="win95-window" style="display:none; position:absolute; top:10px; left:10px; z-index:65; width:200px; font-family:'Segoe UI', sans-serif;">
+         <div class="win95-title"><span>Preview Options</span></div>
+         <div class="win95-panel" style="font-size:11px; padding:4px;">
+            <label style="display:block; margin-bottom:2px;"><input type="checkbox" id="prev-show-traffic" checked> Traffic Visible</label>
+            <label style="display:block; margin-bottom:2px;"><input type="checkbox" title="Stop Animations" onchange="document.getElementById('map-viewport').classList.toggle('stop-anim', this.checked)"> Stop Animations</label>
+            <label style="display:block; margin-bottom:2px;"><input type="checkbox" id="prev-show-compass" checked onchange="document.getElementById('compass').style.display = this.checked ? 'flex' : 'none'"> Show Compass</label>
+            <label style="display:block; margin-bottom:2px;"><input type="checkbox" title="Show Weather" checked onchange="document.querySelector('.hud-weather').style.display = this.checked ? 'block' : 'none'"> Show Weather</label>
+            <label style="display:block; margin-bottom:2px;"><input type="checkbox" title="Show Time" checked onchange="document.querySelector('.hud-topbar').style.display = this.checked ? 'flex' : 'none'"> Show Time/Location</label>
+            <label style="display:block; margin-bottom:2px;"><input type="checkbox" id="prev-show-res" onchange="document.getElementById('map-viewport').classList.toggle('hide-res', !this.checked)"> Show Residences</label>
+            <label style="display:block; margin-bottom:5px;"><input type="checkbox" id="prev-show-bus" onchange="document.getElementById('map-viewport').classList.toggle('hide-bus', !this.checked)"> Show Bus Routes</label>
+            <div style="border-top:1px solid var(--border-dark); padding-top:4px;">
+                <label>Time of Day:</label>
+                <select class="win95-select" style="margin-top:2px;" onchange="setTimeOfDay(this.value)">
+                    <option value="day">Day (Clear)</option><option value="morning">Morning</option>
+                    <option value="evening">Evening</option><option value="night">Night</option>
+                </select>
+            </div>
+         </div>
+      </div>
+
+      <div id="ingame-hud">
+        <div class="hud-topbar">
+          <span id="hud-location">Loc: Unknown Sector</span><span id="hud-time">FRI OCT 13 1999 - 11:45 AM</span>
+        </div>
+        <div class="hud-weather">
+          <div style="border-bottom:1px solid var(--ega-B); margin-bottom:5px; padding-bottom:2px;">LOCAL WEATHER</div>
+          <div>Temp: 45°F</div><div>Status: Heavy Rain</div><div>Wind: 12 mph NW</div>
+        </div>
+        <div id="preview-legend">
+          <div style="font-weight:bold; margin-bottom:5px; border-bottom:1px solid white;">MAP LEGEND</div>
+          <div id="preview-legend-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-sidebar win95-window" id="right-sidebar">
+      <div class="win95-title" id="rs-title">Paint Settings</div>
+      <div class="tool-content" id="rs-content" style="background:var(--panel-bg)"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="setup-modal" style="display:flex;">
+  <div class="win95-window" style="width: 380px;">
+    <div class="win95-title"><span>New Map Setup</span></div>
+    <div class="win95-panel" style="margin:4px; display:flex; flex-direction:column; gap:8px;">
+      <p style="font-size:11px; margin-bottom:5px;">Configure initial parameters for your map.</p>
+      <div style="display:flex; gap:10px;">
+        <label style="flex:1">Width (Tiles):<input type="number" id="setup-w" class="win95-input" value="20" min="5" max="50"></label>
+        <label style="flex:1">Height (Tiles):<input type="number" id="setup-h" class="win95-input" value="20" min="5" max="50"></label>
+      </div>
+      
+      <div style="display:flex; gap:10px;">
+          <label style="flex:1">Sub-pixels per Tile:
+            <select class="win95-select" id="setup-subres">
+              <option value="1">1x1</option><option value="2">2x2</option><option value="4" selected>4x4</option>
+              <option value="6">6x6</option><option value="8">8x8</option><option value="10">10x10</option><option value="12">12x12</option>
+            </select>
+          </label>
+          <label style="flex:1">Map Scale (Per Tile):
+            <select class="win95-select" id="setup-scale">
+              <option value="0.125">1/8 Mile</option><option value="0.25" selected>1/4 Mile</option>
+              <option value="0.5">1/2 Mile</option><option value="1">1 Mile</option><option value="2">2 Miles</option>
+            </select>
+          </label>
+      </div>
+
+      <div style="border:1px solid var(--border-dark); padding:4px; background:#eee;">
+        <label>Initial Districts:</label>
+        <select class="win95-select" id="setup-districts">
+          <option value="none">None (Single District)</option>
+          <option value="2x2">Split into 4 Sectors (2x2)</option>
+          <option value="3x3">Split into 9 Sectors (3x3)</option>
+          <option value="4x4">Split into 16 Sectors (4x4)</option>
+          <option value="5x5">Split into 25 Sectors (5x5)</option>
+          <option value="6x6">Split into 36 Sectors (6x6)</option>
+        </select>
+        <label style="display:block; margin-top:5px;"><input type="checkbox" id="setup-dist-roads" checked> Auto-draw border roads</label>
+        <label style="display:block; margin-top:2px;">Road Lanes: 
+           <select class="win95-select" id="setup-dist-lanes" style="width:70px">
+              <option value="1">1 Lane</option><option value="2" selected>2 Lanes</option>
+              <option value="4">4 Lanes</option><option value="6">6 Lanes</option>
+           </select>
+        </label>
+      </div>
+
+      <div style="text-align:right; margin-top:10px;"><button type="button" class="win95-button" onclick="initializeMap()">Create Map</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="msg-modal">
+  <div class="win95-window" style="width: 400px;">
+    <div class="win95-title"><span id="msg-title">Help</span><button type="button" class="win95-button" onclick="closeModal('msg-modal')" style="padding:0 4px">X</button></div>
+    <div class="win95-panel" style="margin:4px;">
+      <p id="msg-text" style="line-height:1.4; white-space: pre-wrap; max-height:400px; overflow-y:auto; font-size:12px;"></p>
+      <div style="text-align:right; margin-top:10px;"><button type="button" class="win95-button" onclick="closeModal('msg-modal')">OK</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="water-road-conflict-modal">
+  <div class="win95-window" style="width: 380px;">
+    <div class="win95-title"><span>Conflict Detected</span></div>
+    <div class="win95-panel" style="margin:4px;">
+      <p style="font-weight:bold; color:var(--ega-1); text-align:center;">Water painted over Road!</p>
+      <p style="text-align:center; font-size:12px;">Convert the highlighted road into a Bridge, or erase it?</p>
+      <div style="display:flex; flex-direction:column; gap:8px; margin-top:15px;">
+        <div style="display:flex; justify-content:space-between;">
+           <button type="button" class="win95-button" onclick="resolveWaterRoadConflict('bridge', false)">Make Bridge</button>
+           <button type="button" class="win95-button" onclick="resolveWaterRoadConflict('erase', false)">Erase Road</button>
+        </div>
+        <div style="border-top:1px dashed gray; padding-top:8px; display:flex; justify-content:space-between;">
+           <button type="button" class="win95-button" style="color:var(--ega-1)" onclick="resolveWaterRoadConflict('bridge', true)">Bridge All Remaining (<span id="conflict-count">0</span>)</button>
+           <button type="button" class="win95-button" style="color:var(--ega-4)" onclick="resolveWaterRoadConflict('erase', true)">Erase All Remaining</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="settings-modal">
+  <div class="win95-window" style="width: 350px;">
+    <div class="win95-title"><span>Map Settings</span><button type="button" class="win95-button" onclick="closeModal('settings-modal')" style="padding:0 4px">X</button></div>
+    <div class="win95-panel" style="margin:4px; display:flex; flex-direction:column; gap:8px;">
+      
+      <div style="border:1px solid var(--border-dark); padding:4px;">
+        <label style="display:flex; justify-content:space-between">Audio Mode: 
+          <select class="win95-select" id="set-audio" style="width:120px;" onchange="handleAudioSelect(this.value)">
+            <option value="continue">Continue Previous</option><option value="stopAll">Stop All</option>
+            <option value="custom">Play Unique Sounds...</option>
+          </select>
+        </label>
+        <div id="audio-custom-opts" style="display:none; margin-top:5px; font-size:11px;">
+          <input type="file" id="audio-upload" accept="audio/*" style="display:none" onchange="loadCustomAudio(this)">
+          <button type="button" class="win95-button" style="width:100%; margin-bottom:4px;" onclick="document.getElementById('audio-upload').click()">Browse Audio File...</button>
+          <span id="audio-filename" style="font-style:italic; display:block; margin-bottom:4px; overflow:hidden;">No file selected</span>
+          <div style="display:flex; gap:10px;">
+            <label><input type="checkbox" id="aud-fadein" checked> Fade-In</label>
+            <label><input type="checkbox" id="aud-fadeout" checked> Fade-Out</label>
+          </div>
+          <label style="margin-top:2px; display:block">Fade Strength (s): <input type="number" id="aud-str" value="2" class="win95-input" style="width:40px"></label>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border-dark); margin:5px 0;"></div>
+      <label><input type="checkbox" id="set-grid" checked> Show Gridlines In-Game</label>
+      <label><input type="checkbox" id="set-wateranim" checked onchange="toggleWaterAnim(this.checked)"> Enable Water Animations</label>
+      <label><input type="checkbox" id="set-elevation" onchange="STATE.config.showElevation=this.checked; renderEntities();"> Show Elevation Colors (Editor & Game)</label>
+      <label><input type="checkbox" id="set-zoomui" checked onchange="document.getElementById('zoom-slider-ui').style.display = this.checked ? 'flex' : 'none'"> Show Zoom Slider</label>
+      <label><input type="checkbox" id="set-dist-labels" checked onchange="document.getElementById('district-labels').style.display = this.checked ? 'block' : 'none'"> Show District Labels</label>
+      
+      <div style="text-align:right; margin-top:5px;"><button type="button" class="win95-button" onclick="closeModal('settings-modal')">Done</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="win95-window" id="tutorial-box">
+    <div class="win95-title"><span id="tut-title">Tutorial</span><button type="button" class="win95-button" onclick="endTutorial()" style="padding:0 4px">X</button></div>
+    <div class="win95-panel" style="font-size:12px; margin:2px;">
+        <p id="tut-text" style="margin-top:0;">Welcome! Click and drag to pan around. Scroll the mousewheel anywhere over the map to zoom.</p>
+        <div style="display:flex; justify-content:space-between; margin-top:10px;">
+            <button type="button" class="win95-button" style="color:#555" onclick="endTutorial()">Skip All</button>
+            <button type="button" class="win95-button" onclick="nextTutorial()">Next ➡️</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const PALETTE = {
+  water: 'var(--ega-1)', shallows: 'var(--ega-9)', beach: 'var(--ega-E)', sandbar: 'var(--ega-B)',
+  grass: 'var(--ega-A)', forest: 'var(--ega-2)', dirt: 'var(--ega-6)', dock: 'var(--ega-6)',
+  asphalt: 'var(--ega-8)', concrete: 'var(--ega-7)', bridge: 'var(--ega-7)'
+};
+
+const VARIANTS = {
+  grass: ['var(--ega-A)', 'var(--ega-2)'], 
+  forest: ['var(--ega-2)', 'var(--ega-A)'],
+  dirt: ['var(--ega-6)', 'var(--ega-E)'], 
+  concrete: ['var(--ega-7)', 'var(--ega-F)'],
+  asphalt: ['var(--ega-8)', 'var(--ega-7)'], 
+  beach: ['var(--ega-E)', 'var(--ega-B)']
+};
+
+const STATE = {
+  phase: 'editor', tool: 'paint', brush: 'grass',
+  history: [], historyIndex: -1,
+  config: { w: 20, h: 20, subRes: 4, scale: 0.25, audio: 'continue', showElevation: false },
+  paint: { variance: 20, useVar: true, size: 4, autoShore: true, continuousReroll: false },
+  shape: { type: 'rect', fill: 'fill', layer: 'terrain', autoShore: true },
+  road: { lanes: 2, mat: 'asphalt', speed: 25, traffic: 50 },
+  river: { width: 3, wavy: 2, banks: true },
+  elevation: { mode: 'raise', amount: 1 },
+  poi: { name: '', desc: '', link: '', glyph: '', size: 'medium', preset: 'custom', quest: false },
+  res: { type: 'house', price: 'mod', beds: 2, baths: 1, units: 1, tenants: 1, rent: 650, displayMode: 'poi' },
+  bus: { route: 'Route A' },
+  view: { x: 0, y: 0, zoom: 100, rot: 0, isDraggingMap: false },
+  tiles: {}, roads: [], busRoutes: {}, overlays: [], cars: [],
+  selectedTiles: [], selectedRoads: [], pendingConflicts: [],
+  dragParams: null, draggingEntity: null,
+  customAudio: { url: null, el: new Audio() },
+  tutorial: { active: true, step: 0 }
+};
+
+const TILE_PIXELS = 64; 
+
+const TOOL_HTML = {
+  hand: `<p style="font-size:11px;">Left/Right Click and drag to move around. Scroll mousewheel anywhere over the map to zoom in/out.</p>`,
+  paint: `
+    <div class="win95-panel">
+      <label style="font-weight:bold;">Brush Size (Sub-pixels):</label>
+      <input type="number" class="win95-input" value="\${STATE.config.subRes}" min="1" max="\${STATE.config.subRes}" id="ui-pt-size" onchange="STATE.paint.size=parseInt(this.value); document.getElementById('var-wrap').style.display = STATE.paint.size === STATE.config.subRes ? 'block' : 'none';" style="margin-bottom:10px">
+      <p style="font-size:10px; color:#555; margin-top:0;">*Set size to max to snap strokes to exact whole-tile boundaries.</p>
+      
+      <label style="font-weight:bold; display:block; margin-top:5px;"><input type="checkbox" checked onchange="STATE.paint.useVar=this.checked; updateSwatches();"> Enable Subpixel Variability</label>
+      <div id="var-wrap">
+        <label style="font-weight:bold;">Whole-Tile Variance: <span id="ui-pt-vval">20%</span></label>
+        <input type="range" min="0" max="100" value="20" style="width:100%; margin-bottom:5px;" oninput="STATE.paint.variance=this.value; document.getElementById('ui-pt-vval').innerText=this.value+'%'; updateSwatches();">
+        <label style="font-size:11px; display:block; margin-top:5px;"><input type="checkbox" onchange="STATE.paint.continuousReroll=this.checked"> Re-roll variance continuously while dragging</label>
+      </div>
+      <label style="font-weight:bold; display:block; margin-top:10px;"><input type="checkbox" checked onchange="STATE.paint.autoShore=this.checked"> Auto-generate Shorelines (Water)</label>
+    </div>
+  `,
+  shape: `
+    <div class="win95-panel">
+      <label style="font-weight:bold;">Material Source:</label>
+      <select class="win95-select" onchange="STATE.shape.layer=this.value" style="margin-bottom:10px;">
+        <option value="terrain">Paint Terrain (Destructive)</option>
+        <option value="overlay">Draw Overlay Graphic (Non-Destructive)</option>
+      </select>
+      <p style="font-size:11px; margin-top:0; font-style:italic;">Select color from the Palette on the left.</p>
+      <label style="font-weight:bold;">Shape Type:</label>
+      <select class="win95-select" onchange="STATE.shape.type=this.value" style="margin-bottom:5px;">
+        <option value="rect">Rectangle</option><option value="circle">Oval / Circle</option>
+      </select>
+      <label style="font-weight:bold;">Mode:</label>
+      <select class="win95-select" onchange="STATE.shape.fill=this.value" style="margin-bottom:5px;">
+        <option value="fill">Solid Fill</option><option value="outline">Outline</option>
+      </select>
+      <label style="font-weight:bold; display:block; margin-top:10px;"><input type="checkbox" checked onchange="STATE.shape.autoShore=this.checked"> Auto-generate Shorelines (Terrain)</label>
+    </div>
+  `,
+  road: `
+    <div class="win95-panel">
+      <p style="color:var(--ega-1); font-weight:bold; margin-top:0; font-size:11px;">Road start points automatically snap to tile borders.</p>
+      <label style="font-weight:bold;">Lanes (1 to 7):</label>
+      <input type="number" min="1" max="7" value="2" class="win95-input" style="margin-bottom:5px;" onchange="STATE.road.lanes=parseInt(this.value)">
+      <label style="font-weight:bold;">Material:</label>
+      <select class="win95-select" style="margin-bottom:5px;" onchange="STATE.road.mat=this.value">
+        <option value="asphalt">Asphalt</option><option value="concrete">Concrete</option>
+        <option value="dirt">Dirt</option><option value="gravel">Gravel</option>
+      </select>
+      <label style="font-weight:bold;">Speed Limit (mph):</label>
+      <input type="number" min="5" max="85" value="25" class="win95-input" style="margin-bottom:5px;" onchange="STATE.road.speed=parseInt(this.value)">
+      <label style="font-weight:bold;">Traffic Volume (0-100):</label>
+      <input type="range" min="0" max="100" value="50" style="width:100%" oninput="STATE.road.traffic=parseInt(this.value)">
+    </div>
+  `,
+  river: `
+    <div class="win95-panel">
+      <label style="font-weight:bold;">Width (Sub-pixels):</label>
+      <input type="range" min="1" max="8" value="3" style="width:100%; margin-bottom:10px;" oninput="STATE.river.width=parseInt(this.value)">
+      <label style="font-weight:bold;">Waviness:</label>
+      <input type="range" min="0" max="5" value="2" style="width:100%; margin-bottom:10px;" oninput="STATE.river.wavy=parseFloat(this.value)">
+      <label style="font-weight:bold;"><input type="checkbox" checked onchange="STATE.river.banks=this.checked"> Auto-generate Sandbars</label>
+    </div>
+  `,
+  dock: `<div class="win95-panel"><p style="margin:0;">Paint wooden docks that are traversable on foot over deep water.</p></div>`,
+  elevation: `
+    <div class="win95-panel">
+      <label style="font-weight:bold;">Mode:</label>
+      <select class="win95-select" onchange="STATE.elevation.mode=this.value" style="margin-bottom:10px;">
+        <option value="raise">Raise Terrain</option><option value="lower">Lower Terrain</option>
+      </select>
+      <label style="font-weight:bold;">Amount:</label>
+      <input type="number" min="1" max="5" value="1" class="win95-input" onchange="STATE.elevation.amount=parseInt(this.value)">
+      <p style="font-size:11px; color:#555;">(Tile elevation max 10. Highlights peaks and shades valleys).</p>
+    </div>
+  `,
+  poi: `
+    <div class="win95-panel">
+      <label style="font-weight:bold;">Quick Preset:</label>
+      <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;">
+        <button type="button" class="win95-button" style="padding:2px 4px; font-size:10px;" onclick="applyPOIPreset('bus')">🚌 Bus</button>
+        <button type="button" class="win95-button" style="padding:2px 4px; font-size:10px;" onclick="applyPOIPreset('gas')">⛽ Gas</button>
+        <button type="button" class="win95-button" style="padding:2px 4px; font-size:10px;" onclick="applyPOIPreset('hosp')">🏥 Hosp</button>
+        <button type="button" class="win95-button" style="padding:2px 4px; font-size:10px;" onclick="applyPOIPreset('retail')">🛒 Retail</button>
+        <button type="button" class="win95-button" style="padding:2px 4px; font-size:10px;" onclick="applyPOIPreset('custom')">✏️ Cust</button>
+      </div>
+      <label>Name:</label>
+      <input type="text" class="win95-input" id="poi-cfg-name" oninput="STATE.poi.name=this.value" style="margin-bottom:5px;">
+      <label>Description:</label>
+      <input type="text" class="win95-input" id="poi-cfg-desc" oninput="STATE.poi.desc=this.value" style="margin-bottom:5px;">
+      <div style="display:flex; gap:5px; margin-bottom:5px;">
+        <label style="flex:1">Glyph (Emoji/Text):<input type="text" class="win95-input" id="poi-cfg-glyph" maxlength="2" oninput="STATE.poi.glyph=this.value"></label>
+        <label style="flex:1">Size:
+          <select class="win95-select" id="poi-cfg-size" onchange="STATE.poi.size=this.value">
+            <option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option>
+          </select>
+        </label>
+      </div>
+      <label style="display:block; margin-bottom:10px;"><input type="checkbox" id="poi-cfg-quest" onchange="STATE.poi.quest=this.checked"> Quest Key (Flashing)</label>
+      <button type="button" class="win95-button" style="width:100%" onclick="alert('File Picker modal placeholder'); STATE.poi.link='link.map';">Link Mapster File...</button>
+    </div>
+  `,
+  residence: `
+    <div class="win95-panel">
+      <label style="font-weight:bold;">Display Mode:</label>
+      <select class="win95-select" style="margin-bottom:5px;" onchange="STATE.res.displayMode=this.value">
+        <option value="poi">POI Marker</option><option value="subpixel">Map Feature (Subpixel Roof)</option>
+      </select>
+      <p style="font-size:10px; color:#555; margin-top:0;">Clicking a specific sub-pixel drops the residence exactly there.</p>
+      
+      <label style="font-weight:bold;">Type:</label>
+      <select class="win95-select" id="res-type" style="margin-bottom:5px;" onchange="STATE.res.type=this.value; document.getElementById('rent-box').style.display = (this.value === 'rent' || this.value === 'apt') ? 'block' : 'none'; updateRent();">
+        <option value="house">Owned House</option><option value="parents">Parents' House</option>
+        <option value="apt">Apartment</option><option value="rent">Rental Home</option>
+      </select>
+      <label style="font-weight:bold;">Price Tier:</label>
+      <select class="win95-select" onchange="STATE.res.price=this.value" style="margin-bottom:5px;">
+        <option value="cheap">Cheap (Gray)</option><option value="mod" selected>Moderate (Cyan)</option>
+        <option value="exp">Expensive (Purple)</option><option value="lux">Luxury (Gold)</option>
+      </select>
+      <div style="display:flex; gap:5px; margin-bottom:5px;">
+         <label style="flex:1">Beds: <input type="number" min="1" value="2" class="win95-input" onchange="STATE.res.beds=parseInt(this.value); updateRent();"></label>
+         <label style="flex:1">Baths: <input type="number" min="1" value="1" class="win95-input" onchange="STATE.res.baths=parseInt(this.value); updateRent();"></label>
+      </div>
+      <div style="display:flex; gap:5px; margin-bottom:5px;">
+         <label style="flex:1">Units: <input type="number" min="1" value="1" class="win95-input" onchange="STATE.res.units=parseInt(this.value)"></label>
+         <label style="flex:1">Tenants: <input type="number" min="1" value="1" class="win95-input" id="res-tenants" onchange="STATE.res.tenants=Math.min(parseInt(this.value), STATE.res.beds)"></label>
+      </div>
+      <div id="rent-box" style="display:none; border-top:1px dashed gray; padding-top:5px;">
+         <label>1999 Monthly Rent: $<input type="number" id="res-rent" value="650" class="win95-input" style="width:60px" onchange="STATE.res.rent=parseInt(this.value)"></label>
+      </div>
+    </div>
+  `,
+  bus: `
+    <div class="win95-panel">
+      <label style="font-weight:bold;">Route Name:</label>
+      <input type="text" class="win95-input" value="Route A" onchange="STATE.bus.route=this.value">
+      <p style="font-size:11px; margin-top:5px;">Click near roads to place route stops. Lines automatically snap and A* pathfind along the road network!</p>
+    </div>
+  `,
+  inspect: `
+    <div class="win95-panel" id="inspector-content">
+      <p style="color:#888; font-style:italic; margin:0;">Click a tile, road, or entity to inspect. Hold Shift to multi-select. Drag entities to move them.</p>
+    </div>
+  `
+};
+
+window.TUTORIALS = [];
+
+window.nextTutorial = () => {
+    document.querySelectorAll('.tut-highlight').forEach(e => e.classList.remove('tut-highlight'));
+    STATE.tutorial.step++;
+    if (STATE.tutorial.step >= window.TUTORIALS.length) { endTutorial(); return; }
+    
+    document.getElementById('tut-title').innerText = window.TUTORIALS[STATE.tutorial.step].title;
+    document.getElementById('tut-text').innerText = window.TUTORIALS[STATE.tutorial.step].text;
+    
+    let target = document.querySelector(window.TUTORIALS[STATE.tutorial.step].target);
+    if(target) {
+        target.classList.add('tut-highlight');
+        let rect = target.getBoundingClientRect();
+        let box = document.getElementById('tutorial-box');
+        box.style.top = (rect.bottom + 20) + 'px';
+        box.style.left = Math.max(10, rect.left) + 'px';
+        box.style.transform = 'none';
+    }
+};
+
+window.endTutorial = () => { 
+    document.getElementById('tutorial-box').style.display = 'none'; 
+    STATE.tutorial.active = false; 
+    document.querySelectorAll('.tut-highlight').forEach(e => e.classList.remove('tut-highlight'));
+};
+
+window.exportMap = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(STATE));
+    const dl = document.createElement('a'); dl.setAttribute("href", dataStr);
+    
+    // Formatting date safely for download string
+    const d = new Date();
+    const tStr = `${d.getMonth()+1}-${d.getDate()}-${d.getFullYear()}_${d.getHours()}${d.getMinutes().toString().padStart(2, '0')}`;
+    
+    dl.setAttribute("download", `atlasworks_${tStr}.json`);
+    document.body.appendChild(dl); dl.click(); dl.remove();
+};
+
+window.toggleDistricts = () => {
+    const container = document.getElementById('district-labels');
+    if (container) {
+        container.style.display = container.style.display === 'none' ? 'block' : 'none';
+    }
+};
+
+window.updateRent = () => {
+    let rent = 350 + (STATE.res.beds * 100) + (STATE.res.baths * 50);
+    STATE.res.rent = rent;
+    let el = document.getElementById('res-rent'); if(el) el.value = rent;
+    let tel = document.getElementById('res-tenants');
+    if(tel) { tel.max = STATE.res.beds; if(STATE.res.tenants > STATE.res.beds) STATE.res.tenants = STATE.res.beds; tel.value = STATE.res.tenants; }
+};
+
+window.applyPOIPreset = (preset) => {
+  let p = STATE.poi; p.preset = preset;
+  if (preset === 'bus') { p.name = 'Bus Stop'; p.desc = 'Public Transit Node.'; p.glyph = '🚌'; p.size = 'medium'; p.quest = false; } 
+  else if (preset === 'gas') { p.name = 'Gas Station'; p.desc = 'Fuel up here.'; p.glyph = '⛽'; p.size = 'medium'; p.quest = false; }
+  else if (preset === 'hosp') { p.name = 'Hospital'; p.desc = 'Medical Campus'; p.glyph = '🏥'; p.size = 'large'; p.quest = true; }
+  else if (preset === 'retail') { p.name = 'Retail Store'; p.desc = 'General Goods'; p.glyph = '🛒'; p.size = 'medium'; p.quest = false; }
+  else { p.name = 'New POI'; p.glyph = 'X'; }
+  
+  if (document.getElementById('poi-cfg-name')) {
+    document.getElementById('poi-cfg-name').value = p.name; document.getElementById('poi-cfg-desc').value = p.desc;
+    document.getElementById('poi-cfg-glyph').value = p.glyph; document.getElementById('poi-cfg-size').value = p.size;
+    document.getElementById('poi-cfg-quest').checked = p.quest;
+  }
+};
+
+window.setBrush = (b, btn) => {
+  STATE.brush = b;
+  document.querySelectorAll('.brush-btn').forEach(el => el.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+};
+
+window.setTool = (t, btn) => {
+  STATE.tool = t;
+  document.querySelectorAll('.sidebar > .tool-content > .win95-button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  
+  const rsTitle = document.getElementById('rs-title');
+  if (rsTitle) rsTitle.innerText = t.toUpperCase() + ' SETTINGS';
+  
+  const rsContent = document.getElementById('rs-content');
+  if (rsContent) {
+      let toolHTML = TOOL_HTML[t] || '<p style="color:#888; font-style:italic">No options required.</p>';
+      if (t === 'paint') toolHTML = toolHTML.replace(/\$\{STATE\.config\.subRes\}/g, STATE.config.subRes);
+      rsContent.innerHTML = toolHTML;
+  }
+  
+  const needsPalette = ['paint', 'shape', 'river', 'dock'].includes(t);
+  document.getElementById('brush-palette').style.display = needsPalette ? 'flex' : 'none';
+  
+  const view = document.getElementById('map-viewport');
+  if (STATE.phase === 'editor') {
+      view.classList.toggle('hide-res', t !== 'residence');
+      view.classList.toggle('hide-bus', t !== 'bus');
+  }
+
+  if (t === 'inspect') refreshInspector();
+  updateSwatches();
+  if (STATE.tutorial.active) {
+      let tut = window.TUTORIALS[STATE.tutorial.step];
+      if (tut && btn && btn.classList.contains(tut.target.substring(1))) nextTutorial();
+  }
+};
+
+window.updateSwatches = () => {
+    document.querySelectorAll('.brush-btn').forEach(btn => {
+        let b = btn.dataset.brush;
+        let sw = btn.querySelector('.color-swatch');
+        if(!sw) return;
+        sw.innerHTML = '';
+        for(let i=0; i<4; i++) {
+            let c = PALETTE[b];
+            if (STATE.paint.useVar && STATE.paint.variance > 0 && VARIANTS[b] && Math.random()*100 < STATE.paint.variance) {
+                c = VARIANTS[b][Math.floor(Math.random() * VARIANTS[b].length)];
+            }
+            sw.innerHTML += `<div style="width:50%; height:50%; background:${c}"></div>`;
+        }
+    });
+};
+
+const gridContainer = document.getElementById('grid-container');
+
+window.initializeMap = () => {
+  try {
+    const setupModal = document.getElementById('setup-modal');
+    if (setupModal) setupModal.style.display = 'none';
+
+    STATE.config.w = parseInt(document.getElementById('setup-w').value) || 20;
+    STATE.config.h = parseInt(document.getElementById('setup-h').value) || 20;
+    STATE.config.subRes = parseInt(document.getElementById('setup-subres').value) || 4;
+    STATE.config.scale = parseFloat(document.getElementById('setup-scale').value) || 0.25;
+    STATE.paint.size = STATE.config.subRes; 
+
+    const distType = document.getElementById('setup-districts').value;
+    const autoRoads = document.getElementById('setup-dist-roads').checked;
+    const autoLanes = parseInt(document.getElementById('setup-dist-lanes').value) || 2;
+
+    gridContainer.style.width = `${STATE.config.w * TILE_PIXELS}px`;
+    gridContainer.style.height = `${STATE.config.h * TILE_PIXELS}px`;
+    gridContainer.innerHTML = '';
+    STATE.roads = []; STATE.busRoutes = {}; STATE.overlays = []; STATE.cars = []; STATE.history = []; STATE.historyIndex = -1;
+
+    const frag = document.createDocumentFragment();
+
+    for (let ty = 0; ty < STATE.config.h; ty++) {
+      for (let tx = 0; tx < STATE.config.w; tx++) {
+        const tileId = `${tx},${ty}`;
+        let dist = "Unzoned";
+        let isLeftBorder = false, isTopBorder = false;
+        
+        if (distType !== 'none') {
+            let parts = parseInt(distType.split('x')[0]); 
+            let secX = Math.floor(tx / (STATE.config.w / parts));
+            let secY = Math.floor(ty / (STATE.config.h / parts));
+            dist = `Sector ${secX}-${secY}`;
+            
+            let prevX = tx > 0 ? Math.floor((tx-1) / (STATE.config.w / parts)) : secX;
+            let prevY = ty > 0 ? Math.floor((ty-1) / (STATE.config.h / parts)) : secY;
+            
+            if (tx > 0 && prevX !== secX) isLeftBorder = true;
+            if (ty > 0 && prevY !== secY) isTopBorder = true;
+        }
+
+        STATE.tiles[tileId] = {
+          tx, ty, subpixels: new Array(STATE.config.subRes * STATE.config.subRes).fill('grass'), 
+          pois: [], residences: [], busStops: [], depth: 0, district: dist, elevation: 0
+        };
+        
+        const tDiv = document.createElement('div');
+        tDiv.className = 'grid-cell';
+        tDiv.id = `t-${tileId}`;
+        tDiv.style.width = `${TILE_PIXELS}px`; tDiv.style.height = `${TILE_PIXELS}px`;
+        tDiv.style.left = `${tx * TILE_PIXELS}px`; tDiv.style.top = `${ty * TILE_PIXELS}px`;
+        
+        if (isLeftBorder) tDiv.style.borderLeft = "3px solid rgba(255,255,255,0.4)";
+        if (isTopBorder) tDiv.style.borderTop = "3px solid rgba(255,255,255,0.4)";
+
+        const pct = 100 / STATE.config.subRes;
+        for (let sy = 0; sy < STATE.config.subRes; sy++) {
+          for (let sx = 0; sx < STATE.config.subRes; sx++) {
+            const sDiv = document.createElement('div');
+            sDiv.className = 'sub-pixel'; sDiv.id = `sp-${tx}-${ty}-${sx}-${sy}`;
+            sDiv.style.width = `${pct}%`; sDiv.style.height = `${pct}%`;
+            tDiv.appendChild(sDiv);
+          }
+        }
+        frag.appendChild(tDiv);
+        
+        if (autoRoads) {
+            let pxS = STATE.config.subRes;
+            if (isLeftBorder) storeRoad(tx*pxS, ty*pxS, tx*pxS, (ty+1)*pxS, autoLanes, 'asphalt', 45, 50);
+            if (isTopBorder) storeRoad(tx*pxS, ty*pxS, (tx+1)*pxS, ty*pxS, autoLanes, 'asphalt', 45, 50);
+        }
+      }
+    }
+    gridContainer.appendChild(frag);
+    if (autoRoads) renderRoads();
+    renderEntities();
+
+    const screenW = document.getElementById('map-viewport').clientWidth;
+    const screenH = document.getElementById('map-viewport').clientHeight;
+    const mapW = STATE.config.w * TILE_PIXELS;
+    const mapH = STATE.config.h * TILE_PIXELS;
+    const scaleW = (screenW - 50) / mapW * 100;
+    const scaleH = (screenH - 50) / mapH * 100;
+    
+    STATE.view.zoom = Math.max(20, Math.min(100, Math.floor(Math.min(scaleW, scaleH))));
+    STATE.view.x = (screenW - (mapW * STATE.view.zoom/100)) / 2;
+    STATE.view.y = (screenH - (mapH * STATE.view.zoom/100)) / 2;
+    
+    document.getElementById('zoom-range').value = STATE.view.zoom;
+    updateTransform();
+
+    setTool('hand', document.querySelector('.sidebar .win95-button:nth-child(1)')); 
+    pushHistory();
+    
+    window.TUTORIALS = [
+        { title: "Navigation", text: "Welcome to Atlasworks! Left click to drag the map. Scroll the mousewheel to zoom.", target: ".tut-step-0" },
+        { title: "Painting Terrain", text: "Select the Paint Tool. Brushes that match the tile size will snap to the edges and use the Variability slider!", target: ".tut-step-1" },
+        { title: "Roads & Traffic", text: "Roads snap automatically to tile boundaries. Traffic naturally spawns and flows across connected networks.", target: ".tut-step-2" },
+        { title: "Preview Mode", text: "When you're ready, click 'Preview Mode' in the top bar to see the interactive in-game view, weather, and animated features.", target: ".tut-step-3" }
+    ];
+
+    if (distType !== 'none') {
+        window.TUTORIALS.splice(1, 0, { title: "District Names", text: "You created districts! You can toggle their names on and off using this button.", target: ".tut-step-dist" });
+    }
+
+    if (STATE.tutorial.active) {
+        STATE.tutorial.step = 0;
+        document.getElementById('tutorial-box').style.display = 'block';
+        document.getElementById('tut-title').innerText = window.TUTORIALS[0].title;
+        document.getElementById('tut-text').innerText = window.TUTORIALS[0].text;
+        let target = document.querySelector(window.TUTORIALS[0].target);
+        if(target) target.classList.add('tut-highlight');
+    }
+  } catch (e) {
+    console.error("Initialization Error:", e);
+  }
+};
+
+function pushHistory() {
+  STATE.history = STATE.history.slice(0, STATE.historyIndex + 1);
+  STATE.history.push({
+      tiles: JSON.parse(JSON.stringify(STATE.tiles)),
+      roads: JSON.parse(JSON.stringify(STATE.roads)),
+      busRoutes: JSON.parse(JSON.stringify(STATE.busRoutes)),
+      overlays: JSON.parse(JSON.stringify(STATE.overlays))
+  });
+  if (STATE.history.length > 20) STATE.history.shift();
+  STATE.historyIndex = STATE.history.length - 1;
+  document.getElementById('btn-undo').disabled = STATE.historyIndex <= 0;
+  document.getElementById('btn-redo').disabled = STATE.historyIndex >= STATE.history.length - 1;
+}
+
+window.undo = () => { if (STATE.historyIndex > 0) { STATE.historyIndex--; restoreState(); } };
+window.redo = () => { if (STATE.historyIndex < STATE.history.length - 1) { STATE.historyIndex++; restoreState(); } };
+
+function restoreState() {
+  const s = STATE.history[STATE.historyIndex];
+  STATE.tiles = JSON.parse(JSON.stringify(s.tiles)); STATE.roads = JSON.parse(JSON.stringify(s.roads));
+  STATE.busRoutes = JSON.parse(JSON.stringify(s.busRoutes || {})); STATE.overlays = JSON.parse(JSON.stringify(s.overlays || []));
+  
+  for (let ty = 0; ty < STATE.config.h; ty++) {
+    for (let tx = 0; tx < STATE.config.w; tx++) {
+      const t = STATE.tiles[`${tx},${ty}`];
+      for (let sy = 0; sy < STATE.config.subRes; sy++) {
+        for (let sx = 0; sx < STATE.config.subRes; sx++) {
+          const el = document.getElementById(`sp-${tx}-${ty}-${sx}-${sy}`);
+          if (el) {
+            let color = PALETTE[t.subpixels[sy * STATE.config.subRes + sx]] || t.subpixels[sy * STATE.config.subRes + sx];
+            el.style.backgroundColor = color;
+            el.className = 'sub-pixel ' + ((color===PALETTE.water||color===PALETTE.shallows)?'water-anim':color===PALETTE.beach?'shore-anim':'');
+          }
+        }
+      }
+    }
+  }
+  renderEntities(); renderRoads(); renderOverlays(); renderSelectionOverlays();
+  document.getElementById('btn-undo').disabled = STATE.historyIndex <= 0;
+  document.getElementById('btn-redo').disabled = STATE.historyIndex >= STATE.history.length - 1;
+}
+
+function paintSubPixel(gx, gy, brush, enforceAutoShore = false, ignoreVariance = false) {
+  const maxW = STATE.config.w * STATE.config.subRes;
+  const maxH = STATE.config.h * STATE.config.subRes;
+  if (gx < 0 || gx >= maxW || gy < 0 || gy >= maxH) return;
+  
+  const tx = Math.floor(gx / STATE.config.subRes), ty = Math.floor(gy / STATE.config.subRes);
+  const sx = gx % STATE.config.subRes, sy = gy % STATE.config.subRes;
+  const key = `${tx},${ty}`;
+  
+  let colorHex = PALETTE[brush];
+  
+  if (!ignoreVariance && STATE.paint.useVar && STATE.tool === 'paint' && STATE.paint.size === STATE.config.subRes && STATE.paint.variance > 0) {
+    if (Math.random() * 100 < STATE.paint.variance && VARIANTS[brush]) {
+      colorHex = VARIANTS[brush][Math.floor(Math.random() * VARIANTS[brush].length)];
+    }
+  }
+
+  STATE.tiles[key].subpixels[sy * STATE.config.subRes + sx] = brush; 
+  
+  const el = document.getElementById(`sp-${tx}-${ty}-${sx}-${sy}`);
+  if (el) {
+    el.style.backgroundColor = colorHex;
+    el.className = 'sub-pixel';
+    if (document.getElementById('set-wateranim').checked) {
+       if (brush === 'water' || brush === 'shallows') el.classList.add('water-anim');
+       if (brush === 'beach') el.classList.add('shore-anim');
+    }
+  }
+
+  if (enforceAutoShore && (brush === 'water' || brush === 'shallows')) {
+    const neighbors = [[gx-1,gy], [gx+1,gy], [gx,gy-1], [gx,gy+1]];
+    neighbors.forEach(([nx, ny]) => {
+      if (nx >= 0 && nx < maxW && ny >= 0 && ny < maxH) {
+         const ntx = Math.floor(nx / STATE.config.subRes), nty = Math.floor(ny / STATE.config.subRes);
+         const nsx = nx % STATE.config.subRes, nsy = ny % STATE.config.subRes;
+         const nType = STATE.tiles[`${ntx},${nty}`].subpixels[nsy * STATE.config.subRes + nsx];
+         if (!['water', 'shallows', 'beach', 'dock', 'asphalt', 'concrete', 'bridge', 'sandbar'].includes(nType)) {
+             paintSubPixel(nx, ny, 'beach', false, true); 
+         }
+      }
+    });
+  }
+}
+
+function stampCircle(cx, cy, radius, brush) {
+  const rSq = radius * radius;
+  for (let y = Math.floor(cy - radius); y <= Math.ceil(cy + radius); y++) {
+    for (let x = Math.floor(cx - radius); x <= Math.ceil(cx + radius); x++) {
+      if (Math.pow(x - cx, 2) + Math.pow(y - cy, 2) <= rSq) {
+        paintSubPixel(x, y, brush, STATE.paint.autoShore, true);
+      }
+    }
+  }
+}
+
+const mapWrap = document.getElementById('map-transform-wrapper');
+
+function getSubCoords(e) {
+  const rect = gridContainer.getBoundingClientRect();
+  const scale = STATE.view.zoom / 100;
+  const rad = -STATE.view.rot * Math.PI / 180;
+  
+  const cx = e.clientX - rect.left - rect.width/2;
+  const cy = e.clientY - rect.top - rect.height/2;
+  
+  const rx = cx * Math.cos(rad) - cy * Math.sin(rad) + rect.width/2;
+  const ry = cx * Math.sin(rad) + cy * Math.cos(rad) + rect.height/2;
+
+  const subSize = (TILE_PIXELS * scale) / STATE.config.subRes;
+  return { gx: Math.floor(rx / subSize), gy: Math.floor(ry / subSize) };
+}
+
+mapWrap.addEventListener('mousedown', (e) => {
+  if (e.target.closest('.poi-marker, .res-box, .res-subpixel, .bus-stop')) {
+      const el = e.target.closest('.poi-marker, .res-box, .res-subpixel, .bus-stop');
+      const tileId = el.dataset.tile;
+      const index = parseInt(el.dataset.index);
+      let type = 'poi';
+      if(el.classList.contains('res-box') || el.classList.contains('res-subpixel')) type = 'res';
+      if(el.classList.contains('bus-stop')) type = 'bus';
+      
+      STATE.draggingEntity = { type, tileId, index, el, active: true };
+      return;
+  }
+
+  if (e.button !== 0 || STATE.tool === 'hand') { 
+    STATE.view.isDraggingMap = true; STATE.dragParams = { mx: e.clientX, my: e.clientY }; return;
+  }
+  if (STATE.tool === 'inspect' || STATE.tool === 'poi' || STATE.tool === 'residence' || STATE.tool === 'bus') return; 
+
+  const {gx, gy} = getSubCoords(e);
+  let bSize = STATE.tool === 'paint' ? STATE.paint.size : (STATE.tool === 'elevation' ? 1 : 1);
+  let drawGx = gx, drawGy = gy;
+  
+  if (bSize === STATE.config.subRes) { drawGx = Math.floor(gx / STATE.config.subRes) * STATE.config.subRes; drawGy = Math.floor(gy / STATE.config.subRes) * STATE.config.subRes; }
+  STATE.dragParams = { startX: drawGx, startY: drawGy, rawStartX: gx, rawStartY: gy, lockedAxis: null, lastRiverDist: 0, lastTx: drawGx, lastTy: drawGy };
+
+  if (STATE.tool === 'paint') {
+    for(let i=0; i<bSize; i++) { for(let j=0; j<bSize; j++) paintSubPixel(drawGx+i, drawGy+j, STATE.brush, STATE.paint.autoShore); }
+  } else if (STATE.tool === 'dock') { paintSubPixel(gx, gy, 'dock', false, true); } 
+    else if (STATE.tool === 'river') {
+    if (STATE.river.banks) stampCircle(gx, gy, STATE.river.width + 1.5, 'sandbar');
+    stampCircle(gx, gy, STATE.river.width, 'water');
+  } else if (STATE.tool === 'elevation') {
+     const tx = Math.floor(gx / STATE.config.subRes), ty = Math.floor(gy / STATE.config.subRes);
+     if(STATE.tiles[`${tx},${ty}`]) {
+         let el = STATE.tiles[`${tx},${ty}`].elevation;
+         el = Math.max(-5, Math.min(10, el + (STATE.elevation.mode==='raise'?STATE.elevation.amount:-STATE.elevation.amount)));
+         STATE.tiles[`${tx},${ty}`].elevation = el;
+         renderEntities();
+     }
+  }
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (STATE.draggingEntity && STATE.draggingEntity.active) {
+      STATE.draggingEntity.el.style.position = 'fixed';
+      STATE.draggingEntity.el.style.left = e.clientX + 'px';
+      STATE.draggingEntity.el.style.top = e.clientY + 'px';
+      STATE.draggingEntity.el.style.zIndex = '999';
+      return;
+  }
+
+  if (STATE.view.isDraggingMap && STATE.dragParams) {
+    STATE.view.x += e.clientX - STATE.dragParams.mx; STATE.view.y += e.clientY - STATE.dragParams.my;
+    STATE.dragParams.mx = e.clientX; STATE.dragParams.my = e.clientY;
+    updateTransform(); return;
+  }
+  if (!STATE.dragParams) return;
+  const {gx, gy} = getSubCoords(e);
+
+  if (STATE.tool === 'paint') {
+    let bSize = STATE.paint.size; let drawGx = gx, drawGy = gy;
+    if (bSize === STATE.config.subRes) { drawGx = Math.floor(gx / STATE.config.subRes) * STATE.config.subRes; drawGy = Math.floor(gy / STATE.config.subRes) * STATE.config.subRes; }
+    
+    if (!STATE.paint.continuousReroll && STATE.dragParams.lastTx === drawGx && STATE.dragParams.lastTy === drawGy) {
+        return; 
+    }
+    STATE.dragParams.lastTx = drawGx; STATE.dragParams.lastTy = drawGy;
+    
+    for(let i=0; i<bSize; i++) { for(let j=0; j<bSize; j++) paintSubPixel(drawGx+i, drawGy+j, STATE.brush, STATE.paint.autoShore); }
+  }
+  else if (STATE.tool === 'dock') { paintSubPixel(gx, gy, 'dock', false, true); }
+  else if (STATE.tool === 'river') {
+    const dist = Math.sqrt(Math.pow(gx - STATE.dragParams.rawStartX, 2) + Math.pow(gy - STATE.dragParams.rawStartY, 2));
+    if (dist > STATE.dragParams.lastRiverDist) {
+       let cx = gx, cy = gy;
+       if (STATE.river.wavy > 0) { const offset = Math.sin(dist * 0.5) * STATE.river.wavy; cx += offset; cy += offset; }
+       if (STATE.river.banks) stampCircle(cx, cy, STATE.river.width + 1.5, 'sandbar');
+       stampCircle(cx, cy, STATE.river.width, 'water');
+       STATE.dragParams.lastRiverDist = dist;
+    }
+  }
+  else if (STATE.tool === 'road') {
+    const snapStart = (val) => Math.round(val / STATE.config.subRes) * STATE.config.subRes;
+    let sX = snapStart(STATE.dragParams.rawStartX), sY = snapStart(STATE.dragParams.rawStartY);
+    let eX = snapStart(gx), eY = snapStart(gy);
+
+    const dx = eX - sX, dy = eY - sY;
+    if (Math.abs(dx) > Math.abs(dy)) { STATE.dragParams.lockedAxis = 'h'; STATE.dragParams.endX = eX; STATE.dragParams.endY = sY; }
+    else if (Math.abs(dy) > Math.abs(dx)) { STATE.dragParams.lockedAxis = 'v'; STATE.dragParams.endX = sX; STATE.dragParams.endY = eY; }
+    else { STATE.dragParams.lockedAxis = 'd'; STATE.dragParams.endX = eX; STATE.dragParams.endY = eY; }
+    
+    const lp = document.getElementById('line-preview');
+    const pxSize = TILE_PIXELS / STATE.config.subRes;
+    const scaleAdjust = Math.max(0.3, Math.min(0.25 / STATE.config.scale, 1.5));
+    const rawThickness = STATE.road.lanes * (pxSize * 0.4 * scaleAdjust);
+    
+    const len = Math.sqrt(Math.pow(STATE.dragParams.endX - sX, 2) + Math.pow(STATE.dragParams.endY - sY, 2)) * pxSize;
+    const ang = Math.atan2(STATE.dragParams.endY - sY, STATE.dragParams.endX - sX) * 180 / Math.PI;
+    
+    lp.style.display = 'block';
+    lp.style.left = (sX * pxSize) + 'px'; lp.style.top = (sY * pxSize) + 'px';
+    lp.style.width = len + 'px'; lp.style.height = rawThickness + 'px';
+    lp.style.marginTop = -(rawThickness / 2) + 'px'; 
+    lp.style.transform = `rotate(${ang}deg)`;
+  }
+  else if (STATE.tool === 'shape') {
+    const sp = document.getElementById('shape-preview');
+    const minX = Math.min(STATE.dragParams.rawStartX, gx), maxX = Math.max(STATE.dragParams.rawStartX, gx);
+    const minY = Math.min(STATE.dragParams.rawStartY, gy), maxY = Math.max(STATE.dragParams.rawStartY, gy);
+    const sz = TILE_PIXELS / STATE.config.subRes;
+    sp.style.display = 'block';
+    sp.style.left = (minX * sz) + 'px'; sp.style.top = (minY * sz) + 'px';
+    sp.style.width = ((maxX - minX + 1) * sz) + 'px'; sp.style.height = ((maxY - minY + 1) * sz) + 'px';
+    sp.style.borderRadius = STATE.shape.type === 'circle' ? '50%' : '0';
+  }
+});
+
+function checkRoadWaterConflicts() {
+    STATE.pendingConflicts = [];
+    for (let r of STATE.roads) {
+        if (r.mat === 'bridge') continue;
+        let waterFound = false;
+        const steps = Math.max(Math.abs(r.x1 - r.x0), Math.abs(r.y1 - r.y0));
+        for(let i=0; i<=steps; i++) {
+            let sx = Math.floor(r.x0 + (r.x1 - r.x0) * (i/(steps||1)));
+            let sy = Math.floor(r.y0 + (r.y1 - r.y0) * (i/(steps||1)));
+            let tx = Math.floor(sx/STATE.config.subRes), ty = Math.floor(sy/STATE.config.subRes);
+            if (STATE.tiles[`${tx},${ty}`]) {
+                let px = STATE.tiles[`${tx},${ty}`].subpixels[(sy%STATE.config.subRes)*STATE.config.subRes + (sx%STATE.config.subRes)];
+                if (px === 'water' || px === 'shallows') waterFound = true;
+            }
+        }
+        if (waterFound) STATE.pendingConflicts.push(r);
+    }
+    
+    if (STATE.pendingConflicts.length > 0) {
+        document.getElementById('conflict-count').innerText = STATE.pendingConflicts.length;
+        renderRoads(); 
+        openModal('water-road-conflict-modal');
+        return true;
+    }
+    return false;
+}
+
+window.resolveWaterRoadConflict = (action, all=false) => {
+    if (all) {
+        STATE.pendingConflicts.forEach(r => { if(action==='bridge') r.mat='bridge'; else STATE.roads = STATE.roads.filter(x=>x.id!==r.id); });
+        STATE.pendingConflicts = [];
+    } else {
+        let r = STATE.pendingConflicts.shift();
+        if(action==='bridge') r.mat='bridge'; else STATE.roads = STATE.roads.filter(x=>x.id!==r.id);
+    }
+    
+    renderRoads();
+    if (STATE.pendingConflicts.length === 0) {
+        closeModal('water-road-conflict-modal');
+        pushHistory();
+    } else {
+        document.getElementById('conflict-count').innerText = STATE.pendingConflicts.length;
+        renderRoads(); 
+    }
+};
+
+window.addEventListener('mouseup', (e) => {
+  STATE.view.isDraggingMap = false;
+
+  if (STATE.draggingEntity && STATE.draggingEntity.active) {
+      const {gx, gy} = getSubCoords(e);
+      const tx = Math.floor(gx / STATE.config.subRes), ty = Math.floor(gy / STATE.config.subRes);
+      const newTileId = `${tx},${ty}`;
+      const sx = gx % STATE.config.subRes, sy = gy % STATE.config.subRes;
+
+      if (STATE.tiles[newTileId]) {
+          let oldTile = STATE.tiles[STATE.draggingEntity.tileId];
+          let obj = null;
+          if (STATE.draggingEntity.type === 'poi') obj = oldTile.pois.splice(STATE.draggingEntity.index, 1)[0];
+          if (STATE.draggingEntity.type === 'res') obj = oldTile.residences.splice(STATE.draggingEntity.index, 1)[0];
+          if (STATE.draggingEntity.type === 'bus') obj = oldTile.busStops.splice(STATE.draggingEntity.index, 1)[0];
+          
+          if (obj) {
+              if (obj.subX !== undefined) { obj.subX = sx; obj.subY = sy; }
+              if (STATE.draggingEntity.type === 'poi') STATE.tiles[newTileId].pois.push(obj);
+              if (STATE.draggingEntity.type === 'res') STATE.tiles[newTileId].residences.push(obj);
+              if (STATE.draggingEntity.type === 'bus') {
+                  STATE.tiles[newTileId].busStops.push(obj);
+                  if (STATE.busRoutes[obj.route]) {
+                      let rNode = STATE.busRoutes[obj.route].find(n => n.tx === oldTile.tx && n.ty === oldTile.ty);
+                      if (rNode) { rNode.tx = tx; rNode.ty = ty; }
+                  }
+              }
+          }
+      }
+      STATE.draggingEntity = null;
+      renderEntities();
+      pushHistory();
+      return;
+  }
+
+  if (!STATE.dragParams) return;
+
+  const {gx, gy} = getSubCoords(e);
+  let actionTaken = false;
+
+  if (STATE.tool === 'road' && STATE.dragParams.endX !== undefined) {
+    document.getElementById('line-preview').style.display = 'none';
+    const snapStart = (val) => Math.round(val / STATE.config.subRes) * STATE.config.subRes;
+    let sX = snapStart(STATE.dragParams.rawStartX), sY = snapStart(STATE.dragParams.rawStartY);
+    storeRoad(sX, sY, STATE.dragParams.endX, STATE.dragParams.endY, STATE.road.lanes, STATE.road.mat, STATE.road.speed, STATE.road.traffic);
+    renderRoads(); actionTaken = true;
+  }
+  else if (STATE.tool === 'shape') {
+    document.getElementById('shape-preview').style.display = 'none';
+    const minX = Math.min(STATE.dragParams.rawStartX, gx), maxX = Math.max(STATE.dragParams.rawStartX, gx);
+    const minY = Math.min(STATE.dragParams.rawStartY, gy), maxY = Math.max(STATE.dragParams.rawStartY, gy);
+    
+    if (STATE.shape.layer === 'overlay') {
+        STATE.overlays.push({ type: STATE.shape.type, fill: STATE.shape.fill, color: PALETTE[STATE.brush], minX, minY, maxX, maxY });
+        renderOverlays();
+    } else {
+        const cx = (minX+maxX)/2, cy = (minY+maxY)/2;
+        const rx = (maxX-minX)/2, ry = (maxY-minY)/2;
+        for (let y = minY; y <= maxY; y++) {
+          for (let x = minX; x <= maxX; x++) {
+            if (STATE.shape.type === 'circle') { if (Math.pow((x-cx)/(rx||0.1), 2) + Math.pow((y-cy)/(ry||0.1), 2) > 1) continue; }
+            if (STATE.shape.fill === 'outline') {
+               let isInterior = true;
+               if (STATE.shape.type === 'circle') {
+                   [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx,dy]) => {
+                       if (Math.pow((x+dx-cx)/(rx||0.1), 2) + Math.pow((y+dy-cy)/(ry||0.1), 2) > 1) isInterior = false;
+                   });
+               } else { if (x > minX && x < maxX && y > minY && y < maxY) isInterior = true; else isInterior = false; }
+               if (isInterior) continue;
+            }
+            paintSubPixel(x, y, STATE.brush, STATE.shape.autoShore, true);
+          }
+        }
+    }
+    actionTaken = true;
+  }
+  else if (['paint','river','dock','elevation'].includes(STATE.tool)) { actionTaken = true; }
+  
+  STATE.dragParams = null;
+  if (actionTaken) {
+      if (['paint', 'river', 'shape', 'road'].includes(STATE.tool)) {
+          if (!checkRoadWaterConflicts()) pushHistory();
+      } else pushHistory();
+  }
+});
+
+function getTileColors(tileId) { return [...new Set(STATE.tiles[tileId].subpixels)]; }
+
+mapWrap.addEventListener('click', (e) => {
+  if (STATE.view.isDraggingMap || STATE.draggingEntity) return;
+  
+  if (STATE.tool === 'inspect') {
+      const isShift = e.shiftKey;
+      const roadEl = e.target.closest('.map-road');
+      
+      if (roadEl) {
+          const rId = roadEl.dataset.id;
+          if (!isShift) { STATE.selectedRoads = []; STATE.selectedTiles = []; }
+          if (!STATE.selectedRoads.includes(rId)) STATE.selectedRoads.push(rId);
+      } else {
+          const {gx, gy} = getSubCoords(e);
+          const tx = Math.floor(gx / STATE.config.subRes), ty = Math.floor(gy / STATE.config.subRes);
+          if (tx < 0 || tx >= STATE.config.w || ty < 0 || ty >= STATE.config.h) return;
+          const key = `${tx},${ty}`;
+          
+          if (!isShift) { STATE.selectedRoads = []; STATE.selectedTiles = []; }
+          let canSelect = true;
+          if (STATE.selectedTiles.length > 0) {
+              const colors = getTileColors(key);
+              const existingColors = new Set();
+              STATE.selectedTiles.forEach(id => getTileColors(id).forEach(c => existingColors.add(c)));
+              canSelect = colors.some(c => existingColors.has(c));
+          }
+          if (canSelect && !STATE.selectedTiles.includes(key)) {
+              STATE.selectedTiles.push(key); STATE.activeTile = key; 
+          }
+      }
+      renderSelectionOverlays(); refreshInspector();
+      return;
+  }
+
+  const {gx, gy} = getSubCoords(e);
+  let tx = Math.floor(gx / STATE.config.subRes), ty = Math.floor(gy / STATE.config.subRes);
+  const sx = gx % STATE.config.subRes, sy = gy % STATE.config.subRes;
+  if (tx < 0 || tx >= STATE.config.w || ty < 0 || ty >= STATE.config.h) return;
+  
+  let key = `${tx},${ty}`;
+
+  STATE.selectedTiles = [key]; STATE.selectedRoads = []; STATE.activeTile = key;
+
+  if (STATE.tool === 'poi') {
+    const n = STATE.poi.name || 'New POI'; const g = STATE.poi.glyph || n.charAt(0);
+    STATE.tiles[key].pois.push({ ...STATE.poi, name: n, glyph: g });
+    renderEntities(); pushHistory();
+  } else if (STATE.tool === 'residence') {
+    STATE.tiles[key].residences.push({ ...STATE.res, subX: sx, subY: sy });
+    renderEntities(); pushHistory();
+  } else if (STATE.tool === 'bus') {
+    let nearestRoadTile = null; let minDist = Infinity;
+    for(let dy = -2; dy <= 2; dy++) {
+        for(let dx = -2; dx <= 2; dx++) {
+            let ntx = tx+dx, nty = ty+dy;
+            if(ntx>=0 && ntx<STATE.config.w && nty>=0 && nty<STATE.config.h) {
+                let colors = getTileColors(`${ntx},${nty}`);
+                if(colors.includes('asphalt') || colors.includes('concrete')) {
+                    let d = Math.hypot(dx, dy);
+                    if(d < minDist) { minDist = d; nearestRoadTile = {tx: ntx, ty: nty}; }
+                }
+            }
+        }
+    }
+    if (nearestRoadTile) { tx = nearestRoadTile.tx; ty = nearestRoadTile.ty; key = `${tx},${ty}`; }
+
+    STATE.tiles[key].busStops.push({ route: STATE.bus.route });
+    if (!STATE.busRoutes[STATE.bus.route]) STATE.busRoutes[STATE.bus.route] = [];
+    STATE.busRoutes[STATE.bus.route].push({tx, ty});
+    renderEntities(); pushHistory();
+  }
+});
+
+function renderSelectionOverlays() {
+    document.querySelectorAll('.selected-tile-outline').forEach(e => e.remove());
+    document.querySelectorAll('.map-road').forEach(e => e.classList.remove('selected-road-outline'));
+
+    STATE.selectedTiles.forEach(key => {
+        const cell = document.getElementById(`t-${key}`);
+        if (cell) {
+            const out = document.createElement('div');
+            out.className = 'selected-tile-outline';
+            cell.appendChild(out);
+        }
+    });
+
+    STATE.selectedRoads.forEach(id => {
+        const rEl = document.querySelector(`.map-road[data-id="${id}"]`);
+        if (rEl) rEl.classList.add('selected-road-outline');
+    });
+}
+
+function storeRoad(x0, y0, x1, y1, lanes, mat, speed, traffic=50) {
+    STATE.roads.push({ id: 'r'+Math.random().toString(36).substr(2,9), x0, y0, x1, y1, lanes, mat, speed, traffic });
+}
+
+window.renderRoads = () => {
+    const container = document.getElementById('roads-container');
+    container.innerHTML = '';
+    const pxSize = TILE_PIXELS / STATE.config.subRes;
+    const scaleAdjust = Math.max(0.3, Math.min(0.25 / STATE.config.scale, 1.5));
+
+    STATE.roads.forEach(r => {
+        const len = Math.sqrt(Math.pow(r.x1 - r.x0, 2) + Math.pow(r.y1 - r.y0, 2)) * pxSize;
+        const ang = Math.atan2(r.y1 - r.y0, r.x1 - r.x0) * 180 / Math.PI;
+        const rawThickness = r.lanes * (pxSize * 0.4 * scaleAdjust);
+        
+        const div = document.createElement('div');
+        div.className = `map-road ${r.mat}`;
+        div.dataset.id = r.id;
+        
+        if (STATE.selectedRoads.includes(r.id)) div.classList.add('selected-road-outline');
+        if (STATE.pendingConflicts.length > 0 && STATE.pendingConflicts[0].id === r.id) div.classList.add('conflict-highlight');
+
+        div.style.left = (r.x0 * pxSize) + 'px';
+        div.style.top = (r.y0 * pxSize) + 'px';
+        div.style.width = len + 'px';
+        div.style.height = rawThickness + 'px';
+        div.style.marginTop = -(rawThickness / 2) + 'px'; 
+        div.style.transformOrigin = '0 50%';
+        div.style.transform = `rotate(${ang}deg)`;
+        
+        if (r.lanes >= 2 && r.mat !== 'bridge') {
+           const line = document.createElement('div');
+           line.style.width = '100%'; line.style.height = '1px'; 
+           line.style.borderBottom = '1px dashed rgba(255,255,255,0.5)';
+           line.style.pointerEvents = 'none';
+           div.appendChild(line);
+        }
+        container.appendChild(div);
+    });
+};
+
+window.renderOverlays = () => {
+    const container = document.getElementById('overlays-container');
+    container.innerHTML = '';
+    const sz = TILE_PIXELS / STATE.config.subRes;
+    
+    STATE.overlays.forEach(ov => {
+        const div = document.createElement('div');
+        div.style.position = 'absolute';
+        div.style.left = (ov.minX * sz) + 'px'; div.style.top = (ov.minY * sz) + 'px';
+        div.style.width = ((ov.maxX - ov.minX + 1) * sz) + 'px'; div.style.height = ((ov.maxY - ov.minY + 1) * sz) + 'px';
+        if (ov.type === 'circle') div.style.borderRadius = '50%';
+        if (ov.fill === 'outline') { div.style.border = `4px solid ${ov.color}`; div.style.boxSizing = 'border-box'; }
+        else { div.style.backgroundColor = ov.color; }
+        container.appendChild(div);
+    });
+};
+
+function findRoadPath(tx1, ty1, tx2, ty2) {
+    let grid = Array(STATE.config.h).fill(0).map(()=>Array(STATE.config.w).fill(false));
+    STATE.roads.forEach(r => {
+        let steps = Math.max(Math.abs(r.x1-r.x0), Math.abs(r.y1-r.y0));
+        for(let i=0; i<=steps; i++){
+            let sx = Math.floor(r.x0 + (r.x1-r.x0)*(i/(steps||1)));
+            let sy = Math.floor(r.y0 + (r.y1-r.y0)*(i/(steps||1)));
+            let tx = Math.floor(sx/STATE.config.subRes), ty = Math.floor(sy/STATE.config.subRes);
+            if(grid[ty] && grid[ty][tx] !== undefined) grid[ty][tx] = true;
+        }
+    });
+
+    if(grid[ty1]) grid[ty1][tx1] = true;
+    if(grid[ty2]) grid[ty2][tx2] = true;
+
+    let open = [{x: tx1, y: ty1, g: 0, f: Math.abs(tx2-tx1)+Math.abs(ty2-ty1), parent: null}];
+    let closed = new Set();
+    while(open.length > 0) {
+        open.sort((a,b) => a.f - b.f);
+        let curr = open.shift();
+        let key = curr.x+','+curr.y;
+        if(curr.x === tx2 && curr.y === ty2) {
+            let path = []; let node = curr;
+            while(node) { path.unshift({x: node.x, y: node.y}); node = node.parent; }
+            return path;
+        }
+        closed.add(key);
+        [[0,1],[1,0],[0,-1],[-1,0]].forEach(([dx,dy]) => {
+            let nx = curr.x+dx, ny = curr.y+dy;
+            if(nx>=0 && nx<STATE.config.w && ny>=0 && ny<STATE.config.h && grid[ny][nx] && !closed.has(nx+','+ny)) {
+                let g = curr.g + 1;
+                let existing = open.find(n => n.x===nx && n.y===ny);
+                if(!existing) open.push({x: nx, y: ny, g: g, f: g + Math.abs(tx2-nx)+Math.abs(ty2-ny), parent: curr});
+                else if(g < existing.g) { existing.g = g; existing.f = g + Math.abs(tx2-nx)+Math.abs(ty2-ny); existing.parent = curr; }
+            }
+        });
+    }
+    return null; 
+}
+
+window.renderEntities = () => {
+  document.querySelectorAll('.poi-container, .bus-line, .res-subpixel').forEach(e => e.remove());
+  
+  let distGroups = {};
+
+  Object.values(STATE.tiles).forEach(t => {
+    const cell = document.getElementById(`t-${t.tx},${t.ty}`);
+    if (!cell) return;
+    
+    if (STATE.config.showElevation && t.elevation !== 0) {
+        if (t.elevation > 0) cell.style.filter = `brightness(${100 + t.elevation*5}%) saturate(${100 + t.elevation*2}%)`;
+        if (t.elevation < 0) cell.style.boxShadow = `inset 0 0 10px rgba(0,0,0,${Math.abs(t.elevation)*0.1})`;
+    } else { cell.style.filter = 'none'; cell.style.boxShadow = 'none'; }
+
+    if (t.district !== 'Unzoned') {
+        if (!distGroups[t.district]) distGroups[t.district] = { sumX: 0, sumY: 0, count: 0 };
+        distGroups[t.district].sumX += t.tx; distGroups[t.district].sumY += t.ty; distGroups[t.district].count++;
+    }
+
+    let poiHTML = document.createDocumentFragment();
+    let hasPois = false;
+
+    t.pois.forEach((p, i) => {
+        const m = document.createElement('div');
+        m.className = 'poi-box ' + (p.quest ? 'quest-key' : '') + (p.preset!=='custom'?' poi-emoji':'');
+        m.dataset.name = p.name; m.classList.add('poi-marker');
+        m.dataset.tile = `${t.tx},${t.ty}`; m.dataset.index = i;
+        m.innerText = p.glyph; m.style.fontSize = p.size === 'small' ? '9px' : p.size === 'large' ? '18px' : '12px';
+        poiHTML.appendChild(m); hasPois = true;
+    });
+
+    t.residences.forEach((r, i) => {
+        let border = '2px solid gray';
+        if (r.price === 'mod') border = '2px solid cyan';
+        if (r.price === 'exp') border = '2px solid purple';
+        if (r.price === 'lux') border = '2px solid gold';
+
+        if (r.displayMode === 'subpixel' && r.subX !== undefined) {
+            const sz = TILE_PIXELS / STATE.config.subRes;
+            const sub = document.createElement('div');
+            sub.className = 'res-subpixel';
+            sub.dataset.tile = `${t.tx},${t.ty}`; sub.dataset.index = i;
+            sub.style.width = sz + 'px'; sub.style.height = sz + 'px';
+            sub.style.left = (r.subX * sz) + 'px'; sub.style.top = (r.subY * sz) + 'px';
+            sub.style.backgroundColor = r.type === 'apt' ? '#444' : r.type === 'house' ? '#842' : '#555';
+            sub.style.border = border;
+            cell.appendChild(sub);
+        } else {
+            const m = document.createElement('div');
+            m.className = 'res-box';
+            m.dataset.tile = `${t.tx},${t.ty}`; m.dataset.index = i;
+            m.innerText = r.type === 'house' ? 'H' : r.type==='parents' ? 'P' : r.type==='apt' ? 'A' : 'R';
+            m.style.border = border;
+            poiHTML.appendChild(m); hasPois = true;
+        }
+    });
+
+    t.busStops.forEach((b, i) => {
+        const m = document.createElement('div');
+        m.className = 'res-box bus-stop'; m.innerText = '🚌';
+        m.dataset.tile = `${t.tx},${t.ty}`; m.dataset.index = i;
+        poiHTML.appendChild(m); hasPois = true;
+    });
+
+    if (hasPois) {
+        const c = document.createElement('div');
+        c.className = 'poi-container';
+        c.appendChild(poiHTML);
+        cell.appendChild(c);
+    }
+  });
+
+  const dContainer = document.getElementById('district-labels');
+  dContainer.innerHTML = '';
+  Object.keys(distGroups).forEach(d => {
+      const g = distGroups[d];
+      const avgX = (g.sumX / g.count) * TILE_PIXELS + TILE_PIXELS/2;
+      const avgY = (g.sumY / g.count) * TILE_PIXELS + TILE_PIXELS/2;
+      const lbl = document.createElement('div');
+      lbl.className = 'district-label';
+      lbl.innerText = d;
+      lbl.style.left = avgX + 'px'; lbl.style.top = avgY + 'px';
+      dContainer.appendChild(lbl);
+  });
+
+  Object.keys(STATE.busRoutes).forEach(routeName => {
+      const stops = STATE.busRoutes[routeName];
+      for (let i = 0; i < stops.length - 1; i++) {
+          const s1 = stops[i], s2 = stops[i+1];
+          const pxSize = TILE_PIXELS;
+          const path = findRoadPath(s1.tx, s1.ty, s2.tx, s2.ty);
+          
+          let points = path || [{x: s1.tx, y: s1.ty}, {x: s2.tx, y: s2.ty}];
+          for(let p=0; p<points.length-1; p++) {
+              const x1 = points[p].x * pxSize + pxSize/2, y1 = points[p].y * pxSize + pxSize/2;
+              const x2 = points[p+1].x * pxSize + pxSize/2, y2 = points[p+1].y * pxSize + pxSize/2;
+              const len = Math.hypot(x2 - x1, y2 - y1);
+              const ang = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+              
+              const line = document.createElement('div');
+              line.className = 'bus-line';
+              line.style.position = 'absolute';
+              line.style.left = x1 + 'px'; line.style.top = y1 + 'px';
+              line.style.width = len + 'px'; line.style.height = '4px';
+              line.style.marginTop = '-2px'; line.style.borderTop = '3px dotted cyan';
+              line.style.transformOrigin = '0 50%'; line.style.transform = `rotate(${ang}deg)`;
+              line.style.pointerEvents = 'none'; line.style.zIndex = '14';
+              gridContainer.appendChild(line);
+          }
+      }
+  });
+};
+
+const CAR_COLORS = ['#FF0000', '#0000FF', '#FFFFFF', '#AAAAAA', '#FFFF00', '#000000'];
+let trafficActive = false;
+
+function initTrafficSystem() {
+    trafficActive = true;
+    requestAnimationFrame(trafficLoop);
+}
+
+function spawnCar() {
+    if (STATE.roads.length === 0) return;
+    const validRoads = STATE.roads.filter(r => r.traffic > 0 && r.mat !== 'bridge');
+    if (validRoads.length === 0) return;
+    
+    let carsPerRoad = {};
+    STATE.cars.forEach(c => carsPerRoad[c.rId] = (carsPerRoad[c.rId] || 0) + 1);
+    
+    const r = validRoads[Math.floor(Math.random() * validRoads.length)];
+    if ((carsPerRoad[r.id] || 0) > Math.max(1, r.traffic / 5)) return; 
+    
+    const dir = Math.random() > 0.5 ? 1 : -1;
+    const halfLanes = Math.max(1, Math.floor(r.lanes / 2));
+    const laneOffset = Math.floor(Math.random() * halfLanes); 
+    
+    STATE.cars.push({
+        id: Math.random(),
+        rId: r.id,
+        progress: dir === 1 ? 0 : 1,
+        dir: dir,
+        lane: laneOffset,
+        speed: (r.speed / 100) * 0.01 + (Math.random() * 0.005),
+        color: CAR_COLORS[Math.floor(Math.random() * CAR_COLORS.length)],
+        despawning: 0, turnDir: 1
+    });
+}
+
+function trafficLoop() {
+    if (!trafficActive) return;
+    
+    const canvas = document.getElementById('traffic-canvas');
+    if (!canvas) { requestAnimationFrame(trafficLoop); return; }
+    
+    const pxSize = TILE_PIXELS / STATE.config.subRes;
+    const ctx = canvas.getContext('2d');
+    
+    const expectedW = STATE.config.w * TILE_PIXELS;
+    const expectedH = STATE.config.h * TILE_PIXELS;
+    if (canvas.width !== expectedW || canvas.height !== expectedH) {
+        canvas.width = expectedW; canvas.height = expectedH;
+    }
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    const isPreview = STATE.phase === 'preview';
+    const showTraffic = isPreview ? document.getElementById('prev-show-traffic').checked : true;
+    
+    if (showTraffic && STATE.roads.length > 0) {
+        let carsPerRoad = {};
+        STATE.cars.forEach(c => carsPerRoad[c.rId] = (carsPerRoad[c.rId] || 0) + 1);
+        
+        const targetCars = Math.min(200, STATE.roads.reduce((acc, r) => acc + (r.traffic/10), 0));
+        if (STATE.cars.length < targetCars && Math.random() < 0.1) spawnCar();
+        
+        for (let i = STATE.cars.length - 1; i >= 0; i--) {
+            let c = STATE.cars[i];
+            let r = STATE.roads.find(x => x.id === c.rId);
+            
+            if (!r) { STATE.cars.splice(i, 1); continue; }
+            
+            if (c.despawning > 0) {
+                c.despawning += 0.25;
+                if (c.despawning > 1) { STATE.cars.splice(i, 1); continue; }
+            } else {
+                c.progress += (c.speed * c.dir);
+                
+                if (c.progress > 1 || c.progress < 0) {
+                    let endPt = c.progress > 1 ? {x: r.x1, y: r.y1} : {x: r.x0, y: r.y0};
+                    let connections = STATE.roads.filter(x => x.id !== r.id && ((x.x0 === endPt.x && x.y0 === endPt.y) || (x.x1 === endPt.x && x.y1 === endPt.y)));
+                    
+                    let validConnections = connections.filter(x => (carsPerRoad[x.id] || 0) < Math.max(1, x.traffic / 5));
+                    
+                    if (validConnections.length > 0) {
+                        let nextR = validConnections[Math.floor(Math.random() * validConnections.length)];
+                        c.rId = nextR.id;
+                        c.dir = (nextR.x0 === endPt.x && nextR.y0 === endPt.y) ? 1 : -1;
+                        c.progress = c.dir === 1 ? 0 : 1;
+                        c.speed = (nextR.speed / 100) * 0.01;
+                    } else {
+                        c.despawning = 0.01;
+                        c.turnDir = Math.random() > 0.5 ? 1 : -1;
+                        c.progress = c.progress > 1 ? 1 : 0; 
+                    }
+                }
+            }
+            
+            const len = Math.sqrt(Math.pow(r.x1 - r.x0, 2) + Math.pow(r.y1 - r.y0, 2)) * pxSize;
+            let ang = Math.atan2(r.y1 - r.y0, r.x1 - r.x0);
+            
+            const scaleAdjust = Math.max(0.3, Math.min(0.25 / STATE.config.scale, 1.5));
+            const rawThickness = r.lanes * (pxSize * 0.4 * scaleAdjust);
+            const laneW = rawThickness / Math.max(2, r.lanes);
+            
+            const normX = -Math.sin(ang);
+            const normY = Math.cos(ang);
+            
+            const dirOffset = c.dir === 1 ? 1 : -1;
+            let finalOffset = (c.lane * laneW + (laneW/2)) * dirOffset;
+            
+            let drawProg = c.progress;
+            
+            if (c.despawning > 0) {
+                ang += (Math.PI / 2) * c.turnDir * c.despawning;
+                finalOffset += (c.despawning * 5 * c.turnDir);
+            }
+            
+            const px = (r.x0 * pxSize) + Math.cos(ang) * (drawProg * len) + (normX * finalOffset);
+            const py = (r.y0 * pxSize) + Math.sin(ang) * (drawProg * len) + (normY * finalOffset);
+            
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(ang);
+            ctx.globalAlpha = Math.max(0, 1 - (c.despawning * 2));
+            ctx.fillStyle = c.color;
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 2;
+            ctx.fillRect(-3, -2, 6, 4); 
+            ctx.restore();
+        }
+    }
+    
+    requestAnimationFrame(trafficLoop);
+}
+initTrafficSystem();
+
+window.refreshInspector = () => {
+  if (STATE.tool !== 'inspect') return;
+  const content = document.getElementById('rs-content');
+  let html = '';
+
+  if (STATE.selectedRoads.length > 0) {
+      html += `<p style="font-weight:bold; font-size:14px; margin-top:0; color:var(--ega-4)">Roads Selected: ${STATE.selectedRoads.length}</p>
+      <div class="win95-panel" style="margin-bottom:10px;">
+        <label style="display:block">Speed Limit (mph):</label>
+        <select class="win95-select" onchange="STATE.selectedRoads.forEach(id=>{let r=STATE.roads.find(x=>x.id===id); if(r)r.speed=parseInt(this.value);}); pushHistory()">
+            <option value="15">15 mph</option><option value="25" selected>25 mph</option>
+            <option value="35">35 mph</option><option value="45">45 mph</option><option value="65">65 mph</option>
+        </select>
+        <label style="display:block; margin-top:5px;">Lanes:</label>
+        <input type="number" class="win95-input" value="2" min="1" max="7" onchange="STATE.selectedRoads.forEach(id=>{let r=STATE.roads.find(x=>x.id===id); if(r)r.lanes=parseInt(this.value);}); renderRoads(); pushHistory()">
+        <label style="display:block; margin-top:5px;">Traffic Vol (0-100):</label>
+        <input type="range" style="width:100%" value="50" onchange="STATE.selectedRoads.forEach(id=>{let r=STATE.roads.find(x=>x.id===id); if(r)r.traffic=parseInt(this.value);}); pushHistory()">
+      </div>`;
+  }
+  
+  if (STATE.selectedTiles.length > 0) {
+      html += `<p style="font-weight:bold; font-size:14px; margin-top:0;">Tiles Selected: ${STATE.selectedTiles.length}</p>
+      <div class="win95-panel" style="margin-bottom:10px;">
+        <label>District Name:</label>
+        <input type="text" class="win95-input" value="${STATE.tiles[STATE.selectedTiles[0]].district}" onchange="STATE.selectedTiles.forEach(id=>STATE.tiles[id].district=this.value); renderEntities(); pushHistory()">
+      </div>
+      <div class="win95-panel" style="margin-bottom:10px;">
+        <label>Water Depth (m):</label>
+        <input type="number" class="win95-input" value="0" onchange="STATE.selectedTiles.forEach(id=>STATE.tiles[id].depth=parseInt(this.value)); pushHistory()">
+      </div>`;
+      
+      if (STATE.selectedTiles.length === 1) {
+          const t = STATE.tiles[STATE.selectedTiles[0]];
+          html += `<div class="win95-panel"><p style="font-weight:bold; margin:0 0 5px 0;">Entities Here:</p>`;
+          if (t.pois.length===0 && t.residences.length===0 && t.busStops.length===0) html += `<span style="color:#888">None.</span>`;
+          t.pois.forEach((p, i) => {
+            html += `<div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px;">
+              <span>${p.glyph} ${p.name}</span>
+              <button type="button" class="win95-button" style="padding:0 4px; color:var(--ega-4)" onclick="STATE.tiles['${STATE.selectedTiles[0]}'].pois.splice(${i},1); renderEntities(); refreshInspector(); pushHistory()">Del</button>
+            </div>`;
+          });
+          t.residences.forEach((r, i) => {
+             html += `<div style="margin-bottom:4px; font-size:11px; border-top:1px dashed #ccc; padding-top:4px;">
+               <strong>Res:</strong> ${r.type.toUpperCase()} | Rent: $${r.rent}<br>
+               Beds: ${r.beds} | Baths: ${r.baths} | Tenants: ${r.tenants}
+               <button type="button" class="win95-button" style="padding:0 4px; color:var(--ega-4); display:block; margin-top:2px;" onclick="STATE.tiles['${STATE.selectedTiles[0]}'].residences.splice(${i},1); renderEntities(); refreshInspector(); pushHistory()">Delete Res</button>
+             </div>`;
+          });
+          t.busStops.forEach((b, i) => {
+            html += `<div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px;">
+              <span>🚌 ${b.route} Stop</span>
+              <button type="button" class="win95-button" style="padding:0 4px; color:var(--ega-4)" onclick="STATE.tiles['${STATE.selectedTiles[0]}'].busStops.splice(${i},1); renderEntities(); refreshInspector(); pushHistory()">Del</button>
+            </div>`;
+          });
+          html += `</div>`;
+      }
+  }
+
+  if (STATE.selectedRoads.length === 0 && STATE.selectedTiles.length === 0) {
+      html = `<p style="color:#888; font-style:italic; margin:0;">Click a tile, road, or entity to inspect and edit its properties. Hold Shift to multi-select overlapping terrain.</p>`;
+  }
+  content.innerHTML = html;
+};
+
+function renderPreviewLegend() {
+    const legendContainer = document.getElementById('preview-legend-content');
+    const uniquePOIs = new Map(); 
+    Object.values(STATE.tiles).forEach(t => {
+        t.pois.forEach(p => { uniquePOIs.set(p.name, { glyph: p.glyph, preset: p.preset }); });
+    });
+    
+    let html = '';
+    uniquePOIs.forEach((val, name) => {
+        html += `<div class="legend-item" onclick="pulsePOIs('${name}')">
+            <div class="poi-box ${val.preset!=='custom'?'poi-emoji':''}" style="position:static; transform:none; box-shadow:none;">${val.glyph}</div>
+            <span>${name}</span>
+        </div>`;
+    });
+    if (uniquePOIs.size === 0) html = '<div style="color:#888">No POIs Found</div>';
+    legendContainer.innerHTML = html;
+}
+
+window.pulsePOIs = (name) => {
+    document.querySelectorAll('.poi-marker').forEach(m => {
+        if (m.dataset.name === name) {
+            m.classList.add('pulse-target');
+            setTimeout(() => m.classList.remove('pulse-target'), 3000);
+        }
+    });
+};
+
+window.togglePreview = () => {
+  const isP = STATE.phase === 'preview';
+  STATE.phase = isP ? 'editor' : 'preview';
+  
+  document.getElementById('left-sidebar').style.display = isP ? 'flex' : 'none';
+  document.getElementById('right-sidebar').style.display = isP ? 'flex' : 'none';
+  document.getElementById('ingame-hud').style.display = isP ? 'none' : 'block';
+  document.getElementById('ingame-options').style.display = isP ? 'none' : 'block';
+  document.getElementById('btn-preview').innerText = isP ? 'Preview Mode' : 'Return to Editor';
+  
+  const view = document.getElementById('map-viewport');
+  if (!isP) {
+    view.className = 'hide-res hide-bus'; 
+    document.querySelector('#ingame-options input[title="Stop Animations"]').dispatchEvent(new Event('change'));
+    document.querySelector('#ingame-options input[id="prev-show-compass"]').dispatchEvent(new Event('change'));
+    renderPreviewLegend();
+    
+    if (STATE.tutorial.active) endTutorial();
+
+    if (STATE.config.audio === 'custom' && STATE.customAudio.url) {
+       STATE.customAudio.el.src = STATE.customAudio.url;
+       STATE.customAudio.el.volume = document.getElementById('aud-fadein').checked ? 0 : 1;
+       STATE.customAudio.el.play().catch(e=>console.log("Audio blocked by browser policy until interaction."));
+       if (document.getElementById('aud-fadein').checked) {
+           let str = parseFloat(document.getElementById('aud-str').value) || 2;
+           let v = 0; let iv = setInterval(()=>{ v += 0.05/str; if(v>=1){v=1; clearInterval(iv);} STATE.customAudio.el.volume = v; }, 50);
+       }
+    }
+  } else {
+    if (document.getElementById('set-grid').checked) view.classList.add('grid-lines-on');
+    document.getElementById('compass').style.display = 'flex';
+    document.querySelectorAll('.selected-tile-outline').forEach(e => e.remove());
+    setTool(STATE.tool, document.querySelector(`button[onclick*="setTool('${STATE.tool}'"]`));
+    
+    if (STATE.config.audio === 'custom' && !STATE.customAudio.el.paused) {
+        if (document.getElementById('aud-fadeout').checked) {
+           let str = parseFloat(document.getElementById('aud-str').value) || 2;
+           let v = STATE.customAudio.el.volume; 
+           let iv = setInterval(()=>{ v -= 0.05/str; if(v<=0){v=0; clearInterval(iv); STATE.customAudio.el.pause();} else STATE.customAudio.el.volume = v; }, 50);
+        } else { STATE.customAudio.el.pause(); }
+    }
+  }
+};
+
+function makeDraggable(el, handleId) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    let handle = handleId ? document.getElementById(handleId) : el;
+    handle.onmousedown = (e) => {
+        if (e.target.tagName === 'INPUT') return; 
+        e.preventDefault(); e.stopPropagation();
+        pos3 = e.clientX; pos4 = e.clientY;
+        document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
+        document.onmousemove = (ev) => {
+            ev.preventDefault();
+            pos1 = pos3 - ev.clientX; pos2 = pos4 - ev.clientY;
+            pos3 = ev.clientX; pos4 = ev.clientY;
+            el.style.top = (el.offsetTop - pos2) + "px";
+            el.style.left = (el.offsetLeft - pos1) + "px";
+            el.style.right = 'auto'; 
+        };
+    };
+}
+makeDraggable(document.getElementById('compass'));
+makeDraggable(document.getElementById('zoom-slider-ui'), 'zoom-drag-handle');
+
+document.getElementById('map-viewport').addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? -15 : 15;
+  STATE.view.zoom = Math.max(20, Math.min(300, STATE.view.zoom + delta));
+  document.getElementById('zoom-range').value = STATE.view.zoom;
+  document.getElementById('zoom-val').innerText = STATE.view.zoom + '%';
+  updateTransform();
+});
+
+function updateTransform() {
+  mapWrap.style.transform = `translate(${STATE.view.x}px, ${STATE.view.y}px) scale(${STATE.view.zoom/100}) rotate(${STATE.view.rot}deg)`;
+  document.getElementById('compass').style.transform = `rotate(${-STATE.view.rot}deg)`;
+  document.getElementById('zoom-val').innerText = STATE.view.zoom + '%';
+}
+
+window.handleAudioSelect = (val) => {
+  STATE.config.audio = val;
+  document.getElementById('audio-custom-opts').style.display = val === 'custom' ? 'block' : 'none';
+  if (val === 'custom' && !STATE.customAudio.url) document.getElementById('audio-upload').click();
+};
+
+window.loadCustomAudio = (input) => {
+  if (input.files && input.files[0]) {
+    STATE.customAudio.url = URL.createObjectURL(input.files[0]);
+    document.getElementById('audio-filename').innerText = input.files[0].name;
+  }
+};
+
+window.setTimeOfDay = (tod) => { document.getElementById('time-filter').className = `time-${tod}`; };
+window.toggleWaterAnim = (checked) => {
+  document.querySelectorAll('.sub-pixel').forEach(el => {
+    if (el.style.backgroundColor === PALETTE.water || el.style.backgroundColor === PALETTE.shallows) {
+      el.className = 'sub-pixel ' + (checked ? 'water-anim' : '');
+    } else if (el.style.backgroundColor === PALETTE.beach) {
+      el.className = 'sub-pixel ' + (checked ? 'shore-anim' : '');
+    }
+  });
+};
+
+window.openModal = (id) => { document.getElementById(id).style.display = 'flex'; };
+window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; };
+
+window.showHelp = (title, text) => {
+  document.getElementById('msg-title').innerText = title;
+  document.getElementById('msg-text').innerText = text;
+  openModal('msg-modal');
+};
+
+window.showGenericHelp = () => {
+  showHelp('Atlasworks Engine Help', 
+`GENERAL CONTROLS:
+- Mousewheel: Zoom in/out over the map.
+- Pan Tool (Hand): Drag to pan map.
+- Inspector: Click objects to edit metadata. Click and Drag to physically move POIs! Hold Shift to multi-select tiles or roads.
+- Undo/Redo: Top bar buttons or Ctrl+Z / Ctrl+Y.
+- Compass & Zoom Sliders: Click and drag their headers to move them.
+
+PAINTING & TERRAIN:
+- The Variability checkbox allows you to randomize subpixel colors automatically. It applies only to whole-tile brushes.
+- Auto-shorelines automatically generates beach sand when painting water.
+- Elevation dynamically shades terrain brightness based on heightmap data!
+
+ROADS & TRAFFIC:
+- Roads scale dynamically based on the Map Scale in Settings (1/4mi vs 2mi impacts road thickness!).
+- The engine actively builds a node-graph of your roads.
+- Traffic automatically spawns and manages its density. If cars hit a dead end, they pull into unseen parking lots and vanish!
+
+POIS, LAYERS & BUS ROUTES:
+- Residences and Bus routes are distinct layers controlled via toggles in In-Game Preview.
+- Bus routes use A* Pathfinding and will actively trace the Road network if placed near roads!`);
+};
+
+openModal('setup-modal');
+</script>
+</body>
+</html>

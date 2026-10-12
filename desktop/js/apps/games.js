@@ -31,7 +31,7 @@ window.GamesApp = {
                 <iframe src="games/${id}/index.html" title="${g.label}" allow="fullscreen; autoplay; gamepad; clipboard-write" allowfullscreen></iframe>
             </div>`;
         const small = window.innerWidth < 768;
-        WM.open(winId, g.label, html, 'images/icons/apps/' + id + '.png', { width: g.width || 800, height: g.height || 600, center: true, fullscreen: true });
+        WM.open(winId, g.label, html, 'images/icons/apps/' + id + '.png', { width: g.width || 800, height: g.height || 600, center: true, fullscreen: !g.ownControls });   // games with their own settings skip the corner Mute/Full screen buttons
         if (small) WM.maximize(winId);   // phones: games get the whole screen (taskbricks stay visible)
         if (window.FeatureHints) FeatureHints.show('games');
 

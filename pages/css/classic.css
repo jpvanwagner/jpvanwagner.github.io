@@ -308,6 +308,9 @@ h3 { font-size: 18px; margin: 0 0 6px; }
 .side-photo img { width: 100%; display: block; }
 .side-photo.wide { width: 240px; }
 @media (max-width: 640px) { .side-photo.wide { width: 100%; max-width: 360px; } }
+/* a tall photo (Unit 204's origin story): stays beside the text, even on a phone */
+.side-photo.portrait { width: 200px; }
+@media (max-width: 640px) { .side-photo.portrait { width: 42%; margin-left: 12px; } }
 .side-photo figcaption { font-size: 12px; color: var(--muted); text-align: center; padding: 4px 0; }
 .service-icon { width: 72px; height: 72px; object-fit: cover; float: right; margin: 0 0 8px 12px; border: 1px solid var(--dark); }
 .service::after { content: ''; display: block; clear: both; }
@@ -729,7 +732,13 @@ html.in-desktop.retro-cursor input[type="search"], html.in-desktop.retro-cursor 
 .project-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 640px) { .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 440px) { .project-grid { grid-template-columns: 1fr; } }
-.project-grid .links a { white-space: nowrap; }   /* keep "About & demo →" together */
+.project-grid .links a { white-space: nowrap; }
+/* "Coming soon" project cards (no page yet): a plain title card instead of a screenshot */
+.card .thumb.thumb-soon { aspect-ratio: 16 / 9; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    background: repeating-linear-gradient(45deg, #2b2f3a 0 10px, #323745 10px 20px); color: #fff; text-align: center; }
+.thumb-soon span { font: bold 22px var(--pixel-font, monospace); letter-spacing: 1px; }
+.thumb-soon small { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #ffd27f; }
+.card-soon h3 { color: inherit; }   /* keep "About & demo →" together */
 
 /* ---------- Screenshot galleries + LIGHTBOX (js/lightbox.js) ---------- */
 .shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 12px 0 18px; }

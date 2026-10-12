@@ -1,12 +1,19 @@
 /**
  * Midnight at the Multiplex — Dialogue Runtime
  * =============================================
- * Plays a branching conversation authored in SAYMAKER inside the 3D engine,
- * driven by a dialogue JSON file that an author attached to an NPC/object in
- * MAPSTER. This is the glue that makes the two tools produce playable segments.
+ * Plays a branching conversation inside the 3D engine, driven by a dialogue
+ * JSON file that an author attached to an NPC/object in MAPSTER.
+ *
+ * FORMAT NOTE (2026-10): this file format came from Saymaker, the old
+ * in-repo dialogue editor, which has been REMOVED. Branching dialogue is now
+ * authored in SCENEMAKER (Joe's separate tool, github.com/Nostalginaut/
+ * Scenemaker), whose project.json uses scenes / lines / choices / outcomes.
+ * Reading Scenemaker projects is the next step (docs/TODO.md TOOL-6); until
+ * then this runtime reads the format below (the tutorial + debug-room
+ * conversations use it).
  *
  * PIPELINE
- *   Saymaker  → exports  dialogue/<id>.json   (nodes / choices / outcomes …)
+ *   dialogue/<id>.json        (nodes / choices / outcomes …)
  *   Mapster   → NPC/sign meta.dialogueFile = '<id>'; the .json is inlined into
  *               the exported map as <script type="application/json" id="dlg-<id>">
  *   Engine    → on interact, calls DialogueRuntime.start('<id>', speakerCtx)
@@ -151,7 +158,7 @@
     }
 
     // ── camera application ───────────────────────────────────────────────────
-    // Maps a Saymaker line.camera object onto the engine's CameraManager.
+    // Maps a line.camera object onto the engine's CameraManager.
     // Best-effort: base mode, iso facing, tilt, and static zoom are applied
     // directly; cinematic swoops use startCinematic; the looping pan/zoom
     // "dramatic effects" are acknowledged but not fully animated yet (logged
@@ -198,7 +205,7 @@
         ].join(';');
         // the win95 dialogue-tree look (gray bevel, blue title bar)
         // replaces the old glowing cyan box; text stays at the bigger 17px font.
-        // Styles are inline so Saymaker dialogues look right in every shell.
+        // Styles are inline so dialogues look right in every shell.
         overlayEl.innerHTML = `
             <div id="dr-portrait" style="display:none;"></div>
             <div id="dr-box" style="background:#c0c0c0; color:#000; border:2px solid #dfdfdf; border-right-color:#404040; border-bottom-color:#404040; box-shadow:1px 1px 0 #000, 2px 2px 7px rgba(0,0,0,0.45); padding:0; font-family:'GrandeRetro','MS Sans Serif',Tahoma,sans-serif;">
@@ -388,7 +395,7 @@
             const entry = nodeList.find(n => !targeted.has(n.id)) || nodeList[0];
             active = { conv, speaker: speaker || {}, node: null, lineIdx: 0 };
             // pause the world while this conversation runs unless it opts out
-            // (Saymaker's "Pause world during dialogue", default ON). The engine
+            // (the file's "pause world during dialogue" option, default ON). The engine
             // reads window.__worldPaused.
             window.__worldPaused = (conv && conv.pauseWorld === false) ? false : true;
             enterNode(entry.id);

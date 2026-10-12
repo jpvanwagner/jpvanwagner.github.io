@@ -12,14 +12,14 @@
 const CATS = [
   { name: 'Clean / No Action', short: 'Clean', hint: 'Works and looks as expected.' },
   { name: 'Normal Wear & Tear', short: 'Wear & Tear', hint: 'Age and everyday use. Never charged.' },
-  { name: 'Tenant Damage', short: 'Damage', hint: 'Accident, neglect or abuse. Charge the deposit.' },
+  { name: 'Tenant Damage', short: 'Damage', hint: 'Accident, neglect, or abuse. Charge the deposit.' },
   { name: 'Maintenance Hazard', short: 'Hazard', hint: 'Safety risk. Emergency work order.' }
 ];
 const OPEN_FIRST = { if: '!open', t: 'Open the cabinet doors first.' };
 
 const FEATURES = [
   /* ---------------- LIVING ROOM ---------------- */
-  { id: 'carpet', room: 'living', name: 'Carpet', art: 'carpet',
+  { id: 'carpet', room: 'living', name: 'Carpet', art: 'carpet', floor: true,
     hint: 'Carpet tells you more by feel and smell than by looking. Get down there.',
     parts: [{ id: 'corner', name: 'carpet by the window', r: [168, 4, 68, 44] }, { id: 'center', name: 'middle of the carpet', r: [62, 30, 110, 62] }, { id: 'lane', name: 'path to the hallway', r: [0, 96, 240, 39] }],
     base: { '*': { talk: 'You compliment the carpet. It remains beige.' }, corner: { look: 'Just carpet meeting baseboard.' } },
@@ -29,7 +29,7 @@ const FEATURES = [
           lane: { look: 'The vacuum lines run right through the walkway. No matting.', touch: { t: 'The pile springs right back up.', clue: 'c' } } },
         why: 'Clean, springy carpet with no stains or matting. Nothing to do.' },
       { cat: 1, desc: 'Beige carpet. A greyish, flattened lane runs from the front door toward the hall.', key: ['lane'],
-        resp: { lane: { look: 'Grey and flat, but no spots. Years of feet.', touch: { t: 'The fibers are crushed flat but intact. Not sticky, not crunchy.', clue: 'lane' }, tape: { t: 'The worn lane is about 20 inches wide, exactly where people walk.', clue: 'lane' }, smell: 'Dust. Just dust.' },
+        resp: { lane: { look: 'A worn traffic lane: grey, matted, and flat from the door toward the hall, but no spots. Years of feet.', touch: { t: 'The fibers are crushed flat but intact. Not sticky, not crunchy.', clue: 'lane' }, tape: { t: 'The worn lane is about 20 inches wide, exactly where people walk.', clue: 'lane' }, smell: 'Dust. Just dust.' },
           center: { touch: 'Soft enough out here, away from the walkway.' } },
         why: "Matting in a walking path is the textbook example of normal wear. Carpet ages with use; that's never chargeable." },
       { cat: 2, cost: 325, desc: 'A big dark blotch spreads across the middle of the room.', key: ['urine', 'soak', 'ring'],
@@ -42,7 +42,7 @@ const FEATURES = [
     ] },
   { id: 'tvwall', room: 'living', name: 'TV Wall', art: 'tvwall',
     hint: "If there's hardware left in a wall, take it out and measure what's underneath.",
-    parts: [{ id: 'jack', name: 'cable jack', r: [182, 92, 26, 26] }, { id: 'upper', name: 'wall where the TV hung', r: [40, 8, 160, 70] }, { id: 'lower', name: 'lower wall', r: [0, 80, 240, 55] }],
+    parts: [{ id: 'jack', name: 'cable jack', r: [184, 82, 24, 36] }, { id: 'upper', name: 'wall where the TV hung', r: [40, 8, 160, 70] }, { id: 'lower', name: 'lower wall', r: [0, 80, 240, 55] }],
     base: { jack: { look: "A coax cable jack, for the 'HD-ready' TV.", touch: "It's a cable jack. It's fine." }, lower: { look: 'Smooth paint, a little scuffing near the floor.', touch: 'Smooth.' } },
     variants: [
       { cat: 1, desc: 'A few tiny nail holes where pictures used to hang.', key: ['nail'],
@@ -64,45 +64,78 @@ const FEATURES = [
     ] },
   { id: 'fan', room: 'living', name: 'Ceiling Fan', art: 'fan',
     hint: 'With ceiling fans, run it and check the mount.',
-    parts: [{ id: 'canopy', name: 'mounting canopy', r: [92, 0, 56, 24] }, { id: 'chain', name: 'pull chain', r: [146, 58, 16, 62] }, { id: 'light', name: 'light kit', r: [92, 56, 54, 34] }, { id: 'blades', name: 'fan blades', r: [0, 22, 240, 36] }],
+    parts: [{ id: 'canopy', name: 'mounting canopy', r: [100, 0, 40, 22] }, { id: 'chain', name: 'pull chain', r: [136, 54, 16, 54] }, { id: 'light', name: 'light kit', r: [96, 46, 48, 36] }, { id: 'blades', name: 'fan blades', r: [0, 22, 240, 40] }],
     base: { light: { look: 'A frosted glass bowl. Three dead moths, standard issue.', touch: 'Warm. The bulbs work.' }, chain: { look: 'A pull chain with a little brass bead.' }, blades: { look: 'Five oak-look blades.' } },
     variants: [
       { cat: 0, desc: 'A five-blade brushed-nickel fan with a frosted light kit.', key: ['smooth'],
-        resp: { chain: { touch: { t: 'Click. It spins up smooth and quiet.', set: 'spin', clue: 'smooth', sfx: 'click' } }, canopy: { look: 'Snug against the ceiling.', screwdriver: { t: 'Every canopy screw is tight.', clue: 'smooth', sfx: 'unscrew' }, touch: { t: "Solid. It doesn't budge.", clue: 'smooth' } }, blades: { look: 'Level and freshly dusted.' } },
+        resp: { chain: { touch: [{ if: 'spin', t: 'Click. The fan winds down.', toggle: 'spin', sfx: 'click' }, { t: 'Click. It spins up smooth and quiet.', toggle: 'spin', clue: 'smooth', sfx: 'click' }] }, canopy: { look: 'Snug against the ceiling.', screwdriver: { t: 'Every canopy screw is tight.', clue: 'smooth', sfx: 'unscrew' }, touch: { t: "Solid. It doesn't budge.", clue: 'smooth' } }, blades: { look: 'Level and freshly dusted.' } },
         why: 'It runs smoothly and the mount is tight. Nothing to do.' },
       { cat: 1, desc: 'The fan works, but the oak-look blades are faded and a little droopy.', key: ['droop'],
-        resp: { blades: { look: { t: 'Two blades sag slightly. Years of heat and humidity.', clue: 'droop' }, tape: { t: 'The blade tips droop about 1/4 inch. Cosmetic.', clue: 'droop' } }, chain: { touch: { t: 'It spins with a soft, steady tick. Old, but solid.', set: 'spin', clue: 'droop', sfx: 'click' } }, canopy: { screwdriver: { t: "The canopy screws are tight. It's well mounted.", sfx: 'unscrew' }, touch: 'Solid.' } },
+        resp: { blades: { look: { t: 'Two blades sag slightly. Years of heat and humidity.', clue: 'droop' }, tape: { t: 'The blade tips droop about 1/4 inch. Cosmetic.', clue: 'droop' } }, chain: { touch: [{ if: 'spin', t: 'Click. The fan winds down.', toggle: 'spin', sfx: 'click' }, { t: 'It spins with a soft, steady tick. Old, but solid.', toggle: 'spin', clue: 'droop', sfx: 'click' }] }, canopy: { screwdriver: { t: "The canopy screws are tight. It's well mounted.", sfx: 'unscrew' }, touch: 'Solid.' } },
         why: 'Faded, slightly drooping blades on a fan that runs fine are age. Wear and tear, not a safety issue.' },
       { cat: 3, desc: 'The canopy is hanging half an inch below the ceiling.', key: ['wobble', 'bracket'],
         resp: { canopy: { look: "There's a dark gap between the canopy and the ceiling. That's not right.", screwdriver: { t: 'The screws are stripped. The bracket is barely holding onto the box. This could come down.', clue: 'bracket', sfx: 'unscrew' }, touch: { t: 'It shifts when you push it. Loose.', clue: 'bracket' } },
           chain: { touch: [{ if: 'wobble', t: "You're not turning that back on." }, { t: 'It lurches into a violent wobble. The mount groans. You kill it fast.', set: 'wobble', clue: 'wobble', sfx: 'creak' }] } },
-        why: 'A fan that could fall is a life-safety hazard. Stop use and file an emergency work order, however it got that way.' }
+        why: 'A fan that could fall is a life-safety hazard. Stop use and file an emergency work order, however it got that way. Whoever goes up to fix it uses a real ladder, inspected first (1910.23), with the circuit locked out.' }
+    ] },
+  { id: 'frontdoor', room: 'living', name: 'Front Door & Lock', art: 'frontdoor',
+    hint: 'Work the locks. Then look at the frame and the bottom of the door.',
+    parts: [{ id: 'peephole', name: 'peephole', r: [84, 20, 18, 16] }, { id: 'deadbolt', name: 'deadbolt', r: [146, 41, 23, 23] }, { id: 'knob', name: 'doorknob', r: [146, 70, 23, 23] },
+      { id: 'frame', name: 'door frame', r: [176, 0, 64, 135] }, { id: 'bottom', name: 'bottom of the door', r: [10, 112, 166, 23] }, { id: 'panel', name: 'door', r: [10, 0, 166, 112] }],
+    base: { panel: { look: 'A white six-panel steel door.', touch: 'Solid steel. Cold.' }, peephole: { look: 'A fisheye view of the empty hallway. Someone is not standing right outside. Good.' },
+      knob: { touch: [{ if: 'open', t: 'You swing the door shut. It latches with a crisp click.', toggle: 'open', sfx: 'click' }, { t: 'You turn the knob and swing the door open. Now you can see its edge, and the jamb.', toggle: 'open', sfx: 'click' }] },
+      deadbolt: { look: 'A brass deadbolt with a thumb-turn. Up and down is unlocked; sideways is locked.' },
+      bottom: { look: 'The bottom edge of the door and its rubber sweep.' }, frame: { look: [{ if: 'open', t: 'The jamb and its brass strike plates.' }, { t: 'The casing around the door. With the door shut, the strike plates are hidden behind it.' }] } },
+    variants: [
+      { cat: 0, desc: 'The front door: steel, six-panel, freshly painted.', key: ['latch'],
+        resp: { deadbolt: { touch: [{ if: 'bolt', t: 'Clack. You turn the thumb-turn back, and the bolt draws in.', toggle: 'bolt', sfx: 'click' }, { t: 'Clunk. The deadbolt throws smoothly and locks tight.', toggle: 'bolt', clue: 'latch', sfx: 'click' }] }, bottom: { look: { t: 'The sweep is intact. No daylight under the door.', clue: 'latch' } }, frame: { touch: 'Solid. The strike plates are snug.' } },
+        why: 'It locks, seals, and closes properly. Nothing to do.' },
+      { cat: 1, desc: 'A thin line of light shows under the door.', key: ['sweep'],
+        resp: { bottom: { look: { t: 'Daylight under the door. The rubber sweep is flattened and cracked with age.', clue: 'sweep' }, touch: { t: 'The sweep is brittle and worn thin. Years of opening and closing.', clue: 'sweep' }, flashlight: { t: 'The beam shows the gap runs the whole width of the door.', clue: 'sweep' } }, deadbolt: { touch: [{ if: 'bolt', t: 'Clack. You turn the thumb-turn back, and the bolt draws in.', toggle: 'bolt', sfx: 'click' }, { t: 'Clunk. It locks fine.', toggle: 'bolt', sfx: 'click' }] } },
+        why: 'A worn door sweep is a rubber part that wears out with use. Normal wear; replace it at turnover.' },
+      { cat: 2, cost: 280, desc: 'The door frame by the lock looks rough.', key: ['split'],
+        resp: { frame: { look: [{ if: 'open', t: 'The jamb is splintered around the strike plate, as if the door was forced or slammed into the bolt.', clue: 'split' }, { t: "Hairline cracks run up the casing beside the lock, and it bulges a little. Something's wrong with the jamb behind it. Open the door to see.", clue: 'split' }],
+          touch: [{ if: 'open', t: 'Loose splinters and cracked trim. The bolt still catches, barely.', clue: 'split' }, { t: "The casing gives when you press it. It shouldn't.", clue: 'split' }], tape: { t: 'The cracks run about 14 inches up the jamb.', clue: 'split' } },
+          deadbolt: { touch: [{ if: 'bolt', t: 'Clack. You turn the thumb-turn back, and the bolt draws in.', toggle: 'bolt', sfx: 'click' }, { t: 'Clunk. It locks, but the frame flexes when you pull.', toggle: 'bolt', sfx: 'click' }] } },
+        why: 'A split door jamb comes from force, not age. Repairing the frame is tenant damage, charged with photos.' },
+      { cat: 3, desc: 'The deadbolt looks fine at a glance.', key: ['bolt', 'cam'],
+        resp: { deadbolt: { touch: { t: "The thumb-turn spins freely, around and around, and the bolt never comes out. This door can't be locked!", clue: 'bolt', set: 'spin', sfx: 'click' }, screwdriver: { t: 'You pull the interior plate. The cam inside is snapped in two.', clue: 'cam', sfx: 'unscrew' }, look: 'A brass deadbolt. It looks fine. Looks can lie.' },
+          knob: { look: 'A builder-grade knob lock. A credit card would beat it, so the deadbolt has to do the real work.' } },
+        why: "A front door that won't lock leaves the next resident unsafe. That's a hazard: replace the lock before move-in." }
     ] },
   /* ---------------- KITCHEN ---------------- */
   { id: 'sink', room: 'kitchen', name: 'Sink & Cabinet', art: 'sink',
     hint: 'Always open the cabinet and get a light under a sink.',
-    parts: [{ id: 'switch', name: 'disposal switch', r: [198, 8, 34, 34] }, { id: 'faucet', name: 'faucet', r: [98, 0, 44, 38] }, { id: 'basin', name: 'sink basin', r: [40, 30, 160, 32] }, { id: 'cabinet', name: 'cabinet under the sink', r: [30, 66, 180, 69] }],
-    base: { cabinet: { touch: [{ if: 'open', t: 'The doors are already open.' }, { t: 'You open the cabinet doors.', set: 'open', sfx: 'click' }], look: [{ if: 'open', t: 'Too dark to see much under there.' }, { t: 'Closed cabinet doors. Oak-look laminate.' }], smell: 'Old cabinet. Faint lemon.' },
-      basin: { look: 'Stainless double basin.' }, faucet: { touch: 'Hot and cold both run. Decent pressure.' }, switch: { touch: { t: 'Click. The disposal grinds to life, then stops.', sfx: 'click' }, look: 'A disposal switch on the backsplash.' } },
+    parts: [{ id: 'switch', name: 'disposal switch', r: [204, 0, 22, 24] }, { id: 'hot', name: 'hot handle', r: [100, 12, 14, 14] }, { id: 'cold', name: 'cold handle', r: [126, 12, 14, 14] },
+      { id: 'faucet', name: 'faucet spout', r: [86, 2, 68, 16] }, { id: 'drain', name: 'disposal drain', r: [148, 46, 24, 14] }, { id: 'basin', name: 'sink basin', r: [40, 30, 160, 32] }, { id: 'cabinet', name: 'cabinet under the sink', r: [30, 64, 180, 71] }],
+    base: { cabinet: { touch: [{ if: 'open', t: 'You close the cabinet doors.', toggle: 'open', sfx: 'click' }, { t: 'You open the cabinet doors.', toggle: 'open', sfx: 'click' }], look: [{ if: 'open', t: 'Too dark to see much under there.' }, { t: 'Closed cabinet doors. Oak-look laminate.' }], smell: 'Old cabinet. Faint lemon.' },
+      basin: { look: 'A stainless double basin, a good eight inches deep. A basket strainer in the left, the disposal in the right.' },
+      faucet: { look: 'A chrome gooseneck faucet with two levers: hot on the left, cold on the right. The spout swings between the basins.', touch: [{ if: 'spout', t: 'You swing the spout back over the left basin.', toggle: 'spout', sfx: 'click' }, { t: 'You swing the spout over the right basin, the one with the disposal.', toggle: 'spout', sfx: 'click' }] },
+      hot: { touch: [{ if: 'hot', t: 'You push the hot lever back. The water stops.', toggle: 'hot', sfx: 'click' }, { t: 'You swing the hot lever out. Water runs, cool at first, then warm, then steaming.', toggle: 'hot', sfx: 'click' }], look: 'The hot lever, with a red dot.' },
+      cold: { touch: [{ if: 'cold', t: 'You push the cold lever back. The water stops.', toggle: 'cold', sfx: 'click' }, { t: 'You swing the cold lever out. Cold water runs, good and strong.', toggle: 'cold', sfx: 'click' }], look: 'The cold lever, with a blue dot.' },
+      drain: { look: [{ if: 'disposal', t: 'The rubber splash guard shivers while the disposal grinds away underneath.' }, { t: "The disposal's black rubber splash guard. You are not putting your hand in there." }], touch: 'Absolutely not. Not even with it off.', smell: 'Old coffee grounds and lemon peel.', flashlight: "Down past the flaps: the grinding plate, clean enough. Nothing's stuck in it." },
+      switch: { touch: [{ if: 'disposal', t: 'Click. The disposal winds down with a sad little whir.', toggle: 'disposal', sfx: 'click' }, { if: 'hot', t: 'Click. The disposal roars to life, water swirling down into it. Good habit.', toggle: 'disposal', sfx: 'click' }, { if: 'cold', t: 'Click. The disposal roars to life, cold water swirling down into it. Textbook.', toggle: 'disposal', sfx: 'click' }, { t: 'Click. The disposal roars to life and rattles. Run some water while it goes; it likes that better.', toggle: 'disposal', sfx: 'click' }], look: 'The disposal switch, up on the backsplash wall.' } },
     variants: [
       { cat: 0, desc: 'Stainless double sink, oak cabinet below. Clean and dry.', key: ['dry'],
         resp: { cabinet: { flashlight: [OPEN_FIRST, { t: 'Dry, clean, shelf liner still in. Even the P-trap is spotless.', clue: 'dry' }] }, basin: { touch: { t: 'Dry and clean.', clue: 'dry' }, smell: 'Lemon dish soap.' } },
-        why: 'Clean, dry and working. Nothing to do.' },
+        why: 'Clean, dry, and working. Nothing to do.' },
       { cat: 1, desc: 'White mineral crust rings the faucet base.', key: ['scale'],
         resp: { faucet: { look: { t: 'Hard-water scale around the base and aerator. Years of tap water.', clue: 'scale' }, touch: { t: 'Chalky and rough. It runs fine, just crusty.', clue: 'scale' } }, cabinet: { flashlight: [OPEN_FIRST, { t: 'Dry under here.' }] } },
         why: 'Mineral buildup from years of hard water is normal wear. A cleaning item at turnover, not a charge.' },
       { cat: 2, cost: 45, desc: 'The disposal switch plate is cracked and the toggle has snapped off.', key: ['snap'],
-        resp: { switch: { look: { t: 'The toggle is snapped off at the base. The plate is cracked.', clue: 'snap' }, touch: { t: 'Just a jagged stub. Someone forced it.', clue: 'snap' }, screwdriver: { t: 'Behind the plate the wiring is fine. Only the switch is broken.', clue: 'snap', sfx: 'unscrew' } }, cabinet: { flashlight: [OPEN_FIRST, { t: 'Dry under here.' }] } },
+        resp: { switch: { look: { t: 'The toggle is snapped off at the base. The plate is cracked.', clue: 'snap' }, touch: { t: "Just a jagged stub. Someone forced it. The disposal won't come on.", clue: 'snap' }, screwdriver: { t: 'Behind the plate the wiring is fine. Only the switch is broken.', clue: 'snap', sfx: 'unscrew' } }, cabinet: { flashlight: [OPEN_FIRST, { t: 'Dry under here.' }] } },
         why: "A snapped toggle and cracked plate are physical breakage: tenant damage. The wiring behind it is fine, so it isn't a hazard." },
       { cat: 3, desc: 'The cabinet doors are swollen along the bottom edge.', key: ['leak', 'wet', 'mildew'],
-        resp: { cabinet: { touch: [{ if: 'open', t: 'The cabinet floor is soaked and spongy.', clue: 'wet' }, { t: 'The doors stick, then pop open. The cabinet floor is soaked.', set: 'open', clue: 'wet', sfx: 'click' }],
+        resp: { cabinet: { touch: [{ if: 'open', t: 'You press the cabinet floor: soaked and spongy. You close the doors.', toggle: 'open', clue: 'wet', sfx: 'click' }, { t: 'The doors stick, then pop open. The cabinet floor is soaked.', toggle: 'open', clue: 'wet', sfx: 'click' }],
           flashlight: [OPEN_FIRST, { t: 'The supply line is weeping at the compression nut. Drip... drip...', clue: 'leak', sfx: 'drip' }], smell: { t: 'Mildew. Strong.', clue: 'mildew' } } },
         why: 'An active leak under the sink is a maintenance hazard: water damage and mold get worse every hour. Emergency work order.' }
     ] },
   { id: 'stove', room: 'kitchen', name: 'Gas Range', art: 'stove',
     hint: 'With a gas range, trust your nose.',
     parts: [{ id: 'knobs', name: 'control knobs', r: [26, 56, 188, 16] }, { id: 'burners', name: 'burners', r: [26, 6, 188, 48] }, { id: 'oven', name: 'oven door', r: [36, 76, 168, 59] }],
-    base: { oven: { touch: { t: 'The door opens with a creak, then closes.', sfx: 'creak' } }, burners: { look: 'Four sealed burners under cast-iron grates.' } },
+    base: { oven: { touch: [{ if: 'ovenOpen', t: 'You close the oven. Clunk.', toggle: 'ovenOpen', sfx: 'thud' }, { t: 'The oven door creaks open.', toggle: 'ovenOpen', sfx: 'creak' }],
+        look: [{ if: 'ovenOpen', t: 'Two racks, a broiler pan, and baked-on spots older than the lease.' }, { t: 'The oven door, closed.' }], smell: [{ if: 'ovenOpen', t: 'Burnt cheese, a long time ago.' }, { t: 'Old oven smell.' }] },
+      burners: { look: 'Four sealed burners under cast-iron grates.', smell: 'Cold grates. A little greasy.' }, knobs: { look: 'Four control knobs.' } },
     variants: [
       { cat: 0, desc: 'A black gas range. Grates scrubbed, drip pans spotless.', key: ['fresh'],
         resp: { burners: { smell: { t: 'Faint dish soap. No gas smell.', clue: 'fresh' } }, knobs: { touch: { t: 'Every knob clicks off firmly.', clue: 'fresh' } }, oven: { look: 'Clean glass, clean racks.' } },
@@ -115,7 +148,7 @@ const FEATURES = [
         why: 'A melted knob and cracked oven glass come from misuse, not age. Tenant damage: replace both and charge the deposit.' },
       { cat: 3, desc: 'Looks fine at a glance.', key: ['gas', 'knob'],
         resp: { burners: { smell: { t: "Rotten eggs! That's mercaptan, the gas odorant. A burner valve is leaking.", clue: 'gas', sfx: 'hiss' }, look: 'Clean grates. Nothing looks wrong.', flashlight: "Nothing to see. Gas leaks don't show up in pictures." }, knobs: { touch: { t: 'The back-right knob spins freely. It never clicks to OFF.', clue: 'knob' } } },
-        why: 'A gas smell means a leak, the most urgent hazard there is. Shut off the gas, open the windows and file an emergency work order.' }
+        why: 'A gas smell means a leak, the most urgent hazard there is. Shut off the gas, open the windows, and file an emergency work order.' }
     ] },
   { id: 'counter', room: 'kitchen', name: 'Countertop', art: 'counter',
     hint: 'Touch tells you whether a mark is on the surface or goes deeper.',
@@ -129,11 +162,34 @@ const FEATURES = [
         resp: { surface: { look: { t: 'Fine scratches and a dull patch where everyone chops.', clue: 'dull' }, touch: { t: "Surface scratches only. The laminate's intact.", clue: 'dull' } } },
         why: 'Fine scratches and a dull work area are what years of cooking do to laminate. Wear and tear.' },
       { cat: 2, cost: 400, desc: 'A big scorched ring where someone set down a hot pan.', key: ['scorch'],
-        resp: { surface: { look: 'A brown ring with a bubbled, lifting middle.', touch: { t: 'Bubbled and soft. The laminate has come loose from the board underneath.', clue: 'scorch' }, tape: { t: 'The ring is about 8 inches across.', clue: 'scorch' }, smell: 'Faint burnt glue.' } },
+        resp: { surface: { look: 'A brown ring with a bubbled, lifting middle.', touch: { t: 'Bubbled and soft. The laminate has come loose from the board underneath.', clue: 'scorch' }, tape: { t: 'The scorched ring is about 9 inches across: the bottom of a hot pot.', clue: 'scorch' }, smell: 'Faint burnt glue.' } },
         why: "A scorched, bubbled ring from a hot pan is damage. Laminate can't be repaired in place, so the section is replaced and charged." },
       { cat: 2, cost: 260, desc: 'Something is off about the front edge.', key: ['chip'],
         resp: { edge: { look: { t: 'A 3-inch chunk is missing from the bullnose. Particle board shows through.', clue: 'chip' }, touch: { t: 'A sharp edge, with particle board exposed.', clue: 'chip' }, tape: { t: 'The missing chunk is about 3 inches long.', clue: 'chip' } } },
         why: 'A broken-off edge is impact damage, not wear. Chargeable.' }
+    ] },
+  { id: 'fridge', room: 'kitchen', name: 'Refrigerator', art: 'fridge',
+    hint: 'Open the fridge. Feel how cold it is, check the door seals, and look underneath.',
+    parts: [{ id: 'handle', name: 'door handle', r: [120, 28, 12, 54] }, { id: 'gasket', name: 'door seal', r: [118, 4, 10, 112] }, { id: 'freezer', name: 'freezer door', r: [22, 4, 80, 112] },
+      { id: 'floor', name: 'floor under the fridge', r: [0, 118, 240, 17] }, { id: 'inside', name: 'inside the fridge', r: [130, 4, 106, 112] }],
+    base: { handle: { touch: [{ if: 'open', t: 'You shut the door. Fwump.', toggle: 'open', sfx: 'thud' }, { t: 'The door opens with a soft fwump and the light comes on.', toggle: 'open', sfx: 'swish' }], look: 'A long stainless handle.' },
+      inside: { look: [{ if: '!open', t: 'Open the door first.' }, { t: 'Glass shelves, crisper drawers, a dim little bulb.' }], touch: [{ if: '!open', t: 'Open the door first.' }, { t: 'Cold shelves.' }], smell: [{ if: '!open', t: 'Open the door first.' }, { t: 'Cold and faintly of baking soda.' }] },
+      freezer: { look: 'The freezer side of a side-by-side.', touch: 'Cold through the door.' }, floor: { look: 'The vinyl in front of the fridge.' }, gasket: { look: 'The rubber door seal.' } },
+    variants: [
+      { cat: 0, desc: 'A black side-by-side fridge, wiped down.', key: ['cold'],
+        resp: { inside: { touch: [{ if: '!open', t: 'Open the door first.' }, { t: 'Cold, dry, and clean. The dial says 37 degrees.', clue: 'cold' }], smell: [{ if: '!open', t: 'Open the door first.' }, { t: 'Baking soda. Someone left the box in. Bless them.', clue: 'cold' }] }, gasket: { touch: 'Soft and grippy all the way around.' } },
+        why: 'Cold, clean, and sealing. Nothing to do.' },
+      { cat: 1, desc: "The door doesn't quite seal at the bottom corner.", key: ['gasket'],
+        resp: { gasket: { look: { t: 'The rubber gasket is cracked at the bottom corner and hard with age.', clue: 'gasket' }, touch: { t: 'Stiff and split. Old rubber, not abuse.', clue: 'gasket' }, flashlight: { t: 'Light shows through the gap at the cracked corner.', clue: 'gasket' } }, inside: { touch: [{ if: '!open', t: 'Open the door first.' }, { t: 'Cold enough.' }] } },
+        why: 'Door gaskets are rubber parts that harden and crack over the years. Normal wear; replace at turnover.' },
+      { cat: 2, cost: 190, desc: 'There is a big dent in the freezer door.', key: ['dent', 'drawer'],
+        resp: { freezer: { look: { t: 'A deep dent about waist high. Something hit it hard.', clue: 'dent' }, tape: { t: 'The dent is about 5 inches across.', clue: 'dent' }, touch: { t: "A sharp crease in the steel. That's no ding.", clue: 'dent' } },
+          inside: { look: [{ if: '!open', t: 'Open the door first.' }, { t: 'The crisper drawer is cracked clean in half.', clue: 'drawer' }] } },
+        why: 'A creased door and a broken drawer come from impact, not age. Tenant damage.' },
+      { cat: 3, desc: 'There is a puddle at the base of the fridge.', key: ['warm', 'leak'],
+        resp: { inside: { touch: [{ if: '!open', t: 'Open the door first.' }, { t: "It's barely cool in here. The compressor isn't running.", clue: 'warm' }], smell: [{ if: '!open', t: 'Open the door first.' }, { t: 'Sour. Spoiled-milk sour.', clue: 'warm' }] },
+          floor: { look: { t: 'Water pooling under the front edge.', clue: 'leak' }, flashlight: { t: 'Behind the kick plate: a split ice-maker line, dripping steadily.', clue: 'leak', sfx: 'drip' }, touch: { t: 'Wet, and the vinyl seam is lifting.', clue: 'leak' } } },
+        why: "A fridge that isn't cooling and is leaking water is a maintenance hazard: floor damage, mold, and spoiled food. Work order today." }
     ] },
   /* ---------------- BATHROOM ---------------- */
   { id: 'mirror', room: 'bath', name: 'Mirror & Vanity Light', art: 'mirror',
@@ -152,7 +208,7 @@ const FEATURES = [
         why: 'Deliberate scratches in the glass are vandalism. The mirror is replaced and charged to the deposit.' },
       { cat: 3, desc: 'The vanity light flickers and buzzes.', key: ['spark', 'burn'],
         resp: { lightbar: { look: { t: 'One socket is scorched brown. A tiny spark jumps when it flickers.', clue: 'spark' }, smell: { t: 'Burning plastic and ozone.', clue: 'burn', sfx: 'buzz' }, touch: 'Not without the breaker off. You value your eyebrows.', screwdriver: "Absolutely not while it's live." }, glass: { look: "The mirror's fine. The light above it is not." } },
-        why: 'A scorched, sparking fixture is a fire and shock hazard. Kill the breaker and file an emergency work order.' }
+        why: 'A scorched, sparking fixture is a fire and shock hazard. Kill the breaker and file an emergency work order. The electrician locks and tags that breaker and tests the wires dead before touching anything (1910.333(b)(2)).' }
     ] },
   { id: 'tub', room: 'bath', name: 'Tub & Tile', art: 'tub',
     hint: 'Tap tile with your hammer. Solid is good. Hollow and mushy is bad.',
@@ -170,16 +226,19 @@ const FEATURES = [
         why: "Star cracks from a single impact point mean something hit the tile. It's solid behind, so it's tenant damage, not a leak." },
       { cat: 3, desc: 'The grout along the bottom rows has gone dark.', key: ['rot', 'soft', 'musty'],
         resp: { tiles: { hammer: { t: 'Hollow, mushy thuds near the bottom. The backer board is rotting.', clue: 'rot', sfx: 'thud' }, touch: { t: 'A tile flexes when you push it. Soft behind.', clue: 'soft' }, smell: { t: 'Musty. Damp wood.', clue: 'musty' } }, caulk: { look: 'Dark grout and gaps in the caulk line.' } },
-        why: 'Soft, hollow-sounding tile means water is getting into the wall and rotting it. Left alone, that means mold and structural damage. Hazard.' }
+        why: 'Soft, hollow-sounding tile means water is getting into the wall and rotting it. Left alone, that means mold and structural damage. Hazard.' },
+      { cat: 2, cost: 150, desc: 'There is a perfectly round crater in one of the wall tiles.', key: ['divot'],
+        resp: { tiles: { look: { t: 'A perfectly circular divot, with three little dents in a triangle in the middle. Like... finger holes.', clue: 'divot' }, tape: { t: 'Eight and a half inches across. Exactly the size of a bowling ball.', clue: 'divot' }, touch: { t: 'Smooth, round edges. Something heavy and round hit it.', clue: 'divot' }, hammer: { t: 'Solid behind it. Just impact damage.', sfx: 'thud' } } },
+        why: 'Impact damage to tile is tenant damage, however a bowling ball got into the bathroom.' }
     ] },
   { id: 'toilet', room: 'bath', name: 'Toilet', art: 'toilet',
     hint: 'Flush it, and check the base.',
-    parts: [{ id: 'handle', name: 'flush handle', r: [66, 16, 18, 12] }, { id: 'lid', name: 'tank lid', r: [64, 0, 112, 12] }, { id: 'tank', name: 'tank', r: [70, 12, 100, 36] }, { id: 'base', name: 'base', r: [64, 100, 112, 35] }, { id: 'bowl', name: 'bowl', r: [74, 48, 92, 52] }],
+    parts: [{ id: 'handle', name: 'flush handle', r: [72, 14, 18, 10] }, { id: 'lid', name: 'tank lid', r: [74, 0, 92, 11] }, { id: 'tank', name: 'tank', r: [78, 11, 84, 44] }, { id: 'bowl', name: 'bowl', r: [78, 55, 84, 36] }, { id: 'base', name: 'base', r: [80, 91, 80, 40] }],
     base: { bowl: { look: 'Clean water. Mercifully.', touch: "You're a professional, but not THAT professional." }, lid: { look: 'A white porcelain tank lid.' } },
     variants: [
       { cat: 0, desc: 'A white two-piece toilet. Clean and quiet.', key: ['flush'],
         resp: { handle: { touch: { t: 'Whoosh. It refills and shuts off. Perfect.', clue: 'flush', sfx: 'flush' } }, base: { touch: { t: 'Rock solid on the floor.', clue: 'flush' } } },
-        why: 'It flushes, refills and is solid on the floor. Nothing to do.' },
+        why: 'It flushes, refills, and is solid on the floor. Nothing to do.' },
       { cat: 1, desc: 'A white toilet that keeps hissing faintly.', key: ['flapper'],
         resp: { handle: { touch: { t: "It flushes, then hisses for ages. The flapper's worn out.", clue: 'flapper', sfx: 'flush' } }, tank: { look: { t: 'Under the lid: the rubber flapper is warped and old.', clue: 'flapper' }, touch: { t: 'You lift the lid. The flapper is stiff, warped rubber.', clue: 'flapper' } }, base: { touch: 'Solid. No leaks.' } },
         why: "A worn rubber flapper is a part that wears out on its own. Swap it at turnover; that's normal wear." },
@@ -200,7 +259,7 @@ const FEATURES = [
         why: 'It trips and resets properly. Nothing to do.' },
       { cat: 3, desc: 'Brown scorch marks surround the plug slots.', key: ['warm', 'melt', 'burn'],
         resp: { plate: { touch: { t: 'Warm. You hear a faint buzz from inside the box.', clue: 'warm', sfx: 'buzz' }, smell: { t: 'Burnt plastic.', clue: 'burn' }, screwdriver: [{ if: 'open', t: 'The plate is already off.' }, { t: 'You flip the breaker and pull the plate: melted wire insulation behind it.', clue: 'melt', sfx: 'unscrew', set: 'open' }] }, test: { touch: { t: "It won't trip. The GFCI isn't protecting anything.", clue: 'warm', sfx: 'click' } } },
-        why: "Heat, buzzing and scorch marks mean the wiring is failing. It's a fire hazard: shut off the breaker and file an emergency work order." },
+        why: "Heat, buzzing, and scorch marks mean the wiring is failing. It's a fire hazard: shut off the breaker and file an emergency work order. Nobody opens that box until the breaker is locked out and the circuit tests dead (1910.333(b)(2))." },
       { cat: 2, cost: 15, desc: 'The cover plate is cracked, with a chunk missing.', key: ['plate'],
         resp: { plate: { look: { t: 'A corner of the plate is snapped off. Probably a vacuum cord.', clue: 'plate' }, touch: { t: 'Cool. Only the plastic is broken.', clue: 'plate' } }, test: { touch: { t: "Click, it trips. Reset, and it works. Only the plate's broken.", clue: 'plate', sfx: 'click' } } },
         why: "A broken cover plate is minor tenant damage. The outlet itself tests fine, so it isn't a hazard. Replace the plate." },
@@ -225,26 +284,26 @@ const FEATURES = [
         why: "The cover was broken by an impact, but the alarm still works. Replace the unit and charge the deposit; it isn't disabled." },
       { cat: 3, desc: 'There is no light on the detector at all.', key: ['dead', 'battery'],
         resp: { led: { look: { t: 'Dark. No power light.', clue: 'dead' } }, button: { touch: { t: 'Nothing. Silence.', clue: 'dead' } }, cover: { screwdriver: [{ if: 'open', t: "It's already open." }, { t: "You twist it off the base. The battery's gone and the power lead is unplugged.", clue: 'battery', set: 'open', sfx: 'unscrew' }], touch: [{ if: 'open', t: 'Empty battery slot. Unplugged lead.' }, { t: 'It twists a little on its base.' }] } },
-        why: 'A disabled smoke alarm is a life-safety hazard, whoever disabled it. Restore it and file an emergency work order before anyone moves in.' }
+        why: "A disabled smoke alarm is a life-safety hazard, whoever disabled it. Restore it and file an emergency work order before anyone moves in. (That's the fire and housing code, not OSHA; the ladder to reach it is OSHA's, 1910.23.)" }
     ] },
   { id: 'closet', room: 'bedroom', name: 'Closet Doors', art: 'closet',
     hint: 'Work the doors. Then look at the track.',
     parts: [{ id: 'knob', name: 'knob', r: [150, 58, 18, 18] }, { id: 'track', name: 'top track', r: [16, 0, 208, 12] }, { id: 'panel', name: 'door panel', r: [20, 12, 200, 123] }],
-    base: { panel: { look: 'White louvered bifold doors.' }, knob: { look: 'A brass knob.' } },
+    base: { panel: { look: [{ if: 'open', t: 'Inside: a wire shelf, a closet rod, and a tangle of empty hangers.' }, { t: 'White louvered bifold doors.' }] }, knob: { look: 'A brass knob.' } },
     variants: [
       { cat: 0, desc: 'White bifold closet doors.', key: ['glide'],
-        resp: { knob: { touch: { t: 'The doors fold open smoothly and close flush.', clue: 'glide', sfx: 'click' } }, track: { look: { t: 'A straight, clean track.', clue: 'glide' } } },
-        why: 'Smooth, straight and intact. Nothing to do.' },
+        resp: { knob: { touch: [{ if: 'open', t: 'You fold the doors shut.', toggle: 'open', sfx: 'click' }, { t: 'The doors fold open smoothly on their track.', toggle: 'open', clue: 'glide', sfx: 'click' }] }, track: { look: { t: 'A straight, clean track.', clue: 'glide' } } },
+        why: 'Smooth, straight, and intact. Nothing to do.' },
       { cat: 1, desc: 'The bifold doors sag and drag at the bottom.', key: ['roller'],
-        resp: { knob: { touch: { t: 'It drags, scrapes and catches. The rollers are worn smooth.', clue: 'roller', sfx: 'creak' } }, track: { look: { t: 'Worn plastic rollers and a dirty track. Years of use.', clue: 'roller' } }, panel: { screwdriver: { t: 'You snug the pivot. It helps a bit, but the rollers need replacing.', sfx: 'unscrew' } } },
+        resp: { knob: { touch: [{ if: 'open', t: 'You shove the doors shut. They scrape the whole way.', toggle: 'open', sfx: 'creak' }, { t: 'It drags, scrapes, and catches on the way open. The rollers are worn smooth.', toggle: 'open', clue: 'roller', sfx: 'creak' }] }, track: { look: { t: 'Worn plastic rollers and a dirty track. Years of use.', clue: 'roller' } }, panel: { screwdriver: { t: 'You snug the pivot. It helps a bit, but the rollers need replacing.', sfx: 'unscrew' } } },
         why: 'Worn rollers and a sagging bifold come from years of opening and closing. Normal wear.' },
       { cat: 2, cost: 120, desc: 'Something has happened to one of the door panels.', key: ['hole'],
-        resp: { panel: { look: "A fist-sized hole with splintered edges. Hollow-core doors don't stand a chance.", tape: { t: 'About 5 inches across.', clue: 'hole' }, touch: { t: 'Splintered veneer, with cardboard honeycomb inside.', clue: 'hole' }, flashlight: { t: 'Through the hole: the empty honeycomb core.', clue: 'hole' } }, knob: { touch: { t: 'The doors still fold fine.', sfx: 'click' } } },
+        resp: { panel: { look: "A fist-sized hole with splintered edges. Hollow-core doors don't stand a chance.", tape: { t: 'The hole is about 5 inches across. Fist-sized.', clue: 'hole' }, touch: { t: 'Splintered veneer, with cardboard honeycomb inside.', clue: 'hole' }, flashlight: { t: 'Through the hole: the empty honeycomb core.', clue: 'hole' } }, knob: { touch: [{ if: 'open', t: 'You fold the doors shut.', toggle: 'open', sfx: 'click' }, { t: 'The doors still fold open fine.', toggle: 'open', sfx: 'click' }] } },
         why: 'A hole punched through a door is damage. Hollow-core doors get replaced, not patched. Chargeable.' }
     ] },
   { id: 'window', room: 'bedroom', name: 'Window', art: 'window',
     hint: 'Check both sides of the glass, and the sill.',
-    parts: [{ id: 'latch', name: 'latch', r: [108, 92, 24, 12] }, { id: 'sill', name: 'windowsill', r: [24, 104, 192, 31] }, { id: 'glass', name: 'glass', r: [36, 6, 168, 86] }],
+    parts: [{ id: 'latch', name: 'latch', r: [108, 92, 24, 12] }, { id: 'sill', name: 'windowsill', r: [24, 93, 192, 42] }, { id: 'glass', name: 'glass', r: [36, 6, 168, 86] }],
     base: { latch: { touch: { t: 'The latch locks firmly.', sfx: 'click' } }, glass: { talk: 'The tree outside waves. You wave back.' }, sill: { look: 'A white vinyl sill.' } },
     variants: [
       { cat: 0, desc: 'A vinyl double-hung window looking out on an oak tree.', key: ['clear'],
@@ -272,8 +331,225 @@ const FEATURES = [
         resp: { wall: { look: 'Faint grey scuffs at headboard height.', touch: { t: 'They partly wipe off with your thumb. Surface scuffs.', clue: 'scuff' }, tape: { t: 'The scuffs are about 40 inches up, right at headboard height.', clue: 'scuff' } } },
         why: 'Light scuffs from furniture rubbing are what everyday living does to paint. Normal wear; touch up at turnover.' },
       { cat: 2, cost: 140, desc: 'A giant purple dinosaur has been drawn on the wall in marker.', key: ['marker'],
-        resp: { wall: { look: "A purple dinosaur, signed 'KAYDEN, AGE 5'. Honestly, not bad.", touch: { t: "It doesn't smudge at all. Permanent marker.", clue: 'marker' }, smell: { t: 'Faint marker fumes.', clue: 'marker' }, tape: 'About 3 feet tall. Kayden had ambitions.' } },
+        resp: { wall: { look: "A purple dinosaur, signed 'KAYDEN' in wobbly capitals. Honestly, not bad.", touch: { t: "It doesn't smudge at all. Permanent marker.", clue: 'marker' }, smell: { t: 'Faint marker fumes.', clue: 'marker' }, tape: 'The dinosaur is about 3 feet tall. Kayden had ambitions.' } },
+        why: 'Permanent marker on a wall needs primer and paint. That goes beyond normal use, so it gets charged.' },
+      { cat: 2, cost: 140, desc: 'Someone drew a big cat on the wall in marker.', key: ['marker'],
+        resp: { wall: { look: "A huge marker drawing of a lion-tiger crossbreed, labeled 'LIGER: BRED FOR ITS SKILLS IN MAGIC.'", touch: { t: "Permanent marker. It isn't coming off.", clue: 'marker' }, smell: { t: 'Faint marker fumes.', clue: 'marker' }, tape: 'The liger is about 4 feet long. Pretty much the biggest cat ever drawn on drywall.' } },
         why: 'Permanent marker on a wall needs primer and paint. That goes beyond normal use, so it gets charged.' }
+    ] },
+  /* ---------------- more features, two per room ---------------- */
+  { id: 'thermostat', room: 'living', name: 'Thermostat', art: 'thermostat',
+    hint: 'Push the buttons and see if the heat comes on. Then check behind the cover.',
+    parts: [{ id: 'display', name: 'display', r: [92, 38, 56, 24] }, { id: 'buttons', name: 'buttons', r: [92, 64, 56, 20] }, { id: 'cover', name: 'thermostat cover', r: [66, 16, 108, 100] }],
+    base: { cover: { look: 'A beige programmable thermostat.', smell: 'Warm plastic.' }, display: { look: 'A little green screen.' } },
+    variants: [
+      { cat: 0, desc: 'A beige digital thermostat, set to a responsible 68.', key: ['heat'],
+        resp: { buttons: { touch: { t: 'You bump it to 72. Click. Somewhere a furnace kicks on. You set it back to 68.', clue: 'heat', sfx: 'click' } }, display: { look: { t: 'It reads 68, steady.', clue: 'heat' } } },
+        why: 'It works and reads right. Nothing to do.' },
+      { cat: 1, desc: 'The thermostat has gone yellow, and the button labels are rubbed off.', key: ['faded'],
+        resp: { cover: { look: { t: 'Sun-yellowed plastic. Years of afternoon light through the slider.', clue: 'faded' } }, buttons: { look: { t: 'The arrows are worn smooth from use.', clue: 'faded' }, touch: { t: 'It still works. Click, and the heat comes on.', sfx: 'click' } } },
+        why: 'Yellowed plastic and worn buttons are age. Normal wear.' },
+      { cat: 2, cost: 85, desc: 'The thermostat cover is cracked and hanging crooked.', key: ['crack'],
+        resp: { cover: { look: { t: 'The cover is cracked across the middle, like something hit it.', clue: 'crack' }, touch: { t: 'It swings loose on one corner. The display behind it still works.', clue: 'crack' } }, buttons: { touch: { t: 'The heat comes on. Only the cover is broken.', sfx: 'click' } } },
+        why: 'A cracked, knocked-loose cover is impact damage. Replace it and charge, with a photo.' },
+      { cat: 3, desc: 'The thermostat cover is off, and the screen is blank.', key: ['wires', 'scorch'],
+        resp: { cover: { look: { t: 'Bare wires stick out of the wall behind the base plate.', clue: 'wires' }, flashlight: { t: 'One wire nut is scorched brown. Something arced in there.', clue: 'scorch', sfx: 'light' }, smell: { t: 'Burnt plastic.', clue: 'scorch' } }, buttons: { touch: 'Nothing. Dead.' }, display: { look: 'Blank.' } },
+        why: 'Exposed, scorched wiring is a shock and fire hazard. Kill the breaker and file an emergency work order. Every opening in a box gets closed again (1910.305(b)), and the repair starts with lockout (1910.333(b)(2)).' }
+    ] },
+  { id: 'patio', room: 'living', name: 'Balcony Door & Blinds', art: 'patio',
+    hint: 'Run your hand along the blinds, then try the latch on the door.',
+    parts: [{ id: 'latch', name: 'door latch', r: [158, 56, 22, 26] }, { id: 'track', name: 'door track', r: [0, 120, 240, 15] }, { id: 'slats', name: 'blinds', r: [0, 0, 152, 120] }, { id: 'glass', name: 'door glass', r: [152, 0, 88, 120] }],
+    base: { glass: { look: 'The balcony, two floors up. The oak out there never sits still.', touch: 'Cool glass. Smudge-free, mostly.' }, track: { look: 'The aluminum track the door slides in.' }, slats: { talk: 'You tell the blinds they look great. They clatter shyly.', touch: [{ if: 'blindsOpen', t: 'You draw the blinds closed. Clack-clack-clack.', toggle: 'blindsOpen', sfx: 'swish' }, { t: 'You pull the blinds open. They clatter over to one side.', toggle: 'blindsOpen', sfx: 'swish' }] } },
+    variants: [
+      { cat: 0, desc: 'Vertical blinds over a sliding balcony door.', key: ['lock'],
+        resp: { latch: { touch: { t: 'The latch hooks and holds. Locked tight.', clue: 'lock', sfx: 'click' } }, slats: { look: 'Every slat is there.' }, track: { touch: { t: 'Clean track. The door glides.', clue: 'lock' } } },
+        why: 'It locks, slides, and every slat is there. Nothing to do.' },
+      { cat: 1, desc: 'A few blind slats are creased, and the door track is gritty.', key: ['bent'],
+        resp: { slats: { look: { t: 'Two slats are creased near the bottom. Years of being pushed aside.', clue: 'bent' } }, track: { touch: { t: 'Grit and dust in the track. The door still slides.', clue: 'bent' } }, latch: { touch: { t: 'It locks fine.', sfx: 'click' } } },
+        why: 'Creased slats and a dusty track come from years of use. Normal wear.' },
+      { cat: 2, cost: 120, desc: 'There is a gap in the blinds where slats used to be.', key: ['snapped'],
+        resp: { slats: { look: { t: 'Four slats are gone and two are snapped in half. Something tore through them.', clue: 'snapped' }, tape: { t: 'The gap is about 14 inches wide. At three and a half inches a slat, that\'s four slats gone.', clue: 'snapped' } }, track: { look: { t: 'Broken plastic stubs and a snapped slat on the floor by the track.', clue: 'snapped' } }, latch: { touch: { t: 'It locks fine.', sfx: 'click' } } },
+        why: 'Snapped and missing slats are breakage, not age. Replace the blinds and charge, with photos.' },
+      { cat: 3, desc: 'The balcony door looks shut.', key: ['latch'],
+        resp: { latch: { touch: { t: "The latch flops loose. The door slides right open with one push. It can't be locked.", clue: 'latch', sfx: 'click' }, screwdriver: { t: 'The keeper is stripped right out of the frame.', clue: 'latch', sfx: 'unscrew' }, look: 'A chrome latch.' } },
+        why: "A door that can't lock is a security hazard, even on the second floor. Fix it before move-in." }
+    ] },
+  { id: 'dishwasher', room: 'kitchen', name: 'Dishwasher', art: 'dishwasher',
+    hint: 'Run a cycle, open the door, and check the floor in front of it.',
+    parts: [{ id: 'panel', name: 'control panel', r: [30, 10, 180, 22] }, { id: 'floor', name: 'floor in front', r: [0, 116, 240, 19] }, { id: 'door', name: 'dishwasher door', r: [30, 32, 180, 84] }],
+    base: { door: { touch: [{ if: 'open', t: 'You push the door shut. Click.', toggle: 'open', sfx: 'click' }, { t: 'You pull the door down. The racks roll out a little.', toggle: 'open', sfx: 'creak' }], look: [{ if: 'open', t: 'Two racks and a silverware basket.' }, { t: 'A white dishwasher door.' }] },
+      panel: { look: 'A row of buttons and a little red light.' }, floor: { look: 'Vinyl tile in front of the dishwasher.' } },
+    variants: [
+      { cat: 0, desc: 'A white dishwasher under the counter.', key: ['run'],
+        resp: { panel: { touch: { t: 'Beep. It fills, hums, and drains. All normal.', clue: 'run', sfx: 'beep' } }, floor: { touch: { t: 'Dry and firm.', clue: 'run' } } },
+        why: 'It runs and drains, and the floor is dry. Nothing to do.' },
+      { cat: 1, desc: 'The dishwasher works, but it has seen a lot of dishes.', key: ['rust'],
+        resp: { door: { look: [{ if: '!open', t: 'Open the door first.' }, { t: 'Rust on the tips of the rack tines. Years of hot water.', clue: 'rust' }] }, panel: { touch: { t: 'Beep. It runs fine.', sfx: 'beep' } } },
+        why: 'Rusty rack tips come from years of use. Normal wear.' },
+      { cat: 2, cost: 180, desc: 'The dishwasher door has a big dent in it.', key: ['dent'],
+        resp: { door: { look: [{ if: 'open', t: 'Clean racks.' }, { t: 'A dent the size of a boot, right in the middle of the door.', clue: 'dent' }], tape: { t: 'The dent is about 10 inches long and 4 wide, heel to toe, right in the middle of the 24-inch door. Boot-sized, all right.', clue: 'dent' } }, panel: { touch: { t: 'It still runs.', sfx: 'beep' } } },
+        why: 'A kicked-in door panel is impact damage. Replace the panel and charge, with a photo.' },
+      { cat: 3, desc: 'The floor in front of the dishwasher looks stained.', key: ['leak', 'soft'],
+        resp: { floor: { look: { t: 'Water stains and a lifting seam right in front of the door.', clue: 'leak' }, touch: { t: 'Soft and spongy. The subfloor is wet.', clue: 'soft' } }, door: { flashlight: [{ if: '!open', t: 'Open the door first.' }, { t: 'The door gasket is torn. Water gets out every cycle.', clue: 'leak', sfx: 'light' }] } },
+        why: 'A leaking dishwasher rots the subfloor and grows mold. Hazard: work order today.' }
+    ] },
+  { id: 'kfloor', room: 'kitchen', name: 'Kitchen Floor', art: 'kfloor', floor: true,
+    hint: 'Walk the floor. Look for worn paths, burns, and anything you could trip on.',
+    parts: [{ id: 'seam', name: 'tile seam', r: [96, 26, 156, 76] }, { id: 'tile', name: 'vinyl floor', r: [0, 0, 240, 135] }],
+    base: { tile: { look: 'Checkerboard vinyl tile, grout lines and all.', smell: 'Lemon floor cleaner.' }, seam: { look: 'Where two tiles meet.' } },
+    variants: [
+      { cat: 0, desc: 'Vinyl tile floor, mopped and shiny.', key: ['flat'],
+        resp: { tile: { look: { t: 'The shine is even from the sink to the fridge: no dull lane, no scuffs. The bright patch is just sun from the window.', clue: 'flat' }, touch: { t: 'Flat and tight. No soft spots.', clue: 'flat' } }, seam: { touch: { t: 'The seams are sealed flat.', clue: 'flat' } } },
+        why: 'Clean, flat, and sealed. Nothing to do.' },
+      { cat: 1, desc: 'A dull, worn path runs between the sink and the fridge.', key: ['path'],
+        resp: { tile: { look: { t: "A worn traffic path: the shine is gone in a lane from the sink to the fridge. That's years of footsteps, not a spill.", clue: 'path' }, touch: 'Smooth and dull, but solid. The wear is only in the finish.' } },
+        why: 'A worn traffic path is what years of walking do to vinyl. Normal wear.' },
+      { cat: 2, cost: 210, desc: 'There is a melted spot in the floor near the stove.', key: ['burn'],
+        resp: { tile: { look: { t: 'A melted, blackened ring, like a hot pan was set down on the floor.', clue: 'burn' }, tape: { t: 'The melted ring is about 10 inches across. Frying-pan size.', clue: 'burn' }, smell: { t: 'Faint burnt plastic.', clue: 'burn' } } },
+        why: 'A melted burn is damage from carelessness. Replace the tiles and charge, with a photo.' },
+      { cat: 3, desc: 'One of the tile seams is curling up.', key: ['trip'],
+        resp: { seam: { look: { t: 'A tile edge has lifted about half an inch. Easy to catch a toe on.', clue: 'trip' }, touch: { t: 'It flaps up and down. Loose and sharp.', clue: 'trip' }, tape: { t: 'The tile edge sits a full half inch proud of the floor.', clue: 'trip' } } },
+        why: 'A lifted, sharp seam is a trip hazard. Fix it before anyone moves in.' }
+    ] },
+  { id: 'vent', room: 'bath', name: 'Vent Fan', art: 'vent',
+    hint: 'Turn the vent fan on at its switch, and look at the ceiling around it.',
+    parts: [{ id: 'grille', name: 'vent grille', r: [64, 18, 112, 90] }, { id: 'ceiling', name: 'ceiling around the vent', r: [0, 0, 240, 135] }],
+    base: { grille: { smell: 'Dust.' }, ceiling: { look: 'Popcorn ceiling.' } },
+    variants: [
+      { cat: 0, desc: 'A ceiling vent fan with a clean grille.', key: ['pull'],
+        resp: { grille: { touch: { t: 'With the fan on, you hold up a tissue. It pulls the tissue flat. Good airflow.', clue: 'pull' }, look: 'Clean slats.' } },
+        why: 'It runs and pulls air. Nothing to do.' },
+      { cat: 1, desc: 'The vent grille is furry with dust.', key: ['dust'],
+        resp: { grille: { look: { t: 'Gray fuzz packed into the grille. Years of it.', clue: 'dust' }, touch: { t: 'It runs, but it rattles and barely pulls the tissue.', clue: 'dust' } } },
+        why: 'A dusty, tired vent fan is age. Clean it at turnover. Normal wear.' },
+      { cat: 2, cost: 60, desc: 'The vent grille is cracked and hanging down.', key: ['grille'],
+        resp: { grille: { look: { t: 'The grille is cracked and dangling from one spring clip.', clue: 'grille' }, touch: { t: 'Snapped plastic. It was yanked.', clue: 'grille' } } },
+        why: 'A cracked, yanked-down grille is breakage. Replace it and charge, with a photo.' },
+      { cat: 3, desc: 'There are dark spots on the ceiling around the vent.', key: ['mold', 'dead'],
+        resp: { ceiling: { look: { t: 'Black speckled mold, spreading out from the vent.', clue: 'mold' }, smell: { t: 'Musty. Mildew.', clue: 'mold' } }, grille: { touch: { t: 'Dead. The motor does not even hum.', clue: 'dead' } } },
+        why: 'A dead vent fan keeps the steam in, and the mold is already spreading. Hazard: replace the fan and treat the mold.' }
+    ] },
+  { id: 'towelbar', room: 'bath', name: 'Towel Bar', art: 'towelbar',
+    hint: 'Give the towel bar a tug.',
+    parts: [{ id: 'mount', name: 'wall mount', r: [178, 30, 44, 60] }, { id: 'bar', name: 'towel bar', r: [20, 36, 160, 34] }],
+    base: { bar: { look: 'A towel bar with no towel. They took the towels. And the toilet paper. And the roll.', smell: 'Nothing. Not even towel.' }, mount: { look: 'A round mount screwed to the wall.' } },
+    variants: [
+      { cat: 0, desc: 'A brushed-nickel towel bar.', key: ['solid'],
+        resp: { bar: { touch: { t: "Solidly anchored. It doesn't budge.", clue: 'solid' } }, mount: { screwdriver: { t: 'The set screws are snug.', clue: 'solid', sfx: 'unscrew' } } },
+        why: 'Solid and straight. Nothing to do.' },
+      { cat: 1, desc: 'The towel bar is a little loose, and the finish is rubbed dull.', key: ['loose'],
+        resp: { bar: { touch: { t: 'A little play at one end. The finish is worn dull where hands grab it.', clue: 'loose' } }, mount: { screwdriver: { t: 'You snug the set screw. Better.', clue: 'loose', sfx: 'unscrew' } } },
+        why: 'A slightly loose bar and worn finish are years of use. Normal wear.' },
+      { cat: 2, cost: 95, desc: 'One end of the towel bar has pulled out of the wall.', key: ['ripped'],
+        resp: { mount: { look: { t: 'The anchor tore out a chunk of drywall. Someone hung on it.', clue: 'ripped' }, tape: { t: 'The hole where the anchor was is about 3 inches across.', clue: 'ripped' } }, bar: { touch: { t: 'It swings down from the other end.', clue: 'ripped' } } },
+        why: 'Ripping a bar out of the wall is damage. Patch, paint, rehang, and charge, with a photo.' }
+    ] },
+  { id: 'dome', room: 'bedroom', name: 'Ceiling Light', art: 'dome',
+    hint: 'Flip the light on at the switch. Then look closely at the fixture.',
+    parts: [{ id: 'base', name: 'fixture base', r: [58, 12, 124, 16] }, { id: 'dome', name: 'glass dome', r: [62, 28, 116, 62] }],
+    base: { dome: { touch: "You can't quite reach it. You're an inspector, not a basketball player." }, base: { look: 'The round base, flush to the ceiling.' } },
+    variants: [
+      { cat: 0, desc: 'A frosted dome ceiling light.', key: ['works'],
+        resp: { dome: { look: { t: 'Clean glass, two bright bulbs.', clue: 'works' } } },
+        why: 'It works and the glass is fine. Nothing to do.' },
+      { cat: 1, desc: 'The dome is yellowed, with a little pile of dead bugs inside.', key: ['bugs'],
+        resp: { dome: { look: { t: 'A small graveyard of moths in the bottom of a yellowed dome. Standard.', clue: 'bugs' } } },
+        why: 'Yellowed glass and bugs are just years of use. Clean it at turnover. Normal wear.' },
+      { cat: 2, cost: 70, desc: 'The glass dome is cracked.', key: ['crack'],
+        resp: { dome: { look: { t: 'A crack runs across the glass, and a chip is missing at the edge. Something hit it.', clue: 'crack' } } },
+        why: 'A cracked, chipped dome is breakage. Replace the glass and charge, with a photo.' },
+      { cat: 3, desc: 'The ceiling light flickers now and then.', key: ['scorch'],
+        resp: { base: { look: { t: 'Brown scorch marks on the ceiling around the base.', clue: 'scorch' }, flashlight: { t: 'The socket behind the glass is charred.', clue: 'scorch', sfx: 'light' }, smell: { t: 'Hot plastic.', clue: 'scorch' } } },
+        why: 'Scorching around a light means the wiring is overheating. Fire hazard: kill the circuit and file an emergency work order. Lock and tag the breaker before anyone gets on a ladder to it (1910.333(b)(2)).' }
+    ] },
+  { id: 'bfloor', room: 'bedroom', name: 'Bedroom Floor', art: 'bfloor', floor: true,
+    hint: 'Look along the floor where the furniture stood, and near the bathroom door.',
+    parts: [{ id: 'boards', name: 'floorboards', r: [0, 0, 240, 135] }],
+    base: { boards: { look: 'Laminate planks.', smell: 'Dust and furniture polish.' } },
+    variants: [
+      { cat: 0, desc: 'Laminate floor, swept and solid.', key: ['solid'],
+        resp: { boards: { touch: { t: 'Flat and tight all the way across.', clue: 'solid' }, hammer: { t: 'Solid thunk. No hollow spots.', clue: 'solid', sfx: 'thud' } } },
+        why: 'Flat, solid, and clean. Nothing to do.' },
+      { cat: 1, desc: 'Four little dents where a bed frame stood.', key: ['dents'],
+        resp: { boards: { look: { t: 'Furniture dents. Shallow, and expected anywhere a bed stood.', clue: 'dents' }, tape: { t: 'The dents are barely an eighth of an inch deep.', clue: 'dents' } } },
+        why: 'Furniture dents come with any floor that had furniture on it. Normal wear.' },
+      { cat: 2, cost: 240, desc: 'Deep scratches run across the floor.', key: ['gouge'],
+        resp: { boards: { look: { t: 'Long, deep gouges. Something heavy was dragged across it.', clue: 'gouge' }, touch: { t: 'Your fingernail catches in them. Right through the top layer.', clue: 'gouge' }, tape: { t: 'The gouges run about three feet across the boards.', clue: 'gouge' } } },
+        why: 'Gouges through the wear layer come from dragging, not living. Replace the planks and charge, with photos.' },
+      { cat: 3, desc: 'Some floorboards are bulging up.', key: ['buckle', 'damp'],
+        resp: { boards: { look: { t: 'The planks are buckled and peaked. Water got under them.', clue: 'buckle' }, touch: { t: 'Damp, and spongy underneath.', clue: 'damp' }, smell: { t: 'Musty.', clue: 'damp' }, hammer: { t: 'Hollow and soft.', clue: 'buckle', sfx: 'thud' } } },
+        why: 'Buckled, damp flooring means a leak, probably from the bathroom. Hazard: find the water before the subfloor rots.' }
+    ] },
+  /* ---------------- findings behind doors: only reachable once you open the right one ---------------- */
+  { id: 'ucab', room: 'kitchen', name: 'Upper Cabinets', art: 'ucab', inside: true,
+    hint: 'Open the upper cabinets. All of them.',
+    parts: [{ id: 'ceiling', name: 'top of the cabinet', r: [20, 4, 200, 26] }, { id: 'shelf', name: 'shelf', r: [20, 56, 200, 26] }, { id: 'box', name: 'inside of the cabinet', r: [0, 0, 240, 135] }],
+    base: { box: { look: 'The inside of an upper cabinet.', smell: 'Old spices.' }, shelf: { look: 'A particleboard shelf.' } },
+    variants: [
+      { cat: 0, desc: 'Clean, empty upper cabinets.', key: ['clean'],
+        resp: { shelf: { touch: { t: 'Wiped clean and level.', clue: 'clean' } }, box: { flashlight: { t: 'Nothing back there but particleboard.', clue: 'clean', sfx: 'light' } } },
+        why: 'Clean and solid inside. Nothing to do.' },
+      { cat: 1, desc: 'Rings from jars and cans on the shelves.', key: ['rings'],
+        resp: { shelf: { look: { t: 'Sticky rings where spice jars and cans sat for years.', clue: 'rings' }, touch: { t: 'Tacky, but the shelf is sound.', clue: 'rings' } } },
+        why: 'Rings on a shelf are years of use. Wipe them at turnover. Normal wear.' },
+      { cat: 2, cost: 110, desc: 'One cabinet shelf is cracked and sagging.', key: ['shelf'],
+        resp: { shelf: { look: { t: 'The shelf is cracked through and sagging in the middle. Way overloaded, or something heavy was dropped on it.', clue: 'shelf' }, touch: { t: 'It flexes and creaks. Split right through.', clue: 'shelf' }, tape: { t: 'The shelf sags almost an inch in the middle.', clue: 'shelf' } } },
+        why: 'A split, sagging shelf is breakage. Replace it and charge, with a photo.' },
+      { cat: 3, desc: 'There is a brown stain on the top of one cabinet.', key: ['drip', 'swell'],
+        resp: { ceiling: { look: { t: 'A brown water stain across the top of the cabinet, still darkening at the edge.', clue: 'drip' }, touch: { t: 'Damp, and the particleboard is swelling.', clue: 'swell' }, flashlight: { t: 'A drip trail from where the cabinet meets the wall. Water is getting in from above.', clue: 'drip', sfx: 'light' } } },
+        why: 'Fresh water staining inside a cabinet means a leak in the wall or from upstairs. Hazard: find it before mold does.' }
+    ] },
+  { id: 'lcab', room: 'kitchen', name: 'Lower Cabinets', art: 'lcab', inside: true,
+    hint: 'Open the lower cabinets and look at the floor of each one.',
+    parts: [{ id: 'back', name: 'back of the cabinet', r: [40, 10, 160, 60] }, { id: 'floor', name: 'cabinet floor', r: [0, 70, 240, 65] }],
+    base: { floor: { look: 'The cabinet floor.', smell: 'Cardboard and dish soap.' }, back: { look: 'The back panel.' } },
+    variants: [
+      { cat: 0, desc: 'Clean lower cabinets.', key: ['clean'],
+        resp: { floor: { touch: { t: 'Dry, clean, and solid.', clue: 'clean' } }, back: { flashlight: { t: 'Nothing back there. Tight seams.', clue: 'clean', sfx: 'light' } } },
+        why: 'Clean, dry, and solid. Nothing to do.' },
+      { cat: 1, desc: 'The cabinet floor is scuffed.', key: ['scuff'],
+        resp: { floor: { look: { t: 'Scuffs and scrapes from pots and pans sliding in and out. Years of them.', clue: 'scuff' }, touch: { t: 'Rough, but solid.', clue: 'scuff' } } },
+        why: 'Pot scuffs on a cabinet floor are everyday use. Normal wear.' },
+      { cat: 3, desc: 'Something is off in the back of one lower cabinet.', key: ['mice', 'hole'],
+        resp: { floor: { look: { t: 'Little black droppings scattered across the cabinet floor. Mice.', clue: 'mice' }, smell: { t: 'Musky. Unmistakably rodent.', clue: 'mice' } }, back: { flashlight: { t: 'A chewed hole in the back corner, into the wall cavity.', clue: 'hole', sfx: 'light' }, look: { t: 'A gnawed opening in the back panel.', clue: 'hole' } } },
+        why: 'Droppings and a chewed entry hole mean an active rodent problem. That is a health hazard: pest control and seal the hole before move-in.' }
+    ] },
+  { id: 'vanitycab', room: 'bath', name: 'Vanity Cabinet', art: 'vanitycab', inside: true,
+    hint: 'Open both vanity doors and get a light under the sink.',
+    parts: [{ id: 'pipes', name: 'drain pipes', r: [80, 0, 80, 80] }, { id: 'floor', name: 'cabinet floor', r: [0, 80, 240, 55] }],
+    base: { floor: { look: 'The vanity floor.', smell: 'Old soap.' }, pipes: { look: 'The drain and supply lines.' } },
+    variants: [
+      { cat: 0, desc: 'A dry, clean vanity cabinet.', key: ['dry'],
+        resp: { pipes: { flashlight: { t: 'Dry joints, tight fittings.', clue: 'dry', sfx: 'light' }, touch: { t: 'Dry.', clue: 'dry' } }, floor: { touch: 'Dry and firm.' } },
+        why: 'Dry and solid. Nothing to do.' },
+      { cat: 1, desc: 'Old rings on the vanity floor.', key: ['rings'],
+        resp: { floor: { look: { t: 'Faint rings from bottles that sat here for years. Bone dry.', clue: 'rings' }, touch: { t: 'Dry and firm. Just stained.', clue: 'rings' } }, pipes: { flashlight: 'Dry.' } },
+        why: 'Old, dry rings are years of storage. Normal wear.' },
+      { cat: 2, cost: 130, desc: 'There is a burn mark on the vanity floor.', key: ['burn'],
+        resp: { floor: { look: { t: 'A melted, scorched groove. A hot curling iron was set down in here.', clue: 'burn' }, touch: { t: 'Charred and rough.', clue: 'burn' }, smell: { t: 'Burnt laminate.', clue: 'burn' } }, pipes: { flashlight: 'Dry.' } },
+        why: 'A scorch from a hot styling tool is carelessness. Replace the cabinet floor and charge, with a photo.' },
+      { cat: 3, desc: 'The vanity floor looks dark.', key: ['drip', 'mold'],
+        resp: { pipes: { flashlight: { t: 'The drain slip nut is weeping. Drip... drip...', clue: 'drip', sfx: 'drip' }, touch: { t: 'Wet under the trap.', clue: 'drip' } }, floor: { touch: { t: 'Soaked and soft.', clue: 'drip' }, smell: { t: 'Mildew.', clue: 'mold' }, look: { t: 'Dark, wet particleboard and spots of mold.', clue: 'mold' } } },
+        why: 'An active drip under the vanity is rotting the cabinet and growing mold. Hazard: work order today.' }
+    ] },
+  { id: 'closetin', room: 'bedroom', name: 'Inside the Closet', say: 'closet interior', art: 'closetin',   // say: how the feature reads mid-sentence ("the closet interior")
+    inside: true,
+    hint: 'Open the closet and check the walls, the shelf, and the rod.',
+    parts: [{ id: 'rod', name: 'closet rod', r: [20, 34, 200, 16] }, { id: 'shelf', name: 'shelf', r: [20, 16, 200, 18] }, { id: 'wall', name: 'back wall', r: [0, 50, 240, 85] }],
+    base: { wall: { look: 'The back wall of the closet.', smell: 'Cedar block and mothballs.' }, shelf: { look: 'A white wire shelf.' }, rod: { look: 'A chrome closet rod.' } },
+    variants: [
+      { cat: 0, desc: 'A clean, empty closet.', key: ['solid'],
+        resp: { rod: { touch: { t: 'Solid. You could do a pull-up on it. You do not.', clue: 'solid' } }, wall: { touch: { t: 'Dry, clean drywall.', clue: 'solid' } } },
+        why: 'Clean and solid. Nothing to do.' },
+      { cat: 1, desc: 'Hanger scuffs along the closet walls.', key: ['scuffs'],
+        resp: { wall: { look: { t: 'Gray hanger scuffs at shoulder height, all the way across. Years of clothes.', clue: 'scuffs' }, touch: { t: 'Surface marks. They will paint right over.', clue: 'scuffs' } } },
+        why: 'Hanger scuffs are what clothes do to closet walls. Normal wear.' },
+      { cat: 2, cost: 150, desc: 'The closet rod is down.', key: ['rod'],
+        resp: { rod: { look: { t: 'One end of the rod has torn out of the wall, bracket and all. It hangs to the floor.', clue: 'rod' }, touch: { t: 'The bracket screws ripped out a chunk of drywall.', clue: 'rod' } }, shelf: { look: { t: 'The shelf bracket pulled loose with it.', clue: 'rod' } } },
+        why: 'A rod and bracket ripped out of the wall is overloading or abuse. Patch, rehang, and charge, with a photo.' },
+      { cat: 3, desc: 'There are dark spots on the back wall of the closet.', key: ['mold', 'damp'],
+        resp: { wall: { look: { t: 'Black mold spreading across the back corner. That wall backs onto the shower.', clue: 'mold' }, touch: { t: 'Cold and damp.', clue: 'damp' }, smell: { t: 'Musty. Strong.', clue: 'mold' } } },
+        why: 'Mold on the back of the closet, where the wall backs onto the shower, means a hidden leak. Hazard: find the leak and remediate before move-in.' }
     ] }
 ];
 const FEATURE = {}; for (const f of FEATURES) FEATURE[f.id] = f;
@@ -282,22 +558,33 @@ const FEATURE = {}; for (const f of FEATURES) FEATURE[f.id] = f;
 const GENERIC = {
   walk: () => "You're already up close.",
   look: p => `Nothing unusual about the ${p}.`,
-  touch: p => pick([`Nothing unusual about the ${p} to the touch.`, `The ${p} feels like... a ${p}.`]),
-  smell: () => pick(['Nothing but stale apartment air.', 'Your nose finds nothing interesting.', 'Smells like drywall dust and somebody else\'s life.']),
+  touch: p => pick([`Nothing unusual about the ${p}.`, `The ${p} seems sound.`]),
+  smell: p => pick([`You sniff the ${p}. Nothing notable.`, `The ${p} smells like nothing in particular.`, `Nothing but stale apartment air around the ${p}.`]),
   talk: p => pick([`You ask the ${p} how it's holding up. No comment.`, `The ${p} has nothing to say. Dana pretends not to notice.`]),
-  tape: () => 'Nothing worth measuring there.',
-  flashlight: () => 'Nothing new in the light.',
-  screwdriver: () => 'Nothing to unscrew there.',
-  hammer: () => "You'd rather not hit that.",
-  pencil: () => 'You doodle a tiny house in the margin instead.'
+  tape: p => `Nothing about the ${p} needs measuring.`,
+  flashlight: p => `The flashlight shows nothing new on the ${p}.`,
+  screwdriver: p => `Nothing on the ${p} to unscrew.`,
+  hammer: p => `You'd rather not hit the ${p}.`,
+  pencil: () => Doodles.add()                                   // the doodle really lands in the margin (js/doodles.js)
 };
 
-/* Deal out this shift's conditions, making sure there's a healthy mix of every category. */
+/* Deal out this shift. Each room's work order lists 3 to 5 real findings (wear, damage, or hazards), picked at random
+   from its features; everything else in the room is fine this time. Across the unit there's always a healthy mix,
+   and no room gets more than two hazards. Returns { cond, required }. */
 function dealConditions() {
-  for (let tries = 0; tries < 400; tries++) {
-    const pickN = {}, n = [0, 0, 0, 0];
-    for (const f of FEATURES) { const i = Math.floor(Math.random() * f.variants.length); pickN[f.id] = i; n[f.variants[i].cat]++; }
-    if (n[0] >= 2 && n[1] >= 3 && n[2] >= 3 && n[3] >= 2 && n[3] <= 4) return pickN;
+  const rooms = [...new Set(FEATURES.map(f => f.room))], idx = (f, test) => f.variants.map((v, i) => i).filter(i => test(f.variants[i].cat));
+  for (let tries = 0; tries < 3000; tries++) {
+    const cond = {}, required = new Set(), n = [0, 0, 0, 0]; let ok = true;
+    for (const room of rooms) {
+      const fs = shuffle(FEATURES.filter(f => f.room === room)), want = 3 + Math.floor(Math.random() * 3);
+      let haz = 0;
+      fs.forEach((f, i) => {
+        if (i < want) { cond[f.id] = pick(idx(f, c => c > 0)); required.add(f.id); const c = f.variants[cond[f.id]].cat; n[c]++; if (c === 3) haz++; }
+        else cond[f.id] = pick(idx(f, c => c === 0));
+      });
+      if (haz > 2) ok = false;
+    }
+    if (ok && n[1] >= 3 && n[2] >= 3 && n[3] >= 2 && n[3] <= 5) return { cond, required };
   }
-  const out = {}; for (const f of FEATURES) out[f.id] = 0; return out;
+  const cond = {}; for (const f of FEATURES) cond[f.id] = 0; return { cond, required: new Set() };
 }

@@ -4,8 +4,11 @@
 <meta charset="UTF-8">
 <title>Scenemaker; Interactive Scenario Builder</title>
 <link rel="icon" type="image/png" href="favicon.png">
-
-<link rel="stylesheet" href="./vendor/tailwind.css">
+<!-- Precompiled from Tailwind v3 (see tailwind.config.js / editor/tailwind-src.css
+     at the repo root), not loaded live from the Play CDN - the editor needs no
+     internet connection to run. Regenerate with `npm run build:css` after adding
+     a new Tailwind utility class anywhere in editor/. -->
+<link rel="stylesheet" href="vendor/tailwind.css">
 <script src="./sm-1.min.js"></script>
 <style>
 /* ============================================================================
@@ -985,7 +988,16 @@ html.detached-view .dock-panel{position:static!important;display:flex!important;
 .chroma-preview img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
 .chroma-controls{transition:opacity .15s}
 </style>
-
+<!-- #172: applies the actual saved/current theme SYNCHRONOUSLY, before the
+     browser's first paint, so the editor never flashes EDITOR_THEME_DEFAULT
+     (the :root block above) before swapping to whatever theme was actually
+     chosen. These four files are pure data/functions with no DOM dependency
+     at parse time (confirmed by reading them; nothing in them runs eagerly
+     except the tiny inline bootstrap below), so loading them here instead of
+     their old spot near the end of <body> is safe; loadToolTheme() still
+     runs later, on window 'load' (core.js), to populate the Settings UI and
+     reconcile with the server's durable copy - this bootstrap only owns the
+     very first paint. -->
 <script src="./sm-2.min.js"></script>
 <script>
   try{
@@ -1078,7 +1090,7 @@ html.detached-view .dock-panel{position:static!important;display:flex!important;
   </div>
 </div>
 
-
+<!-- ── ABOUT MODAL (content loaded from about.html) ────────────────────── -->
 <div id="about-modal" class="modal-bg hidden">
   <div class="modal-card">
     <h2>About Scenemaker <span class="hdr-icon" title="Open in its own window (native app only)" onclick="detachSurface('about-modal','About Scenemaker')">⧉</span><span class="hdr-icon" onclick="document.getElementById('about-modal').classList.add('hidden')" style="cursor:pointer">✕</span></h2>
@@ -1090,7 +1102,7 @@ html.detached-view .dock-panel{position:static!important;display:flex!important;
   </div>
 </div>
 
-
+<!-- ── CANVAS TEMPLATE PICKER (preview thumbnails, #96) ─────────────────── -->
 <div id="ce-tpl-picker" class="modal-bg hidden">
   <div class="modal-card big">
     <h2>Pick a template <span class="hdr-icon" onclick="closeTemplatePicker()" style="cursor:pointer">✕</span></h2>
@@ -1101,8 +1113,8 @@ html.detached-view .dock-panel{position:static!important;display:flex!important;
   </div>
 </div>
 
-
-
+<!-- persistent corner credit -->
+<!-- ── RESOURCES MODAL (content loaded from resources.html) ────────────── -->
 <div id="resources-modal" class="modal-bg hidden">
   <div class="modal-card">
     <h2>Asset Resources <span class="hdr-icon" title="Open in its own window (native app only)" onclick="detachSurface('resources-modal','Asset Resources')">⧉</span><span class="hdr-icon" onclick="document.getElementById('resources-modal').classList.add('hidden')" style="cursor:pointer">✕</span></h2>
@@ -1113,7 +1125,7 @@ html.detached-view .dock-panel{position:static!important;display:flex!important;
   </div>
 </div>
 
-
+<!-- ── SETTINGS MODAL (sectioned) ──────────────────────────────────────── -->
 <div id="story-modal" class="modal-bg hidden">
   <div class="modal-card settings-card">
     <h2>Settings <span class="hdr-icon" title="Open in its own window (native app only)" onclick="detachSurface('story-modal','Settings')">⧉</span></h2>
@@ -1285,6 +1297,14 @@ html.detached-view .dock-panel{position:static!important;display:flex!important;
             <label class="chk" style="margin-top:10px"><input type="checkbox" id="pi-showcredits"> Show an automatic <b>credits screen</b> at the end (author, collaborators &amp; asset credits)</label>
             <div class="fld" style="margin-top:6px"><label>Credits heading</label><input type="text" id="pi-creditshead" placeholder="Credits"></div>
             <button class="tb-btn tb-accent" style="margin-top:10px" onclick="openCreditsScreenEditor()" title="A richer, canvas-editor-style surface with a live preview: static panel or an auto-scrolling movie-style roll, an optional background &amp; music while it's open, heading/text colour overrides, and which sections (author/team/asset credits/socials) show">🎬 Open Credits Screen Editor…</button>
+          </div>
+          <div class="sec"><h3>Share at the ending</h3>
+            <div class="hint" style="margin-bottom:8px">When a player reaches an ending, offer to share it: links back to the <b>Website</b> set above (so other people can find and play the story), with the <b>Author</b> credited if you've set one. Nothing to set up beyond this; it reuses the project info already filled in above.</div>
+            <label class="chk"><input type="checkbox" id="pi-share-enabled"> Let players <b>share their ending</b></label>
+            <div class="fld" style="margin-top:8px"><label>Share message</label>
+              <input type="text" id="pi-share-message" placeholder="I got the “{ending}” ending in {title}!">
+              <div class="hint">Tokens: <code>{ending}</code> (the ending scene's title), <code>{title}</code> (your project's title).</div>
+            </div>
           </div>
         </section>
 
@@ -1482,7 +1502,7 @@ html.detached-view .dock-panel{position:static!important;display:flex!important;
   </div>
 </div>
 
-
+<!-- ── FOCUS / EDIT-SCENE MODAL ────────────────────────────────────────── -->
 <div id="focus-modal" class="modal-bg hidden">
   <div class="modal-card big">
     <h2><span id="focus-title">Edit scene</span><span class="hdr-icon" title="Open in its own window (native app only)" onclick="detachSurface('focus-modal',document.getElementById('focus-title').textContent)">⧉</span><span class="hdr-icon" onclick="closeFocus()" style="color:#ef4444">✕</span></h2>
@@ -1532,5 +1552,6 @@ html.detached-view .dock-panel{position:static!important;display:flex!important;
 <input type="file" id="mediaInput" style="display:none">
 <input type="file" id="openInput" accept=".vnproj,.json,application/zip" style="display:none">
 <script src="./sm-3.min.js"></script>
+<script src="./modules/demo-mode.js"></script>
 </body>
 </html>

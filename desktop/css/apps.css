@@ -253,7 +253,14 @@
     0%   { background: #7dff9a; border-color: #1f8a3c; box-shadow: 0 0 6px 2px #5cff80; opacity: 1; }
     50%  { background: transparent; border-color: transparent; box-shadow: none; opacity: 0.25; }
 }
-@media (prefers-reduced-motion: reduce) { #tray-msg { animation-duration: 1.6s !important; } }
+/* a new message: a soft green bloom for the first 0.8s, then the usual blink takes over */
+#tray-msg.im-arrive { animation: im-arrive 0.8s ease-out 1 !important; }
+@keyframes im-arrive {
+    0%   { background: #f2fff4; border-color: #2c9d48; box-shadow: 0 0 0 0 rgba(140, 255, 170, 0.95); filter: brightness(1.35); }
+    35%  { background: #a8ffbb; border-color: #1f8a3c; box-shadow: 0 0 9px 4px rgba(110, 255, 150, 0.75); filter: brightness(1.2); }
+    100% { background: #7dff9a; border-color: #1f8a3c; box-shadow: 0 0 14px 7px rgba(110, 255, 150, 0); filter: none; }
+}
+@media (prefers-reduced-motion: reduce) { #tray-msg { animation-duration: 1.6s !important; } #tray-msg.im-arrive { animation-duration: 0.8s !important; } }
 .im-menu { position: fixed; z-index: 2147483000; display: flex; flex-direction: column; padding: 2px; min-width: 160px; background: #c0c0c0; }
 .im-menu button { text-align: left; padding: 5px 12px; background: none; border: 0; font: 11px Tahoma, 'MS Sans Serif', sans-serif; cursor: pointer; color: #000; }
 .im-menu button:hover { background: #000080; color: #fff; }

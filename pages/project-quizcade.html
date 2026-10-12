@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-QUIZCADE.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="c5913bfc">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizcade</title>
+    <meta name="description" content="Quizcade by Joseph VanWagner: three arcade-style quiz games (Quizaga, Quiz-Guy, and Quizcavator) plus a builder for making your own versions.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=90379466">
+    <link rel="stylesheet" href="../shared/share.css?v=ebba4e48">
+    <link rel="stylesheet" href="css/modern.css?v=0ffe9a82">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=ecd42624"></script>
+    <script src="../config/shared-content.js?v=3cd2f224"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=8ddee710"></script>
+    <script src="js/lightbox.js?v=af09d593"></script>
+    <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=418e2f9e"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=726959f6"></script>
+</head>
+<body data-title="Quizcade" data-nav="my-projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="my-projects.html">&larr; Back to Projects</a></p>
+                <p class="kicker">Game collection · HTML / JavaScript</p>
+                <h1>Quizcade</h1>
+                <p class="lede">Three arcade quiz games, plus a builder to make them your own.</p>
+                <p>Quizcade is my set of arcade-style quiz games, built to turn training review into something people actually
+                   want to replay. Each one asks quick multiple-choice questions between bursts of play, and each is a single
+                   self-contained web page, so it drops straight into a Rise 360 Code block, an LMS, or any website. In training,
+                   they reviewed software skills; the versions here use easy general trivia so anyone can jump in.</p>
+                <div class="btn-row">
+                    <a class="btn primary" href="../games/builder/index.html" target="_blank" rel="noopener">Open the Quizcade Builder</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-body">
+                <h2>The games</h2>
+                <div class="grid project-grid">
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-game-quizaga.html" tabindex="-1" aria-hidden="true" title="Open Quizaga"><img src="../images/games/quizaga-v2.jpg" alt="Quizaga gameplay" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Space shooter</p>
+                            <h3><a href="project-game-quizaga.html">Quizaga</a></h3>
+                            <p>Four crab-shaped ships carry the letters A to D. Shoot the one holding the right answer while dodging the ones that dive at you.</p>
+                            <div class="links"><a href="project-game-quizaga.html">About &amp; play</a><a href="../games/quizaga/index.html" target="_blank" rel="noopener">Full screen</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-game-quiz-guy.html" tabindex="-1" aria-hidden="true" title="Open Quiz-Guy"><img src="../images/games/quiz-guy-v2.jpg" alt="Quiz-Guy gameplay" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Maze chase</p>
+                            <h3><a href="project-game-quiz-guy.html">Quiz-Guy</a></h3>
+                            <p>Eat the dots, dodge the ghosts, and eat a glowing ? block for a question. Answer it right to turn the tables. Three mazes, one per level.</p>
+                            <div class="links"><a href="project-game-quiz-guy.html">About &amp; play</a><a href="../games/quiz-guy/index.html" target="_blank" rel="noopener">Full screen</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-game-quizcavator.html" tabindex="-1" aria-hidden="true" title="Open Quizcavator"><img src="../images/games/quizcavator-v2.jpg" alt="Quizcavator gameplay" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Digging</p>
+                            <h3><a href="project-game-quizcavator.html">Quizcavator</a></h3>
+                            <p>Tunnel down to the block with the right answer while enemies burrow after you; rings of air knock them dizzy.</p>
+                            <div class="links"><a href="project-game-quizcavator.html">About &amp; play</a><a href="../games/quizcavator/index.html" target="_blank" rel="noopener">Full screen</a></div>
+                        </div>
+                    </article>
+                </div>
+                <p class="course-note">Every game page also has a quick &ldquo;Make your own quiz game!&rdquo; form: type in your questions and get a copy that asks them instead.</p>
+
+                <h2>Screenshots</h2>
+                <div class="shots tall">
+                    <figure><a class="zoom" href="../images/games/quizaga/gameplay.webp" data-caption="Quizaga: the question sits above the playfield; each ship carries a letter."><img src="../images/games/quizaga/thumbs/gameplay.jpg" alt="Quizaga: crab-shaped ships labeled A to D above the player ship" loading="lazy"></a><figcaption>Quizaga</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/quiz-guy/gameplay.webp" data-caption="Quiz-Guy: the Library maze, with roaming ghosts and glowing ? blocks."><img src="../images/games/quiz-guy/thumbs/gameplay.jpg" alt="Quiz-Guy: a purple maze with dots, ghosts, and question blocks" loading="lazy"></a><figcaption>Quiz-Guy</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/quizcavator/gameplay.webp" data-caption="Quizcavator: dig down to the lettered answer blocks while enemies burrow toward you."><img src="../images/games/quizcavator/thumbs/gameplay.jpg" alt="Quizcavator: tunnels through orange dirt above four lettered blocks" loading="lazy"></a><figcaption>Quizcavator</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/quizaga/tutorial.webp" data-caption="Each game opens with an optional three-step tutorial."><img src="../images/games/quizaga/thumbs/tutorial.jpg" alt="The Quizaga tutorial over the playfield" loading="lazy"></a><figcaption>The built-in tutorials</figcaption></figure>
+                </div>
+
+                <h2>The Quizcade Builder</h2>
+                <p>The Builder edits everything about each game without touching any code, with a live preview as you go:</p>
+                <ul>
+                    <li><strong>Questions:</strong> type them in, or paste rows straight from Excel or Google Sheets; each can have 2 to 4 answer choices.</li>
+                    <li><strong>Words:</strong> every title, button, tutorial step, and hint, so a game can be retitled or translated.</li>
+                    <li><strong>Rules and colors:</strong> lives, questions per level, points, speeds, and every color, including the A/B/C/D answer colors.</li>
+                    <li><strong>Pictures:</strong> swap in your own sprites and backgrounds, or edit the pixel art, and rework Quiz-Guy's mazes.</li>
+                    <li><strong>Export:</strong> copy the finished game as a whole web page, an embed code, or a hosted link, ready for Rise 360, an LMS, or a website.</li>
+                </ul>
+                <div class="shots">
+                    <figure><a class="zoom" href="../images/projects/quizcade/builder.webp" data-caption="The Quizcade Builder: pick a game, edit its questions (or paste them from a spreadsheet), and watch the live preview."><img src="../images/projects/quizcade/thumbs/builder.jpg" alt="The Quizcade Builder with a question table on the left and a live game preview on the right" loading="lazy"></a><figcaption>The Builder, editing Quizaga</figcaption></figure>
+                </div>
+                <h2>Design features</h2>
+                <ul class="tags"><li>Gamified learning</li><li>Knowledge checks</li><li>JavaScript</li><li>Arcade style</li><li>Rise 360</li><li>Authoring tools</li><li>Mobile friendly</li></ul>
+                <div class="btn-row">
+                    <a class="btn" href="my-projects.html">&larr; Back to Projects</a>
+                    <a class="btn primary" href="../games/builder/index.html" target="_blank" rel="noopener">Open the Builder</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

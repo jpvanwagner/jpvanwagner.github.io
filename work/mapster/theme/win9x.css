@@ -1,0 +1,208 @@
+/* ============================================================================
+ *  theme/win9x.css  —  shared Windows 95/98 skin for the authoring tools
+ * ----------------------------------------------------------------------------
+ *  Loaded by BOTH Mapster and Saymaker AFTER the Tailwind CDN, so these rules
+ *  win over Tailwind's utility classes. The goal is a classic Win9x look —
+ *  silver panels, beveled (raised/sunken) borders, square corners, system
+ *  fonts, blue title bars — WITHOUT changing how either tool operates. Nothing
+ *  here touches layout structure or JS hooks; it only restyles.
+ *
+ *  Design tokens (the only colors you should need to tweak):
+ * ========================================================================== */
+:root {
+  --w9x-face:      #c0c0c0;   /* the iconic silver button/panel face          */
+  --w9x-face-dk:   #b0b0b0;
+  --w9x-hilite:    #ffffff;   /* top/left bevel highlight                     */
+  --w9x-light:     #dfdfdf;   /* inner top/left                               */
+  --w9x-shadow:    #808080;   /* inner bottom/right                           */
+  --w9x-dkshadow:  #404040;   /* outer bottom/right                           */
+  --w9x-text:      #000000;
+  --w9x-disabled:  #808080;
+  --w9x-title:     #000080;   /* active title-bar navy                        */
+  --w9x-title2:    #1084d0;   /* title-bar gradient end                       */
+  --w9x-titletxt:  #ffffff;
+  --w9x-field:     #ffffff;   /* text input / list background                 */
+  --w9x-desktop:   #008080;   /* classic teal desktop                         */
+  --w9x-sel:       #000080;   /* selection highlight                          */
+  --w9x-font: "MS Sans Serif", "Pixelated MS Sans Serif", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ── RAISED / SUNKEN BEVEL HELPERS ──────────────────────────────────────────
+   The whole aesthetic is two-tone 2px borders. These mixins are applied to the
+   right elements further down. */
+/* raised (button at rest, panels): white/ltgray top-left, gray/dkgray bot-right */
+/* sunken (text fields, pressed):    reverse */
+
+/* ── GLOBAL RESET OF THE "AI LOOK" ──────────────────────────────────────────
+   Kill rounded corners, glassy shadows, gradients, and the dark slate/indigo
+   palette across the whole document. Square + flat + silver. */
+body, body * {
+  border-radius: 0 !important;
+  font-family: var(--w9x-font) !important;
+  letter-spacing: 0 !important;
+}
+body {
+  background: var(--w9x-desktop) !important;
+  color: var(--w9x-text) !important;
+  font-size: 12px !important;
+}
+/* Neutralize Tailwind drop shadows / glows (the "liquid glass" feel). */
+[class*="shadow"], [class*="ring"], [class*="blur"], [class*="backdrop"] {
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* ── PANELS (anything that was a dark slate/gray surface) ────────────────────
+   Map the common Tailwind surface utilities onto the silver face with a raised
+   bevel so panels look like Win9x group boxes. */
+[class*="bg-gray-"], [class*="bg-slate-"], [class*="bg-zinc-"], [class*="bg-neutral-"],
+[class*="bg-black"], aside, .panel, .toolbar {
+  background: var(--w9x-face) !important;
+  color: var(--w9x-text) !important;
+  border-color: var(--w9x-shadow) !important;
+}
+/* Side/tool panels get an outset bevel + a thin divider from the work area. */
+aside {
+  border: 2px solid var(--w9x-face) !important;
+  border-top-color: var(--w9x-hilite) !important;
+  border-left-color: var(--w9x-hilite) !important;
+  border-right-color: var(--w9x-dkshadow) !important;
+  border-bottom-color: var(--w9x-dkshadow) !important;
+}
+
+/* ── HEADINGS / ACCENT TEXT ──────────────────────────────────────────────────
+   The cyan/fuchsia/indigo accent text becomes a classic navy title bar where
+   it acts as a header, or plain black body text otherwise. */
+[class*="text-cyan-"], [class*="text-fuchsia-"], [class*="text-purple-"],
+[class*="text-indigo-"], [class*="text-violet-"], [class*="text-sky-"],
+[class*="text-blue-"], [class*="text-teal-"], [class*="text-emerald-"] {
+  color: var(--w9x-text) !important;
+}
+/* A big bold heading at the top of a panel → render it as a title bar. */
+h1, .titlebar {
+  background: linear-gradient(90deg, var(--w9x-title), var(--w9x-title2)) !important;
+  color: var(--w9x-titletxt) !important;
+  font-weight: bold !important;
+  font-size: 12px !important;
+  padding: 3px 6px !important;
+  margin: 0 0 6px 0 !important;
+}
+
+/* ── BUTTONS ─────────────────────────────────────────────────────────────────
+   Every <button> (and the .tool-btn) gets the raised silver bevel; pressing it
+   inverts to a sunken bevel and nudges the label, like a real Win9x button. */
+button, .tool-btn, [role="button"], input[type="button"], input[type="submit"] {
+  background: var(--w9x-face) !important;
+  color: var(--w9x-text) !important;
+  border: 2px solid var(--w9x-face) !important;
+  border-top-color: var(--w9x-hilite) !important;
+  border-left-color: var(--w9x-hilite) !important;
+  border-right-color: var(--w9x-dkshadow) !important;
+  border-bottom-color: var(--w9x-dkshadow) !important;
+  box-shadow: inset 1px 1px 0 var(--w9x-light), inset -1px -1px 0 var(--w9x-shadow) !important;
+  font-size: 12px !important;
+  font-weight: normal !important;
+  padding: 3px 9px !important;
+  min-height: 0 !important;
+  cursor: default !important;
+}
+button:hover, .tool-btn:hover { background: var(--w9x-face) !important; }
+button:active, .tool-btn:active, .tool-btn.active, button.active {
+  border-top-color: var(--w9x-dkshadow) !important;
+  border-left-color: var(--w9x-dkshadow) !important;
+  border-right-color: var(--w9x-hilite) !important;
+  border-bottom-color: var(--w9x-hilite) !important;
+  box-shadow: inset 1px 1px 0 var(--w9x-shadow), inset -1px -1px 0 var(--w9x-light) !important;
+  padding: 4px 8px 2px 10px !important;   /* nudge the label down-right */
+}
+/* The "active tool" state reads as a pressed (selected) button. */
+.tool-btn.active { background: var(--w9x-light) !important; color: var(--w9x-text) !important; }
+
+/* ── TEXT FIELDS / SELECTS / TEXTAREAS (sunken white field) ──────────────────*/
+input[type="text"], input[type="number"], input[type="search"],
+textarea, select {
+  background: var(--w9x-field) !important;
+  color: var(--w9x-text) !important;
+  border: 2px solid var(--w9x-field) !important;
+  border-top-color: var(--w9x-shadow) !important;
+  border-left-color: var(--w9x-shadow) !important;
+  border-right-color: var(--w9x-hilite) !important;
+  border-bottom-color: var(--w9x-hilite) !important;
+  box-shadow: inset 1px 1px 0 var(--w9x-dkshadow) !important;
+  font-size: 12px !important;
+  padding: 2px 4px !important;
+}
+select { padding-right: 16px !important; }
+input:focus, textarea:focus, select:focus { outline: 1px dotted var(--w9x-text) !important; }
+
+/* Checkboxes/radios: keep them native (classic) rather than Tailwind-accented. */
+input[type="checkbox"], input[type="radio"] { accent-color: var(--w9x-title) !important; }
+
+/* ── LABELS / SMALL TEXT ─────────────────────────────────────────────────────*/
+label, .text-xs, .text-\[10px\], .text-\[11px\], .text-\[9px\], p, span, div {
+  color: var(--w9x-text);
+}
+/* Muted helper text stays readable but recedes. */
+[class*="text-gray-4"], [class*="text-gray-5"], [class*="text-slate-4"], [class*="text-slate-5"] {
+  color: #404040 !important;
+}
+
+/* ── SCROLLBARS (chunky classic look) ───────────────────────────────────────*/
+::-webkit-scrollbar { width: 16px !important; height: 16px !important; }
+::-webkit-scrollbar-track { background: #dfdfdf !important; }
+::-webkit-scrollbar-thumb {
+  background: var(--w9x-face) !important;
+  border: 2px solid var(--w9x-face) !important;
+  border-top-color: var(--w9x-hilite) !important;
+  border-left-color: var(--w9x-hilite) !important;
+  border-right-color: var(--w9x-dkshadow) !important;
+  border-bottom-color: var(--w9x-dkshadow) !important;
+}
+
+/* ── BORDERS: turn Tailwind's colored 1px borders into bevel-grey ────────────*/
+[class*="border-"] { border-color: var(--w9x-shadow) !important; }
+
+/* ── KEEP THE WORK SURFACES BRIGHT ──────────────────────────────────────────
+   Mapster's grid work area and Saymaker's node canvas should stay light so the
+   author can see their map/graph; don't silver them over. */
+.grid-wrapper { background: #ffffff !important; }
+#canvas, .node-canvas, svg { background: transparent !important; }
+
+/* ── SAYMAKER NODES → little Win9x windows ──────────────────────────────────
+   The dialogue nodes use direct CSS colors (not Tailwind classes), so style
+   them explicitly: silver body with a raised bevel, a navy title-bar header,
+   and square corners. The draggable CONNECTION lines are intentionally left as
+   the author designed them. */
+.node {
+  background: var(--w9x-face) !important;
+  border: 2px solid var(--w9x-face) !important;
+  border-top-color: var(--w9x-hilite) !important;
+  border-left-color: var(--w9x-hilite) !important;
+  border-right-color: var(--w9x-dkshadow) !important;
+  border-bottom-color: var(--w9x-dkshadow) !important;
+  box-shadow: 1px 1px 0 var(--w9x-dkshadow) !important;
+  color: var(--w9x-text) !important;
+}
+.node.selected {
+  border-color: var(--w9x-face) !important;
+  box-shadow: 0 0 0 1px var(--w9x-title), 1px 1px 0 var(--w9x-dkshadow) !important;
+}
+.node-header {
+  background: linear-gradient(90deg, var(--w9x-title), var(--w9x-title2)) !important;
+  color: var(--w9x-titletxt) !important;
+  border-bottom: 2px solid var(--w9x-shadow) !important;
+  padding: 3px 6px !important;
+}
+.node-header * { color: var(--w9x-titletxt) !important; }
+.node-body, .choices-container { background: var(--w9x-face) !important; color: var(--w9x-text) !important; }
+.connection { border-radius: 0 !important; }
+
+/* Tooltips: classic pale-yellow Win9x tooltip instead of the dark glassy one. */
+.tooltip-text {
+  background-color: #ffffe1 !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  box-shadow: 1px 1px 0 var(--w9x-dkshadow) !important;
+  font-family: var(--w9x-font) !important;
+}

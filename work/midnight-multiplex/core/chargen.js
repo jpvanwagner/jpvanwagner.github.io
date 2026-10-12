@@ -154,7 +154,7 @@ const SCENARIOS = {
 // ─── DATA SOURCE: core/gameData.js (window.GameData) ───────────────────
 // Stats, skills, hobbies, cliques, and age modifiers are NO LONGER hardcoded
 // here — they're derived at load from the shared catalog in core/gameData.js
-// so chargen, Saymaker, the dialogue runtime, and the game can never drift.
+// so chargen, the dialogue runtime, and the game can never drift.
 // To edit the actual data (add a skill, tune a gate, change a hobby bonus),
 // edit core/gameData.js, not this file. The adapters below only reshape that
 // catalog into the internal shapes chargen's logic already expects.
@@ -1635,7 +1635,7 @@ Screens.CHARSHEET = {
     if (k === 'Escape') {
       // Leaving chargen restarts the long intro crawl, so ask first (Esc twice).
       if (State.cg.escArmed && Date.now() - State.cg.escArmed < 2500) { State.cg.escArmed = 0; this.onClick('back'); return true; }
-      State.cg.escArmed = Date.now(); sfx.error(); flash('Press Esc again to leave character creation (back to the intro).'); return true;
+      State.cg.escArmed = Date.now(); sfx.error(); flash('Press Esc (or Backspace) again to leave character creation (back to the intro).'); return true;
     }
     // TYPED WORDS: when the NAME field isn't focused, letters spell commands —
     // "done", "random", "back" (players kept typing "done" and nothing happened).

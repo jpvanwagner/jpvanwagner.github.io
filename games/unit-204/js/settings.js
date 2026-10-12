@@ -4,19 +4,20 @@
 const SETTING_DEFS = [
   { sec: 'Sound' },
   { id: 'master', name: 'Master volume', type: 'range', def: 0.8 },
-  { id: 'music', name: 'Music', note: 'Lounge tunes from the leasing office radio', type: 'range', def: 0.35 },
+  { id: 'music', name: 'Music', note: "The leasing office radio, hold music, and your manager's verdict", type: 'range', def: 0.35 },
   { id: 'ambience', name: 'Ambience', note: 'Traffic and birds outside the windows', type: 'range', def: 0.5 },
   { id: 'sfx', name: 'Sound effects', type: 'range', def: 0.8 },
   { sec: 'Gameplay' },
-  { id: 'feedback', name: 'Feedback', note: 'Right after each mark, or all at once in the final report', type: 'seg', def: 'now', opts: [['now', 'Immediate'], ['end', 'End of shift']] },
+  { id: 'feedback', name: 'Feedback', note: 'Right after each mark, or only at the end (your manager goes over it either way)', type: 'seg', def: 'now', opts: [['now', 'Immediate'], ['end', 'End of shift']] },
   { id: 'hotspots', name: 'Hotspot hints', note: 'Show what you can interact with', type: 'seg', def: 'hover', opts: [['off', 'Off'], ['hover', 'On hover'], ['always', 'Always']] },
   { id: 'danaHints', name: "Dana's hints", note: 'Your assistant chimes in when you stall', type: 'seg', def: true, opts: [[true, 'On'], [false, 'Off']] },
+  { id: 'tips', name: 'Tutorial tips', note: 'Little pointers the first time something comes up (turning them on again replays them)', type: 'seg', def: true, opts: [[true, 'On'], [false, 'Off']] },
   { id: 'textSpeed', name: 'Text speed', type: 'seg', def: 1, opts: [[0.6, 'Slow'], [1, 'Normal'], [1.6, 'Fast']] },
   { sec: 'Display' },
   { id: 'dither', name: 'Dithered accents', note: 'Retro pixel dithering on character shadows', type: 'seg', def: true, opts: [[true, 'On'], [false, 'Off']] },
-  { id: 'motion', name: 'Ambient animation', note: 'Swaying trees, dust, flicker and screen flashes', type: 'seg', def: true, opts: [[true, 'On'], [false, 'Reduced']] },
+  { id: 'motion', name: 'Ambient animation', note: 'Swaying trees, dust, flicker, and screen flashes', type: 'seg', def: true, opts: [[true, 'On'], [false, 'Reduced']] },
   { id: 'bigCursor', name: 'Large cursors', type: 'seg', def: false, opts: [[false, 'Normal'], [true, 'Large']] },
-  { id: 'tags', name: 'Tag marked items', note: 'Little paper tags on items already on your form', type: 'seg', def: true, opts: [[true, 'On'], [false, 'Off']] }
+  { id: 'mute', def: false, hidden: true }                          // the toolbar's mute button
 ];
 const Settings = {
   v: {},
@@ -36,10 +37,12 @@ const Settings = {
     if (!id || id === 'bigCursor') Icons.applyCursors();
     if (!id || id === 'motion') $('game').classList.toggle('calm', !this.v.motion);
     if (!id || id === 'dither') { if (typeof Rooms !== 'undefined') Rooms.invalidate(); }
+    if (id === 'tips' && typeof Tips !== 'undefined') { if (this.v.tips) Tips.replay(); else Tips.hide(); }
   },
   build() {
     const body = $('settingsBody'); body.replaceChildren();
     for (const d of SETTING_DEFS) {
+      if (d.hidden) continue;
       if (d.sec) { const h = document.createElement('div'); h.className = 'set-sec'; h.textContent = d.sec; body.append(h); continue; }
       const row = document.createElement('div'); row.className = 'set-row';
       const nm = document.createElement('div'); nm.className = 'set-name'; nm.textContent = d.name;
@@ -67,5 +70,6 @@ const Settings = {
       }
       body.append(row);
     }
+    if (typeof Progress !== 'undefined') Progress.build(body);   // wiping a property's progress (js/progress.js)
   }
 };

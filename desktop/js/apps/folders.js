@@ -11,7 +11,7 @@
  * Where the lists come from (nothing to edit here when you add things):
  *   courses   the #courses cards on pages/projects.html
  *   games     `games` in config/site-config.js, plus Midnight at the Multiplex and PeeDee's Dental Defense
- *   projects  Scenemaker, the LMS Course Catalog, Midnight at the Multiplex, PeeDee's Dental Defense, and Unit 204
+ *   projects  my own projects: tools (Course Catalog, Scenemaker, Atlasworks), then games; a few are learning games too
  * View (large/small icons, list, details) and Sort by (A to Z, Z to A, type) are remembered per visitor.
  * Details view adds a Preview pane (on by default; untick "Preview pane" to hide it): the selected item's
  * short looping clip (preview: path without extension, .webm/.mp4 + .jpg poster), or its thumbnail.
@@ -39,7 +39,7 @@ window.FolderApp = {
             desc: 'My branching-story authoring tool: build scenario-based training and export SCORM.',
             open: () => SceneMakerApp.open(), openLabel: 'Launch', page: 'project-scenemaker.html' };
         const peedee = { label: "PeeDee's Dental Defense", icon: 'images/icons/apps/peedee.png',
-            thumb: 'images/projects/peedee/card.jpg', kind: 'Game', preview: 'images/previews/peedee',
+            thumb: 'images/projects/peedee/card-v2.jpg', kind: 'Game', preview: 'images/previews/peedee',
             desc: 'My pixel-art platformer: fill cavities, scrub plaque, zap germs, and beat bad breath.',
             open: () => PeeDeeApp.open(), openLabel: 'Play', page: 'project-peedee.html' };
         if (kind === 'games') {
@@ -54,13 +54,32 @@ window.FolderApp = {
             thumb: 'images/projects/course-catalog/card.jpg', kind: 'Program', preview: 'images/previews/course-catalog',
             desc: 'My course-code tool: one naming system for every course, plus a searchable catalog.',
             open: () => CourseCatalogApp.open(), openLabel: 'Launch', page: 'project-course-catalog.html' };
+        const atlasworks = { label: 'Atlasworks', icon: 'images/icons/apps/atlasworks.png',
+            thumb: 'images/projects/atlasworks/card.jpg', kind: 'Program', preview: 'images/previews/atlasworks',
+            desc: 'My retro town-map editor: terrain, rivers, roads with live traffic, places, homes and bus routes.',
+            open: () => AtlasworksApp.open(), openLabel: 'Launch', page: 'project-atlasworks.html' };
+        const mapster = { label: 'Mapster', icon: 'images/icons/apps/mapster.png',
+            thumb: 'images/projects/mapster/card.jpg', kind: 'Program',
+            preview: 'images/projects/midnight/room-editor-3d', poster: 'images/projects/midnight/room-editor-3d-poster.jpg',
+            desc: 'My 3D level editor: paint a map tile by tile, then walk around it in 3D.',
+            open: () => MapsterApp.open(), openLabel: 'Launch', page: 'project-mapster.html' };
         // Unit 204 is also a learning game (SiteConfig.games); it shows here too, opened the same way
         const unit = ((window.SiteConfig && SiteConfig.games) || []).find(g => g.id === 'unit-204');
         const unit204 = unit && { label: unit.label, icon: 'images/icons/apps/unit-204.png', thumb: unit.thumb,
             kind: 'Learning game', preview: 'images/previews/unit-204',
             desc: 'My pixel-art point-and-click move-out inspection: gather evidence, then call wear, damage or hazard.',
             open: () => GamesApp.open('unit-204'), openLabel: 'Play', page: 'project-game-unit-204.html' };
-        if (kind === 'projects') return Promise.resolve([scenemaker, catalog, midnight, peedee, unit204].filter(Boolean));
+        // Learning games that are also listed as projects (SiteConfig.games), opened the same way as in Games
+        const asProject = (id, desc) => { const g = ((window.SiteConfig && SiteConfig.games) || []).find(x => x.id === id);
+            return g && { label: g.label, icon: 'images/icons/apps/' + id + '.png', thumb: g.thumb, kind: 'Learning game',
+                preview: 'images/previews/' + id, desc, open: () => GamesApp.open(id), openLabel: 'Play', page: 'project-game-' + id + '.html' }; };
+        const rtw = asProject('right-this-way', 'My access control management simulator: run the front desk and keep every visitor escorted.');
+        const mallRun = asProject('mall-run', 'My endless 3D runner quiz through a shopping mall.');
+        const quizcade = { label: 'Quizcade', icon: 'images/icons/apps/quizaga.png', thumb: 'images/projects/quizcade/card.jpg',
+            kind: 'Game collection', preview: 'images/previews/quizaga',
+            desc: 'My three arcade quiz games (Quizaga, Quiz-Guy, Quizcavator) and the builder for making your own.',
+            open: () => Browser.openPage('project-quizcade.html'), openLabel: 'Open', page: 'project-quizcade.html' };
+        if (kind === 'projects') return Promise.resolve([catalog, scenemaker, atlasworks, mapster, unit204, peedee, rtw, mallRun, quizcade, midnight].filter(Boolean))   // tools, then games; each newest first;
         // courses: every course card on the Portfolio page
         return fetch('pages/projects.html', { cache: 'no-cache' })
             .then(r => r.text())

@@ -4,7 +4,7 @@
  *
  *  THIS FILE IS THE SINGLE SOURCE OF TRUTH for the game's character vocabulary.
  *  It's plain JavaScript (no build step) and is exposed as window.GameData.
- *  chargen, Saymaker, the dialogue runtime, and the 3D engine all read FROM
+ *  chargen, the dialogue runtime, and the 3D engine all read FROM
  *  here, so adding an entry HERE makes it show up everywhere automatically.
  *
  *  ┌──────────────────────────────────────────────────────────────────────┐
@@ -442,10 +442,10 @@
         { key: 'other',       label: 'Other / prefer not to say', attractedTo: 'any',      blurb: 'Romance arcs open based on situation.' },
     ];
 
-    // ── 7. CONDITION/CHECK VOCABULARY (used by Saymaker + dialogue runtime) ─────
+    // ── 7. CONDITION/CHECK VOCABULARY (used by the dialogue runtime) ─────
     // The kinds of things a dialogue condition or skill-check can test, and the
-    // comparison operators allowed. Saymaker builds its dropdowns from these so
-    // an author can never reference a type/operator that the runtime can't read.
+    // comparison operators allowed. A dialogue editor should build its dropdowns
+    // from these so an author can never reference a type/operator the runtime can't read.
     const CONDITION_TYPES = ['Stat', 'Skill', 'Hobby', 'Clique', 'Item', 'Gender', 'Orientation', 'Romance', 'Appearance'];
     const OPERATORS = ['==', '>=', '<=', '>', '<', '!='];
 

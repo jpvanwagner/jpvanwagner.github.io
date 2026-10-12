@@ -12,20 +12,22 @@ const DANA_SMALLTALK = [
 ];
 const DANA_TOPICS = [
   { q: 'Any tips for this room?', a: () => {
-    const todo = FEATURES.filter(f => f.room === Game.room && !Game.marks[f.id]);
-    if (!todo.length) return "Everything in here is on the form. Next room?";
+    const todo = FEATURES.filter(f => f.room === Game.room && !Game.marks[f.id]);   // any feature, so hints don't give away the work order
+    if (!todo.length) return "You've marked everything in here. Next room? Or poke around. Little stuff counts too.";
     const f = todo[Game.hintIx++ % todo.length];
-    return `The ${f.name.toLowerCase()}: ${f.hint}`;
+    Game.danaPoint(f.id);
+    return `The ${lower(f.name)}: ${f.hint} I'll show you.`;
   } },
   { q: "What's the difference between wear and damage?", a: () => "Wear is what time and normal living do: matting, fading, small nail holes, old caulk. Damage is what an accident or carelessness does: stains, burns, big holes, broken stuff. Wear is never charged. Damage is, with a photo." },
   { q: 'When is something a hazard?', a: () => "If it could hurt someone or the building is getting worse by the hour: gas, sparks, leaks, mold, a dead smoke alarm, something that could fall. It's a hazard even if the tenant caused it. Safety first, billing later." },
-  { q: 'Why all the photos?', a: () => "Deposit charges get disputed. No photo, no charge; that's office policy. And maintenance needs pictures of hazards before they send someone out." },
+  { q: 'Why all the photos?', a: () => "Deposit charges get disputed. No photo, no charge; that's office policy. And maintenance needs pictures of hazards before they send someone out. Snap anything you want, though. Extra photos never hurt." },
   { q: 'How are we doing?', a: () => {
-    const done = Object.keys(Game.marks).length, total = FEATURES.length;
-    const left = Object.values(ROOMS).map((r, i) => [r.name, FEATURES.filter(f => f.room === Object.keys(ROOMS)[i] && !Game.marks[f.id]).length]).filter(([, n]) => n).map(([n, k]) => `${n} (${k})`);
-    if (done === total) return "That's all fourteen! Submit the report from the menu, or head out the front door.";
-    return `${done} of ${total} marked. Still to do: ${left.join(', ')}.`;
+    const done = Object.keys(Game.marks).length;            // never how many are left: finding them is the job
+    const cold = Object.keys(ROOMS).filter(id => !FEATURES.some(f => f.room === id && Game.seen.has(f.id))).map(id => ROOMS[id].name.toLowerCase());
+    return `You've written up ${done} ${done === 1 ? 'thing' : 'things'} so far. How many are left? No idea, boss. That's why they send an inspector.` +
+      (cold.length ? ` You haven't really looked around the ${list(cold)} yet.` : ' Did you open every door and cabinet, flip every switch, and check under stuff?');
   } },
+  { q: 'Can I borrow your BlackBerry?', a: () => { setTimeout(() => { UI.close('dialogueScreen'); BlackBerry.open(); }, 900); return BlackBerry.pending().length ? "For Gus? Sure. He's under GUS (MAINT). Don't read my texts." : "Sure. Don't read my texts. ...You're going to read my texts."; } },
   { q: 'So... how are you?', a: () => DANA_SMALLTALK[Game.smallTalk++ % DANA_SMALLTALK.length] },
   { q: "Let's get back to it.", a: null }
 ];
@@ -52,12 +54,10 @@ const Dialogue = {
   /* idle chatter in the room */
   bark() {
     if (!Settings.get('danaHints') || UI.blocking() || UI.talking('dana') || UI.talking('you')) return;
-    const todo = FEATURES.filter(f => f.room === Game.room && !Game.marks[f.id]);
+    const todo = FEATURES.filter(f => f.room === Game.room && !Game.marks[f.id]);   // any feature, so hints don't give away the work order
     if (todo.length && Math.random() < .75) {
       const f = todo.find(x => !Game.seen.has(x.id)) || todo[Game.hintIx++ % todo.length];
-      UI.say('dana', Game.seen.has(f.id) ? `Psst. The ${f.name.toLowerCase()}. ${f.hint}` : `Don't forget the ${f.name.toLowerCase()}. Give it a Look.`);
-    } else if (!todo.length && Object.keys(Game.marks).length < FEATURES.length) {
-      UI.say('dana', "This room's done. There's more on the checklist elsewhere.");
+      Game.danaPoint(f.id, Game.seen.has(f.id) ? `Psst. The ${lower(f.name)}. ${f.hint}` : `Don't forget the ${lower(f.name)}. Give it a Look.`);   // said once she's standing by it
     } else UI.say('dana', pick(["Don't fall asleep on me, boss.", 'My feet hurt. These flats were a mistake.', 'Is it just me, or is this unit weirdly quiet?']));
   }
 };

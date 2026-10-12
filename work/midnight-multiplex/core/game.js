@@ -254,130 +254,34 @@ const sfx = {
   blower3: () => blowerBurst(3),
 };
 //═══════════════════════════════════════════════════════════════════════════
-// MUSIC ENGINE
+// MUSIC
 //═══════════════════════════════════════════════════════════════════════════
 //
-// Single-voice square-wave melody, Apple-IIe-flavored envelope. The original
-// build had a TITLE_THEME that played on the title screen — that's been
-// removed because title music is now owned by core/title.js (the canvas
-// title-screen module). What remains here are the GAME-START JINGLES —
-// short one-shot tunes that play once on entering Day 1, routed by scenario
-// (summer vs winter) via Music.playStartJingle().
-//
-// To change a jingle: edit SUMMER_JINGLE or WINTER_JINGLE below. Each entry
-// is [freqHz | null, durationSeconds]. null = rest.
-// To add more jingles for future scenarios: add a const and case-branch in
-// playStartJingle().
+// All music lives in music/songs/*.js — ZzFXM Tracker song files — and is
+// loaded and played by music/musicPlayer.js (window.MMMusic, TitleMusic,
+// CrawlMusic). This small object is the game-side glue: the start-of-game
+// jingle, and pause/resume for the ESC menu. The jingles are the songs
+// music/songs/jingle-summer.js and jingle-winter.js.
 //
 //───────────────────────────────────────────────────────────────────────────
-
-// Note frequencies (equal temperament A4=440 Hz). Add more as needed.
-const NOTE = {
-  // Octave 3
-  A3: 220.00, Bb3: 233.08, B3: 246.94,
-  // Octave 4
-  C4: 261.63, Db4: 277.18, D4: 293.66, Eb4: 311.13, E4: 329.63,
-  F4: 349.23, Gb4: 369.99, G4: 392.00, Ab4: 415.30, A4: 440.00,
-  Bb4: 466.16, B4: 493.88,
-  // Octave 5
-  C5: 523.25, Db5: 554.37, D5: 587.33, Eb5: 622.25, E5: 659.25,
-  F5: 698.46, Gb5: 739.99, G5: 783.99, Ab5: 830.61, A5: 880.00,
-  Bb5: 932.33, B5: 987.77,
-  // Octave 6
-  C6: 1046.50, D6: 1174.66, E6: 1318.51, F6: 1396.91, G6: 1567.98,
-};
-// ─── GAME-START JINGLES ───────────────────────────────────────────────────
-//
-// Light, happy little tunes that play ONCE when a new game (or loaded game)
-// starts. Different jingles for each scenario. Total length ~2–3 seconds.
-//
-// SUMMER_JINGLE: bright, sunny, ascending — "summer's here" feel.
-// WINTER_JINGLE: warm, cozy, with a gentle bell-like ending — "tucked-in" feel.
-//
-// HOW TO TWEAK:
-//   - Add/remove notes from the array below.
-//   - Tempo: shorten/lengthen the second number (duration in seconds).
-//   - To change which one plays, see Music.playStartJingle() — it routes by
-//     State.world.scenario.
-
-const SUMMER_JINGLE = [
-  // Bright C-major arpeggio rising into a held C, then a quick wink.
-  [NOTE.C5, 0.14], [NOTE.E5, 0.14], [NOTE.G5, 0.14], [NOTE.C6, 0.30],
-  [NOTE.G5, 0.14], [NOTE.A5, 0.14], [NOTE.C6, 0.40],
-  [null,    0.20],
-];
-
-const WINTER_JINGLE = [
-  // Warm 6-note phrase: G - C - E - D - C - G (rising then settling).
-  [NOTE.G4, 0.16], [NOTE.C5, 0.16], [NOTE.E5, 0.20],
-  [NOTE.D5, 0.16], [NOTE.C5, 0.20], [NOTE.G5, 0.40],
-  [null,    0.20],
-];
 const Music = {
-  scheduledStops: [],     // OscillatorNodes scheduled to stop after current playthrough
-  doneTimer: null,        // setTimeout id for "song just finished"
-  replayTimer: null,      // setTimeout id for "play again in 3 min"
+  _jingle: null,          // handle of a playing jingle (MMMusic.play)
   isPlaying: false,
 
-  // Title-screen music is handled by core/title.js (the canvas title module).
-  // This stub is kept so any code that calls Music.startTitle() (e.g. when
-  // returning to title from in-game ESC menu) doesn't error. It silently
-  // no-ops here — if you want a tune that plays after the player returns
-  // to title from in-game, replace this body with a _playOnce(SOME_THEME).
-  startTitle() {
-    this.stop();
-    /* no-op — title.js owns title-screen audio */
-  },
+  // Title-screen music is window.TitleMusic (music/musicPlayer.js). Kept so
+  // older callers of Music.startTitle() don't error.
+  startTitle() { this.stop(); },
 
-  // Schedule one full playthrough. Calls onDone when the last note finishes.
-  _playOnce(song, onDone) {
-    const ctx = ensureAudio();
-    if (!ctx) return;
-    this.isPlaying = true;
-    let when = ctx.currentTime + 0.05;
-    let total = 0.05;
-    for (const [freq, dur] of song) {
-      if (freq === null) { when += dur; total += dur; continue; }
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'square';
-      osc.frequency.value = freq;
-      // Envelope: sharp attack, steady body, quick release (Apple IIe-ish)
-      const attack  = 0.004;
-      const release = Math.min(0.04, dur * 0.2);
-      const peak    = 0.045;
-      gain.gain.setValueAtTime(0.0001, when);
-      gain.gain.linearRampToValueAtTime(peak, when + attack);
-      gain.gain.setValueAtTime(peak, when + dur - release);
-      gain.gain.exponentialRampToValueAtTime(0.0001, when + dur - 0.001);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(when);
-      osc.stop(when + dur);
-      this.scheduledStops.push(osc);
-      when += dur;
-      total += dur;
-    }
-    this.doneTimer = setTimeout(() => {
-      this.scheduledStops = [];
-      this.isPlaying = false;
-      if (onDone) onDone();
-    }, total * 1000);
-  },
-
-  // Stop everything: scheduled notes, the "song-done" timer, and replay timer.
+  // Stop the jingle if it's playing.
   stop() {
-    if (this.doneTimer)   { clearTimeout(this.doneTimer);   this.doneTimer = null; }
-    if (this.replayTimer) { clearTimeout(this.replayTimer); this.replayTimer = null; }
-    for (const o of this.scheduledStops) { try { o.stop(); } catch(e) {} }
-    this.scheduledStops = [];
+    if (this._jingle) { try { this._jingle.stop(0.15); } catch (e) {} this._jingle = null; }
     this.isPlaying = false;
   },
 
   // PAUSE / RESUME used by the ESC menu, character sheet, and any overlay
-  // that shouldn't permanently kill audio. The in-game looping track is the
-  // opening crawl music (window.CrawlMusic); we remember whether it was playing
-  // and restart it on resume. (CrawlMusic has no sample-accurate pause, so this
-  // restarts the loop — acceptable for a pause/resume of a looping bed.)
+  // that shouldn't permanently kill audio. The in-game music that can be
+  // playing is the opening crawl (window.CrawlMusic); we remember whether it
+  // was and restart it on resume (it restarts from the top).
   pause() {
     this._wasCrawl = !!(window.CrawlMusic && window.CrawlMusic.playing);
     try { if (window.CrawlMusic) window.CrawlMusic.stop(); } catch (e) {}
@@ -388,17 +292,16 @@ const Music = {
     this._wasCrawl = false;
   },
 
-  // Play a one-shot start-of-game jingle. Routes by scenario. Call once at
-  // the moment the player enters Day 1 from REVIEW.
-  //
-  // Doesn't loop; doesn't re-trigger after the song ends. Respects the music
-  // setting — silently no-ops if music is off.
+  // The one-shot start-of-game jingle, routed by scenario. Called once as the
+  // player enters Day 1 from REVIEW. Silent if music is off.
+  // To change a jingle, open music/songs/jingle-<scenario>.js in ZzFXM Tracker.
   playStartJingle() {
     this.stop();
-    if (!State.settings.music) return;
+    if (!State.settings.music || !window.MMMusic) return;
     const scen = State.world && State.world.scenario;
-    const song = scen === 'winter' ? WINTER_JINGLE : SUMMER_JINGLE;
-    this._playOnce(song, () => { /* one-shot, no replay */ });
+    this.isPlaying = true;
+    this._jingle = MMMusic.play(scen === 'winter' ? 'jingle-winter' : 'jingle-summer',
+      { onended: () => { this.isPlaying = false; this._jingle = null; } });
   },
 };
 
@@ -1872,6 +1775,16 @@ function typeOpensPrompt(e) {
   return true;
 }
 const controlsBar = document.getElementById('controls-bar');
+// Keep #terminal's bottom padding equal to the fixed bottom stack's real height
+// (it changes with the font size, the map-only bars and wrapping), via the CSS
+// variable --bottom-stack-h (see #terminal in midmulti.html).
+(function trackBottomStack() {
+  const bs = document.getElementById('bottom-stack');
+  if (!bs) return;
+  const set = () => document.documentElement.style.setProperty('--bottom-stack-h', Math.ceil(bs.getBoundingClientRect().height) + 'px');
+  try { new ResizeObserver(set).observe(bs); } catch (e) { window.addEventListener('resize', set); }
+  set();
+})();
 
 // the sticky controls bar shows movement/interaction keys. It's only
 // visible on playable map screens (body.map-screen toggled here), sitting just
@@ -1900,9 +1813,10 @@ function updateControlsBar() {
     `<span class="ck"><span class="ck-key">V</span> first-person</span>`,
     `<span class="ck"><span class="ck-key">X</span> crouch</span>`,
     `<span class="ck"><span class="ck-key">F7</span> compass / map</span>`,
+    `<span class="ck"><span class="ck-key">L</span> log</span>`,
     `<span class="ck"><span class="ck-key">Enter</span> command</span>`,
   ];
-  controlsBar.innerHTML = segs.join('<span class="ck-sep">|</span>');
+  controlsBar.innerHTML = segs.join(' <span class="ck-sep">|</span> ');   // spaces = wrap points (the bar wraps in narrow windows)
 }
 
 // #3: COMMAND TICKER. A bottom frame listing the words you can TYPE right now:
@@ -1980,15 +1894,16 @@ function updateHotkeyBar() {  const m = AUDIO_MODE_LABEL[State.settings.audioMod
     segs.push(`<span class="hk"><span class="hk-key">F3</span> sheet</span>`);
     segs.push(`<span class="hk"><span class="hk-key">F7</span> map</span>`);
     segs.push(`<span class="hk"><span class="hk-key">F8</span> stats</span>`);
-    // PORTFOLIO EDIT: the log hotkey is F9 on every screen (a bare L opens the command prompt on
-    // typed-command screens, where it's the first letter of "look"); L still works on map screens.
+    // F9, not a letter: on text screens a typed letter starts a command (type-to-
+    // command), so a letter hotkey there could never fire. (L still opens the log
+    // on MAP screens — it's listed in the map controls bar.)
     segs.push(`<span class="hk"><span class="hk-key">F9</span> log</span>`);
   }
   segs.push(`<span class="hk"><span class="hk-key">F11</span> fullscreen</span>`);
   if (inGame) {
-    segs.push(`<span class="hk"><span class="hk-key">ESC</span> menu/pause</span>`);
+    segs.push(`<span class="hk"><span class="hk-key">ESC</span>/<span class="hk-key">⌫</span> menu · back</span>`);
   }
-  hotkeyBar.innerHTML = segs.join('<span class="hk-sep">|</span>');
+  hotkeyBar.innerHTML = segs.join(' <span class="hk-sep">|</span> ');   // spaces = wrap points
 }
 
 //═══════════════════════════════════════════════════════════════════════════
@@ -2861,7 +2776,9 @@ function goto(screen) {
   // bleed into the next screen's prompt.
   try { if (typeof input !== 'undefined' && input) input.value = ''; } catch (e) {}
   State.screen = screen;
-  Music.stop();
+  // (No Music.stop() here any more: the only thing it stops is the start-of-game
+  // jingle, which is played right as the game moves to the Day-1 screen — it was
+  // being cut off before it began. The crawl music stops itself above.)
   // Cursor-driven screens (e.g. ATTRIBUTES chargen) take keys directly, so close
   // the command prompt and reset the cursor to the top on entry.
   if (cursorScreenObj(screen)) {
@@ -2886,7 +2803,6 @@ function back() {
     return;
   }
   State.screen = prev;
-  Music.stop();
   render();
 }
 //═══════════════════════════════════════════════════════════════════════════
@@ -3256,34 +3172,29 @@ window.addEventListener('resize', () => {
 //                already inside a user-gesture handler (keypress in the
 //                Settings screen), so we can request immediately.
 
+// FULLSCREEN DELEGATE. A page that EMBEDS the game can own fullscreen for it:
+// it sets window.__fsDelegate = { isOn(), enter(), exit() } and every fullscreen
+// call below goes through it. (The web demo's core/demo.js does this on Joe's
+// portfolio site, whose page fullscreens the demo's box, corner buttons and all,
+// and keyboard-locks Esc itself.) No delegate = the normal browser API.
+function fsDelegate() {
+  const d = window.__fsDelegate;
+  return (d && typeof d.isOn === 'function' && typeof d.enter === 'function' && typeof d.exit === 'function') ? d : null;
+}
+
 // True if we currently are in browser fullscreen.
 function isFullscreen() {
-  try { if (window.parent !== window && window.parent.document.fullscreenElement) return true; } catch (e) {}
+  const d = fsDelegate();
+  if (d) { try { return !!d.isOn(); } catch (e) {} }
   return !!(document.fullscreenElement || document.webkitFullscreenElement);
 }
-// PORTFOLIO EDIT: in full screen, keep Esc for the game (cancel / back / pause menu) instead of
-// letting the browser leave full screen on a tap; holding Esc still exits (Chrome and Edge).
-document.addEventListener('fullscreenchange', () => {
-  try {
-    if (!navigator.keyboard || !navigator.keyboard.lock) return;
-    if (document.fullscreenElement) navigator.keyboard.lock(['Escape']).catch(() => {});
-    else navigator.keyboard.unlock();
-  } catch (e) {}
-});
 
 // Try to enter fullscreen. Safe to call without a user gesture — if the
 // browser rejects the request, we silently swallow the failure (the next
 // gesture will retry from firstGesture or from the Settings handler).
 function enterFullscreen() {
-  // PORTFOLIO EDIT: embedded on the portfolio site, full screen goes through the page
-  // (shared/demo-controls.js), which also keeps Esc for the game instead of leaving full screen.
-  try {
-    if (window.parent !== window && window.parent.DemoControls && window.frameElement) {
-      const host = window.frameElement.parentElement;
-      if (!window.parent.document.fullscreenElement) window.parent.DemoControls.toggleFullscreen(host);
-      return null;
-    }
-  } catch (e) {}
+  const d = fsDelegate();
+  if (d) { try { if (!d.isOn()) d.enter(); } catch (e) {} return null; }
   const el = document.documentElement;
   try {
     // requestFullscreen returns a Promise that REJECTS (not throws) when the
@@ -3295,6 +3206,8 @@ function enterFullscreen() {
   } catch (e) {}
 }
 function exitFullscreen() {
+  const d = fsDelegate();
+  if (d) { try { d.exit(); } catch (e) {} return; }
   try {
     if (document.exitFullscreen)          return document.exitFullscreen();
     if (document.webkitExitFullscreen)    return document.webkitExitFullscreen();
@@ -3333,12 +3246,8 @@ function cycleAudioMode() {
 //═══════════════════════════════════════════════════════════════════════════
 // Browsers: requestFullscreen on documentElement; exitFullscreen on document.
 function toggleFullscreen() {
-  // PORTFOLIO EDIT: embedded, the page owns full screen (see enterFullscreen)
-  try {
-    if (window.parent !== window && window.parent.DemoControls && window.frameElement && window.parent.document.fullscreenElement) {
-      window.parent.document.exitFullscreen(); return;
-    }
-  } catch (e) {}
+  State._fsUserToggleAt = Date.now();   // a deliberate F11/Settings exit shouldn't show the Esc tip
+  if (fsDelegate()) { if (isFullscreen()) exitFullscreen(); else enterFullscreen(); return; }
   if (!document.fullscreenElement) {
     enterFullscreen();   // (swallows the rejection when fullscreen isn't allowed, e.g. an iframe without allow="fullscreen")
   } else {
@@ -3346,6 +3255,38 @@ function toggleFullscreen() {
     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
   }
 }
+// ESC vs FULLSCREEN. Browsers reserve Esc for "leave fullscreen", so in
+// fullscreen Esc used to drop you out of fullscreen instead of (or as well as)
+// opening the menu / going back. Two fixes:
+//  1. KEYBOARD LOCK (Chromium, top-level page only): while fullscreen we lock the
+//     Escape key, so a tap reaches the game and the browser asks you to HOLD Esc
+//     to leave fullscreen. Not available in iframes (the web demo) or in
+//     Firefox/Safari — hence:
+//  2. BACKSPACE does everything Esc does (menu, back, cancel, close) and never
+//     touches fullscreen. See the BACKSPACE = ESC block in INPUT HANDLING.
+function syncEscKeyboardLock() {
+  try {
+    const kb = navigator.keyboard;
+    if (!kb || typeof kb.lock !== 'function') return;
+    if (isFullscreen() && window.self === window.top) { const p = kb.lock(['Escape']); if (p && p.catch) p.catch(() => {}); }
+    else if (typeof kb.unlock === 'function') kb.unlock();
+  } catch (e) {}
+}
+function escLockAvailable() {
+  try { return !!(navigator.keyboard && navigator.keyboard.lock) && window.self === window.top; } catch (e) { return false; }
+}
+document.addEventListener('fullscreenchange', () => {
+  syncEscKeyboardLock();
+  // Left fullscreen WITHOUT using F11/Settings (i.e. the browser's Esc) where we
+  // can't lock Esc: point out Backspace once per session.
+  if (!isFullscreen() && !escLockAvailable() && !State._escTipShown &&
+      document.body.classList.contains('terminal-active') &&
+      !(State._fsUserToggleAt && Date.now() - State._fsUserToggleAt < 1500)) {
+    State._escTipShown = true;
+    setTimeout(() => { try { flash('Tip: Backspace works like Esc (menu / back) and keeps you in fullscreen.'); } catch (e) {} }, 300);
+  }
+});
+
 //═══════════════════════════════════════════════════════════════════════════
 // INPUT HANDLING
 //═══════════════════════════════════════════════════════════════════════════
@@ -3450,9 +3391,9 @@ input.addEventListener('keydown', (e) => {
     return;
   }
   if (e.key === 'Escape') { e.preventDefault(); input.value = ''; PromptState.close(); return; }
-  // Note: "back" is typed as a command (or you can press F10 globally).
-  // Backspace is intentionally NOT a back hotkey — too easy to hit while
-  // typing.
+  // Note: "back" is typed as a command (or press F10 globally). Backspace
+  // only acts as back/Esc while the prompt is CLOSED (see BACKSPACE = ESC) —
+  // here, inside the open prompt, it just deletes.
   if (e.key === 'ArrowUp') {
     e.preventDefault(); e.stopPropagation();   // #4: keep the recall ours
     const recall = CommandHistory.prev(input.value);
@@ -3617,6 +3558,42 @@ function scrollToBottom() {
 }
 window.addEventListener('scroll', updateScrollIndicators);
 window.addEventListener('resize', updateScrollIndicators);
+// ─── BACKSPACE = ESC ─────────────────────────────────────────────────
+// Backspace does exactly what Esc does — open/close the menu, go back, cancel a
+// dialogue or pop-up — but, unlike Esc, it never knocks you out of fullscreen.
+// (In the command prompt it only does this once the line is empty.)
+// It's translated at the very top of the key pipeline (window, capture phase):
+// the Backspace is swallowed and a synthetic Escape is dispatched in its place, so
+// EVERY Esc handler (menus, chargen pop-ups, engine dialogues, painter, minimap…)
+// gets it for free. It stays a real Backspace wherever you're editing text: the
+// open command prompt, any input box, the chargen NAME field and the custom-
+// pronoun boxes.
+function backspaceEditsText(e) {
+  const t = e.target;
+  // The command prompt: Backspace deletes while there's text to delete; on an
+  // EMPTY prompt (typed-command screens keep it open) it's Esc/back. Key-repeat is
+  // ignored, so holding Backspace to clear a line never fires "back".
+  if (PromptState.open || (t && t.id === 'input')) return !!input.value.length;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return true;
+  if (State.screen === 'CHARSHEET' && State.cg) {
+    if (State.cg.pronounModal) return true;
+    if (!State.cg.modal) {
+      try { const el = Screens.CHARSHEET._els()[State.cg.cur]; if (el && el.type === 'name') return true; } catch (err) {}
+    }
+  }
+  return false;
+}
+['keydown', 'keyup'].forEach((type) => {
+  window.addEventListener(type, (e) => {
+    if (e.key !== 'Backspace' || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (State.minigameActive || !document.body.classList.contains('terminal-active')) return;
+    if (backspaceEditsText(e)) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (type === 'keydown' && e.repeat) return;   // holding it doesn't machine-gun "back"
+    (e.target || document).dispatchEvent(new KeyboardEvent(type, { key: 'Escape', code: 'Escape', bubbles: true, cancelable: true }));
+  }, true);
+});
+
 // Global hotkey handler
 document.addEventListener('keydown', (e) => {
   // FULLSCREEN FALLBACK — browsers only grant fullscreen from inside a user
@@ -3721,20 +3698,20 @@ document.addEventListener('keydown', (e) => {
     render();
     return;
   }
-  // F9: open the full EVENT LOG from any in-game screen (PORTFOLIO EDIT).
+  // F9 — the full EVENT LOG, on ANY in-game screen (a letter can't do this on
+  // text screens: there the first letter starts a typed command). F9 again, or
+  // Esc/Backspace/back, returns.
   if (e.key === 'F9') {
     e.preventDefault();
-    if (!State.screen || State.screen === 'QUIT') return;
+    if (!State.screen || State.screen === 'QUIT' || !(State.character && State.character.name)) return;
     if (State.screen === 'EVENT_LOG') { Screens.EVENT_LOG.handle('back'); return; }
-    if (!State.character || !State.character.name) { sfx.error(); flash('Nothing logged yet.'); return; }
-    if (PromptState.open) PromptState.close();
     State.logReturn = State.screen;
     sfx.select();
     goto('EVENT_LOG');
     return;
   }
-  // L — open the full EVENT LOG. Only on a live map screen and only when
-  // the command prompt isn't open (so typing 'l' in a command doesn't fire it).
+  // L — the same EVENT LOG on a live map screen (letters are game keys there),
+  // only when the command prompt isn't open (so typing 'l' in a command doesn't fire it).
   if ((e.key === 'l' || e.key === 'L') && !e.ctrlKey && !e.metaKey && !e.altKey) {
     const onMap = (typeof MAP_SCREENS !== 'undefined') && MAP_SCREENS.has(State.screen);
     const promptOpen = (typeof PromptState !== 'undefined') && PromptState.open;
@@ -3792,6 +3769,8 @@ document.addEventListener('keydown', (e) => {
       State.escReturn = null;
       if (!ret) { MultiplexGame.hide(); return; }
       returnToScreen(ret);
+    } else if (State.screen === 'EVENT_LOG') {
+      Screens.EVENT_LOG.handle('back');   // close the log, back to where you were
     } else if (State.screen === 'CHARACTER_SHEET') {
       // dismiss the sheet (same behavior as F3)
       sfx.back();
@@ -3975,7 +3954,7 @@ function resetRunState() {
   try { if (typeof unmountMapCanvas === 'function') unmountMapCanvas(); } catch (e) {}
   try { if (window.engineClearKeys) window.engineClearKeys(); } catch (e) {}
   try { if (window.setSceneWords) window.setSceneWords([]); } catch (e) {}
-  ['log-overlay', 'minimap-overlay', 'tut-moveon'].forEach(id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; });
+  ['log-overlay', 'minimap-overlay', 'tut-moveon', 'tut-offer'].forEach(id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; });
   document.body.classList.remove('map-screen');
   window.engineOnExitReached = null;
   window.__tutExitPromptOpen = false;

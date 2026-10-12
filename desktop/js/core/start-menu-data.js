@@ -92,10 +92,11 @@ window.StartMenuData = {
 
         // 2. Folders
         menu.push({
-            label: "Programs", icon: "os/programs.svg", tip: "Notes, Calculator, Clock, DoodleTop, the NetCrawler browser, Scenemaker, and Games", items: [
+            label: "Programs", icon: "os/programs.svg", tip: "Notes, Calculator, Clock, DoodleTop, the NetCrawler browser, Scenemaker, Mapster, and Games", items: [
                 { label: "Accessories", icon: "folder.png", tip: "Small handy programs", submenu: accessoryItems },
                 { label: "NetCrawler", icon: "images/icons/globe.svg", tip: "Open another browser window", action: "if(window.Browser) window.Browser.open(null, true);" },
-                { label: "Scenemaker (Demo)", icon: "os/scenemaker.png", tip: "Try Scenemaker, the branching-story authoring tool I'm building", action: "if(window.SceneMakerApp) SceneMakerApp.open();" }
+                { label: "Scenemaker (Demo)", icon: "os/scenemaker.png", tip: "Try Scenemaker, the branching-story authoring tool I'm building", action: "if(window.SceneMakerApp) SceneMakerApp.open();" },
+                { label: "Mapster", icon: "images/icons/apps/mapster.png", tip: "Try Mapster, my 3D level editor: paint a map on a grid, then walk around it", action: "if(window.MapsterApp) MapsterApp.open();" }
             ].concat(gamesFolder ? [gamesFolder] : [])
         });
 

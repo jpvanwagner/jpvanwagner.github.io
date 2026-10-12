@@ -7,7 +7,7 @@
  *  correct pronouns for whoever is being referred to, resolved live at runtime.
  *
  *  Used identically by the game, the dialogue runtime, and the tools, so a line
- *  written in Saymaker reads the same way in-game.
+ *  written in a dialogue file reads the same way in-game.
  *
  *  ──────────────────────────────────────────────────────────────────────────
  *  TWO TOKEN FAMILIES

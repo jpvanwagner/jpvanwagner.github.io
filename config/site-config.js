@@ -30,7 +30,7 @@ window.SiteConfig = {
         { id: 'about',    label: 'About Me', file: 'about.html',    icon: 'os/about-card.svg', tip: 'Who I am and how I got here' },
         { id: 'resume',   label: 'Resume',   file: 'resume.html',   icon: 'default/helpsheet.png', tip: 'Experience, skills, and awards' },
         { id: 'projects', label: 'Portfolio', file: 'projects.html', icon: 'os/briefcase.png', tip: 'My past work: sample courses, learning games, and areas of expertise' },
-        { id: 'my-projects', label: 'Projects', file: 'my-projects.html', icon: 'os/projects.svg', tip: 'What I\'m building now: Scenemaker and Midnight at the Multiplex' },
+        { id: 'my-projects', label: 'Projects', file: 'my-projects.html', icon: 'os/projects.svg', tip: 'What I\'m building now: Scenemaker, Mapster and Midnight at the Multiplex' },
         { id: 'courses',  label: 'Sample Courses', file: 'courses.html', icon: 'os/folder-full.png', tip: 'Interactive Rise 360 courses I built' },
         { id: 'contact',  label: 'Contact',  file: 'contact.html',  icon: 'default/letter.png', tip: 'Get in touch' }
     ],
@@ -66,7 +66,7 @@ window.SiteConfig = {
         { id: 'quizaga',     label: 'Quizaga',     width: 640, height: 860, tip: 'Space-shooter quiz', thumb: 'images/games/quizaga-v2.jpg' },
         { id: 'quizcavator', label: 'Quizcavator', width: 640, height: 860, tip: 'Digging quiz', thumb: 'images/games/quizcavator-v2.jpg' },
         { id: 'right-this-way', label: 'Right This Way, Please', width: 1180, height: 760, tip: 'Access-desk security game', thumb: 'images/games/right-this-way.jpg' },
-        { id: 'unit-204',    label: 'Unit 204',    width: 960, height: 572, tip: 'Point-and-click move-out inspection', thumb: 'images/games/unit-204.jpg' }
+        { id: 'unit-204',    label: 'Unit 204',    width: 960, height: 572, tip: 'Point-and-click move-out inspection', thumb: 'images/games/unit-204.jpg', ownControls: true }   // has its own full screen and sound settings
     ],
 
     // VISITOR COUNTER (the 88x31 badge in the footer). One count for the whole site, shown on

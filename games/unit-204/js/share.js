@@ -3,7 +3,7 @@
    Same set-up as the other games: every button opens the platform's compose box with the post already
    written. Facebook ignores pre-written text, so its button copies the post first. Instagram has no web
    posting link: on phones its button hands the score card and text to the share menu; elsewhere it saves the
-   card, copies the text and opens Instagram. Save Image downloads a 1080x1080 score card. Nothing is sent
+   card, copies the text, and opens Instagram. Save Image downloads a 1080x1080 score card. Nothing is sent
    unless the player picks one. */
 const copyrightYears = (now = new Date()) => now.getFullYear() > 2026 ? '2026–' + now.getFullYear() : '2026';
 document.querySelectorAll('.jv-years').forEach(el => { el.textContent = copyrightYears(); });
@@ -12,7 +12,7 @@ function shareLink() {
   return /^https?:$/.test(location.protocol) ? location.origin + location.pathname : PORTFOLIO_URL;
 }
 function shareText(r) {
-  return `I inspected ${GAME_NAME} and got a ${r.grade} (${r.score.toLocaleString()} pts): ${r.correct}/${r.total} calls right and ${r.hazards}/${r.hazTotal} hazards caught. Can you spot the difference between wear and damage?`;
+  return `I inspected ${GAME_NAME} and got ${/^[AEF]/.test(r.grade) ? 'an' : 'a'} ${r.grade} (${r.score.toLocaleString()} pts): ${r.correct}/${r.total} calls right and ${r.hazards}/${r.hazTotal} hazards caught.${r.csGrade ? ` Customer service: ${r.csGrade}.` : ''} Can you spot the difference between wear and damage?`;
 }
 async function copyText(text) {
   try { await navigator.clipboard.writeText(text); return true; }
@@ -26,8 +26,8 @@ async function copyText(text) {
     return ok;
   }
 }
-function shareTargets(r, phone) {
-  const text = shareText(r), url = shareLink(), full = text + ' ' + url, enc = encodeURIComponent;
+function shareTargets(r, phone, own, subject) {     // own: a post other than the shift report (a badge, js/badge-sets.js)
+  const text = own || shareText(r), url = shareLink(), full = text + ' ' + url, enc = encodeURIComponent;
   const tag = enc('#' + GAME_NAME.replace(/\W/g, ''));
   return [
     { label: 'Bluesky', href: 'https://bsky.app/intent/compose?text=' + enc(full) },
@@ -37,7 +37,7 @@ function shareTargets(r, phone) {
     { label: 'LinkedIn', href: 'https://www.linkedin.com/sharing/share-offsite/?url=' + enc(url), copy: true },
     { label: 'Reddit', href: 'https://www.reddit.com/submit?url=' + enc(url) + '&title=' + enc(text) },
     { label: 'WhatsApp', href: 'https://wa.me/?text=' + enc(full) },
-    { label: 'Email', href: 'mailto:?subject=' + enc('My ' + GAME_NAME + ' inspection report') + '&body=' + enc(text + '\n\n' + url) },
+    { label: 'Email', href: 'mailto:?subject=' + enc(subject || 'My ' + GAME_NAME + ' inspection report') + '&body=' + enc(text + '\n\n' + url) },
     ...(phone ? [{ label: 'Text', href: 'sms:?&body=' + enc(full) }] : [])
   ];
 }
@@ -90,7 +90,7 @@ function drawScoreCard(r) {
   const W = 1080, H = 1080, c = document.createElement('canvas');
   c.width = W; c.height = H;
   const g = c.getContext('2d');
-  const sk = s => s + "px 'Silkscreen', 'Courier New', monospace", px = s => s + "px 'Pixelify Sans', 'Trebuchet MS', sans-serif";
+  const sk = s => s + "px 'Silkscreen', 'Courier New', monospace", px = s => s + "px 'Jersey 15', 'Trebuchet MS', sans-serif";
   // desk + clipboard
   g.fillStyle = '#2b2440'; g.fillRect(0, 0, W, H);
   g.fillStyle = '#332a4c'; for (let y = 0; y < H; y += 24) g.fillRect(0, y, W, 12);
@@ -101,8 +101,8 @@ function drawScoreCard(r) {
   g.fillStyle = '#0d0b13'; g.fillRect(400, 52, 280, 92); g.fillStyle = '#c9ccd4'; g.fillRect(408, 60, 264, 76); g.fillStyle = '#eef0f4'; g.fillRect(408, 60, 264, 10);
   // header
   g.fillStyle = '#8a3d00'; g.font = sk(22); g.textAlign = 'left'; g.fillText('BRICKROAD PROPERTY MGMT.', 180, 210);
-  g.fillStyle = '#2a2133'; g.font = sk(64); g.fillText('UNIT 204', 180, 290);
-  g.font = px(32); g.fillStyle = '#4a3f5a'; g.fillText('Move-out inspection · ' + GAME_DATE, 180, 336);
+  g.fillStyle = '#2a2133'; g.font = sk(64); g.fillText((Sites.site.place + ' 204').toUpperCase(), 180, 290);
+  g.font = px(32); g.fillStyle = '#4a3f5a'; g.fillText(Sites.site.report + ' · ' + GAME_DATE, 180, 336);
   g.fillStyle = '#2a2133'; g.fillRect(180, 356, 720, 5);
   // grade stamp
   g.save(); g.translate(770, 470); g.rotate(-.16);
@@ -113,7 +113,7 @@ function drawScoreCard(r) {
   g.textAlign = 'left'; g.fillStyle = '#6a5a7a'; g.font = sk(24); g.fillText('SCORE', 180, 420);
   g.fillStyle = '#2a2133'; g.font = sk(84); g.fillText(r.score.toLocaleString(), 180, 505);
   g.fillStyle = '#6a5a7a'; g.font = px(32); g.fillText('of ' + r.max.toLocaleString() + ' · ' + r.rank, 180, 550);
-  const rows = [['Correct calls', `${r.correct}/${r.total}`], ['Hazards caught', `${r.hazards}/${r.hazTotal}`], ['Deposit charged', `$${r.charged} of $${r.chargeable}`], ['Shift time', r.time]];
+  const rows = [...(r.csGrade ? [['Customer service', `${r.csGrade} (${r.cs})`]] : []), ['Correct calls', `${r.correct}/${r.total}`], ['Hazards caught', `${r.hazards}/${r.hazTotal}`], ['Deposit charged', `$${r.charged} of $${r.chargeable}`], ['Shift time', r.time]];
   let y = 610;
   for (const [k, v] of rows) {
     g.font = px(36); g.fillStyle = '#2a2133'; g.textAlign = 'left'; g.fillText(k, 180, y);
@@ -145,7 +145,7 @@ function drawScoreCard(r) {
 }
 function scoreCardBlob(r) {
   const ready = document.fonts && document.fonts.load
-    ? Promise.all([document.fonts.load("40px 'Silkscreen'"), document.fonts.load("40px 'Pixelify Sans'")]).catch(() => {}) : Promise.resolve();
+    ? Promise.all([document.fonts.load("40px 'Silkscreen'"), document.fonts.load("40px 'Jersey 15'")]).catch(() => {}) : Promise.resolve();
   return ready.then(() => new Promise((ok, fail) => drawScoreCard(r).toBlob(b => b ? ok(b) : fail(new Error('no image')), 'image/png')));
 }
 function saveScoreImage(r) {

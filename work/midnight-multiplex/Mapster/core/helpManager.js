@@ -97,7 +97,7 @@ const HelpData = {
                 "<b>Default:</b> an interaction-text box stays until the player presses <b>Space</b>.",
                 "<b>Timed:</b> toggle <i>'Auto-dismiss after a time limit'</i> to make it disappear on its own (default 5 seconds, adjustable).",
                 "<b>Countdown bar:</b> with timed text on, optionally show a draining bar so the player sees how long is left.",
-                "<b>Branching dialogue:</b> attach a Saymaker file to an NPC/object for full conversations with choices, checks, and camera moves (see the Dialogue section)."
+                "<b>Branching dialogue:</b> attach a dialogue file to an NPC/object for full conversations with choices, checks, and camera moves (see the Dialogue section)."
             ]
         },
         {
@@ -111,9 +111,9 @@ const HelpData = {
             ]
         },
         {
-            title: "Dialogue (Saymaker → Mapster)",
+            title: "Dialogue (attach a conversation)",
             items: [
-                "<b>Attach a conversation:</b> select an NPC or object, open <i>Branching Dialogue (Saymaker)</i>, click Import… to load a Saymaker .json export, then pick it from the dropdown.",
+                "<b>Attach a conversation:</b> select an NPC or object, open <i>Branching Dialogue</i>, click Import… to load a dialogue .json file, then pick it from the dropdown.",
                 "<b>It just works offline:</b> the dialogue is baked into your exported map, so conversations play even when the file is opened directly from disk.",
                 "<b>Conditions gate options:</b> choices that require a stat/skill/hobby/clique/gender/orientation the player lacks are simply hidden — so the same conversation adapts to each character.",
                 "<b>Tokens:</b> dialogue can use [NAME] and pronoun tokens ([THEY]/[THEM]/...) plus {npc.name}/{npc.they} for whoever is referred to."

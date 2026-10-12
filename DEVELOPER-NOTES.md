@@ -101,6 +101,8 @@ desktop/                   Everything that only exists in the Retro Desktop
     clock.js + clock-timers.js   Clock, stopwatch, timer            global: ClockApp
     about.js               About This Site window
     scenemaker.js          Scenemaker live demo in a desktop window   global: SceneMakerApp
+    atlasworks.js          Atlasworks town-map editor in a desktop window   global: AtlasworksApp
+    mapster.js             Mapster (3D level editor) in a desktop window   global: MapsterApp
   js/customize/            Looks and toys
     themes-data.js         ** All color themes (add yours here) **
     theme-browser.js       Theme Browser window
@@ -121,6 +123,13 @@ work/                      Sample e-learning (unmodified Rise 360 web exports, o
   scenemaker/  (Scenemaker live demo: landing page index.html, editor in app/editor/. The editor's
                code is minified into sm-core.min.js + sm-app.min.js on purpose; the readable
                source stays private. Exports made in the demo carry a credit line.)
+  atlasworks/  (Atlasworks town-map editor: one self-contained index.html, shown on pages/project-atlasworks.html,
+               screenshots in images/projects/atlasworks/. ** Synced automatically from the TOOL--Atlasworks repo
+               by its "Sync to portfolio" workflow: edit it there, not here. **)
+  mapster/     (Mapster live demo: the level editor, copied from the TOOL--Mapster repo. Portfolio build:
+               three.js is bundled in lib/, Tailwind is pre-built into vendor/tailwind.css (no CDNs), and
+               portfolio-samples.js adds sample maps from maps/samples/; mapster.html?sample=sunrise opens one.
+               See work/mapster/README.md. Page: pages/project-mapster.html.)
   property-post-orders/ (its video, assets/Incident_Documentation_Pro.mp4, is added separately)
                            Each is shown on pages/project-<name>.html in an embedded frame.
                            To add a course: unzip the Rise export's "content" folder into work/<name>/,
@@ -129,9 +138,15 @@ work/                      Sample e-learning (unmodified Rise 360 web exports, o
                            file names, narration that says them, logos blurred).
 
 games/                     Playable learning games, one self-contained index.html each
-  mall-run/  quiz-guy/  quizaga/  quizcavator/  right-this-way/
+  mall-run/  quiz-guy/  quizaga/  quizcavator/  right-this-way/  builder/ (Quizcade Builder)
   unit-204/  (Unit 204: index.html + css/ js/ assets/fonts/, synced from the GAME--Unit-204 repo by its
              sync-to-portfolio workflow; its sounds are embedded in js/sounds.js, so no audio files)
+                           ** Synced automatically: edit each game in its own repo, not here. ** Every game
+                           repo has a "Sync to Portfolio" workflow that copies the game in and commits to main
+                           whenever the game changes on its main branch (a change made here is overwritten
+                           by the next sync): GAME-Quizcade-Suite (quizaga, quiz-guy, quizcavator, builder),
+                           GAME-Mall-Run (mall-run), GAME-Right-This-Way-Please- (right-this-way),
+                           GAME--Unit-204 (unit-204) and PeeDee's Dental Defense (work/peedee/).
                            Listed in config/site-config.js (games); Traditional View page for each is
                            pages/project-game-<id>.html. To add one: drop it in games/<id>/index.html,
                            add it to `games` in the config, copy a project-game page, add a card to

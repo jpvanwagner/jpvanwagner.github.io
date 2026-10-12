@@ -10,20 +10,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="page-version" content="6efc4a15">
+    <meta name="page-version" content="4ce4fa87">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projects</title>
     <meta name="description" content="What Joseph VanWagner is building now: Scenemaker, a branching-scenario authoring tool, and Midnight at the Multiplex, a retro life and work sim with a supernatural streak.">
     <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
     <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
     <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="css/classic.css?v=fa07d833">
+    <link rel="stylesheet" href="css/classic.css?v=90379466">
     <link rel="stylesheet" href="../shared/share.css?v=ebba4e48">
-    <link rel="stylesheet" href="css/modern.css?v=cdfd7b86">    <!-- Traditional View look (not used inside the Retro Desktop) -->
-    <script src="../config/site-config.js?v=6696cace"></script>
-    <script src="../config/shared-content.js?v=e9eeb62c"></script>   <!-- stats, colleague quotes (shared) -->
+    <link rel="stylesheet" href="css/modern.css?v=0ffe9a82">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=ecd42624"></script>
+    <script src="../config/shared-content.js?v=3cd2f224"></script>   <!-- stats, colleague quotes (shared) -->
     <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
-    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/classic.js?v=8ddee710"></script>
     <script src="js/search.js?v=92eeb169"></script>
     <script src="../shared/share.js?v=726959f6"></script>
 </head>
@@ -34,13 +34,32 @@
     <header class="site-header"></header>
 
     <main id="content">
-        <!-- PROJECTS: what I'm building now. (Past work, like sample courses and learning games, lives on the Portfolio page.) -->
+        <!-- PROJECTS: what I'm building, in two groups (Tools, Games), each newest first, in the order I started them.
+             (Past work, like sample courses and training games built for work, lives on the Portfolio page.) -->
         <section class="panel">
             <div class="panel-body">
                 <h1>Projects</h1>
-                <p class="lede">What I'm building right now.</p>
-                <p>Looking for finished work, like sample courses and learning games? That's in my <a href="projects.html">Portfolio</a>.</p>
+                <p class="lede">What I'm building, newest first.</p>
+                <p>These are my own projects: tools that make course building faster and games that teach something while you
+                   play. Looking for finished client work, like sample courses? That's in my <a href="projects.html">Portfolio</a>.</p>
+            </div>
+        </section>
+
+        <section class="panel" id="tools">
+            <div class="panel-body">
+                <h2>Tools</h2>
+                <p>Software I build to solve problems I keep running into as an instructional designer: authoring branching
+                   scenarios without an expensive subscription, keeping a large course library organized, and more on the way.</p>
                 <div class="grid project-grid" id="building">
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-course-catalog.html" tabindex="-1" aria-hidden="true" title="Open LMS Course Catalog"><img src="../images/projects/course-catalog/card.jpg" alt="The course catalog: a table of courses with color-coded course codes" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Tool · Try it in your browser</p>
+                            <h3><a href="project-course-catalog.html">LMS Course Catalog</a></h3>
+                            <p>The tool I built to give every course my team makes a consistent, readable course code, with a searchable catalog, spreadsheet import, and format checks.</p>
+                            <div class="links"><a href="project-course-catalog.html">About &amp; demo</a><a href="../work/course-catalog/index.html" target="_blank" rel="noopener">Open the tool</a></div>
+                        </div>
+                    </article>
                     <article class="card">
                         <div class="thumb"><a class="thumb-link" href="project-scenemaker.html" tabindex="-1" aria-hidden="true" title="Open Scenemaker"><img src="../work/scenemaker/shots/stage-graph.png" alt="Scenemaker's node-graph editor with connected scenes" loading="lazy"></a></div>
                         <div class="content">
@@ -51,12 +70,76 @@
                         </div>
                     </article>
                     <article class="card">
-                        <div class="thumb"><a class="thumb-link" href="project-course-catalog.html" tabindex="-1" aria-hidden="true" title="Open LMS Course Catalog"><img src="../images/projects/course-catalog/card.jpg" alt="The course catalog: a table of courses with color-coded course codes" loading="lazy"></a></div>
+                        <div class="thumb"><a class="thumb-link" href="project-atlasworks.html" tabindex="-1" aria-hidden="true" title="Open Atlasworks"><img src="../images/projects/atlasworks/card.jpg" alt="A pixel town map with a lake, a winding river, roads with traffic, and map markers" loading="lazy"></a></div>
                         <div class="content">
                             <p class="kicker">Tool · Try it in your browser</p>
-                            <h3><a href="project-course-catalog.html">LMS Course Catalog</a></h3>
-                            <p>The tool I built to give every course my team makes a consistent, readable course code, with a searchable catalog, spreadsheet import, and format checks.</p>
-                            <div class="links"><a href="project-course-catalog.html">About &amp; demo</a><a href="../work/course-catalog/index.html" target="_blank" rel="noopener">Open the tool</a></div>
+                            <h3><a href="project-atlasworks.html">Atlasworks</a></h3>
+                            <p>A retro town-map editor: paint terrain and rivers, lay roads, place landmarks, homes, and bus routes, then preview the town with live traffic and weather.</p>
+                            <div class="links"><a href="project-atlasworks.html">About &amp; demo</a><a href="../work/atlasworks/index.html" target="_blank" rel="noopener">Open the tool</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-mapster.html" tabindex="-1" aria-hidden="true" title="Open Mapster"><img src="../images/projects/mapster/card.jpg" alt="Mapster: a map painted on the editor grid next to the same theater in 3D" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Tool · Try it in your browser</p>
+                            <h3><a href="project-mapster.html">Mapster</a></h3>
+                            <p>The level editor I built for Midnight at the Multiplex, now its own tool: paint a map tile by tile, add doors, lights, NPCs and weather, then walk around it in 3D.</p>
+                            <div class="links"><a href="project-mapster.html">About &amp; demo</a><a href="../work/mapster/mapster.html?sample=sunrise" target="_blank" rel="noopener">Open the editor</a></div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" id="games">
+            <div class="panel-body">
+                <h2>Games</h2>
+                <p>Games I design and program myself, from arcade quizzes and training simulations to a story-driven adventure.
+                   Most of them teach something along the way, and every one plays right in your browser.</p>
+                <div class="grid project-grid">
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-game-unit-204.html" tabindex="-1" aria-hidden="true" title="Open Unit 204"><img src="../images/games/unit-204.jpg" alt="Unit 204 title screen: the inspector and Dana in a pixel-art apartment hallway" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Learning game · Play it in your browser</p>
+                            <h3><a href="project-game-unit-204.html">Unit 204</a></h3>
+                            <p>A pixel-art point-and-click move-out inspection: look, touch, smell, and measure your way through an empty apartment, then call each finding wear, damage, or hazard.</p>
+                            <div class="links"><a href="project-game-unit-204.html">About &amp; demo</a><a href="../games/unit-204/index.html" target="_blank" rel="noopener">Play the game</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-peedee.html" tabindex="-1" aria-hidden="true" title="Open PeeDee's Dental Defense"><img src="../images/projects/peedee/card-v2.jpg" alt="PeeDee zapping across the rolling pink tongue, with germs nearby" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Game · Play it in your browser</p>
+                            <h3><a href="project-peedee.html">PeeDee's Dental Defense</a></h3>
+                            <p>A colorful pixel-art platformer set inside a mouth: fill cavities, scrub plaque and tartar, zap germs, and take down bad breath itself.</p>
+                            <div class="links"><a href="project-peedee.html">About &amp; demo</a><a href="../work/peedee/index.html" target="_blank" rel="noopener">Play the game</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-game-right-this-way.html" tabindex="-1" aria-hidden="true" title="Open Right This Way, Please"><img src="../images/games/right-this-way.jpg" alt="A 3D camera view of the visitor center with a waiting line and an officer" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Learning game · Play it in your browser</p>
+                            <h3><a href="project-game-right-this-way.html">Right This Way, Please</a></h3>
+                            <p>An access control management simulator: run the front desk, check IDs, call escorts, and keep every visitor accounted for.</p>
+                            <div class="links"><a href="project-game-right-this-way.html">About &amp; demo</a><a href="../games/right-this-way/index.html" target="_blank" rel="noopener">Play the game</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-game-mall-run.html" tabindex="-1" aria-hidden="true" title="Open Mall Run"><img src="../images/games/mall-run-v2.jpg" alt="Mall Run title screen with the runner customizer" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Learning game · Play it in your browser</p>
+                            <h3><a href="project-game-mall-run.html">Mall Run</a></h3>
+                            <p>An endless 3D runner through a shopping mall: grab coins, dodge shoppers, and answer quick questions to earn power-ups.</p>
+                            <div class="links"><a href="project-game-mall-run.html">About &amp; demo</a><a href="../games/mall-run/index.html" target="_blank" rel="noopener">Play the game</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-quizcade.html" tabindex="-1" aria-hidden="true" title="Open Quizcade"><img src="../images/projects/quizcade/card.jpg" alt="Quizaga, Quiz-Guy, and Quizcavator side by side" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Game collection · Three games and a builder</p>
+                            <h3><a href="project-quizcade.html">Quizcade</a></h3>
+                            <p>Three arcade quiz games (Quizaga, Quiz-Guy, and Quizcavator) plus a builder for making your own versions, ready for Rise 360 or any LMS.</p>
+                            <div class="links"><a href="project-quizcade.html">About &amp; demo</a><a href="../games/builder/index.html" target="_blank" rel="noopener">Open the builder</a></div>
                         </div>
                     </article>
                     <!-- id="midnight-card": games.html shows this same card too (js/collection.js), so edit it only here -->
@@ -67,24 +150,6 @@
                             <h3><a href="project-midnight-multiplex.html">Midnight at the Multiplex</a></h3>
                             <p>A lo-fi life and work sim about the staff of a nine-screen movie theater in 1999, with something strange under the surface. The opening is playable right in your browser.</p>
                             <div class="links"><a href="project-midnight-multiplex.html">About &amp; demo</a><a href="../work/midnight-multiplex/index.html" target="_blank" rel="noopener">Play the demo</a></div>
-                        </div>
-                    </article>
-                    <article class="card">
-                        <div class="thumb"><a class="thumb-link" href="project-peedee.html" tabindex="-1" aria-hidden="true" title="Open PeeDee's Dental Defense"><img src="../images/projects/peedee/card.jpg" alt="PeeDee standing among giant molars with braces" loading="lazy"></a></div>
-                        <div class="content">
-                            <p class="kicker">Game · Play it in your browser</p>
-                            <h3><a href="project-peedee.html">PeeDee's Dental Defense</a></h3>
-                            <p>A colorful pixel-art platformer set inside a mouth: fill cavities, scrub plaque and tartar, zap germs, and take down bad breath itself.</p>
-                            <div class="links"><a href="project-peedee.html">About &amp; demo</a><a href="../work/peedee/index.html" target="_blank" rel="noopener">Play the game</a></div>
-                        </div>
-                    </article>
-                    <article class="card">
-                        <div class="thumb"><a class="thumb-link" href="project-game-unit-204.html" tabindex="-1" aria-hidden="true" title="Open Unit 204"><img src="../images/games/unit-204.jpg" alt="Unit 204 title screen: the inspector and Dana in a pixel-art apartment hallway" loading="lazy"></a></div>
-                        <div class="content">
-                            <p class="kicker">Learning game · Play it in your browser</p>
-                            <h3><a href="project-game-unit-204.html">Unit 204</a></h3>
-                            <p>A pixel-art point-and-click move-out inspection: look, touch, smell and measure your way through an empty apartment, then call each finding wear, damage or hazard.</p>
-                            <div class="links"><a href="project-game-unit-204.html">About &amp; demo</a><a href="../games/unit-204/index.html" target="_blank" rel="noopener">Play the game</a></div>
                         </div>
                     </article>
                 </div>

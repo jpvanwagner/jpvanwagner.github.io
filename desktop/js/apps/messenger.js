@@ -81,6 +81,7 @@ window.Messenger = {
         try { i = (parseInt(localStorage.getItem(this.nextKey), 10) || 0) % this.MESSAGES.length; localStorage.setItem(this.nextKey, i + 1); } catch (e) {}
         this.queue.push({ msg: this.MESSAGES[i], at: new Date() });
         this.showTray(true);
+        this.glow();                          // a soft bloom for the first moment, then the usual blink
         this.updateNext();                    // an open message window offers the new one with "Next message"
         this.chime();
     },
@@ -113,6 +114,17 @@ window.Messenger = {
         btn.title = n > 1 ? `${n} new messages from Joe! Click to read them one at a time (right-click for options)`
                           : 'New message from Joe! Click to read it (right-click for options)';
         btn.setAttribute('aria-label', n > 1 ? `${n} new messages from Joe` : 'New message from Joe');
+    },
+
+    /** A brief glow on the tray bubble each time a message arrives (about 0.8s), then back to the blink. */
+    glow() {
+        const btn = document.getElementById('tray-msg');
+        if (!btn) return;
+        clearTimeout(this._glowT);
+        btn.classList.remove('im-arrive');
+        void btn.offsetWidth;                 // restart the glow if another message lands mid-glow
+        btn.classList.add('im-arrive');
+        this._glowT = setTimeout(() => btn.classList.remove('im-arrive'), 800);
     },
 
     /** The open message window's "Next message" row: shown while more messages are waiting. */
@@ -263,6 +275,10 @@ window.Messenger = {
     chime() {
         const vol = window.SiteVolume ? SiteVolume.effective() : 1;
         if (!vol) return;
+        // a game (or any one window) filling the screen plays on undisturbed: the bubble still blinks, just no sound
+        // (the whole desktop in full screen from the tray button still chimes)
+        const fs = document.fullscreenElement || document.webkitFullscreenElement;
+        if (fs && fs !== document.documentElement && fs !== document.body) return;
         // A voice-like "uh-oh!": a buzzy source shaped by two vowel "formant" filters, "uh" then "oh",
         // at a high, cartoonish pitch that jumps up and then drops
         try {

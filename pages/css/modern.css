@@ -301,8 +301,8 @@ html:not(.in-desktop) .site-footer { background: #d8dfea; }
 
 /* ======================================================================================
    DARK MODE (Traditional View only). html[data-theme="dark"] is set by js/classic.js from the
-   visitor's choice (the sun/moon button in the header, saved as localStorage "site-theme") or,
-   if they never chose, from their device's own light/dark setting.
+   visitor's choice (the sun/moon button in the header, saved as localStorage "site-theme").
+   Light mode is the default until they choose.
    Tokens first, then the surfaces that use fixed light colors.
    ====================================================================================== */
 html[data-theme="dark"]:not(.in-desktop) {

@@ -17,6 +17,7 @@
  * Start muted: add data-demo-muted to the iframe. For that to catch sound made the moment the demo
  * loads, the demo page calls DemoControls.early(window) first thing in its <head>:
  *   <script>try{if(parent!==window&&parent.DemoControls)parent.DemoControls.early(window)}catch(e){}</script>
+ * A frame that shouldn't get the corner buttons can still get the mouse guard: add data-demo-guard instead.
  * Styles: shared/share.css ("DEMO CONTROLS")
  */
 (function () {
@@ -28,6 +29,21 @@
         full: '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M1.5 6V1.5H6M10 1.5h4.5V6M14.5 10v4.5H10M6 14.5H1.5V10" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
         exit: '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6 1.5V6H1.5M14.5 6H10V1.5M10 14.5V10h4.5M1.5 10H6v4.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>'
     };
+
+    /** Keep the browser's own mouse shortcuts off a demo's box (the frame's edge, its corner buttons, and the
+        box in full screen), so a visitor playing can't be thrown off the page: no context menu (its first
+        item is Back), no back or forward from the mouse's side buttons, no new tab from the middle button,
+        no two-finger swipe back, and no dragging the game out onto the tab bar. The games guard their own
+        insides the same way. */
+    function guard(host) {
+        if (host.__dcGuard) return; host.__dcGuard = true;
+        var stop = function (e) { e.preventDefault(); };
+        var notLeft = function (e) { if (e.button !== 0) e.preventDefault(); };
+        ['contextmenu', 'dragstart'].forEach(function (t) { host.addEventListener(t, stop, true); });
+        ['mousedown', 'mouseup', 'auxclick'].forEach(function (t) { host.addEventListener(t, notLeft, true); });
+        host.addEventListener('wheel', function (e) { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) e.preventDefault(); }, { capture: true, passive: false });
+        host.style.overscrollBehavior = 'none';
+    }
 
     /** Patch a demo frame's window once so its sound can be muted. */
     function hook(win) {
@@ -80,7 +96,14 @@
         isMuted: function (frame) {
             var w = frameWin(frame);
             try { if (w && w.MMDemoMute) return w.MMDemoMute.muted; } catch (e) {}
-            return !!(w && w.__dcMuted);
+            // Reading a property off a cross-origin frame throws instead of
+            // just coming back undefined - same-site https:// pages are same
+            // origin so this never fires in real use, but a visitor testing
+            // the site locally (double-clicked straight off disk, per this
+            // repo's own "Testing locally" note) gets a unique opaque origin
+            // PER file://, making every iframe here cross-origin from the
+            // page around it.
+            try { return !!(w && w.__dcMuted); } catch (e) { return false; }
         },
 
         setMuted: function (frame, on) {
@@ -157,10 +180,13 @@
             hook(frameWin(frame));
             showMute();
             showFs();
+            guard(host);
         },
 
         init: function () {
             document.querySelectorAll('iframe[data-demo]').forEach(DC.enhance);
+            // <iframe data-demo-guard>: no corner buttons, but the same mouse guard on its box
+            document.querySelectorAll('iframe[data-demo-guard]').forEach(function (f) { guard(f.parentElement); });
         }
     };
 

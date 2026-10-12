@@ -52,9 +52,6 @@ const LAUNCH_TARGETS = [
   { key: 'mapster',  label: 'MAPSTER — 3D level editor',
     path: 'Mapster/mapster.html', kind: 'external',
     blurb: 'The level-design tool. Opens in a new tab (editor, not gameplay).' },
-  { key: 'saymaker', label: 'SAYMAKER — branching dialogue editor',
-    path: 'Saymaker/saymaker.html', kind: 'external',
-    blurb: 'Node-graph tool for authoring branching conversations. Opens in a new tab.' },
   { key: 'debugmap', label: 'DEBUG ROOM — authored test map',
     path: 'Mapster/maps/debug_room.html', kind: 'external',
     blurb: 'The hand-built test room: every door type, smashable windows, a lightswitch, neon, a patrol NPC, warp points & portals. Opens in a new tab.' },
@@ -525,7 +522,7 @@ window.addEventListener('resize', () => { if (_mapMounted) { positionMapContaine
 
 // ── #14: IN-GAME DIALOGUE OVERLAY (debug NPCs as conversations) ─────────────
 // Interacting with a debug NPC that carries meta.debugMenu opens a small,
-// retro, Saymaker-style dialogue rendered over the map. It's a tree of nodes:
+// retro, branching dialogue rendered over the map. It's a tree of nodes:
 //   nodes: { start: { text, options:[ {label, action|goto|back} ] }, ... }
 // where `action` is an engineDebugAction string (e.g. 'sound:spark'), `goto`
 // jumps to a named child node, and `back` closes. Arrow keys (or W/S) move the
@@ -557,7 +554,7 @@ function dlgOverlay() {
 }
 function openDebugDialogue(tree, npcName) {
   _dlg = { tree, node: tree.root || 'start', sel: 0, npcName: npcName || '' };
-  // pause the world while talking unless the tree opts out. Saymaker writes
+  // pause the world while talking unless the tree opts out. Dialogue files write
   // tree.pauseWorld (default true). The engine reads window.__worldPaused.
   window.__worldPaused = (tree && tree.pauseWorld === false) ? false : true;
   _dlgStartTyping();   // #16: NPC line types out; choices appear after

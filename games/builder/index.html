@@ -443,7 +443,7 @@ function drawQuestionTable() {
         tr.append(
             h('td', { class: 'num' }, String(idx + 1)),
             h('td', { class: 'q' }, h('textarea', { rows: 1, value: r.q, 'aria-label': 'Question ' + (idx + 1), oninput: e => { r.q = e.target.value; refresh(); } })),
-            LETTERS.map((L, i) => h('td', null, h('input', {
+            ...LETTERS.map((L, i) => h('td', null, h('input', {
                 type: 'text', class: 'answer-input', value: r.a[i], style: '--c:' + (colors[i] || '#444'),
                 'aria-label': 'Question ' + (idx + 1) + ' answer ' + L, oninput: e => { r.a[i] = e.target.value; refresh(); }
             }))),

@@ -58,7 +58,8 @@ const QUIZCADE = {
             emailSubject: "My {game} score",
             finalScore: "FINAL SCORE", levelLabel: "LEVEL REACHED", rightLabel: "QUESTIONS RIGHT", accuracyLabel: "ACCURACY",
             copyImage: "COPY IMAGE", saveImage: "SAVE IMAGE", copyText: "COPY TEXT", more: "MORE…",
-            copied: "COPIED!", couldNotCopy: "COULDN'T COPY", useSave: "USE SAVE IMAGE", pasteIt: "Text copied: paste it in"
+            copied: "COPIED!", couldNotCopy: "COULDN'T COPY", useSave: "USE SAVE IMAGE", pasteIt: "Text copied: paste it in",
+            instagramReady: "Picture saved, caption copied"
         }
     },
 
@@ -1195,18 +1196,28 @@ function prepareShare() {
         ['Bluesky', 'https://bsky.app/intent/compose?text=' + enc(full)],
         ['X', 'https://x.com/intent/post?text=' + enc(message) + '&url=' + enc(url)],
         ['Threads', 'https://www.threads.net/intent/post?text=' + enc(full)],
-        ['Facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + enc(url) + '&hashtag=' + tag, true],
+        ['Facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + enc(url) + '&hashtag=' + tag, 'copy'],
+        ['Instagram', 'https://www.instagram.com/', 'instagram'],
         ['Reddit', 'https://www.reddit.com/submit?url=' + enc(url) + '&title=' + enc(message)],
         ['WhatsApp', 'https://wa.me/?text=' + enc(full)],
         ['Email', 'mailto:?subject=' + enc(fillIn(SHT.emailSubject || 'My {game} score', vals)) + '&body=' + enc(message + '\n\n' + url)],
         ...(mobile ? [['Text', 'sms:?&body=' + enc(full)]] : [])
     ];
-    links.replaceChildren(...targets.map(([label, href, copyFirst]) => {
+    links.replaceChildren(...targets.map(([label, href, kind]) => {
         const a = document.createElement('a');
         a.className = 'toggle-btn share-link';
         a.href = href; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label;
         // Facebook won't take pre-written text: it goes on the clipboard as the link opens
-        if (copyFirst) a.addEventListener('click', () => { copyPlainText(full); flashLabel(a, true, null); a.textContent = SHT.pasteIt || 'Text copied: paste it in'; });
+        if (kind === 'copy') a.addEventListener('click', () => { copyPlainText(full); flashLabel(a, true, null); a.textContent = SHT.pasteIt || 'Text copied: paste it in'; });
+        // Instagram has no way to pre-fill a post. Phones: the share sheet, with the picture (pick Instagram there).
+        // Computers: the picture is saved and the caption copied as instagram.com opens, ready for Create > Post.
+        if (kind === 'instagram') a.addEventListener('click', e => {
+            copyPlainText(full);
+            if (mobile) { e.preventDefault(); shareNative(); return; }
+            saveImage(getPng());
+            flashLabel(a, true, null);
+            a.textContent = SHT.instagramReady || 'Picture saved, caption copied';
+        });
         return a;
     }));
     if (mobile) links.append(small(SHT.more || 'MORE…', () => shareNative()));

@@ -3276,6 +3276,23 @@ function initEngine() {
         return false;
     }
 
+    // EXIT THROUGH AN INTERIOR DOOR. checkCollision() only fires the exit when
+    // you walk off the MAP EDGE through an open perimeter door (the lesson rooms).
+    // A waypoint whose door is INSIDE the map — the parking lot's theater doors —
+    // never fired, so walking in did nothing. This fires it when you step OUT of
+    // an exitWaypoint tile THROUGH that tile's door edge (call it after a successful
+    // step, with the tile you came from).
+    function fireExitIfThroughDoor(fromX, fromZ, flr, dirStr) {
+        const cell = MAP[flr] && MAP[flr][fromZ] && MAP[flr][fromZ][fromX];
+        const edge = cell && cell[dirStr];
+        if (!cell || !cell.o || !cell.o.meta || !cell.o.meta.exitWaypoint) return;
+        if (!edge || String(edge.v || '').indexOf('door') !== 0) return;
+        if (typeof window.engineOnExitReached !== 'function' || window.__exitFireLatch) return;
+        window.__exitFireLatch = true;
+        setTimeout(() => { window.__exitFireLatch = false; }, 500);
+        try { window.engineOnExitReached(cell.o.meta || {}); } catch (e) {}
+    }
+
     function checkCollision(nx, nz, pF, dirStr, isJumpMove) {
         // Off the map edge → block, or fire the configured edge warp.
         if (nx < 0 || nx >= W || nz < 0 || nz >= H) {
@@ -3704,7 +3721,7 @@ function initEngine() {
         try {
             if ((typeof window.__hostPromptOpen === 'function' && window.__hostPromptOpen())) return;
         } catch (e2) {}
-        // While a Saymaker conversation is playing, capture input for it:
+        // While a branching conversation (DialogueRuntime) is playing, capture input for it:
         // Space advances a line; Escape ends the conversation. Block
         // movement/camera keys so the player can't walk off mid-dialogue.
         if (window.DialogueRuntime && window.DialogueRuntime.isActive()) {
@@ -3807,6 +3824,7 @@ function initEngine() {
                     if (!checkCollision(pX+dx, pZ+dz, pFlr, dS, false)) {
                         if (gapPromptActive) return;
                         pX += dx; pZ += dz; tPos.x = pX; tPos.z = pZ; isMov = true; lastMoveTime = Date.now();
+                        fireExitIfThroughDoor(pX - dx, pZ - dz, pFlr, dS);
                         let co = MAP[pFlr][pZ][pX].o;
                         if (co?.v === 'ladder') { const _t = floorTargetFrom(pFlr, pX, pZ); if (_t >= 0) showMsg('Press SPACE to climb the ladder.'); }   // stairs auto-walk (no prompt); ladders still prompt
                         if (MAP[pFlr][pZ][pX].f?.meta?.isWarp) executeWarp(MAP[pFlr][pZ][pX].f.meta);
@@ -4155,7 +4173,7 @@ function initEngine() {
                 if (tgt.meta.swoopType && tgt.meta.swoopType !== 'none' && camManager) { let tgtPos = tgt.mesh ? tgt.mesh.position : tgt.m.position; camManager.startCinematic(tgt.meta.swoopType, tgtPos, player.position, tgt.meta.overheadZoomDist, tgt.meta.overheadRot); }
                 // Stop any "stopOnInteract" PositionalAudio attached to the same meta object.
                 let aObj = localAudios.find(a => a.meta === tgt.meta); if (aObj && aObj.meta.audioStopInteract) { aObj.audio.stop(); }
-                // If a SAYMAKER dialogue file is attached, play the full
+                // If a branching dialogue file is attached, play the full
                 // branching conversation (skill checks, camera moves, choices)
                 // instead of the one-shot dialogue string. The runtime handles
                 // its own overlay + Space-to-advance.
@@ -4477,6 +4495,7 @@ function initEngine() {
             if (!checkCollision(pX + dx, pZ + dz, pFlr, dS, false)) {
                 if (gapPromptActive) return;
                 pX += dx; pZ += dz; tPos.x = pX; tPos.z = pZ; isMov = true; lastMoveTime = Date.now();
+                fireExitIfThroughDoor(pX - dx, pZ - dz, pFlr, dS);
                 // Stepping onto a ladder/stairs tile: bump floor up (or down if on top floor).
                 let checkObj = MAP[pFlr][pZ][pX].o;
                 if (checkObj?.v === 'ladder' || checkObj?.v === 'stairs') {
@@ -4524,7 +4543,7 @@ function initEngine() {
     // #19: MOUSE in the in-game modals. A click drives the shop and every dialogue
     // exactly like the keyboard does, so players never have to touch a key mid-scene.
     // Capture phase + stopPropagation so it pre-empts the prompt-opener in game.js
-    // (a click inside a modal must not also open the command prompt). Saymaker choices
+    // (a click inside a modal must not also open the command prompt). Dialogue choices
     // are already buttons; the dialogue-TREE choices are wired in debugroom.js.
     function _engineModalClick(e) {
         if (window.__engineGen !== __myEngineGen) return;
@@ -5059,7 +5078,7 @@ function initEngine() {
         // WORLD PAUSE. When a dialogue that requested it is open, freeze the
         // simulation (NPC AI, player stepping) but keep rendering so the scene
         // still shows behind the conversation. The host sets window.__worldPaused
-        // (Saymaker's "Pause world during dialogue", on by default).
+        // (the dialogue file's "pause world" option, on by default).
         const worldPaused = ((typeof window.__worldPaused !== 'undefined') ? !!window.__worldPaused : false)
             || !!window.__posterMsgPaused   // #9: poster/interaction notes freeze the world like dialogue
             || (typeof window.__anyModalOpen === 'function' && window.__anyModalOpen());   // #21: modals pause the world by default
@@ -5310,8 +5329,12 @@ function initEngine() {
                 // LADDER climb — alternating hands/feet reaching up the rungs.
                 player.userData.walkPhase += dt * 5.0;
                 const sw = Math.sin(player.userData.walkPhase);
-                L.legL.hip.rotation.x = -0.55 + sw * 0.45; L.legR.hip.rotation.x = -0.55 - sw * 0.45;
-                L.legL.knee.rotation.x = 0.7; L.legR.knee.rotation.x = 0.7;
+                // LEG SIGNS (the rig faces -Z): hip +x swings the THIGH FORWARD, knee -x
+                // folds the SHIN BACK — the way a real knee bends (same as setCrouched /
+                // setSeated). The old ladder/jump poses used the opposite signs, which bent
+                // the knees backward like a bird's.
+                L.legL.hip.rotation.x = 0.55 + sw * 0.45; L.legR.hip.rotation.x = 0.55 - sw * 0.45;
+                L.legL.knee.rotation.x = -0.7; L.legR.knee.rotation.x = -0.7;
                 L.armL.rotation.x = -2.3 + sw * 0.35; L.armR.rotation.x = -2.3 - sw * 0.35;   // arms up gripping rungs
                 L.torso.position.set(0, L.hipY + 0.40, -0.02); L.torso.rotation.x = 0.0;
             } else if (isJump) {
@@ -5319,10 +5342,10 @@ function initEngine() {
                 if (jumpStyle === 'climb') {
                     // CLIMB pose — one knee up high, torso pitched forward, arms
                     // reaching up as if pulling up and over.
-                    L.legL.hip.rotation.x = -1.5 * air;
-                    L.legR.hip.rotation.x = -0.4 * air;
-                    L.legL.knee.rotation.x = 1.6 * air;
-                    L.legR.knee.rotation.x = 0.6 * air;
+                    L.legL.hip.rotation.x = 1.5 * air;          // lead knee up in front
+                    L.legR.hip.rotation.x = 0.4 * air;
+                    L.legL.knee.rotation.x = -1.6 * air;        // shins fold back (real knee bend)
+                    L.legR.knee.rotation.x = -0.6 * air;
                     L.armL.rotation.x = -1.4 * air;             // arms forward/up (reach)
                     L.armR.rotation.x = -1.4 * air;
                 } else if (jumpStyle === 'recoil') {
@@ -5336,16 +5359,16 @@ function initEngine() {
                     // little as you drop to the floor below.
                     L.armL.rotation.x = -2.2 * air; L.armL.rotation.z = 0.4 * air;
                     L.armR.rotation.x = -2.2 * air; L.armR.rotation.z = -0.4 * air;
-                    L.legL.hip.rotation.x = -0.7 * air;
-                    L.legR.hip.rotation.x = -0.5 * air;
-                    L.legL.knee.rotation.x = 0.9 * air;
-                    L.legR.knee.rotation.x = 0.7 * air;
+                    L.legL.hip.rotation.x = 0.7 * air;
+                    L.legR.hip.rotation.x = 0.5 * air;
+                    L.legL.knee.rotation.x = -0.9 * air;
+                    L.legR.knee.rotation.x = -0.7 * air;
                 } else {
                     // VAULT pose — tuck legs, swing arms.
-                    L.legL.hip.rotation.x = -1.1 * air;
-                    L.legR.hip.rotation.x = -1.1 * air;
-                    L.legL.knee.rotation.x = 1.3 * air;
-                    L.legR.knee.rotation.x = 1.3 * air;
+                    L.legL.hip.rotation.x = 1.1 * air;          // knees tuck up in FRONT
+                    L.legR.hip.rotation.x = 1.1 * air;
+                    L.legL.knee.rotation.x = -1.3 * air;        // shins fold back under
+                    L.legR.knee.rotation.x = -1.3 * air;
                     L.armL.rotation.x = 0.9 * air;
                     L.armR.rotation.x = 0.9 * air;
                 }
@@ -5355,8 +5378,8 @@ function initEngine() {
                 L.legL.hip.rotation.x = s;
                 L.legR.hip.rotation.x = -s;
                 // Knees bend a touch on the back-swing so feet clear the floor.
-                L.legL.knee.rotation.x = Math.max(0, -s) * 0.5;
-                L.legR.knee.rotation.x = Math.max(0, s) * 0.5;
+                L.legL.knee.rotation.x = -Math.max(0, -s) * 0.5;   // negative = shin folds back (heel lifts)
+                L.legR.knee.rotation.x = -Math.max(0, s) * 0.5;
                 L.armL.rotation.x = -s * 0.7;
                 L.armR.rotation.x = s * 0.7;
             } else {
@@ -5519,8 +5542,8 @@ function initEngine() {
                     const s = Math.sin(n._walkPhase) * 0.6;
                     if (Lw.legL && Lw.legL.hip) {
                         Lw.legL.hip.rotation.x = s; Lw.legR.hip.rotation.x = -s;
-                        Lw.legL.knee.rotation.x = Math.max(0, -s) * 0.5;
-                        Lw.legR.knee.rotation.x = Math.max(0, s) * 0.5;
+                        Lw.legL.knee.rotation.x = -Math.max(0, -s) * 0.5;   // negative = shin folds back (see the player walk)
+                        Lw.legR.knee.rotation.x = -Math.max(0, s) * 0.5;
                     }
                     if (Lw.armL) { Lw.armL.rotation.x = -s * 0.7; Lw.armR.rotation.x = s * 0.7; }
                 }
@@ -5588,7 +5611,7 @@ function initEngine() {
                 } else if (mode === 'lookaround') {
                     L.torso.rotation.y = Math.sin(t * 1.2) * 0.5;   // glance L/R
                 } else if (mode === 'tapfoot') {
-                    L.legR.knee.rotation.x = Math.max(0, Math.sin(t * 7)) * 0.5; // tap
+                    L.legR.knee.rotation.x = -Math.max(0, Math.sin(t * 7)) * 0.35; // tap: heel lifts back (negative = real knee bend)
                 } else if (mode === 'nod') {
                     L.torso.rotation.x = 0.12 + Math.sin(t * 2) * 0.12; // slow nod
                 }

@@ -10,23 +10,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="page-version" content="9ac39a87">
+    <meta name="page-version" content="341786b3">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scenemaker</title>
     <meta name="description" content="Scenemaker by Joseph VanWagner: a node-graph branching-scenario and visual-novel authoring tool that exports SCORM 1.2. Try the live demo in your browser.">
     <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
     <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
     <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="css/classic.css?v=fa07d833">
+    <link rel="stylesheet" href="css/classic.css?v=90379466">
     <link rel="stylesheet" href="../shared/share.css?v=ebba4e48">
-    <link rel="stylesheet" href="css/modern.css?v=cdfd7b86">    <!-- Traditional View look (not used inside the Retro Desktop) -->
-    <script src="../config/site-config.js?v=6696cace"></script>
-    <script src="../config/shared-content.js?v=e9eeb62c"></script>   <!-- stats, colleague quotes (shared) -->
+    <link rel="stylesheet" href="css/modern.css?v=0ffe9a82">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=ecd42624"></script>
+    <script src="../config/shared-content.js?v=3cd2f224"></script>   <!-- stats, colleague quotes (shared) -->
     <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
-    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/classic.js?v=8ddee710"></script>
     <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
     <script src="js/search.js?v=92eeb169"></script>
-    <script src="../shared/demo-controls.js?v=01dee569"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/demo-controls.js?v=418e2f9e"></script>   <!-- Mute + Full screen above each demo -->
     <script src="../shared/share.js?v=726959f6"></script>
 </head>
 <body data-title="Scenemaker" data-nav="my-projects.html">
@@ -103,6 +103,25 @@
                 </ul>
                 <figure class="side-photo"><img src="../work/scenemaker/shots/start-screen.png" alt="Scenemaker's start screen" loading="lazy"><figcaption>The start screen: a new story, an existing one, or the guided sample tour.</figcaption></figure>
                 <ul class="tags section-tags" aria-label="Tags for this section"><li>Node graphs</li><li>Authoring tools</li></ul>
+
+                <h2 id="feature-gallery">Feature gallery</h2>
+                <p class="course-note">Updated 2026-10-10: two new entries below, marked <strong>New</strong>, an Overlay/popup embed for dropping a scenario into another page or game, and a share-your-ending prompt. Everything else is a look at what's already there.</p>
+                <div class="shots">
+                    <figure><a class="zoom" href="../work/scenemaker/shots/feature-node-graph.png" data-caption="The node graph: every scene is a draggable box, with colour-coded lines for each choice's branches &ndash; here, a dice check's three outcomes."><img src="../work/scenemaker/shots/feature-node-graph.png" alt="Scenemaker's node-graph scene editor" loading="lazy"></a><figcaption>Branching story structure</figcaption></figure>
+                    <figure><a class="zoom" href="../work/scenemaker/shots/feature-dice-choice.png" data-caption="A scene with four dice-check choices, each rolling a d20 against a stat (Charisma, Might, Stealth) plus a target number &ndash; legible right on the card, no need to open anything."><img src="../work/scenemaker/shots/feature-dice-choice.png" alt="A scene card showing four tabletop-style dice-check choices" loading="lazy"></a><figcaption>Tabletop-style dice checks</figcaption></figure>
+                    <figure><a class="zoom" href="../work/scenemaker/shots/feature-characters.png" data-caption="Each character's portraits and expression states (here, Theodric's 'alarmed' and Grum's 'angry' faces), scale, border colour, and typing sound, all in one panel."><img src="../work/scenemaker/shots/feature-characters.png" alt="The Characters panel showing portrait expression states" loading="lazy"></a><figcaption>Characters &amp; expression states</figcaption></figure>
+                    <figure><a class="zoom" href="../work/scenemaker/shots/feature-variables.png" data-caption="Tracked numbers and flags that choices can read, change, and branch on &ndash; here, four RPG stats a dice check rolls against."><img src="../work/scenemaker/shots/feature-variables.png" alt="The Variables panel listing tracked stats" loading="lazy"></a><figcaption>Variables: the story's memory</figcaption></figure>
+                    <figure><a class="zoom" href="../work/scenemaker/shots/feature-canvas-editor.png" data-caption="A live, drag-and-drop editor for the dialogue box, portraits, choices, and name tab, positioned directly over the real background art."><img src="../work/scenemaker/shots/feature-canvas-editor.png" alt="The Canvas editor's drag-and-drop screen layout designer" loading="lazy"></a><figcaption>Drag-and-drop screen designer</figcaption></figure>
+                    <figure><a class="zoom" href="../work/scenemaker/shots/feature-export-modal.png" data-caption="Every export format in one place: a SCORM package for an LMS, a standalone executable, a single self-contained HTML page, or a printable script."><img src="../work/scenemaker/shots/feature-export-modal.png" alt="The Export modal listing SCORM, executable, and HTML output options" loading="lazy"></a><figcaption>Export, every way a story might ship</figcaption></figure>
+                    <figure><a class="zoom" href="../work/scenemaker/shots/feature-overlay-export.png" data-caption="New: a scenario exported as one file that runs as a layer on top of another page or game &ndash; full-screen with the host showing through, or a small popup &ndash; instead of filling its own tab."><img src="../work/scenemaker/shots/feature-overlay-export.png" alt="The new Overlay / popup embed export options" loading="lazy"></a><figcaption><strong>New:</strong> drop a scenario into another game</figcaption></figure>
+                    <figure><a class="zoom" href="../work/scenemaker/shots/feature-share-settings.png" data-caption="New: turn this on and a player who reaches an ending can share it, with a message you write and a link back to the story's own site."><img src="../work/scenemaker/shots/feature-share-settings.png" alt="The new Share at the ending setting" loading="lazy"></a><figcaption><strong>New:</strong> share your ending</figcaption></figure>
+                    <figure><a class="zoom" href="../work/scenemaker/shots/feature-sound-studio.png" data-caption="Record a clip or import one, then trim, filter (high/low cut, EQ, compressor, noise gate), and normalize it without leaving the editor."><img src="../work/scenemaker/shots/feature-sound-studio.png" alt="Sound Studio's waveform editing and audio filters" loading="lazy"></a><figcaption>Sound Studio: record &amp; edit audio</figcaption></figure>
+                    <figure><a class="zoom" href="../work/scenemaker/shots/feature-title-screen-editor.png" data-caption="A live preview of the title screen updates as you edit its heading, background, music, and menu items."><img src="../work/scenemaker/shots/feature-title-screen-editor.png" alt="The Title screen editor with a live preview" loading="lazy"></a><figcaption>Title screen editor</figcaption></figure>
+                    <figure><a class="zoom" href="../work/scenemaker/shots/feature-player-jrpg-style.png" data-caption="The Bridge Toll, played: a JRPG-styled skin with framed portraits and a name tab, the name/box colours recoloured to match this story."><img src="../work/scenemaker/shots/feature-player-jrpg-style.png" alt="The Bridge Toll playing with a JRPG-styled skin" loading="lazy"></a><figcaption>Ships in very different visual styles&hellip;</figcaption></figure>
+                    <figure><a class="zoom" href="../work/scenemaker/shots/feature-player-comic-style.png" data-caption="The Group Chat, played: the same engine, a bright comic-book skin with round portraits and colour-coded names."><img src="../work/scenemaker/shots/feature-player-comic-style.png" alt="The Group Chat playing with a comic-book styled skin" loading="lazy"></a><figcaption>&hellip;from the very same engine</figcaption></figure>
+                </div>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Dice rolls</li><li>Portraits</li><li>Audio tools</li><li>Game embeds</li></ul>
+
                 <h2>Design features</h2>
                 <ul class="tags"><li>Branching scenarios</li><li>SCORM</li><li>JavaScript</li><li>Python</li><li>Node graphs</li><li>Visual novels</li><li>Walkthroughs</li></ul>
                 <div class="btn-row">

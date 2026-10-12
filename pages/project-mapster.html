@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-MAPSTER.HTML - Project detail page for Mapster (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page).
+    The live editor is the copy in ../work/mapster/ (see its README.md); ?sample=sunrise opens the theater map in it.
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="3430c4a4">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapster</title>
+    <meta name="description" content="Mapster by Joseph VanWagner: a grid-based 3D level editor that runs in the browser. Paint a map tile by tile, then walk around it in 3D. Try the live editor.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=90379466">
+    <link rel="stylesheet" href="../shared/share.css?v=ebba4e48">
+    <link rel="stylesheet" href="css/modern.css?v=0ffe9a82">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=ecd42624"></script>
+    <script src="../config/shared-content.js?v=3cd2f224"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=8ddee710"></script>
+    <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=418e2f9e"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=726959f6"></script>
+    <script src="js/lightbox.js?v=af09d593"></script>          <!-- click a screenshot to see it full size -->
+</head>
+<body data-title="Mapster" data-nav="my-projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="my-projects.html">&larr; Back to Projects</a></p>
+                <p class="kicker">Tool · Try it in your browser</p>
+                <h1>Mapster</h1>
+                <p class="lede">Paint a level on a grid, then walk around it in 3D.</p>
+                <p>Mapster is the level editor I built to make the rooms in <a href="project-midnight-multiplex.html">Midnight at the
+                   Multiplex</a>, and it now stands on its own. You lay a map out tile by tile: floors, walls, doors and windows on the
+                   edges between tiles, then furniture, cars, signs, stairs, NPCs and everything else on top. One click on
+                   <strong>Preview</strong> turns that grid into a 3D scene you can walk through, with lighting, weather, fog and a
+                   working minimap.</p>
+                <p>Maps can have several floors joined by stairs and ladders, doors that need a key, guards that patrol and spot the
+                   player, light switches, smashable windows players can draw on, and branching conversations from Saymaker, the
+                   dialogue editor that grew into <a href="project-scenemaker.html">Scenemaker</a>, attached to any character. Export saves the map as a
+                   playable web page, and that same file opens again in Mapster for more editing.</p>
+                <div class="btn-row">
+                    <a class="btn primary" href="../work/mapster/mapster.html?sample=sunrise" target="_blank" rel="noopener">Open the editor in its own tab</a>
+                    <button class="btn retro-only" type="button" onclick="parent.MapsterApp && parent.MapsterApp.open()" title="Opens the editor as its own program on the desktop, with a full-screen button">Open as a desktop program</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-body course-panel">
+                <h2>Try it</h2>
+                <p>This is the whole editor, with the movie theater from Midnight at the Multiplex already open: two floors, a lobby, a
+                   concession stand and the projection booth upstairs. Change anything you like, then press <strong>Preview</strong> to walk
+                   around it.</p>
+                <div class="course-frame">
+                    <iframe data-demo data-demo-nomute src="../work/mapster/mapster.html?sample=sunrise" title="Mapster: the live level editor, with a sample map open"
+                            allow="fullscreen" allowfullscreen loading="lazy"></iframe>
+                </div>
+                <p class="course-note"><strong>How to use it:</strong> pick a tool on the left (a floor, a wall, an object) and click or drag
+                   on the grid; walls and doors go on the edges between tiles. Choose <strong>Select / Edit</strong> and click anything to change
+                   it in the panel on the right. The arrows next to <strong>Floor</strong> switch floors, and <strong>Open a sample map</strong>
+                   loads the theater or a parking lot. In <strong>Preview</strong>, move with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>,
+                   turn the camera with <kbd>Q</kbd>/<kbd>E</kbd>, jump with <kbd>Space</kbd>, interact with <kbd>G</kbd>, and press
+                   <kbd>M</kbd> for the minimap. <strong>Help Guide</strong> explains every tool. Best on a computer with a mouse; for more room, use the
+                   <span class="fs-glyph" aria-hidden="true">&#x26F6;</span> full-screen button in the editor's top-right corner.</p>
+                <p class="course-note">Everything runs in your browser and nothing is uploaded. <strong>Export</strong> downloads your map as a web
+                   page you can open again later with <strong>Load Project</strong>; it plays on its own once it sits next to Mapster's engine
+                   files, so in this demo, use <strong>Preview</strong> to play it.
+                   <a href="../work/mapster/mapster.html?sample=sunrise" target="_blank" rel="noopener">Open the editor in its own tab</a>.</p>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Live demo</li><li>Level editor</li><li>three.js</li></ul>
+
+                <h2>What it does</h2>
+                <ul>
+                    <li><strong>Paint the map.</strong> Fourteen floor styles; solid, brick, stone and glass walls, archways, counters, rope barriers,
+                        swinging and sliding doors, and windows; with fill and wrap-the-walls tools for big areas, plus undo and redo.</li>
+                    <li><strong>Furnish it.</strong> Player start, cars, keys, arcade cabinets, benches, signs, directory kiosks, stairs, ladders,
+                        warp points, and posters, light switches, mirrors and neon mounted on the walls.</li>
+                    <li><strong>Bring it to life.</strong> NPCs with their own stats, clothing, idle animations and conversations; guards with
+                        vision cones that patrol and spot the player; locked doors that need the right key.</li>
+                    <li><strong>Set the mood.</strong> Skyboxes, lighting, fog, rain and snow per floor, background music and ambient sound,
+                        named zones, and a fog-of-war minimap that fills in as the player explores.</li>
+                    <li><strong>Choose the camera.</strong> Isometric with 45&deg; or 90&deg; turns, free rotation, locked, or first person.</li>
+                    <li><strong>Built to teach itself.</strong> A searchable help guide and a <strong>?</strong> next to every setting that needs explaining.</li>
+                </ul>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Level design</li><li>3D</li></ul>
+
+                <h2>How I built it</h2>
+                <ul>
+                    <li>Plain HTML and JavaScript, no build step: open the file and it runs.</li>
+                    <li>The 3D side is the same three.js engine that plays the rooms in Midnight at the Multiplex, so a map that looks right in
+                        Preview looks the same in the game.</li>
+                    <li>Every map is one JSON object (floors of tiles, each tile with a floor, an object, a ceiling and four walls), which keeps
+                        maps easy to generate from code as well as by hand.</li>
+                </ul>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>JavaScript</li><li>three.js</li><li>JSON</li></ul>
+
+                <h2>In motion</h2>
+                <div class="motion">
+                    <figure><video poster="../images/projects/midnight/room-editor-3d-poster.jpg" autoplay muted loop playsinline preload="metadata" title="Click to pause or play" aria-label="A room laid out on the Mapster grid, then previewed in 3D and turned around"><source src="../images/projects/midnight/room-editor-3d.webm" type="video/webm"><source src="../images/projects/midnight/room-editor-3d.mp4" type="video/mp4"></video>
+                        <figcaption>From grid to room: a layout in Mapster, previewed in 3D and turned to check every wall.</figcaption></figure>
+                </div>
+
+                <h2>Screenshots</h2>
+                <p class="course-note">Click a picture to see it full size.</p>
+                <div class="shots">
+                    <figure><a class="zoom" href="../images/projects/mapster/editor.webp" data-caption="The editor with the movie theater open: tools on the left, the map grid in the middle, and an NPC selected in the property inspector on the right."><img src="../images/projects/mapster/thumbs/editor.jpg" alt="Mapster's editor: a tool palette, a grid of colorful floor tiles, and a property panel for a selected NPC" loading="lazy"></a><figcaption>The editor with the movie theater open, and an NPC selected in the property inspector.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/mapster/preview-theater.webp" data-caption="Preview: the same theater in 3D, with staff behind the concession stand, a minimap, a compass, and an NPC's stats."><img src="../images/projects/mapster/thumbs/preview-theater.jpg" alt="An isometric 3D theater lobby with staff characters, a concession counter, stairs and a purple kiosk" loading="lazy"></a><figcaption>Preview: the same theater in 3D, with a minimap, a compass, and an NPC's stats.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/mapster/two-floors.webp" data-caption="The second floor (the projection booth), with the floor below showing faintly underneath so the two line up."><img src="../images/projects/mapster/thumbs/two-floors.jpg" alt="The editor showing an upper floor, with the lower floor's layout faintly visible beneath it" loading="lazy"></a><figcaption>The second floor, with the floor below showing faintly underneath so the two line up.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/mapster/editor-parking.webp" data-caption="The parking lot sample in the editor: parking stalls, cars, and the theater's front wall and doors."><img src="../images/projects/mapster/thumbs/editor-parking.jpg" alt="The editor showing a small parking lot layout with car icons on asphalt tiles" loading="lazy"></a><figcaption>The parking lot sample in the editor: stalls, cars, and the theater's front doors.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/mapster/preview-parking.webp" data-caption="The parking lot in 3D: each car is built from its tile, facing the way it was set in the editor."><img src="../images/projects/mapster/thumbs/preview-parking.jpg" alt="An isometric 3D parking lot with colorful cars, painted stall lines, and a lit EXIT sign on a building" loading="lazy"></a><figcaption>The parking lot in 3D: each car faces the way it was set in the editor.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/mapster/settings.webp" data-caption="Map settings: camera style, zoom, skybox, music and ambient sound, and what happens at the map's edge."><img src="../images/projects/mapster/thumbs/settings.jpg" alt="A settings dialog with options for the camera, skybox, audio and map edges" loading="lazy"></a><figcaption>Map settings: camera, skybox, sound, and what happens at the map's edge.</figcaption></figure>
+                </div>
+                <ul class="tags"><li>Level editor</li><li>Live demo</li><li>three.js</li><li>JavaScript</li><li>3D</li><li>Game tools</li><li>Midnight at the Multiplex</li></ul>
+                <div class="btn-row">
+                    <a class="btn" href="my-projects.html">&larr; Back to Projects</a>
+                    <a class="btn primary" href="../work/mapster/mapster.html?sample=sunrise" target="_blank" rel="noopener">Open the editor</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

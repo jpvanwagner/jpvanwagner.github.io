@@ -661,7 +661,7 @@
         { label: 'Show me a trait-gated option', goto: 'gate_intro' },
         { label: '(done for now)', back: true },
       ]},
-      how: { text: 'Each line gives you choices. Choices can jump to other lines, run effects, or end the talk. Authors build these in Saymaker; this one is hard-coded for the tutorial.', options: [
+      how: { text: 'Each line gives you choices. Choices can jump to other lines, run effects, or end the talk. Authors build these in Scenemaker; this one is hard-coded for the tutorial.', options: [
         { label: 'Got it — back', goto: 'start' },
       ]},
       gate_intro: { text: 'See the option that needs Charm 8? If your Charm is lower, it is HIDDEN. I can lend you a temporary +3 Charm so it appears…', options: [
@@ -698,7 +698,7 @@
   // The ordered lesson list. Add/remove/reorder freely. (The renderer already
   // shows the lesson title above the intro, so intros start with the guidance.)
   const TUTORIAL_LESSONS = [
-    { key: 'movement', title: 'Getting to Work', blurb: 'Walk, zoom, turn the view, tilt, compass, first-person \u2014 then grab your key and unlock the doors.',
+    { key: 'movement', title: 'Getting to Work: The Grande Parking Lot', blurb: 'Walk, zoom, turn the view, tilt, compass, first-person \u2014 then grab your key and unlock the doors.',
       buildMap: buildParkingLot,
       intro: ['You just pulled into the multiplex lot. W/A/S/D to walk; the camera follows.',
               'Scroll to zoom, Q/E turn the view, T tilts it, F7 the compass/map, V first-person.',
@@ -857,29 +857,10 @@
     // through the early game — there's no named "next tutorial".
     window.engineOnExitReached = function () {
       if (window.__tutExitPromptOpen) return;
-      // #4: the parking-lot arrival skips the generic "move on?" prompt — crossing
-      // the theater door goes straight to nextLesson (fade -> tutorial choice).
-      // PORTFOLIO EDIT: getting to work (the parking lot) is part of the story, not a tutorial.
-      // Once you're inside, a modal offers the tutorials; skipping it goes straight on.
-      if (State.tut && State.tut.parkingLotIntro) {
-        window.__tutExitPromptOpen = true;
-        if (typeof window.__worldPaused !== 'undefined') window.__worldPaused = true;
-        if (typeof sfx !== 'undefined' && sfx.confirm) sfx.confirm();
-        showMoveOnPrompt(function (yes) {
-          window.__tutExitPromptOpen = false;
-          if (typeof window.__worldPaused !== 'undefined') window.__worldPaused = false;
-          leaveParkingLot(yes);
-        }, {
-          title: 'Tutorials',
-          html: '<div style="font-weight:bold;margin-bottom:8px;">You made it inside the Grande.</div>' +
-                '<div style="text-align:left;margin-bottom:8px;">Want a quick hands-on tutorial before your shift? A handful of tiny rooms, each ' +
-                'teaching one thing: vaulting, switches and sneaking; drawing on and breaking windows; first-person; ' +
-                'two floors and the map; and how dialogue works.</div>' +
-                '<div style="text-align:left;margin-bottom:14px;">You can replay any of them later from Help.</div>',
-          yes: 'Start the tutorials', no: 'Skip', noEsc: true
-        });
-        return;
-      }
+      // The parking lot is NOT a tutorial — it's the commute. Walking through the
+      // theater doors (key in hand) pops the tutorial OFFER as a modal right over
+      // the map: start the lessons, or skip straight to the first shift.
+      if (State.tut && State.tut.parkingLotIntro) { offerTutorialFromLot(); return; }
       window.__tutExitPromptOpen = true;
       if (typeof window.__worldPaused !== 'undefined') window.__worldPaused = true;
       showMoveOnPrompt(function (yes) {
@@ -891,27 +872,33 @@
     };
   }
 
-  // a tiny yes/no overlay. Built into #game-container (embedded) or body.
+  // A tiny yes/no overlay. Built into #game-container (embedded) or body.
+  // opts (all optional): title, text, yes, no — the labels; escNo:false makes Esc
+  // do nothing (a real either/or choice, e.g. the tutorial offer). Defaults are
+  // the lessons' "Ready to move on?".
   function showMoveOnPrompt(cb, opts) {
     opts = opts || {};
-    // (a modal with its own text, like the tutorials offer, covers the whole screen so it fits)
-    const ovId = opts.html ? 'tut-offer' : 'tut-moveon';
+    const esc = (t) => String(t).replace(/[<&>]/g, c => ({ '<': '&lt;', '&': '&amp;', '>': '&gt;' }[c]));
+    // opts.page: cover the whole PAGE (fixed) instead of just the 3D panel — for
+    // longer messages that don't fit the small map view in an embed.
+    const ovId = opts.page ? 'tut-offer' : 'tut-moveon';
     let ov = document.getElementById(ovId);
     if (!ov) {
-      const host = opts.html ? document.body : (document.getElementById('game-container') || document.body);
+      const host = opts.page ? document.body : (document.getElementById('game-container') || document.body);
       ov = document.createElement('div');
       ov.id = ovId;
-      ov.style.cssText = 'position:' + (opts.html ? 'fixed' : 'absolute') + ';inset:0;z-index:' + (opts.html ? 9000 : 70) + ';display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);font:13px/1.4 "GrandeRetro","MS Sans Serif",Tahoma,sans-serif;color:#000;';
+      ov.style.cssText = (opts.page ? 'position:fixed;z-index:9000;background:rgba(0,0,0,0.55);' : 'position:absolute;z-index:70;background:rgba(0,0,0,0.35);') +
+        'inset:0;display:flex;align-items:center;justify-content:center;font:13px/1.4 "GrandeRetro","MS Sans Serif",Tahoma,sans-serif;color:#000;';
       host.appendChild(ov);
     }
     ov.innerHTML =
-      '<div class="win95-win" style="min-width:240px;max-width:80%;">' +
-      '<div class="win95-title"><span>' + (opts.title || 'Tutorial') + '</span></div>' +
-      '<div class="win95-body" style="text-align:center;' + (opts.html ? 'max-width:620px;font-size:20px;line-height:1.45;' : '') + '">' +
-      (opts.html || '<div style="margin-bottom:14px;">Ready to move on?</div>') +
-      '<div style="display:flex;gap:10px;justify-content:center;">' +
-      '<button data-yes class="win95-btn">' + (opts.yes || 'Yes') + '</button>' +
-      '<button data-no class="win95-btn">' + (opts.no || 'Not yet') + '</button>' +
+      '<div class="win95-win" style="min-width:240px;max-width:min(460px,86%);">' +
+      '<div class="win95-title"><span>' + esc(opts.title || 'Tutorial') + '</span></div>' +
+      '<div class="win95-body" style="text-align:center;">' +
+      '<div style="margin-bottom:14px;line-height:1.45;">' + esc(opts.text || 'Ready to move on?').replace(/\n/g, '<br>') + '</div>' +
+      '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">' +
+      '<button data-yes class="win95-btn">' + esc(opts.yes || 'Yes') + '</button>' +
+      '<button data-no class="win95-btn">' + esc(opts.no || 'Not yet') + '</button>' +
       '</div></div></div>';
     ov.style.display = 'flex';
     const done = (yes) => { ov.style.display = 'none'; document.removeEventListener('keydown', onKey, true); if (typeof cb === 'function') cb(yes); };
@@ -923,8 +910,8 @@
     const onKey = (e) => {
       const k = e.key;
       if (k === 'y' || k === 'Y') { e.preventDefault(); e.stopPropagation(); done(true); return; }
-      if (k === 'n' || k === 'N' || (k === 'Escape' && !opts.noEsc)) { e.preventDefault(); e.stopPropagation(); done(false); return; }
-      if (k === 'Escape') { e.preventDefault(); e.stopPropagation(); return; }   // (a choice that matters: no accidental Esc)
+      if (k === 'n' || k === 'N' || (k === 'Escape' && opts.escNo !== false)) { e.preventDefault(); e.stopPropagation(); done(false); return; }
+      if (k === 'Escape' || k === 'Backspace') { e.preventDefault(); e.stopPropagation(); return; }   // escNo:false → a choice is required
       if (k === 'ArrowLeft' || k === 'ArrowUp') { e.preventDefault(); e.stopPropagation(); cycle(-1); return; }
       if (k === 'ArrowRight' || k === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); cycle(+1); return; }
       if (k === 'Tab') { e.preventDefault(); e.stopPropagation(); cycle(e.shiftKey ? -1 : +1); return; }
@@ -940,18 +927,36 @@
     const first = ov.querySelector('[data-yes]'); if (first) first.focus();
   }
 
-  // PORTFOLIO EDIT: leave the getting-to-work map; yes = start the tutorials, no = carry on.
-  function leaveParkingLot(startTutorials) {
-    const t = State.tut; if (!t) return;
-    window.engineOnExitReached = null;
-    const lesson = currentLesson();
-    try { if (lesson && typeof lesson.onExit === 'function') lesson.onExit(); } catch (e) {}
-    if (typeof unmountMapCanvas === 'function') unmountMapCanvas();
-    const ret = t.returnScreen || 'FIRST_SHIFT';
-    if (startTutorials) { fadeThen(() => startFullTutorial(ret), 550); return; }
-    if (typeof sfx !== 'undefined' && sfx.back) sfx.back();
-    State.tut = null;
-    fadeThen(() => goto(ret), 550);
+  // The tutorial OFFER, shown as a modal when you walk into the multiplex from
+  // the parking lot. Start → the lesson rooms; Skip → straight to the first shift.
+  // You can replay any lesson later from Help.
+  function offerTutorialFromLot() {
+    if (window.__tutExitPromptOpen) return;
+    window.__tutExitPromptOpen = true;
+    if (typeof window.__worldPaused !== 'undefined') window.__worldPaused = true;
+    if (typeof sfx !== 'undefined' && sfx.confirm) sfx.confirm();
+    showMoveOnPrompt(function (yes) {
+      window.__tutExitPromptOpen = false;
+      if (typeof window.__worldPaused !== 'undefined') window.__worldPaused = false;
+      const t = State.tut || {};
+      const ret = t.returnScreen || 'FIRST_SHIFT';
+      const lesson = currentLesson();
+      try { if (lesson && typeof lesson.onExit === 'function') lesson.onExit(); } catch (e) {}
+      window.engineOnExitReached = null;
+      if (typeof unmountMapCanvas === 'function') unmountMapCanvas();
+      if (yes) {
+        fadeThen(() => startFullTutorial(ret), 550);
+      } else {
+        if (typeof sfx !== 'undefined' && sfx.back) sfx.back();
+        State.tut = null; State._offerCur = 0;
+        if (typeof logEvent === 'function') logEvent('Skipped the tutorial.');
+        fadeThen(() => goto(ret), 550);
+      }
+    }, {
+      title: 'Welcome to the Grande',
+      text: 'Want a quick hands-on tutorial before your shift?\nA few tiny rooms, one skill each. You can replay any of them later from Help.',
+      yes: 'Start the tutorial', no: 'Skip \u2014 clock in', escNo: false, page: true,
+    });
   }
 
   function nextLesson() {
@@ -1135,7 +1140,7 @@
         if (!w.done.dress) { say('sys', 'You can\u2019t head to your first shift in pajamas \u2014 try  GET DRESSED  first.'); sfx.error(); rerender(); return; }
         if (typeof logEvent === 'function') logEvent('Left home for the first shift at the Grande.');
         say('world', 'You grab your keys, lock up, and step out into the morning. The Grande\u2019s marquee is a few blocks away.');
-        say('tut-coach', '\u27e2 That\u2019s the heart of it: spend TIME, manage RESTED, weigh trade-offs. Next: getting to work. Once you\u2019re inside, you can take a few tiny hands-on tutorial rooms, or skip them.');
+        say('tut-coach', '\u27e2 That\u2019s the heart of it: spend TIME, manage RESTED, weigh trade-offs. Next, a few tiny rooms teach the hands-on controls \u2014 then you\u2019re loose in the game.');
         State._wake = null;
         try { if (window.setSceneWords) window.setSceneWords([]); } catch (e) {}   // #6: clear the wake-up command bar on handoff
         sfx.confirm();
@@ -1315,7 +1320,9 @@
         '',
         ...lines,
         '',
-        t.parkingLotIntro ? '' :   // PORTFOLIO EDIT: getting to work isn't a tutorial, so it can't be skipped
+        // The parking lot is the commute, not a lesson: no next/skip/back — you
+        // get your key and walk in (the tutorial offer pops up at the doors).
+        t.parkingLotIntro ? span('stat-name', 'Grab your key, then head inside — your shift starts soon.') :
         span('accent', '[ next ]') + ' continue   ·   ' +
           (t.replay ? '' : span('accent', '[ skip ]') + ' skip all tutorials   ·   ') +
           span('accent', '[ back ]') + (t.replay ? ' leave' : ' previous'),
@@ -1334,9 +1341,8 @@
     handle(text) {
       const t = (text || '').trim().toLowerCase();
       const tut = State.tut || {};
-      if (tut.parkingLotIntro) {   // PORTFOLIO EDIT: no next / skip / back on the way in to work
-        if (t.startsWith('warp')) { const n = parseInt(t.replace(/^warp\s*/, ''), 10); if (!isNaN(n) && window.engineFastTravel) { window.engineFastTravel(n); return; } }
-        sfx.error(); flash('Grab your key from your car, then head inside through the theater doors.'); return;
+      if (tut.parkingLotIntro && ['next', 'n', 'continue', 'done', 'skip', 'skipall', 'back', 'b'].includes(t)) {
+        sfx.error(); flash('This isn\u2019t a tutorial \u2014 grab your key from your car and head inside.'); return;
       }
       if (t === 'next' || t === 'n' || t === 'continue' || t === 'done') {  // (removed t==='' — a stray Enter no longer skips the lesson)
         sfx.confirm(); nextLesson(); return;

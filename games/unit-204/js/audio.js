@@ -1,9 +1,9 @@
 'use strict';
 /* ============================== AUDIO ==============================
    Recorded sounds (Kenney, CC0) play through plain <audio> elements, which also work when the game is opened
-   straight from disk. They're embedded in js/sounds.js (free Neocities accounts don't accept audio files). The shutter, beeps, pencil, tape measure and lounge music are synthesized with Web Audio. */
+   straight from disk. They're embedded in js/sounds.js (free Neocities accounts don't accept audio files). The shutter, beeps, pencil, and tape measure are synthesized with Web Audio; the music is ZzFXM songs (js/music.js). */
 const Audio2 = {
-  ctx: null, sfxBus: null, musicBus: null, files: {}, amb: null, steps: null, musicOn: false, nextBar: 0, bar: 0, unlocked: false,
+  ctx: null, sfxBus: null, musicBus: null, files: {}, amb: null, steps: null, unlocked: false,
   FILES: { click: ['click-a', .55], click2: ['click-b', .55], tick: ['tick', .25], chime: ['chime', .7], thud: ['thud', .9], swish: ['swish', .45], ratchet: ['ratchet', .5] },
   src(file) { return (typeof SOUNDS !== 'undefined' && SOUNDS[file]) || 'assets/audio/' + file + '.mp3'; },   // embedded (js/sounds.js) first
   init() {
@@ -24,7 +24,7 @@ const Audio2 = {
     } catch (e) { this.ctx = null; }
     this.volumes();
   },
-  muted() { try { return !!(parent !== window && parent.DemoControls && parent.DemoControls.muted && parent.DemoControls.muted()); } catch (e) { return false; } },
+  muted() { if (Settings.get('mute')) return true; try { return !!(parent !== window && parent.DemoControls && parent.DemoControls.muted && parent.DemoControls.muted()); } catch (e) { return false; } },
   vol(kind) { return this.muted() ? 0 : Settings.get('master') * Settings.get(kind); },
   volumes() {
     if (this.master) { this.sfxBus.gain.value = this.vol('sfx'); this.musicBus.gain.value = this.vol('music') * .55; }
@@ -95,51 +95,13 @@ const Audio2 = {
       case 'unscrew': for (let i = 0; i < 6; i++) this.burst(t + i * .06, .03, 2500, 5, .2); break;
       case 'creak': { const o = this.tone(t, 180, .5, .05, 'sawtooth'); o.frequency.linearRampToValueAtTime(120, t + .45); break; }
       case 'blip': this.tone(t, 880, .05, .04, 'square'); break;
+      case 'click': this.tone(t, 1200, .025, .03, 'square'); break;
+      case 'ring': for (let r = 0; r < 2; r++) for (let i = 0; i < 16; i++) { this.tone(t + r * .9 + i * .045, 440, .04, .045, 'square'); this.tone(t + r * .9 + i * .045, 480, .04, .045, 'square'); } break;   // a desk phone's double ring
+      case 'hangup': this.burst(t, .06, 900, 1, .4, 'lowpass'); this.tone(t + .08, 480, .25, .03, 'square'); this.tone(t + .08, 620, .25, .03, 'square'); break;
+      case 'whir': this.burst(t, 1.1, 380, .7, .14, 'lowpass'); this.tone(t, 110, .9, .03, 'sawtooth'); break;
     }
   },
-  /* ---------- lounge music: a soft electric-piano ii-V-I loop, like hold music at the leasing office ---------- */
-  CHORDS: [[50, 53, 57, 60, 64], [43, 53, 55, 59, 64], [48, 52, 55, 59, 62], [45, 52, 55, 58, 61], [50, 53, 57, 60, 64], [43, 53, 57, 59, 62], [48, 52, 55, 59, 64], [48, 52, 55, 59, 64]],
-  music(on) {
-    this.musicOn = on;
-    if (on && this.ctx) { this.nextBar = Math.max(this.nextBar, this.ctx.currentTime + .1); }
-  },
-  tick() {                          // called every frame: schedule a bar ahead
-    if (!this.musicOn || !this.ctx || this.vol('music') <= 0) return;
-    const now = this.ctx.currentTime, beat = 60 / 76;
-    while (this.nextBar < now + .5) {
-      const ch = this.CHORDS[this.bar % this.CHORDS.length], t0 = this.nextBar;
-      const hz = m => 440 * Math.pow(2, (m - 69) / 12);
-      // electric piano: sine + soft overtone, gentle tremolo, comped on beats 1 and the "and" of 2
-      for (const hit of [0, 1.5]) for (let i = 1; i < ch.length; i++) {
-        const t = t0 + hit * beat + i * .012;
-        for (const [mul, amp] of [[1, .05], [2, .012]]) {
-          const o = this.ctx.createOscillator(); o.type = 'sine'; o.frequency.value = hz(ch[i]) * mul;
-          const g = this.ctx.createGain(); this.env(g, t, .01, amp, hit ? 1.4 : 2.1);
-          o.connect(g); g.connect(this.musicBus); g.connect(this.verb); o.start(t); o.stop(t + 2.4);
-        }
-      }
-      // walking bass
-      const root = ch[0] - 12, walk = [root, root + 7, root + 12, root + (this.bar % 2 ? 5 : 3)];
-      walk.forEach((m, i) => {
-        const o = this.ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = hz(m);
-        const g = this.ctx.createGain(); this.env(g, t0 + i * beat, .01, .09, beat * .8);
-        o.connect(g); g.connect(this.musicBus); o.start(t0 + i * beat); o.stop(t0 + i * beat + beat);
-      });
-      // brushes
-      for (let i = 0; i < 4; i++) {
-        const s = this.ctx.createBufferSource(); s.buffer = this._brush || (this._brush = this.noise(.2));
-        const f = this.ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 5000;
-        const g = this.ctx.createGain(); this.env(g, t0 + i * beat, .02, i % 2 ? .03 : .015, .12);
-        s.connect(f); f.connect(g); g.connect(this.musicBus); s.start(t0 + i * beat); s.stop(t0 + i * beat + .2);
-      }
-      // a lazy melody note now and then
-      if (this.bar % 2 === 1 || hash(this.bar) > .5) {
-        const m = ch[2 + Math.floor(hash(this.bar * 7) * 3)] + 12, t = t0 + (2 + Math.floor(hash(this.bar * 3) * 2)) * beat;
-        const o = this.ctx.createOscillator(); o.type = 'sine'; o.frequency.value = hz(m);
-        const g = this.ctx.createGain(); this.env(g, t, .02, .04, 1.2);
-        o.connect(g); g.connect(this.musicBus); g.connect(this.verb); o.start(t); o.stop(t + 1.4);
-      }
-      this.nextBar += beat * 4; this.bar++;
-    }
-  }
+  /* ---------- music: ZzFXM songs, see js/music.js ---------- */
+  music(on) { if (on) Music.play(Sites.site.music || 'lounge'); else Music.stop(); },   // each property has its own radio station
+  tick() {}
 };

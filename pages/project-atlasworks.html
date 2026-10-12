@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-ATLASWORKS.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="89998b16">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlasworks</title>
+    <meta name="description" content="Atlasworks by Joseph VanWagner: a retro town-map editor for laying out a game's overworld, with terrain, rivers, roads and live traffic, places, homes, and bus routes. Try it in your browser.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=90379466">
+    <link rel="stylesheet" href="../shared/share.css?v=ebba4e48">
+    <link rel="stylesheet" href="css/modern.css?v=0ffe9a82">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=ecd42624"></script>
+    <script src="../config/shared-content.js?v=3cd2f224"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=8ddee710"></script>
+    <script src="js/lightbox.js?v=af09d593"></script>
+    <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=418e2f9e"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=726959f6"></script>
+</head>
+<body data-title="Atlasworks" data-nav="my-projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="my-projects.html">&larr; Back to Projects</a></p>
+                <p class="kicker">Tool · HTML / JavaScript</p>
+                <h1>Atlasworks</h1>
+                <p class="lede">Lay out a whole town, then watch it run.</p>
+                <p>Atlasworks is a town-map editor with a Windows&nbsp;95 look and a 16-color EGA palette. You lay a town out on a
+                   grid of tiles: paint the ground, wind a river through it, raise hills, lay roads with real lane counts and speed
+                   limits, and drop in the places, homes, and bus stops that make it a town. Then switch to Preview mode and the map
+                   comes alive, with traffic on the roads, a clock, the weather, and a legend of everywhere worth going.</p>
+                <p>I first built it inside <a href="project-midnight-multiplex.html">Midnight at the Multiplex</a>, for the town the
+                   player travels across between locations (each building's inside is built in a separate editor). It has since
+                   moved out into its own standalone tool.</p>
+                <div class="btn-row">
+                    <a class="btn primary" href="../work/atlasworks/index.html" target="_blank" rel="noopener">Open the tool full screen</a>
+                    <button class="btn retro-only" type="button" onclick="parent.AtlasworksApp && parent.AtlasworksApp.open()" title="Opens Atlasworks as its own program on the desktop, with a full-screen button">Open as a desktop program</button>
+                </div>
+                <p class="course-note">Everything runs in your browser; nothing is sent anywhere. Export File downloads your map as a JSON file.</p>
+            </div>
+        </section>
+
+        <!-- The tool itself is one self-contained file: /work/atlasworks/index.html (synced from the TOOL--Atlasworks repo; edit it there) -->
+        <section class="panel">
+            <div class="panel-body course-panel">
+                <h2>Try it</h2>
+                <p>This is the working tool. Pick a size in the <strong>New Map Setup</strong> box (try splitting the town into
+                   districts with border roads) and press <strong>Create Map</strong>; a short tour shows you around. Paint some
+                   water, drag out a road, place a few points of interest, then press <strong>Preview Mode</strong> to see it run.</p>
+                <div class="course-frame">
+                    <iframe data-demo data-demo-nomute src="../work/atlasworks/index.html" title="Atlasworks (interactive town-map editor)" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
+                </div>
+                <p class="course-note">Tip: Atlasworks is made for a mouse and a big screen (drag to paint, scroll to zoom). The
+                   <a href="../work/atlasworks/index.html" target="_blank" rel="noopener">full-screen version</a> has the most room.</p>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Interactive demo</li><li>Map editor</li></ul>
+
+                <h2>What it does</h2>
+                <ul>
+                    <li><strong>New Map Setup:</strong> choose the grid size (5 to 50 tiles each way), how finely each tile can be
+                        painted (1&times;1 up to 12&times;12 sub-pixels), and how much ground one tile covers (1/8 mile up to 2 miles).
+                        Optionally split the town into up to 36 districts and draw roads along their borders automatically.</li>
+                    <li><strong>Terrain:</strong> paint grass, forest, dirt, concrete, asphalt, sand, shallows, and deep water, with an
+                        adjustable brush, a little random color variety on whole-tile strokes, and beaches that form on their own
+                        wherever water meets land. Shapes draws rectangles and ovals, filled or outlined, as terrain or as a separate
+                        overlay layer.</li>
+                    <li><strong>Rivers, docks, and hills:</strong> draw winding rivers with sandbars along their banks, walkable wooden
+                        docks over deep water, and raise or lower the ground so peaks show brighter and valleys darker.</li>
+                    <li><strong>Roads and traffic:</strong> roads snap to tile edges and carry 1 to 7 lanes, a surface (asphalt,
+                        concrete, dirt, or gravel), a speed limit, and a traffic volume. They're drawn wider or narrower to match the map's scale.
+                        Paint water over a road and Atlasworks asks whether to turn it into a bridge or erase it.</li>
+                    <li><strong>Places and homes:</strong> points of interest with a name, description, icon, and size (quick presets
+                        for bus stops, gas stations, hospitals, and shops), plus &ldquo;quest&rdquo; markers that flash for attention.
+                        Residences carry a type (owned house, parents' house, apartment, or rental), a color-coded price tier, beds,
+                        baths, units, and tenants, and a suggested 1999 monthly rent.</li>
+                    <li><strong>Bus routes:</strong> name a route and click near the roads to place its stops; each stop snaps to the
+                        nearest road.</li>
+                    <li><strong>Inspector:</strong> click a tile or road to see and edit what's there; Shift-click to select several;
+                        drag places and homes to move them. Undo and Redo cover every change.</li>
+                    <li><strong>Preview mode:</strong> the map as a player would see it: animated traffic, a date-and-time bar, local
+                        weather, a compass, a legend of every place on the map, morning, day, evening, and night lighting, and switches to
+                        show or hide homes and bus routes. A song can play while you look, with fade-in and fade-out.</li>
+                </ul>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Level design</li><li>Terrain painting</li><li>Traffic simulation</li><li>Worldbuilding</li></ul>
+
+                <h2>Screenshots</h2>
+                <p>All of these show one sample town, &ldquo;Lakeside,&rdquo; built in Atlasworks: a lake and a winding river,
+                   a downtown, the fairgrounds, and the Grande, the movie theater from Midnight at the Multiplex.</p>
+                <div class="shots">
+                    <figure><a class="zoom" href="../images/projects/atlasworks/editor.webp" data-caption="The editor: tools on the left, the selected tool's settings on the right, and the town in between, split into four districts with border roads."><img src="../images/projects/atlasworks/thumbs/editor.jpg" alt="The Atlasworks editor: a Windows 95-style window with a tile map of a town with a lake, a river, roads, and forest" loading="lazy"></a><figcaption>The editor</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/atlasworks/preview.webp" data-caption="Preview mode: cars drive the roads, homes and the bus route show, and the legend lists every place on the map, with the date and the weather up top."><img src="../images/projects/atlasworks/thumbs/preview.jpg" alt="The town in Preview mode with traffic on the roads, a weather box, and a map legend" loading="lazy"></a><figcaption>Preview mode, with traffic</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/atlasworks/preview-night.webp" data-caption="The same town at night: Preview mode can show it in the morning, during the day, in the evening, or at night."><img src="../images/projects/atlasworks/thumbs/preview-night.jpg" alt="The town map tinted dark blue for night" loading="lazy"></a><figcaption>The same town at night</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/atlasworks/residences.webp" data-caption="Residences: each home's type, price tier, beds, baths, units, and tenants, with a suggested 1999 rent for rentals and apartments. Markers are colored by price tier."><img src="../images/projects/atlasworks/thumbs/residences.jpg" alt="The Residences tool settings beside the map, with small colored home markers" loading="lazy"></a><figcaption>Placing homes</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/atlasworks/inspector.webp" data-caption="The Inspector on the Grande's tile: its district, water depth, and the places on it, any of which can be edited or removed."><img src="../images/projects/atlasworks/thumbs/inspector.jpg" alt="The Inspector panel listing the selected tile's district and the Grande" loading="lazy"></a><figcaption>The Inspector</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/atlasworks/setup.webp" data-caption="Every map starts here: grid size, sub-pixels per tile, map scale, and optional districts with border roads."><img src="../images/projects/atlasworks/thumbs/setup.jpg" alt="The New Map Setup dialog with size, scale, and district options" loading="lazy"></a><figcaption>New Map Setup</figcaption></figure>
+                </div>
+
+                <h2>How it's built</h2>
+                <p>The whole tool is one HTML file with no libraries and no build step, so it opens straight from a folder, offline,
+                   or from any web server. The map is drawn with ordinary page elements rather than a canvas: every tile is split into
+                   sub-pixels that can each be painted, and roads, places, and traffic sit on layers above them. Traffic follows the
+                   road network the tool builds as you draw. The editor's look is Windows&nbsp;95-style beveled panels and the 16 EGA
+                   colors, to match the 1999 setting of the game it was made for.</p>
+                <h2>Design features</h2>
+                <ul class="tags"><li>Map editor</li><li>Level design</li><li>JavaScript</li><li>Worldbuilding</li><li>Traffic simulation</li><li>Retro style</li><li>Game tools</li></ul>
+                <div class="btn-row">
+                    <a class="btn" href="my-projects.html">&larr; Back to Projects</a>
+                    <a class="btn primary" href="../work/atlasworks/index.html" target="_blank" rel="noopener">Open the tool</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

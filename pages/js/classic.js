@@ -16,14 +16,13 @@
     if (framed) document.documentElement.classList.add('in-desktop');
 
     /*
-     * LIGHT / DARK (Traditional View only). The visitor's choice is saved as localStorage "site-theme"
-     * ('light' or 'dark'); until they choose, the page follows their device's own setting and
-     * keeps following it if that changes. Set here, in <head>, so there's no white flash.
+     * LIGHT / DARK (Traditional View only). Light mode is the default for everyone; the visitor's own
+     * choice (the moon / sun switch) is saved as localStorage "site-theme" ('light' or 'dark') and
+     * remembered from then on. Set here, in <head>, so there's no flash of the wrong theme.
      * Styles: css/modern.css ("DARK MODE"). The switch is added to the header further down.
      */
     var THEME_KEY = 'site-theme';
     function savedTheme() { try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; } }
-    function systemTheme() { try { return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch (e) { return 'light'; } }
     function applyTheme(t) {
         document.documentElement.setAttribute('data-theme', t);
         var b = document.getElementById('theme-btn');
@@ -34,12 +33,7 @@
         }
     }
     if (!framed) {
-        applyTheme(savedTheme() || systemTheme());
-        try {
-            matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
-                if (!savedTheme()) applyTheme(systemTheme());
-            });
-        } catch (e) {}
+        applyTheme(savedTheme() || 'light');
     }
     // Retro desktop's pixel mouse pointers (TOOLS > Quick Toggles; desktop/js/customize/retro-cursor.js)
     if (framed) {

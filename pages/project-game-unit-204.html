@@ -11,24 +11,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="page-version" content="9f78766e">
+    <meta name="page-version" content="f513c1cb">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unit 204: learning game</title>
     <meta name="description" content="Unit 204, a playable learning game by Joseph VanWagner: a pixel-art point-and-click move-out inspection about telling normal wear from tenant damage and maintenance hazards.">
     <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
     <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
     <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="css/classic.css?v=fa07d833">
+    <link rel="stylesheet" href="css/classic.css?v=90379466">
     <link rel="stylesheet" href="../shared/share.css?v=ebba4e48">
-    <link rel="stylesheet" href="css/modern.css?v=cdfd7b86">    <!-- Traditional View look (not used inside the Retro Desktop) -->
-    <script src="../config/site-config.js?v=6696cace"></script>
-    <script src="../config/shared-content.js?v=e9eeb62c"></script>   <!-- stats, colleague quotes (shared) -->
+    <link rel="stylesheet" href="css/modern.css?v=0ffe9a82">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=ecd42624"></script>
+    <script src="../config/shared-content.js?v=3cd2f224"></script>   <!-- stats, colleague quotes (shared) -->
     <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
-    <script src="js/classic.js?v=1e0da1f0"></script>
+    <script src="js/classic.js?v=8ddee710"></script>
     <script src="js/page-toc.js?v=635e0a6a"></script>             <!-- "On this page" box from the headings -->
     <script src="js/lightbox.js?v=af09d593">        </script>   <!-- click a screenshot to see it full size -->
     <script src="js/search.js?v=92eeb169"></script>
-    <script src="../shared/demo-controls.js?v=01dee569"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/demo-controls.js?v=418e2f9e"></script>   <!-- Mute + Full screen above each demo -->
     <script src="../shared/share.js?v=726959f6"></script>
 </head>
 <body data-title="Unit 204" data-nav="projects.html">
@@ -43,76 +43,160 @@
                 <p class="breadcrumb"><a href="projects.html#games">&larr; Back to Portfolio</a></p>
                 <p class="kicker">Learning game · A point-and-click move-out inspection · HTML / JavaScript / Canvas</p>
                 <h1>Unit 204</h1>
-                <p class="lede">A pixel-art point-and-click adventure about a move-out inspection: look, touch, smell and
-                   measure your way through an empty apartment, then mark every finding on your clipboard.</p>
+                <p class="lede">A pixel-art point-and-click adventure about a move-out inspection: look, touch, smell, and measure your way through an empty apartment, then mark every finding on your clipboard.</p>
                 <p>The hardest calls in a move-out inspection are the ones that decide money and safety. Is that worn
                    carpet normal wear (never charged), tenant damage (charged, but only with a photo), or a maintenance
                    hazard that needs a work order today? I built Unit 204 as a demo piece for a learning design role in
                    property management. It makes you gather evidence before you decide, then grades every call with the
                    reasoning from the standard operating procedure. You walk the unit with Dana from the leasing office,
                    zoom into each feature, and use your senses and a toolbelt of 2008-vintage gear: tape measure, flashlight,
-                   screwdriver, hammer, pencil, and a silver point-and-shoot camera.</p>
-                <p><strong>Controls:</strong> left-click to use the current verb or tool; <strong>right-click</strong> to cycle
-                   Walk, Look, Touch, Smell and Talk, like the Sierra adventure games of the '90s (or press <kbd>1</kbd>&ndash;<kbd>5</kbd>,
-                   or <kbd>C</kbd>). Hover over the top edge for the toolbar of tools, the SOP manual and settings; <kbd>Esc</kbd>
-                   opens the menu. Best with a mouse, but it works on a phone or tablet too (tap the top edge for tools; a
-                   corner button cycles the cursor).</p>
+                   screwdriver, hammer, pencil, and a forest-green point-and-shoot camera. Two weeks later, the tenant calls about the deposit,
+                   and how you handle that call is graded too.</p>
+                <p><strong>Four properties.</strong> The title screen lets you pick where you're inspecting. <strong>Unit 204</strong>
+                   is the apartment move-out. <strong>Suite 204</strong> is the lease-end walkthrough of an office suite a business just
+                   moved out of. <strong>Lot 204</strong> is a safety and condition walk of a tenant's warehouse floor, racks, and shop.
+                   <strong>Site 204</strong> is the owner's safety walk of a contractor's jobsite, mostly outdoors, with the crew at
+                   work around you: hard hats, vests, glasses, fall protection, the trench box, and the excavator all count. Each has four
+                   areas, its own SOP, gray-area calls, and containers to open, and a Field Safety Handbook explains the OSHA rules behind
+                   the safety findings, linked right from your notes.</p>
+                <p><strong>Controls:</strong> left-click to use the current verb or tool. A plain click also opens doors and
+                    appliances, flips switches, and picks up whatever the tenant left. <strong>Right-click</strong> cycles
+                    Walk, Look, Touch, Smell, and Talk (or press <kbd>1</kbd>&ndash;<kbd>5</kbd>, or <kbd>C</kbd>). Hover over the top
+                    edge for the toolbar: tools, your form, <strong>Finish</strong>, your bag, the SOP binder, mute (<kbd>M</kbd>),
+                    full screen (<kbd>F</kbd>), settings, and the menu (<kbd>Esc</kbd>). Short tips point things out the first time
+                    they come up, and Settings turns them off. On a phone the toolbar stays up and the text gets bigger; held
+                    upright, the room becomes a strip you swipe side to side.</p>
                 <div class="btn-row">
-                    <a class="btn primary" href="../games/unit-204/index.html" target="_blank" rel="noopener">Play full screen</a>
                     <!-- Retro Desktop only: open the game in its own desktop window -->
-                    <button class="btn retro-only" type="button" onclick="parent.GamesApp.open('unit-204')" title="Opens the game as its own program on the desktop, with a full-screen button">Open as a desktop program</button>
+                    <button class="btn retro-only" type="button" onclick="parent.GamesApp.open('unit-204')" title="Opens the game as its own program on the desktop">Open as a desktop program</button>
                 </div>
             </div>
         </section>
 
-        <!-- The game itself: /games/unit-204/index.html (plain HTML, CSS and JavaScript; sounds embedded in js/sounds.js) -->
+        <!-- The game itself: /games/unit-204/index.html (plain HTML, CSS, and JavaScript; sounds embedded in js/sounds.js) -->
         <section class="panel">
             <div class="panel-body course-panel">
                 <div class="course-frame" style="aspect-ratio: 16 / 9; height: auto; max-height: 90vh;">
-                    <iframe data-demo src="../games/unit-204/index.html" title="Unit 204 (playable game)" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
+                    <iframe data-demo-guard src="../games/unit-204/index.html" title="Unit 204 (playable game)" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
                 </div>
-                <p class="course-note">Tip: right-click inside the game to change your cursor. On a small screen, try the
-                <a href="../games/unit-204/index.html" target="_blank" rel="noopener">full-screen version</a>.</p>
+                <p class="course-note">Tip: right-click inside the game to change your cursor. For full screen, use the game's own button in the
+                toolbar (or press <kbd>F</kbd>).</p>
 
                 <h2>Screenshots</h2>
                 <div class="shots">
-                    <figure><a class="zoom" href="../images/games/unit-204/title.webp" data-caption="The title screen: you and Dana in the hallway outside Unit 204, with Settings and Credits for the free sounds and fonts."><img src="../images/games/unit-204/thumbs/title.jpg" alt="A pixel-art apartment hallway with a burgundy carpet runner, the inspector and Dana on either side of the Unit 204 logo" loading="lazy"></a><figcaption>The hallway outside Unit 204</figcaption></figure>
-                    <figure><a class="zoom" href="../images/games/unit-204/living-room.webp" data-caption="The living room at golden hour: an accent wall, a ceiling fan, vertical blinds, and a dark stain on the carpet. Hover outlines show what you can interact with."><img src="../images/games/unit-204/thumbs/living-room.jpg" alt="A living room in one-point perspective with a red accent wall, a ceiling fan, and a stain on the beige carpet outlined by the Look cursor" loading="lazy"></a><figcaption>Looking over the living room</figcaption></figure>
-                    <figure><a class="zoom" href="../images/games/unit-204/close-up.webp" data-caption="Looking at a feature zooms into a close-up. Here the flashlight finds a weeping supply line under the kitchen sink, and every useful observation lands in the field notes."><img src="../images/games/unit-204/thumbs/close-up.jpg" alt="A close-up window of an open sink cabinet lit by a flashlight beam, with handwritten field notes beside it" loading="lazy"></a><figcaption>A close-up, with field notes</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/title.webp" data-caption="The title screen: you and Dana in the hallway outside Unit 204, with Settings and Credits for the free sounds, icons, fonts, and music players."><img src="../images/games/unit-204/thumbs/title.jpg" alt="A pixel-art apartment hallway with a burgundy carpet runner, the inspector and Dana on either side of the Unit 204 logo" loading="lazy"></a><figcaption>The hallway outside Unit 204</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/living-room.webp" data-caption="The living room at golden hour. Dana keeps out of your way, and when she has a hint she walks over and points at what you should check. Somebody left a rug, and a necktie on the ceiling fan."><img src="../images/games/unit-204/thumbs/living-room.jpg" alt="A living room with a red accent wall, a round area rug, and a ceiling fan with a necktie on one blade, Dana pointing up at the fan" loading="lazy"></a><figcaption>Dana points out the ceiling fan</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/rug.webp" data-caption="Roll up the rug the tenant left behind and see what it was hiding. Touch works right in the room: switches, every cabinet, the fridge, the oven, the dishwasher, the closet, the blinds."><img src="../images/games/unit-204/thumbs/rug.jpg" alt="The same living room with the rug rolled up and a dark stain on the carpet where it lay, a narration caption below" loading="lazy"></a><figcaption>What the rug was hiding</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/call.webp" data-caption="Two weeks later, the old tenant calls about the deposit. Here, you charged them for something that turns out to be normal wear, and they know it. The calls are branching scenarios built in my Scenemaker tool, and they change with what you did: whether you charged it, whether it was really damage, and whether you took a photo or measured it."><img src="../images/games/unit-204/thumbs/call.jpg" alt="A phone call window: a desk with a deposit statement, a coffee mug, and a desk phone, the caller saying normal wear can&rsquo;t be charged, and three ways to answer" loading="lazy"></a><figcaption>The tenant calls about the deposit</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/anomaly.webp" data-caption="Every room also has a few small oddities that are not on the work order, like a sticky note, glow-in-the-dark stars, or a marker drawing. Write one up correctly for extra credit (it never cancels something you missed)."><img src="../images/games/unit-204/thumbs/anomaly.jpg" alt="A bedroom with an open closet, a yellow sticky note on the door frame and a marker drawing of a big cat on the side wall, with a narration caption" loading="lazy"></a><figcaption>Small oddities, worth noting</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/kitchen.webp" data-caption="Every cabinet door, the fridge and freezer, the oven, and the dishwasher swing or drop open on screen, and close again with a click. Some findings only show up inside, like a cracked shelf or a leak under the sink, and whatever the tenant left behind can go in your bag."><img src="../images/games/unit-204/thumbs/kitchen.jpg" alt="A kitchen with several upper cabinet doors swung open, the oven door down, and the refrigerator and freezer doors open" loading="lazy"></a><figcaption>Open everything. Some findings are inside.</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/close-up.webp" data-caption="Looking at a feature zooms into a close-up. Here the flashlight finds a weeping supply line under the kitchen sink, below the two basins, and every useful observation lands in the field notes."><img src="../images/games/unit-204/thumbs/close-up.jpg" alt="A close-up of an open sink cabinet with the basins dropping below the counter, lit by a flashlight beam, with handwritten field notes beside it" loading="lazy"></a><figcaption>A close-up, with field notes</figcaption></figure>
                     <figure><a class="zoom" href="../images/games/unit-204/clipboard.webp" data-caption="The clipboard form: pick one of the four SOP condition codes, attach a photo, and file it. Your field notes come along."><img src="../images/games/unit-204/thumbs/clipboard.jpg" alt="A clipboard with a move-out inspection form: four condition checkboxes, a photo of the sink, and notes" loading="lazy"></a><figcaption>Marking it on the clipboard</figcaption></figure>
-                    <figure><a class="zoom" href="../images/games/unit-204/camera.webp" data-caption="A silver 2008 point-and-shoot. Damage can only be charged to the deposit with a photo, and hazards always need one."><img src="../images/games/unit-204/thumbs/camera.jpg" alt="A silver digital camera with an LCD screen showing the sink cabinet and an orange date stamp" loading="lazy"></a><figcaption>Documenting it with the camera</figcaption></figure>
-                    <figure><a class="zoom" href="../images/games/unit-204/bedroom-toolbar.webp" data-caption="The hover toolbar: five verbs, seven tools, the clipboard report, the SOP manual, settings and the menu. The bedroom on a rainy day."><img src="../images/games/unit-204/thumbs/bedroom-toolbar.jpg" alt="A bedroom with floorboards, closet doors and a rainy window, with a toolbar of pixel icons along the top" loading="lazy"></a><figcaption>The toolbar, on a rainy day</figcaption></figure>
-                    <figure><a class="zoom" href="../images/games/unit-204/bathroom.webp" data-caption="Every shift rolls new conditions, light, paint, floors and leftover junk, so no two inspections look alike."><img src="../images/games/unit-204/thumbs/bathroom.jpg" alt="A seafoam bathroom with a tiled tub, a vanity mirror and a toilet, the inspector and Dana in the middle" loading="lazy"></a><figcaption>The bathroom in the morning</figcaption></figure>
-                    <figure><a class="zoom" href="../images/games/unit-204/report.webp" data-caption="The end-of-shift report: a grade, score, hazards caught, deposit charged (and wrongly charged), and the SOP reasoning for every item, plus a score card to save and share."><img src="../images/games/unit-204/thumbs/report.jpg" alt="A move-out report with a red grade stamp, stats, itemized findings, a photo, and share buttons" loading="lazy"></a><figcaption>The move-out report</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/camera.webp" data-caption="A slim forest-green 2008 point-and-shoot, drawn in the same pixel art as the rest of the game, with only the buttons that matter: the shutter on top (labeled SNAP), zoom, playback, and a pad to page through your shots and erase one. Damage can only be charged to the deposit with a photo, and hazards always need one. Extra photos never count against you."><img src="../images/games/unit-204/thumbs/camera.jpg" alt="A forest-green pixel-art pocket camera seen from the back, its screen zoomed in on the sink cabinet, with two round control dials beside it" loading="lazy"></a><figcaption>Documenting it with the camera</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/camera-roll.webp" data-caption="Playback pages through every photo from the shift. Press the trash can, then OK, to erase one."><img src="../images/games/unit-204/thumbs/camera-roll.jpg" alt="The forest-green camera in playback mode, showing a dated photo of the gas range" loading="lazy"></a><figcaption>Reviewing the camera roll</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/bedroom-toolbar.webp" data-caption="The toolbar keeps everything one click away: five verbs, seven tools, your form, the Finish button, your bag, the SOP binder, mute, full screen, settings, and the menu."><img src="../images/games/unit-204/thumbs/bedroom-toolbar.jpg" alt="A bedroom with an open closet, a rainy window, and an orange marker drawing on the side wall, with a toolbar of pixel icons along the top" loading="lazy"></a><figcaption>The toolbar: every verb and tool, one click away</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/bathroom.webp" data-caption="Every shift rolls new conditions, light, paint, floors, and leftover junk, so no two inspections look alike. Nobody tells you what&rsquo;s wrong, or how much."><img src="../images/games/unit-204/thumbs/bathroom.jpg" alt="A seafoam bathroom with a tiled tub, a round dent in one wall tile, a toilet, and a vanity, with a narration caption below" loading="lazy"></a><figcaption>The bathroom in the morning</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/bag.webp" data-caption="Your bag: things the tenant left behind that you picked up. Look at them, touch them, smell them, and combine them. No use on the job. That isn&rsquo;t the point."><img src="../images/games/unit-204/thumbs/bag.jpg" alt="An inventory window with a necktie, a red stapler, a hamburger phone, a trial CD, and a jar of pickles" loading="lazy"></a><figcaption>Your bag of left-behind things</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/blackberry.webp" data-caption="Hazards have to be called in, not just written down. Dana lends you her BlackBerry, and you walk Gus in maintenance through each one. The call is a short branching scenario built in Scenemaker. The phone has Snake on it, too, and Dana notices if you play instead of calling."><img src="../images/games/unit-204/thumbs/blackberry.jpg" alt="A pixel-art BlackBerry held up close, mid-call with maintenance, offering two ways to describe a sparking vanity light" loading="lazy"></a><figcaption>Calling hazards in on Dana&rsquo;s BlackBerry</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/window-bird.webp" data-caption="Every window can be looked at up close, and now and then a bird lands on the ledge or flies past. Photograph one for an achievement."><img src="../images/games/unit-204/thumbs/window-bird.jpg" alt="A close-up of a kitchen window over a parking lot with a red cardinal perched on the outside ledge" loading="lazy"></a><figcaption>A visitor at the kitchen window</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/achievements.webp" data-caption="Achievements for being thorough, safe, or a little silly, from Birding Enthusiast to The Dude Abides, in a trophy case on the toolbar."><img src="../images/games/unit-204/thumbs/achievements.jpg" alt="A grid of pixel medallions, some earned and labeled, others locked with hints" loading="lazy"></a><figcaption>The trophy case</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/debrief.webp" data-caption="Before the report, your property manager walks you through how it went: hazards caught and missed, wrongful charges, missing photos, thin notes, and how you handled the tenant&rsquo;s call."><img src="../images/games/unit-204/thumbs/debrief.jpg" alt="A dialogue window with a pixel portrait of the property manager praising how the tenant call was handled" loading="lazy"></a><figcaption>The manager&rsquo;s debrief</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/report.webp" data-caption="The end-of-shift report: a rubber-stamped grade, a separate Customer Service grade for the phone call, the score, hazards caught, deposit charged (and wrongly charged), and the SOP reasoning for every item, plus a score card to save and share."><img src="../images/games/unit-204/thumbs/report.jpg" alt="A move-out report with a red grade stamp, stats, itemized findings, photos, and share buttons" loading="lazy"></a><figcaption>The move-out report</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/phone.webp" data-caption="On a phone held upright, the room is a strip you swipe through, with the tools and captions underneath."><img src="../images/games/unit-204/thumbs/phone.jpg" alt="The game on a phone screen in portrait: the living room on top, a grid of tool icons below, and a caption at the bottom" loading="lazy"></a><figcaption>On a phone</figcaption></figure>
                 </div>
 
                 <h2>How it plays</h2>
                 <ul>
-                    <li><strong>Fourteen features, four rooms.</strong> Carpet, a TV wall, a ceiling fan, the sink, the gas range,
-                        the countertop, the mirror and vanity light, the tub, the toilet, a GFCI outlet, the smoke detector, the
-                        closet doors, a window and a bedroom wall.</li>
-                    <li><strong>Look closer.</strong> Looking at a feature zooms into a close-up. Touch, smell and use tools on its
+                    <li><strong>Find it yourself.</strong> Every room is full of things to inspect, and each shift some of them have
+                        something wrong: a leaky faucet, a child's wall-doodle, grease stains on the carpet, and plenty more.
+                        Nobody tells you which ones or how many. Looking at everything and making the call is the game.</li>
+                    <li><strong>Small oddities.</strong> Every room also has 2 to 4 things that look odd but don't really matter: thumbtack
+                        holes, a sticky note, hair in the drain, an old dry water stain. You don't have to mark them, but each one you
+                        call right is extra credit. It never cancels a miss.</li>
+                    <li><strong>Look closer.</strong> Looking at a feature zooms into a close-up. Touch, smell, and use tools on its
                         parts: measure a hole, tap tile with the hammer, pull an outlet cover with the screwdriver, get a light
-                        under the sink. Useful findings go into your field notes.</li>
+                        under the sink. Anything the tenant left inside a cabinet, the oven, or the closet can be picked up right there.
+                        Useful findings go into your field notes.</li>
+                    <li><strong>See if it works.</strong> Flip the light switches, the fan's wall switch, and the bathroom vent fan.
+                        Every cabinet, appliance door, and the closet swings, drops, or folds open on screen, and closes again; some
+                        findings are only visible inside. Raise and lower the blinds (broken blinds can be a finding), and run the
+                        fan to watch the slats sway. Run the kitchen faucet and the garbage disposal, work the front door's
+                        deadbolt, and look out its peephole.</li>
+                    <li><strong>Make it safe.</strong> A hazard isn't just a box to tick. Kill the circuit at the breaker panel on
+                        the kitchen wall, or turn off the gas at the shut-off in the cabinet beside the range, and it counts on
+                        your report. Anything on a circuit you've cut stays dead until you flip it back. Then call it in: Dana lends you
+                        her BlackBerry, and you walk Gus in maintenance through each hazard on your form (a short branching call
+                        built in Scenemaker). The phone also has Snake, and Dana will gently remind you what you borrowed it for.</li>
                     <li><strong>Four calls.</strong> Use the clipboard to mark each feature <em>Clean</em>, <em>Normal Wear &amp;
-                        Tear</em>, <em>Tenant Damage</em> or <em>Maintenance Hazard</em>. The SOP manual is a click away.</li>
-                    <li><strong>Document it.</strong> Damage is only chargeable with a photo, and hazards always need one, so the
-                        camera is part of the job.</li>
-                    <li><strong>Dana.</strong> Your assistant from the leasing office gives room hints and SOP refreshers (never
-                        the answer), and nudges you if you stall.</li>
-                    <li><strong>A different unit every shift.</strong> Each feature gets one of its possible conditions at random,
-                        and the light (morning, afternoon, golden hour or rain), paint, floors and leftover junk change too.</li>
-                    <li><strong>Feedback your way.</strong> Get graded right after each mark, or only in the final report (and change
-                        your mind until you submit).</li>
-                    <li><strong>The report.</strong> Points for the right call, for finding real evidence, and for photos; a penalty
-                        for missing a hazard. Wrongful charges (billing a tenant for wear) are counted, and every item explains why.</li>
+                        Tear</em>, <em>Tenant Damage</em>, or <em>Maintenance Hazard</em>, and hear right away whether it was right
+                        (or turn that off and find out at the end). Some calls are gray areas, and a defensible answer earns partial
+                        credit in yellow. Any note that cites the SOP is a link that opens the binder right to that rule.</li>
+                    <li><strong>Document it.</strong> Damage is only chargeable with a photo, and hazards always need one. Photograph
+                        or note anything else you like: it's listed in the report and never counts against you. The camera is a
+                        late-2000s pocket camera with a zoom, playback, and erase.</li>
+                    <li><strong>The tenant calls.</strong> Two weeks later, the old tenant phones about the deposit. Sometimes they
+                        just want the refund date; sometimes they say the holes were tiny nail holes, that the damage was there on
+                        move-in day, or that an old carpet isn't worth a new one's price. If you have the photo and the measurement,
+                        you can show them. If you don't, the charge gets dropped and the company pays. The calls are branching
+                        scenarios I wrote in my own tool, <a href="project-scenemaker.html">Scenemaker</a>, and you get a
+                        Customer Service grade for listening, explaining plainly, and not making promises you can't keep. Every answer
+                        comes in three tones (helpful, noncommittal, or rude), and the tenant, and later your manager, react to
+                        whichever you choose.</li>
+                    <li><strong>Dana.</strong> Your assistant from the leasing office stays out of your way, gives room hints and
+                        SOP refreshers (never the answer), and walks over and points at what you should check.</li>
+                    <li><strong>A different unit every shift.</strong> Your first shift is Unit 204; after that, you're sent elsewhere in the building. Conditions, light (morning, afternoon, golden hour, or rain),
+                        paint, floors, and leftover junk change every time (rental DVDs, mail-order envelopes, and VHS tapes of
+                        era movies turn up on floors, counters, and sills), along with a few things you might find: a rug that
+                        ties the room together, a necktie on the fan, a perfectly round dent in the tub tile.</li>
+                    <li><strong>The debrief and the report.</strong> Your property manager goes over the shift and the call with you first. Then the
+                        report: points for the right call, bonuses for real evidence, photos, and extra write-ups (which never cancel a miss), a penalty for missing a hazard,
+                        wrongful charges counted, the reasoning for every item, and the extra things you wrote up.</li>
+                    <li><strong>Little extras.</strong> Every window can be inspected, and birds sometimes visit. The pencil doodles in
+                        your notes' margins when there's nothing to circle. Thirty-two achievements live in a trophy case on the toolbar, including a completion badge for each property and a Platinum for earning them all, each with a share card. Settings can reset one property's progress, or all of them.</li>
+                    <li><strong>Music.</strong> Nine original songs, each its own <a href="https://keithclark.github.io/ZzFXM/" target="_blank" rel="noopener">ZzFXM</a>
+                        tracker file: a radio song while you inspect at each property (a lounge loop in the apartment, elevator bossa nova at the office, a second-shift groove at the warehouse, and a country shuffle on the jobsite), hold music for the tenant's call, and a track for each grade, all played by the same small lounge band
+                        that starts when your manager starts talking and plays through the report. Inspired by various free tracks on
+                        <a href="https://pixabay.com/music/" target="_blank" rel="noopener">Pixabay</a>, but synthesized by me using the ZzFXM tracker.</li>
+                    <li><strong>The SOP binder.</strong> The standard operating procedure is a binder you page through, with the
+                        four condition codes, the field method, and how to handle the tenant's call.</li>
                 </ul>
 
+                <!-- The tenant calls' source projects, opened in Scenemaker (scenes/*.vnproj in the game's own repo) -->
+                <h2>The tenant calls, built in Scenemaker</h2>
+                <p>The customer service and de-escalation scenarios at the end of every shift, all six tenant calls, were written
+                   and wired in my own branching-scenario tool, <a href="project-scenemaker.html">Scenemaker</a>. Each call is a
+                   Scenemaker project: a scene for every beat of the conversation, a helpful, a noncommittal, and a rude answer at
+                   every turn, each raising or lowering a hidden Customer Service score, and conditions that check what you actually did on the inspection, like whether you took the
+                   photo or measured the hole. The finished projects export straight into the game.</p>
+                <div class="shots">
+                    <figure><a class="zoom" href="../images/games/unit-204/scenemaker-deescalation.webp" data-caption="&ldquo;Tiny Holes&rdquo; open in Scenemaker: the tenant insists the holes were only nail holes. Each answer nudges the Customer Service score up or down, and the strongest replies only unlock if you measured the holes or photographed them during the inspection."><img src="../images/games/unit-204/thumbs/scenemaker-deescalation.jpg" alt="The Scenemaker editor showing a branching node graph of dialogue scenes for an upset tenant's call, with choices, score changes, and photo and measurement conditions" loading="lazy"></a><figcaption>De-escalation: &ldquo;Tiny Holes&rdquo; in Scenemaker</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/unit-204/scenemaker-customer-service.webp" data-caption="&ldquo;Just Asking&rdquo; open in Scenemaker: no complaint, just a tenant who wants one line on the statement explained and to know when the refund is coming. Explaining plainly scores well; vague answers and promises you can&rsquo;t keep don&rsquo;t."><img src="../images/games/unit-204/thumbs/scenemaker-customer-service.jpg" alt="The Scenemaker editor showing a branching node graph of dialogue scenes for a friendly tenant's question about the deposit statement, ending in three outcomes" loading="lazy"></a><figcaption>Customer service: &ldquo;Just Asking&rdquo; in Scenemaker</figcaption></figure>
+                </div>
+
+                <!-- Origin story: the photo that started it (side-photo styles in css/classic.css) -->
+                <h2>Where it came from</h2>
+                <figure class="side-photo portrait">
+                    <a class="zoom" href="../images/games/unit-204/inspiration.webp" data-caption="The spark: my trusty 2005 Fujifilm FinePix Z, freshly fixed up and still sitting on my desk next to the morning coffee."><img src="../images/games/unit-204/thumbs/inspiration.jpg" alt="A green Fujifilm FinePix Z pocket camera with its wrist strap, lying on a wooden desk in front of a coffee mug" loading="lazy"></a>
+                    <figcaption>The spark: my 2005 FinePix Z</figcaption>
+                </figure>
+                <p>Curiosity and play spark my best ideas, and they're how people of any age learn best. I had just fixed up my
+                   trusty old Fujifilm FinePix Z from 2005, and it was still sitting on my desk, buried in notes for a dozen other
+                   side projects, when I started wondering how a videogame could sharpen the kind of observation people rely on in
+                   the field. That camera was the spark, and a new direction for my JavaScript learning was the fuel.</p>
+                <p>Hidden-object games are a dime a dozen, but most of them are a checklist on a busy picture. I wanted something
+                   more immersive: nobody hands you a list, so you have to notice what's wrong, decide what it means, back it up
+                   with evidence, and then explain it to the tenant. That's the same eye for detail and plain talk that
+                   inspectors, property managers and anyone in a customer-facing job use every day, practiced somewhere mistakes
+                   cost nothing, with a nod to the point-and-click games many of us grew up with.</p>
+                <div class="clearfix"></div>
+
                 <h2>What it trains</h2>
-                <ul class="tags"><li>Move-out inspections</li><li>Wear vs. damage</li><li>Hazard recognition</li><li>Evidence and documentation</li><li>Fair deposit charges</li><li>Scenario practice</li><li>Gamified learning</li></ul>
+                <ul class="tags"><li>Move-out inspections</li><li>Wear vs. damage</li><li>Hazard recognition</li><li>Evidence and documentation</li><li>Fair deposit charges</li><li>Customer service</li><li>Deposit disputes</li><li>Scenario practice</li><li>Gamified learning</li></ul>
                 <p>Like my other <a href="games.html">learning games</a>, it's plain HTML and JavaScript that drops right into a
                    course. Sound effects are by <a href="https://kenney.nl/" target="_blank" rel="noopener">Kenney</a> (CC0), and
-                   the pixel fonts are Pixelify Sans and Silkscreen (SIL Open Font License); everything else is drawn in code.</p>
+                   some of the icons are from <a href="https://www.streamlinehq.com/" target="_blank" rel="noopener">Streamline</a>'s
+                   free Pixel set (CC BY 4.0) and <a href="https://github.com/halfmage/pixelarticons" target="_blank" rel="noopener">pixelarticons</a>
+                   (MIT), and the pixel fonts are Jersey 15 and Silkscreen (SIL Open Font License).</p>
 
                 <div class="btn-row">
                     <a class="btn" href="projects.html#games">&larr; Back to Portfolio</a>

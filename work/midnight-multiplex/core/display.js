@@ -184,9 +184,10 @@
             const GLYPH = 0.6;
             const usableW = (v.w * 0.997) - 14;            // nearly edge-to-edge
             const widthFont  = usableW / (cols * GLYPH);
-            // (rows + 3.8) folds in the fixed bottom stack; -40 leaves a small top
-            // pad + a safety gap so the grid never tucks under the bottom bars.
-            const heightFont = (v.h - 40) / (rows + 3.8);
+            // (rows + 4.8) folds in the fixed bottom stack (prompt, command words,
+            // controls, F-keys — all at the terminal text size); -56 covers their
+            // padding plus a small top pad, so the grid never tucks under the bars.
+            const heightFont = (v.h - 56) / (rows + 4.8);
             // Use the size that FITS the grid in both directions. (This used to
             // be max(canvasFont, fit), which let the canvas-derived floor win in
             // small windows / iframes — e.g. a 960px embed got ~15px text for a

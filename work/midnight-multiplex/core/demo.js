@@ -22,6 +22,10 @@
  *      loading a missing page. (The debug room is hidden via IS_DEMO_BUILD()
  *      checks in settings.js / debugroom.js.)
  *
+ *   4. FOCUS PAUSE — a PAUSED / click-to-resume card when the embed loses focus.
+ *   5. HOST-PAGE FULLSCREEN — on Joe's portfolio site the page owns fullscreen
+ *      (its shared/demo-controls.js); see §5.
+ *
  *  The full game never loads this file (midmulti.html doesn't list it), and
  *  window.MM_BUILD.demo is set by the demo page before any script runs.
  *
@@ -241,6 +245,29 @@
     });
     window.addEventListener('focus', () => { try { if (window.engineClearKeys) window.engineClearKeys(); } catch (err) {} });
   }
+
+  // ── 5. HOST-PAGE FULLSCREEN ──────────────────────────────────────────────
+  // On a page that provides DemoControls (Joe's portfolio site, shared/demo-
+  // controls.js, same origin) the PAGE owns fullscreen: it fullscreens the box
+  // around this iframe (corner mute / fullscreen buttons included) and keyboard-
+  // locks Esc there, so a tap of Esc stays with the game. We hand game.js the
+  // page's controls through window.__fsDelegate (see "FULLSCREEN DELEGATE" in
+  // game.js). Any other host — or a cross-origin one, which throws here — keeps
+  // the normal browser fullscreen.
+  try {
+    const P = window.parent;
+    if (P && P !== window && P.DemoControls && window.frameElement) {
+      const host = (P.DemoControls.hostOf ? P.DemoControls.hostOf(window.frameElement) : window.frameElement.parentElement);
+      window.__fsDelegate = {
+        isOn: () => !!P.document.fullscreenElement,
+        enter: () => { if (!P.document.fullscreenElement) P.DemoControls.toggleFullscreen(host); },
+        exit: () => { if (P.document.fullscreenElement) P.document.exitFullscreen(); },
+      };
+      // entering/leaving the page's fullscreen can leave keyboard focus on the PAGE,
+      // so the next key (F11, Esc, WASD…) never reached the game — take it back.
+      P.document.addEventListener('fullscreenchange', () => { setTimeout(() => { try { window.focus(); } catch (e) {} }, 30); });
+    }
+  } catch (e) {}
 
   window.MMDemo = { gate };
 })();
