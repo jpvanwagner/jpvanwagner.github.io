@@ -13,7 +13,7 @@ const Crew = {
      'saw' (pushing a saw through a cut), 'shovel', 'reach' (an arm out, working at an edge), 'phone' */
   person(g, x, z, o = {}, t = 0) {
     // drawn with the same sprite style as you and Dana (js/crew-sprites.js), at the same size you'd be standing there
-    const mo = Settings.get('motion'), [sx, sy] = P(x, o.y || 0, z), k = clamp(.62 + 2.4 / z, .78, 1.14), seed = Math.round(Math.abs(x * 7 + z * 13 + (o.seed || 0)));
+    const mo = Settings.get('motion'), [sx, sy] = P(x, o.y || 0, z), k = clamp(.62 + 2.4 / z, .78, 1.14), seed = o.seed ?? Math.round(Math.abs(x * 7 + z * 13));   // who they are (from their id), never where they're standing, so nobody changes face mid-stride
     let act = o.act || 'idle'; if (o.carry) act = 'carry'; if (o.smoke && act === 'idle') act = 'smoke';
     const rate = { hammer: 4, saw: 5, shovel: 1.6, reach: 1.5, smoke: .25 }[act] || 0, frame = mo && rate ? Math.floor(t * rate + seed) % (act === 'hammer' ? 3 : 2) : 0;
     const walking = act === 'walk' || (act === 'carry' && o.moving !== false && o.act === 'walk'), ph = mo ? t * 6 + seed : 0;
@@ -36,6 +36,6 @@ const Crew = {
   blocks(list) { return list.filter(c => c.block).map(c => ({ x0: c.x - .25, x1: c.x + .25, z0: c.z - .2, z1: c.z + .2, pts: () => this.pts(c) })); },
   /* a crew member as a hotspot you can Look at and Talk to: crewFn returns the area's crew, who picks one out */
   hot(crewFn, who, name, walk, look, talk, extra) {
-    return { id: 'crew_' + who, name, walk, look, talk, when: () => crewFn().some(c => c.id === who), pts: () => { const c = crewFn().find(p => p.id === who); return c ? this.pts(c) : [[0, 0], [1, 0], [1, 1]]; }, ...(extra || {}) };
+    return { id: 'crew_' + who, name, walk, look, talk, live: true, when: () => crewFn().some(c => c.id === who), pts: () => { const c = crewFn().find(p => p.id === who); return c ? this.pts(c) : [[0, 0], [1, 0], [1, 1]]; }, ...(extra || {}) };
   }
 };

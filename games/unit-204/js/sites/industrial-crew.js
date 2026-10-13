@@ -14,7 +14,7 @@ const INDC = (() => {
       { id: 'dockhand', x: .2 + Math.sin(Game.t * .35) * .9, z: 13.6, o: { act: 'walk', face: Math.cos(Game.t * .35) > 0 ? 1 : -1, shirt: '#3a5a7a', hat: false, hair: '#2a1a10' } }
     ],
     i_racks: () => [
-      { id: 'picker', x: -1.6, z: 13.4 + Math.sin(Game.t * .25) * .8, o: { act: 'walk', face: 1, shirt: '#5a7a4a', hat: '#f4f4ee' } }
+      { id: 'picker', x: -.9 + Math.sin(Game.t * .3) * 1.1, z: 13.3 + Math.sin(Game.t * .15) * .4, o: { act: 'walk', face: Math.cos(Game.t * .3) > 0 ? 1 : -1, shirt: '#5a7a4a', hat: '#f4f4ee' } }   // back and forth across the aisle, facing the way they're headed (side-on sprites can't walk straight at you)
     ],
     i_floor: () => {
       const nv = cond('i_noise'), muffs = nv < 2, bv = cond('i_belt');
@@ -34,7 +34,7 @@ const INDC = (() => {
   };
   /* the machines and fixtures standing inside the walkable floor */
   const BLOCKS = {
-    i_dock: () => [{ ...D.fork, h: 3.4 }, { x0: D.rack.x0, x1: D.rack.x1, z0: D.rack.z - .35, z1: D.rack.z + .1, h: 2.7 }],
+    i_dock: () => [{ ...D.fork, h: 3.4, pts: () => INDA.forkliftOutline(), parts: () => INDA.forkliftParts() }, { x0: D.rack.x0, x1: D.rack.x1, z0: D.rack.z - .35, z1: D.rack.z + .1, h: 2.7 }],
     i_racks: () => { const [x, z] = cond('i_ladder') === 1 ? [-.4, 10.4] : GR.ladder; return [{ x0: x - .1, x1: x + 1.1, z0: z, z1: z + 1.1, h: 3.5 }]; },
     i_floor: () => [{ x0: GP.saw[0], x1: GP.saw[1], z0: GP.saw[2], z1: GP.saw[3], h: 1.9 }, { x0: GP.belt[0] - .25, x1: GP.belt[1], z0: GP.belt[2], z1: GP.belt[3], h: 2.5 }],
     i_shop: () => []
@@ -43,9 +43,12 @@ const INDC = (() => {
     i_dock: [['dockhand', 'Dock hand', { x: .2, z: 12.6 }, 'A dock hand pacing between the doors with a scanner gun, waiting on the next trailer.', '"Truck\'s late. Truck is always late." They scan a box out of boredom. It beeps.']],
     i_racks: [['picker', 'Order picker', { x: 0, z: 12.4 }, 'An order picker working down the aisle with a scanner and a cart.', '"Aisle four, bay three, level two." They don\'t look up. "Sorry. Quota."']],
     i_floor: [['sawop', 'Saw operator', { x: -3.2, z: 6.8 }, 'The cut-off saw operator, feeding stock one piece at a time.', '"Hang on." The saw spins down. "Safety walk? Glasses are on. Mostly." The saw spins up again.'],
-      ['packer1', 'Packer', { x: -3.6, z: 11.6 }, 'A packer boxing parts off the conveyor, fast.', '"Twelve hundred a shift. Talk while I pack." They do not slow down.']],
+      ['packer1', 'Packer', { x: -3.6, z: 11.6 }, 'A packer boxing parts off the conveyor, fast.', '"Twelve hundred a shift. Talk while I pack." They do not slow down.'],
+      ['packer2', 'Packer', { x: -1.2, z: 11.6 }, 'A second packer, taping boxes shut faster than seems possible.', '"Don\'t mind me." Rrrrip, tape. "Fourteen hundred yesterday. New record."'],
+      ['beltop', 'Belt machine operator', { x: 2.0, z: 9.2 }, 'The operator at the belt machine, feeding parts and watching the belt.', '"It jams every forty minutes like clockwork." They tap the housing. "It\'s about due."']],
     i_shop: [['diaz', 'R. Diaz, maintenance', { x: -3.8, z: 11.6 }, 'R. Diaz from maintenance, elbow-deep in the punch press with a wrench.', '"Locked it out myself. Key\'s in my pocket." They pat it. "Nobody turns this on but me."'],
-      ['grinder', 'Mechanic', { x: -.6, z: 14.2 }, 'A mechanic at the bench grinder, dressing a chisel. Face shield down.', '"One sec." Sparks. "Okay. What\'s up?"']]
+      ['grinder', 'Mechanic', { x: -.6, z: 14.2 }, 'A mechanic at the bench grinder, dressing a chisel. Face shield down.', '"One sec." Sparks. "Okay. What\'s up?"'],
+      ['under', 'Mechanic under the gearbox', { x: 1.4, z: 10.0 }, 'A mechanic under the gearbox hanging from the hoist, reaching up into it.', '"Hand me that seven-sixteenths?" They don\'t look down. "Never mind. Got it."']]
   };
   function attach(rooms) {
     for (const [id, r] of Object.entries(rooms)) {
@@ -70,7 +73,7 @@ const INDL = (() => {
   const NAMES = ['T. NGUYEN', 'R. DIAZ', 'B. KOWALSKI'];
   const LOOKS = ['A gray steel employee locker with a name strip: T. NGUYEN. A sticker on the door says I SURVIVED INVENTORY 2007.',
     'A gray steel employee locker: R. DIAZ. A magnet on it holds a kid\'s drawing of a forklift.',
-    'A gray steel employee locker: B. KOWALSKI. Somebody wrote GO BEARS on the vent slats.'];
+    'A gray steel employee locker: B. KOWALSKI. Bud has been here longer than the building. Somebody wrote GO BEARS on the vent slats.'];
   const lockers = [0, 1, 2].map(i => ({ id: 'lk' + (i + 1), name: 'Locker', kind: 'swing', hinge: 'l', x0: -5.07 + i * .6, x1: -4.51 + i * .6, y0: .16, y1: 2.44, z: 15.45, depth: .46, col: COL, inside: 'locker',
     shelves: [2.1], shelfCol: '#6a7488', walk: { x: -4.8 + i * .6, z: 14.4 }, look: LOOKS[i],
     drawInside: (g, d) => { const h = P((d.x0 + d.x1) / 2, 1.95, d.z + d.depth * .8); pxRect(g, h[0] - 1, h[1], 2, 2, '#a8acb4');
@@ -88,6 +91,6 @@ const INDL = (() => {
       const n = Q.back({ ...r.box, zb: d.z }, d.x0 + .1, d.x1 - .1, 1.7, 1.8); fillPoly(g, n, '#f4f2ea');
     });
   }
-  const CONTAINERS = { i_lk1: { doors: ['lk1'], items: ['i_gloves', null] }, i_lk2: { doors: ['lk2'], items: ['i_cooler', 'i_radio', null] }, i_lk3: { doors: ['lk3'], items: ['i_tapegun', null, null] } };
+  const CONTAINERS = { i_lk1: { doors: ['lk1'], items: ['i_gloves', null] }, i_lk2: { doors: ['lk2'], items: ['i_tapegun', 'i_radio', null] }, i_lk3: { doors: ['lk3'], items: ['i_cooler', null] } };
   return { DOORS: { i_shop: lockers }, CONTAINERS, NAMES, draw, block: { x0: -5.12, x1: -3.28, z0: 15.43, z1: 15.95, h: 2.5 } };
 })();

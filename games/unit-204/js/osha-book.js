@@ -145,6 +145,7 @@ const OshaBook = {
     const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
     const title = `<div class="pg title-pg osha-title"><p class="pg-co">BRICKROAD PROPERTY MGMT.</p><h2>Field Safety Handbook</h2>
       <p class="pg-sub">OSHA's rules, in plain language</p>
+      <p class="osha-src">Read the real thing at osha.gov: <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1910" target="_blank" rel="noopener" data-tip="OSHA 1910|Opens OSHA's General Industry standards in a new window.">General Industry, 29 CFR 1910</a> and <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926" target="_blank" rel="noopener" data-tip="OSHA 1926|Opens OSHA's Construction standards in a new window.">Construction, 29 CFR 1926</a>.</p>
       <p class="pg-note">Written from public-domain OSHA publications (the General Industry Digest, OSHA 2201; the Construction Industry Digest, OSHA 2202; the Small Business Handbook, OSHA 2209) and 29 CFR 1910 and 1926. Not an official OSHA publication: the current text on eCFR always wins.</p></div>`;
     const toc = Array.from({ length: Math.ceil(OSHA_CHAPTERS.length / 10) }, (_, i) => i * 10).map(from => `<div class="pg osha-toc"><h3>${from ? 'Contents (continued)' : 'Contents'}</h3><ol start="${from + 1}">${OSHA_CHAPTERS.slice(from, from + 10).map(c => `<li><button type="button" class="sop-ref osha-go" data-osha="${c.id}">${esc(c.title)}</button> <small>${esc(c.sub)}</small></li>`).join('')}</ol></div>`).join('');
     // a chapter too long for one page carries on to the next
@@ -152,7 +153,8 @@ const OshaBook = {
       const long = c.rules.join('').length > 700, cut = long ? Math.ceil(c.rules.length / 2) : c.rules.length;
       const page = (rules, more) => `<div class="pg osha-pg"><h3${more ? '' : ` data-sop="osha-${c.id}"`}>${esc(c.title)}${more ? ' (continued)' : ''}</h3>
       ${more ? '' : `<p class="osha-meta"><span class="osha-cite">29 CFR ${esc(c.cites)}</span>${[...c.sites].map(k => `<span class="osha-site s-${k}">${OSHA_SITES[k]}</span>`).join('')}</p>`}
-      <ul>${rules.map(r => `<li>${esc(r)}</li>`).join('')}</ul></div>`;
+      <ul>${rules.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
+      <button type="button" class="osha-back" data-tip="Contents|Back to the handbook's table of contents.">&#9650; Contents</button></div>`;
       return page(c.rules.slice(0, cut)) + (long ? page(c.rules.slice(cut), true) : '');
     }).join('');
     return title + toc + pages;

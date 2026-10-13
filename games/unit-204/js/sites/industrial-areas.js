@@ -313,8 +313,16 @@ const INDX = (() => {
     { id: 'i_grinder', room: 'i_shop', name: 'Bench Grinder', say: 'bench grinder', art: 'i_grinder',
       hint: 'Measure the gaps: the rest under the wheel and the guard over it.',
       osha: 'Work rest within 1/8 inch of the wheel, tongue guard within 1/4 inch, and the grinder bolted down (1910.215(a)(4), (b)(9); 1910.212(b)).',
-      parts: [{ id: 'rest', name: 'work rest', r: [20, 80, 200, 14] }, { id: 'tongue', name: 'tongue guard', r: [40, 10, 160, 20] }, { id: 'wheel', name: 'grinding wheels', r: [30, 28, 180, 60] }, { id: 'base', name: 'mounting bolts', r: [86, 90, 68, 24] }],
-      base: { base: { look: 'The grinder on the steel bench.' } },
+      parts: [{ id: 'switch', name: 'switch', r: [108, 86, 24, 12] }, { id: 'shield', name: 'eye shields', r: [36, 6, 168, 16] }, { id: 'tongue', name: 'tongue guard', r: [36, 22, 168, 12] }, { id: 'rest', name: 'work rest', r: [36, 66, 168, 14] },
+        { id: 'base', name: 'mounting bolts', r: [66, 96, 108, 18] }, { id: 'wheel', name: 'grinding wheels', r: [36, 34, 168, 32] }],
+      base: { base: { look: 'The grinder on the steel bench.' },
+        shield: { look: 'Clear polycarbonate eye shields on swing-arm brackets, one over each wheel.', touch: 'They swing down over the wheel and stay where you put them.' },
+        // it really runs: flip the switch to watch it spin up (and do it without safety glasses at your peril, js/ppe.js)
+        switch: { look: [{ if: 'run', t: 'A paddle switch on the base, flipped ON. The grinder is running.' }, { t: 'A paddle switch on the base: OFF.' }],
+          touch: [{ if: 'run', t: 'Click. The grinder winds down with a long, falling whine.', toggle: 'run', sfx: 'click' },
+            { t: 'You flip the switch. The wheels spin up to 3,450 RPM with a rising whine, and the bench hums under your hand.', toggle: 'run', sfx: 'whir', unsafe: 'glasses' }],
+          smell: 'Hot motor and steel dust.' },
+        wheel: { smell: 'Burnt steel and abrasive grit.' } },
       variants: [
         { cat: 0, desc: 'A bench grinder, bolted down, eye shields on.', key: ['gaps'],
           resp: { rest: { tape: { t: 'The work rest is 1/8 inch from the wheel.', clue: 'gaps' } }, tongue: { tape: { t: 'The tongue guard is 1/4 inch from the wheel.', clue: 'gaps' } }, base: { touch: { t: 'Bolted tight.', clue: 'gaps' } } },
@@ -326,7 +334,8 @@ const INDX = (() => {
           resp: { rest: { tape: { t: 'The work rest is 3/8 inch from the wheel. Enough to jam a part.', clue: 'wide' } }, tongue: { tape: { t: 'The tongue guard is a full inch off the wheel.', clue: 'wide' } } },
           why: 'A wide rest gap can jam a workpiece and shatter the wheel (1910.215(a)(4), (b)(9)). Correction: adjust both; charged back. Photo it.' },
         { cat: 3, desc: 'The bench grinder is walking on the bench.', key: ['crack', 'loose'],
-          resp: { wheel: { look: { t: 'A crack across the left wheel. The guards are off.', clue: 'crack' } }, base: { look: { t: 'No bolts. It walks across the bench when it runs.', clue: 'loose' }, touch: { t: 'The bench shakes.', clue: 'loose' } } },
+          resp: { switch: { touch: "You reach for the switch and stop. A cracked wheel can burst at full speed, and the guards are off. Not today." },
+            wheel: { look: { t: 'A crack across the left wheel. The guards are off.', clue: 'crack' } }, base: { look: { t: 'No bolts. It walks across the bench when it runs.', clue: 'loose' }, touch: { t: 'The bench shakes.', clue: 'loose' } } },
           why: 'A cracked wheel can burst like a grenade. Stop: unplug it, tag it Do Not Use, and call it in (1910.215(a)(2), (d)(1); 1910.212(b)).' }
       ] },
     { id: 'i_loto', room: 'i_shop', name: 'Press Under Repair', say: 'punch press under repair', art: 'i_loto',
@@ -352,7 +361,10 @@ const INDX = (() => {
       hint: 'Cylinders stand up, chained, capped, and oxygen stays apart from fuel gas.',
       osha: 'Cylinders are stored upright, secured, and capped (1910.101(b)); oxygen is kept 20 feet from fuel gas or behind a 5-foot fire wall (1910.253(b)(4)(iii)).',
       parts: [{ id: 'oxy', name: 'oxygen cylinders', r: [16, 0, 64, 112] }, { id: 'fuel', name: 'acetylene cylinders', r: [146, 0, 70, 112] }, { id: 'wall', name: 'fire wall', r: [82, 28, 14, 84] }, { id: 'chain', name: 'chains', r: [10, 50, 210, 10] }],
-      base: { wall: { look: 'A steel divider between them.' } },
+      base: { wall: { look: 'A steel divider between them.', smell: 'Cold steel and old paint.' },
+        fuel: { smell: 'The faintest whiff of garlic right at the valve cap. Commercial acetylene always smells a little like garlic; a strong smell would mean a leak.' },
+        oxy: { smell: "Nothing at all. Oxygen has no smell, which is exactly why a leaking oxygen cylinder is so dangerous: nobody notices." },
+        chain: { smell: 'Steel and a little rust.' } },
       variants: [
         { cat: 0, desc: 'Oxygen and acetylene cylinders, chained, with a fire wall between them.', key: ['secured'],
           resp: { chain: { touch: { t: 'Chained tight. None of them rock.', clue: 'secured' } }, oxy: { look: 'Capped, upright.' }, wall: { tape: { t: 'The fire wall is 5 feet tall. Good.', clue: 'secured' } } },
@@ -390,7 +402,10 @@ const INDX = (() => {
       hint: 'Labels on everything, a Safety Data Sheet for everything, and an eyewash close by.',
       osha: 'Every container is labeled and every chemical has a Safety Data Sheet (1910.1200(f), (g)(8)); where corrosives can splash, an eyewash is right there (1910.151(c)).',
       parts: [{ id: 'bottles', name: 'chemical containers', r: [0, 0, 110, 92] }, { id: 'sds', name: 'SDS box', r: [118, 2, 48, 38] }, { id: 'eyewash', name: 'eyewash station', r: [180, 6, 54, 124] }, { id: 'floor', name: 'under the shelf', r: [0, 96, 170, 39] }],
-      base: { floor: { look: 'Concrete under the shelf.' } },
+      base: { floor: { look: 'Concrete under the shelf.', smell: 'Concrete and a faint solvent tang.' },
+        bottles: { smell: 'Citrus degreaser, mineral spirits, and, from the back, the sharp bite of the acid. The caps are on; it is just a chemical shelf.' },
+        sds: { smell: 'Old paper and a little machine oil.' },
+        eyewash: { smell: 'Plastic and clean water.' } },
       variants: [
         { cat: 0, desc: 'A chemical shelf with labeled containers, the SDS box, and an eyewash station.', key: ['labeled'],
           resp: { bottles: { look: { t: 'Every container labeled.', clue: 'labeled' } }, sds: { look: { t: 'An SDS binder, current, for every product on the shelf.', clue: 'labeled' } }, eyewash: { touch: { t: 'You push the paddle. Both nozzles flush clean water.', clue: 'labeled' } } },
@@ -451,9 +466,14 @@ const INDX = (() => {
     { id: 'i_a_calendar', room: 'i_shop', name: 'Parts calendar', cat: 0, pts: () => Q.back(ROOMS.i_shop.box, -4.6, -3.6, 2.75, 3.75), walk: { x: -4.6, z: 14.4 },
       look: 'A bearing supplier\'s calendar, still on September. The photo is a very shiny ball bearing.', why: 'Shop decor. Not a finding.',
       draw(g, r) { const q = Q.back(r.box, -4.6, -3.6, 2.75, 3.75), b = polyBox(q); pxRect(g, b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0, '#f4f0e0'); pxRect(g, b.x0 + 2, b.y0 + 2, b.x1 - b.x0 - 4, (b.y1 - b.y0) / 2, '#8a9aaa'); } },
-    { id: 'i_a_creeper', room: 'i_shop', name: 'Mechanic\'s creeper', cat: 1, pts: () => around(P(-2, 0, 7.6), 22, 8), walk: { x: -2, z: 6.6 },
+    { id: 'i_a_creeper', room: 'i_shop', name: 'Mechanic\'s creeper', cat: 1, pts: () => growPoly(hull(boxPts(-2.65, -1.35, 0, .14, 7.38, 7.84)), 1), walk: { x: -2, z: 6.6 },
       look: "A mechanic's creeper left out in the middle of the floor.", touch: 'It rolls when you nudge it. Exactly the problem.', why: 'A creeper in the walkway is a trip. Note it: hang it up.',
-      draw(g) { const a = P(-2.6, .08, 7.6), b = P(-1.4, .08, 7.6); pxRect(g, a[0], a[1] - 2, b[0] - a[0], 2, '#d82020'); pxRect(g, a[0], a[1], 2, 1, '#1a1a1e'); pxRect(g, b[0] - 2, b[1], 2, 1, '#1a1a1e'); } },
+      draw(g) {   // a padded red creeper on its steel frame and four casters, with a raised headrest at one end, lying flat on the floor
+        for (const [x, z] of [[-2.55, 7.45], [-1.45, 7.45], [-2.55, 7.78], [-1.45, 7.78]]) { const p = P(x, 0, z); pxRect(g, p[0] - 1, p[1] - 2, 3, 2, '#1a1a1e'); }
+        box3(g, -2.6, -1.4, .05, .08, 7.4, 7.82, { front: '#5a5e66', top: '#6a6e76', side: '#4a4e56' });
+        box3(g, -2.58, -1.42, .08, .13, 7.42, 7.8, { front: '#a81818', top: '#d82020', side: '#8a1414' });
+        for (let x = -2.3; x < -1.5; x += .3) lineW(g, P(x, .13, 7.42), P(x, .13, 7.8), '#b81c1c');   // the tufted seams
+        box3(g, -2.58, -2.3, .13, .19, 7.46, 7.76, { front: '#a81818', top: '#e83030', side: '#8a1414' }); } },   // the headrest
     { id: 'i_a_weld', room: 'i_shop', name: 'Torn welding curtain', cat: 1, pts: () => Q.back(ROOMS.i_shop.box, 5.4, 6.4, 0, 2), walk: { x: 4.4, z: 14.4 },
       look: 'A red welding curtain in the back corner, torn near the bottom.', why: 'A small rip in a welding screen. Note it: patch it before the next hot work (1910.252(b)(2)(iii)).',
       draw(g, r) { fillPoly(g, Q.back(r.box, 5.4, 6.4, 0, 2), 'rgba(200,40,40,0.55)'); const p = P(5.8, .4, r.box.zb); pxLine(g, p[0], p[1], p[0] + 3, p[1] - 6, '#2a1010'); } }
@@ -462,11 +482,13 @@ const INDX = (() => {
   /* ============================== LEFT BEHIND ============================== */
   const spr = kind => (g, x, y, k) => drawSprite(g, INDA.SPRITES[kind], x, y + 1, sprScale(k), SPR_PAL);
   const CLUTTER = {
-    i_boxcutter: { name: 'Box cutter', look: 'A yellow box cutter, blade retracted. Every warehouse has a hundred and none when you need one.', touch: 'You check: blade retracted. Good habit.', smell: 'Cardboard.', draw: spr('i_boxcutter') },
-    i_radio: { name: 'Work radio', look: 'A beat-up job site radio, tuned to classic rock. It has survived being dropped off a forklift, by the look of it.', touch: 'Heavy, rubber-cornered, and sticky.', smell: 'Sawdust and battery.', draw: spr('i_radio') },
-    i_cooler: { name: 'Lunch cooler', look: "A red lunch cooler with GARY on it in marker. Gary's lunch is still inside.", touch: 'Cold. Gary is going to want this back.', smell: 'Bologna.', draw: spr('i_cooler') },
-    i_gloves: { name: 'Work gloves', look: 'A pair of yellow leather work gloves, molded to somebody\'s hands.', touch: 'Stiff and broken in.', smell: 'Leather and sweat.', draw: spr('i_gloves') },
-    i_tapegun: { name: 'Tape gun', look: 'A packing tape gun with half a roll left. The most borrowed tool in any warehouse.', touch: 'You pull the trigger. SCREEEECH.', smell: 'Adhesive.', draw: spr('i_tapegun') }
+    i_boxcutter: { name: 'Box cutter', owned: 'tool', owner: "the dock crew's", look: 'A yellow box cutter, blade retracted. Every warehouse has a hundred and none when you need one.', touch: 'You check: blade retracted. Good habit.', smell: 'Cardboard.', draw: spr('i_boxcutter') },
+    i_radio: { name: 'Work radio', owned: 'personal', owner: "somebody's", look: 'A beat-up job site radio, tuned to classic rock. It has survived being dropped off a forklift, by the look of it.', touch: 'Heavy, rubber-cornered, and sticky.', smell: 'Sawdust and battery.', draw: spr('i_radio') },
+    i_cooler: { name: 'Lunch pail', owned: 'personal', owner: "Bud Kowalski's", lunch: true,
+      look: "A dented black lunch pail with BUD K. scratched into the lid. Bud Kowalski is sixty-eight and has worked here since the building went up. His lunch is still inside: a bologna sandwich and a pudding cup.",
+      touch: 'Heavy, and still cool from the ice pack. Bud is going to want this back.', smell: 'Bologna, and a little bit of pudding.', draw: spr('i_cooler') },
+    i_gloves: { name: 'Work gloves', owned: 'personal', owner: "somebody's", look: 'A pair of yellow leather work gloves, molded to somebody\'s hands.', touch: 'Stiff and broken in.', smell: 'Leather and sweat.', draw: spr('i_gloves') },
+    i_tapegun: { name: 'Tape gun', owned: 'tool', owner: "the packing line's", look: 'A packing tape gun with half a roll left. The most borrowed tool in any warehouse.', touch: 'You pull the trigger. SCREEEECH.', smell: 'Adhesive.', draw: spr('i_tapegun') }
   };
   const CLUTTER_SPOTS = {
     i_dock: [[-1.2, 7], [2.2, 7.6], [-3, 9.6], [4.4, 8.4], [1.2, 12.4]],
@@ -491,7 +513,7 @@ const INDX = (() => {
     { title: "We're not OSHA", art: 'camera', text: "You can't fine anybody. You <b>document</b> it, require a <b>correction</b> under the lease, and for imminent danger you <b>stop the work</b> and <b>call it in</b> on Dana's BlackBerry. Photos for everything you write up." }
   ];
   const SOP = `
-    <div class="pg title-pg"><p class="pg-co">BRICKROAD PROPERTY MGMT.</p><h2>Standard Operating Procedure 9.4</h2><p class="pg-sub">Industrial Safety Walks</p><p class="pg-note">PPE before clipboard. Every time.</p><span class="coffee" aria-hidden="true"></span></div>
+    <div class="pg title-pg"><p class="pg-co">BRICKROAD PROPERTY MGMT.</p><h2>Standard Operating Procedure 9.4</h2><p class="pg-sub">Industrial Safety Walks</p><p class="pg-note">Keep this binder in the truck. Do not use as a coaster. PPE before clipboard, every time.</p><span class="coffee" aria-hidden="true"></span></div>
     <div class="pg"><h3>The four calls</h3>
       <div class="sop-cat c0" data-sop="c0"><b>0 &middot; OK</b><p>Compliant, and in good shape. Nothing to do.</p></div>
       <div class="sop-cat c1" data-sop="c1"><b>1 &middot; Note</b><p>Housekeeping or a good-practice gap: a faded line, an empty earplug box, a smudged tag. Mention it; no correction notice, no charge.</p></div></div>

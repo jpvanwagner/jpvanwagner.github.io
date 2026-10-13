@@ -49,9 +49,11 @@ const SITE_DEFAULTS = {
   start: 'living',                     // the room you start in
   calls: true,                         // whether the old tenant phones about the deposit afterward
   music: 'lounge',                     // the song on the radio while you inspect (js/music.js)
-  words: { tenant: 'tenant', deposit: 'deposit', damage: 'tenant damage', wear: 'normal wear and tear', where: 'unit', manager: 'Pat', promo: 'the Maple Court turnovers' },
+  words: { tenant: 'tenant', deposit: 'deposit', damage: 'tenant damage', wear: 'normal wear and tear', where: 'unit', manager: 'Pat', promo: 'the Maple Court turnovers', air: 'stale apartment air' },
   opener: unit => `Okay! Unit ${unit}. Walls, floors, fixtures, inside everything. Write up whatever looks off. Toolbar's up top, and hit Finish when you're done, boss.`,
   ppe: null,                           // { items: [{ id, name, look }], need: { room: [ids] } } on sites where you suit up first
+  exit: { id: 'frontdoor', name: 'Front Door' },   // the way out that ends the shift: walking out through it asks to file the report
+  dana: null,                          // Dana's lines for this site (js/dialogue.js danaSays): small, barks, wear, hazard, photos, smell, flashlight
   sop: 'sopPages',                     // the <template> with the SOP binder's pages
   title: null                          // (g, t) => draws the title screen's backdrop, or null for the apartment hallway
 };

@@ -224,7 +224,8 @@ const Decor = {
       const def = CLUTTER[c.kind], p = P(c.x, c.y || 0, c.z), k = clamp(8 / c.z, .8, 1.7), w = ROOMS[id].walk;
       const data = { ...def, item: itemKey(c.kind, c) };
       for (const f of ['look', 'touch', 'smell', 'take']) if (def[f]) data[f] = clutterText(def, f, c);
-      const big = (typeof BIG_ITEMS !== 'undefined' && BIG_ITEMS[c.kind]) || 1, hw = Math.max(7 * k, 8 * big), hh = Math.max(7 * k, 6 * big);   // the clickable area fits the sprite
+      const big = (typeof BIG_ITEMS !== 'undefined' && BIG_ITEMS[c.kind]) || 1, spr = typeof ITEM_SPRITES !== 'undefined' && ITEM_SPRITES[c.kind], sc = sprScale(k) * big;
+      const hw = Math.max(7 * k, 8 * big, spr ? spr[0].length * sc / 2 + 1 : 0), hh = Math.max(7 * k, 6 * big, spr ? spr.length * sc + 1 : 0);   // the clickable area fits the sprite, however big it is (a CRT, a fax machine)
       out.push({ kind: 'scenery', id: c.id, name: def.name, pts: [[p[0] - hw, p[1] - hh], [p[0] + hw, p[1] - hh], [p[0] + hw, p[1] + 2], [p[0] - hw, p[1] + 2]],
         walk: { x: clamp(c.x, w.x0, w.x1), z: Math.min(c.z - .5, w.z1) }, data });
     }

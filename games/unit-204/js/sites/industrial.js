@@ -29,9 +29,9 @@
         i_dockdoor: { pts: () => Q.back(ROOMS.i_dock.box, G.dock.D1[0] - .3, G.dock.D1[1] + .3, 0, G.dock.dh + .3), walk: { x: -4.7, z: 13.4 } },
         i_restraint: { pts: () => [...Q.back(ROOMS.i_dock.box, G.dock.D2[0], G.dock.D2[1] + 1, .02, G.dock.dh)], walk: { x: .6, z: 13.4 } },
         i_leveler: { pts: () => Q.floor(G.dock.D2[0] + .25, G.dock.D2[1] - .25, 13.7, 16.4), walk: { x: 0, z: 13 } },
-        i_forklift: { pts: () => hull([P(.4, 0, 10), P(5.2, 0, 10), P(5.2, 0, 11.5), P(.4, 0, 11.5), P(2.4, 2.9, 10), P(4.6, 2.9, 10), P(4.6, 2.9, 11.5), P(1.9, 2.95, 10), ...(cond('i_forklift') === 3 ? [P(.4, 3.7, 10), P(1.9, 4.7, 10)] : [])]), walk: { x: 3, z: 8.6 } },
-        i_charger: { pts: () => hull([...Q.left(ROOMS.i_dock.box, 12.3, 15.8, 0, 3.2), P(-4.7, 0, 12.3), P(-4.7, 0, 15.8), P(-4.7, 1.3, 12.3)]), walk: { x: -4.2, z: 12.6 } },
-        i_firstaid: { pts: () => Q.right(ROOMS.i_dock.box, G.dock.aid[0], G.dock.aid[1], G.dock.aid[2], G.dock.aid[3]), walk: { x: 5.6, z: 8.2 } },
+        i_forklift: { pts: () => INDA.forkliftOutline(), walk: { x: 3, z: 8.6 } },
+        i_charger: { pts: () => { const b = ROOMS.i_dock.box; return unionOutline([Q.left(b, 12.4, 14.6, 1.25, 3.2), hull(boxPts(b.x0 + .05, b.x0 + 1.35, 0, 1.2, 12.8, 14.3)), Q.left(b, 12.6, 13.6, 1.1, 1.4)]); }, walk: { x: -4.2, z: 12.6 } },
+        i_firstaid: { pts: () => { const [za, zb, ya, yb] = G.dock.aid, x1 = ROOMS.i_dock.box.x1, open = cond('i_firstaid') === 2 || !!(Game.flags.i_firstaid && Game.flags.i_firstaid.open); return hull([...boxPts(x1 - .25, x1, ya, yb, za, zb), ...(open ? [P(x1 - 1.13, ya, zb - .15), P(x1 - 1.13, yb, zb - .15)] : [])]); }, walk: { x: 5.6, z: 8.2 } },
         i_dockfloor: { pts: () => Q.floor(-4.2, 0, 8.8, 11.6), walk: { x: -1.4, z: 8.4 } }
       },
       scenery: [
@@ -260,8 +260,20 @@
   Sites.register({
     music: 'warehouse',
     id: 'industrial', place: 'Lot', kind: 'Industrial', tag: 'A Safety Inspection Adventure',
-    form: 'SAFETY INSPECTION', report: 'Site Safety Report', start: 'i_dock', calls: false,
-    words: { tenant: 'tenant', deposit: 'lease', damage: 'violation', where: 'building' },
+    form: 'SAFETY INSPECTION', report: 'Site Safety Report', exit: { id: 'i_exitdoor', name: 'Exit Door' }, start: 'i_dock', calls: false,
+    words: { tenant: 'tenant', deposit: 'lease', damage: 'violation', where: 'building', air: 'cardboard, oil, and forklift exhaust' },
+    dana: {
+      small: ["The forklift drivers wave at me like I'm famous. I'm in a hard hat and safety glasses. I look like a bug.",
+        "Their break room vending machine only takes quarters. Who even has quarters? I respect it, though.",
+        "My cousin drives a reach truck. He says the racking aisle is 'like Tetris, except it can kill you.'",
+        "These earplugs make everything sound like I'm underwater. I kind of love it.",
+        "I'm putting 'OSHA-adjacent' on my MySpace profile.",
+        "Steel-toes are surprisingly comfortable? Don't tell anyone. I have a reputation for flats."],
+      barks: ["Watch the forklift lane, boss. They have the right of way and a lot of momentum.", "It's loud in here. Like, HUH? loud.", "Every time a backup alarm beeps, I jump. Every single time."],
+      wear: ["What's a Note versus a Correct?", "A Note is housekeeping: a little clutter, a faded sign, something to tidy up. A Correct is a rule broken: a guard off, a blocked exit, PPE missing. It gets written up and fixed on the tenant's dime, with a photo."],
+      hazard: ["When is something Stop Work?", "When somebody could get hurt bad today: a machine that isn't locked out, a load hanging over people, a cracked grinding wheel, a forklift that shouldn't be running. You stop it and you call it in. Paperwork second."],
+      photos: "If we tell the tenant to correct something, they'll want proof. And a Stop Work photo goes straight to their safety manager. Extra photos never hurt.",
+      smell: 'Vanilla body spray and forklift propane.', flashlight: "'Ow! Point that at a machine guard or something!'" },
     opener: unit => `Lot ${unit}! Okay, it's a safety walk, so gear up first: the PPE station's right here by the dock. Then dock, racks, production floor, shop. Look at everything, write up whatever's off, and hit Finish when you're done.`,
     ppe: { need: { i_dock: ['glasses', 'boots', 'vest'], i_racks: ['glasses', 'boots', 'vest', 'hardhat'], i_floor: ['glasses', 'boots', 'vest', 'ears'], i_shop: ['glasses', 'boots'] }, where: "The PPE station's back on the dock, by where we came in." },
     title: A.title,
@@ -270,7 +282,7 @@
       ROOMS: ALL, FEATURES: [...FEATURES, ...X.FEATURES], ANOMALIES: [...ANOMALIES, ...X.ANOMALIES], ZOOM_ART: A.ZOOM_ART || {},
       CATS: X.CATS, BRIEFING: X.BRIEFING, BLANK: X.BLANK, CLUTTER: X.CLUTTER, CLUTTER_SPOTS: X.CLUTTER_SPOTS, FLOOR_CLUTTER: Object.keys(X.CLUTTER),
       ITEM_SPRITES: A.SPRITES || {},
-      DOORS: INDL.DOORS, CONTAINERS: INDL.CONTAINERS,                    // the shop lockers (js/sites/industrial-crew.js)
+      DOORS: INDL.DOORS, CONTAINERS: INDL.CONTAINERS, ROOM_TOUCH: { i_firstaid: 'door' },                    // the shop lockers (js/sites/industrial-crew.js)
       // gray areas: calls a reasonable inspector could defend, worth partial credit (js/partial-marks.js)
       ACCEPTABLE: {
         'i_restraint:1': [0], 'i_forklift:1': [0], 'i_upright:1': [0], 'i_sprinkrack:1': [0], 'i_belt:1': [0], 'i_conveyor:1': [0], 'i_grinder:1': [0], 'i_cylinders:1': [0], 'i_hoist:1': [0],

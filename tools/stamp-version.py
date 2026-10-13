@@ -31,7 +31,9 @@ def bust_caches():
     """Add ?v=<fingerprint> to every local .css/.js link in the site's pages, so browsers (and
     Neocities' cache) fetch a file again only when it has actually changed."""
     pages = glob.glob(os.path.join(ROOT, 'pages', '*.html')) + [os.path.join(ROOT, 'index.html'), os.path.join(ROOT, 'not_found.html')]
-    pat = re.compile(r'((?:src|href)=")(?!https?:|//|data:)([^"?#]+\.(?:css|js))(?:\?v=[0-9a-f]+)?(")')
+    pages += glob.glob(os.path.join(ROOT, 'games', '*', 'index.html'))   # the games' own scripts too, so a returning player never mixes old and new files
+    # a game's index.html, wherever a page frames or links it, is fingerprinted the same way
+    pat = re.compile(r'((?:src|href)=")(?!https?:|//|data:)([^"?#]+\.(?:css|js)|[^"?#]*games/[^"?#/]+/index\.html)(?:\?v=[0-9a-f]+)?(")')
     changed = 0
     for page in pages:
         if not os.path.exists(page):

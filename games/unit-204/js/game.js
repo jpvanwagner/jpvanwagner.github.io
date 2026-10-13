@@ -35,6 +35,7 @@ class Walker {
     o.blink = (t * 1000 + (this.who === 'dana' ? 1700 : 0)) % 3900 < 130;
     o.talk = UI.talking(this.who) && Math.floor(t * 8) % 2 === 0;
     if (this.who === 'you' && PPE.on()) o.ppe = PPE.all().filter(id => PPE.has(id)).join(',');   // whatever you've put on shows
+    if (this.who === 'dana' && PPE.on()) o.ppe = PPE.all().join(',');   // Dana's already suited up when you get there
     return Sprites.get(this.who, o, this.screen().s);
   }
   rect(x, z) { const { sx, sy, s } = this.screen(x, z); return { x0: sx - 13 * s, x1: sx + 13 * s, y0: sy - (SPR_H - 4) * s, y1: sy }; }
@@ -106,11 +107,14 @@ const BLANK = {
   }
 };
 const UNITS = ['112', '118', '207', '215', '303', '311', '316', '402', '409', '417'];   // later shifts, elsewhere in the building
+/* a way out: a door to another area, or the front door that ends the shift (outlined in cyan, not cream) */
+const shiftExit = h => !!h && h.id === Sites.site.exit.id;   // the site's way out (the apartment's front door, the office entry, the warehouse exit, the jobsite gate)
+const isExit = h => !!h && (h.kind === 'door' || shiftExit(h));
 const ROOM_TOUCH = { fridge: 'handle', sink: 'cabinet', closet: 'knob', stove: 'oven', dishwasher: 'door', patio: 'slats' };
 
 const Game = {
   mode: 'title', room: 'living', tool: 'look', t: 0,
-  cond: {}, required: new Set(), anomalies: [], flags: {}, marks: {}, notes: {}, clues: {}, photos: {}, gallery: [], opened: {}, taken: new Set(), bag: [], jotted: new Set(),
+  cond: {}, required: new Set(), anomalies: [], flags: {}, marks: {}, notes: {}, clues: {}, photos: {}, gallery: [], opened: {}, taken: new Set(), bag: [], from: {}, jotted: new Set(),
   shots: 0, actions: 0, seen: new Set(), asked: new Set(), hintIx: 0, smallTalk: 0,
   player: new Walker('you', 3.4), dana: new Walker('dana', 3.0),
   hover: null, mouse: null, fade: 0, start: 0, idle: 0, nextBark: 30, hots: [],
@@ -120,7 +124,7 @@ const Game = {
     this.unit = this.shiftNo === 1 ? '204' : pick(UNITS.filter(u => u !== this.unit));
     for (const id of ['markUnit', 'endUnit']) if ($(id)) $(id).textContent = this.unit;
     const deal = dealConditions(); this.cond = deal.cond; for (const id in VIEWS) this.cond[id] = 0; this.required = deal.required; this.anomalies = dealAnomalies(); this.flags = {}; this.order = null; this.noted = new Set(); this.marks = {}; this.notes = {}; this.clues = {}; this.photos = {}; this.gallery = [];
-    this.opened = { bblinds: true }; PPE.reset(); Openables.reset(); Utilities.reset(); this.taken = new Set(); this.bag = []; this.jotted = new Set(); Decor.roll(); Doodles.reset(); Birds.reset(); Achievements.newShift(); this.combos = new Set(); this.notified = new Set(); this.maint = null; this.bbOffered = false; Calendar.reset(); this.hoodOn = false;
+    this.opened = { bblinds: true }; PPE.reset(); Openables.reset(); Utilities.reset(); this.taken = new Set(); this.bag = []; this.from = {}; this.jotted = new Set(); Decor.roll(); Doodles.reset(); Birds.reset(); Achievements.newShift(); this.combos = new Set(); this.notified = new Set(); this.maint = null; this.bbOffered = false; Calendar.reset(); this.hoodOn = false;
     this.measures = {}; this.call = null; this.shots = 0; this.actions = 0; this.toldDone = false; this.seen = new Set(); this.asked = new Set(); this.hintIx = 0;
     for (const r of Object.values(ROOMS)) { r.lightsOff = false; r.ventOn = false; }
     Rooms.invalidate(); this.start = performance.now();
@@ -148,6 +152,12 @@ const Game = {
     PPE.check(id);                                                // on sites with PPE: walking in without it gets you called out (js/ppe.js)
   },
   refreshHots() { this.hots = Rooms.hotspots(this.room); },
+  /* people walk, so their outlines follow them: re-outline the live hotspots every frame, and re-check what's under a still mouse */
+  liveHots() {
+    let any = false;
+    for (const h of this.hots || []) if (h.live) { h.pts = h.ptsFn(); h.box = polyBox(h.pts); any = true; }
+    if (any && this.mouse) this.updateHover();
+  },
   setTool(id) {
     if (!CYCLE.includes(id)) this.lastTool = id;            // so right-click can keep coming back to it (camera, clipboard, hammer...)
     this.tool = id; $('game').className = $('game').className.replace(/\bcur-\S+/g, '').trim() + ' cur-' + id;
@@ -234,7 +244,7 @@ const Game = {
     const s = h.data;
     if (s.noTake && !withLook && s.item === 'pizza') Takeout.note('tony');   // Tony's number, off the lid (js/takeout.js)
     if (s.noTake) return this.tell(withLook && s.look ? s.look : s.noTake);   // a plain click on something you won't carry just looks at it
-    this.taken.add(h.id); Bag.add(s.item);
+    this.taken.add(h.id); Bag.add(s.item, h.id);
     Rooms.invalidate(this.room); this.refreshHots(); this.updateHover();
     this.tell(s.take || (withLook && s.look ? `${s.look} You drop it in your bag.` : `You pick up the ${lower(s.name)} and drop it in your bag.`));
   },
@@ -254,8 +264,8 @@ const Game = {
     if (this.mode !== 'play' || !this.mouse || UI.blocking()) { this.hover = null; UI.verb(''); return; }
     const h = this.hit(this.mouse[0], this.mouse[1]); this.hover = h;
     if (h) {
-      const exit = h.id === 'frontdoor' && this.tool === 'walk';
-      UI.verb(exit ? 'Leave through the <b>Front Door</b> (submit report)' : (this.tool === 'walk' && ((h.kind === 'openable' && h.id !== 'rug') || (h.kind === 'feature' && ROOM_TOUCH[h.id])) ? `Open or close <b>${h.name}</b>` : this.tool === 'walk' && h.kind === 'scenery' && h.data && h.data.item ? (h.data.noTake ? `Look at <b>${h.name}</b>` : `Pick up <b>${h.name}</b>`) : this.tool === 'walk' && h.kind === 'scenery' && h.data && (h.data.light || h.data.fan || h.data.vent || h.data.hood) ? `Flip <b>${h.name}</b>` : (this.tool === 'walk' || this.tool === 'touch') && h.data && h.data.panel ? `Open the <b>${h.name}</b>` : (this.tool === 'walk' || this.tool === 'touch') && h.data && h.data.valve ? `Turn the <b>${h.name}</b>` : verbPhrase(h.kind === 'door' && this.tool === 'walk' ? 'walk' : this.tool, h.name)) + ((h.kind === 'feature' || h.kind === 'anomaly') && this.marks[h.id] ? ' <i>(on your form)</i>' : ''));
+      const exit = shiftExit(h) && this.tool === 'walk';
+      UI.verb(exit ? `Leave through the <b>${Sites.site.exit.name}</b> (submit report)` : (this.tool === 'walk' && ((h.kind === 'openable' && h.id !== 'rug') || (h.kind === 'feature' && ROOM_TOUCH[h.id])) ? `Open or close <b>${h.name}</b>` : this.tool === 'walk' && h.kind === 'scenery' && h.data && h.data.item ? (h.data.noTake ? `Look at <b>${h.name}</b>` : `Pick up <b>${h.name}</b>`) : this.tool === 'walk' && h.kind === 'scenery' && h.data && (h.data.light || h.data.fan || h.data.vent || h.data.hood) ? `Flip <b>${h.name}</b>` : (this.tool === 'walk' || this.tool === 'touch') && h.data && h.data.panel ? `Open the <b>${h.name}</b>` : (this.tool === 'walk' || this.tool === 'touch') && h.data && h.data.valve ? `Turn the <b>${h.name}</b>` : verbPhrase(h.kind === 'door' && this.tool === 'walk' ? 'walk' : this.tool, h.name)) + ((h.kind === 'feature' || h.kind === 'anomaly') && this.marks[h.id] ? ' <i>(on your form)</i>' : ''));
     } else UI.verb(this.tool === 'walk' || floorAt(this.mouse[0], this.mouse[1]) ? (this.tool === 'walk' ? 'Walk' : TOOL[this.tool].name) : '');
   },
   click(x, y) {
@@ -340,12 +350,16 @@ const Game = {
     if (tool === 'walk') {
       if (f.floor) { const fl = floorAt(x, y); if (fl) { P0.goTo(fl.x, fl.z); return; } }       // a floor is somewhere to walk, too
       P0.goTo(spot.x, spot.z, () => {
-        faceTo(cx); if (h.id === 'frontdoor') Report.confirmSubmit();
+        faceTo(cx); if (shiftExit(h)) Report.confirmSubmit();
         else if (ROOM_TOUCH[h.id]) { const part = f.parts.find(p => p.id === ROOM_TOUCH[h.id]); this.tell(Inspect.act(h.id, part, 'touch')); }   // the fridge, oven, closet, and blinds open with a plain click too
       }); return;
     }
-    if (tool === 'look') { faceTo(cx); Inspect.open(h.id, origin); return; }
-    if (tool === 'talk') { faceTo(cx); this.tell(`You ask the ${lower(f.name)} how it's doing. It doesn't say. That's what the tools are for.`); return; }
+    if (tool === 'look') {   // from across the room, you walk over first (most of the way, not right up to it), then look closely
+      const d = Math.hypot(P0.x - spot.x, P0.z - spot.z), near = 2.4;
+      if (d > near + .6) { const k = (d - near) / d; P0.goTo(P0.x + (spot.x - P0.x) * k, P0.z + (spot.z - P0.z) * k, () => { faceTo(cx); Inspect.open(h.id, origin); }); return; }
+      faceTo(cx); Inspect.open(h.id, origin); return;
+    }
+    if (tool === 'talk') { faceTo(cx); this.tell(f.talk || `You ask the ${lower(f.name)} how it's doing. It doesn't say. That's what the tools are for.`); return; }   // a feature that's a person (the crew's PPE) answers
     P0.goTo(spot.x, spot.z, () => {
       faceTo(cx);
       if (tool === 'clipboard') return Mark.open(h.id);
@@ -357,9 +371,9 @@ const Game = {
   useOnDana(tool) {
     const lines = {
       look: "Dana, from the leasing office. Three months in and already running the place.",
-      touch: "'Yes, boss?'", smell: 'Vanilla body spray and printer toner.',
+      touch: "'Yes, boss?'", smell: danaSays('smell', null, 'Vanilla body spray and printer toner.'),
       clipboard: "'I'm not a finding. I'd be a ten, obviously.'", camera: 'Dana throws up a peace sign. You save the shot for later.',
-      tape: "'Five-foot-four. Five-five in these flats. Can we get back to work?'", flashlight: "'Ow! My eyes! Point that at the sink!'",
+      tape: "'Five-foot-four. Five-five in these flats. Can we get back to work?'", flashlight: danaSays('flashlight', null, "'Ow! My eyes! Point that at the sink!'"),
       screwdriver: "'Don't you dare.'", hammer: "You think better of it.", pencil: "You hand Dana the pencil. She hands it back.", walk: null
     };
     if (tool === 'talk') { this.player.goTo(this.dana.x + (this.player.x < this.dana.x ? -1 : 1), this.dana.z, () => { this.player.face = this.dana.x > this.player.x ? 1 : -1; this.dana.face = -this.player.face; Dialogue.open(); }); return; }
@@ -376,6 +390,7 @@ const Game = {
     for (let i = 0; i < 36; i++) {
       const x = clamp(nx + (i ? rand(-3.5, 3.5) : 0), w.x0, w.x1), z = clamp(nz + (i ? rand(-2.4, 1.2) : 0), w.z0, w.z1), r = this.dana.rect(x, z);
       let cost = Math.hypot(x - nx, z - nz) * 30 + (pr ? over(r, pr) * 2 : 0);
+      if (r.x0 < 6 || r.x1 > SW - 6 || r.y0 < 2 || r.y1 > SH - 4) cost += 100000;   // never anywhere she'd be cut off by the edge of the screen
       for (const b of boxes) cost += over(r, b) * 1.5;
       if (!best || cost < best.cost) best = { x, z, cost };
     }
@@ -423,15 +438,16 @@ const Game = {
       Audio2.walking(P0.moving);
     } else Audio2.walking(false);
     this.fade = Math.max(0, this.fade - dt * 2.5);
+    if (this.mode === 'play') this.liveHots();
   },
   render(g) {
     const t = this.t;
     Rooms.draw(g, this.room, t);
     const hs = Settings.get('hotspots');
     if (!UI.blocking()) {
-      if (hs === 'always') for (const h of this.hots) if (h.kind !== 'door') { g.save(); g.setLineDash([1, 3]); strokePoly(g, h.pts, 'rgba(255,236,190,0.35)'); g.restore(); }
+      if (hs === 'always') for (const h of this.hots) { g.save(); g.setLineDash([1, 3]); strokePoly(g, h.pts, isExit(h) ? 'rgba(120,220,255,0.4)' : 'rgba(255,236,190,0.35)'); g.restore(); }
       Reveal.drawRoom(g, this.hots);                              // the toolbar's sparkle: everything outlined for a moment
-      if (this.hover && this.hover.pts && hs !== 'off') { g.save(); g.setLineDash([2, 2]); g.lineDashOffset = -Math.floor(t * 8); strokePoly(g, growPoly(this.hover.pts, 1.5), 'rgba(255,236,190,0.95)'); g.restore(); }   // drawn just outside the edge, so it never cuts into the thing
+      if (this.hover && this.hover.pts && hs !== 'off') { g.save(); g.setLineDash([2, 2]); g.lineDashOffset = -Math.floor(t * 8); strokePoly(g, growPoly(this.hover.pts, 1.5), isExit(this.hover) ? 'rgba(120,220,255,0.95)' : 'rgba(255,236,190,0.95)'); g.restore(); }   // drawn just outside the edge, so it never cuts into the thing; ways out are cyan
     }
     Obstacles.draw(g, this.room, [this.player, this.dana], t);    // back to front, with machines and tables in front of whoever walks behind them
     Rooms.overlay(g, this.room, t);

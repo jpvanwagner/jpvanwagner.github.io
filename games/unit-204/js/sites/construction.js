@@ -19,7 +19,7 @@
   const crewPts = (room, who) => { const c = crewOf(room).find(p => p.id === who); return c ? A.personPts(c) : [[0, 0], [1, 0], [1, 1]]; };
   const crewBlocks = room => crewOf(room).filter(c => c.block).map(c => ({ x0: c.x - .25, x1: c.x + .25, z0: c.z - .2, z1: c.z + .2, pts: () => A.personPts(c) }));
   /* a crew member you can talk to (Look and Talk), standing where the art puts them */
-  const crewScenery = (room, who, name, walk, look, talk, extra) => ({ id: 'c_crew_' + who, name, pts: () => crewPts(room, who), walk, look, talk, ...(extra || {}) });
+  const crewScenery = (room, who, name, walk, look, talk, extra) => ({ id: 'c_crew_' + who, name, pts: () => crewPts(room, who), walk, look, talk, live: true, ...(extra || {}) });
 
   /* ============================== AREAS ============================== */
   const ROOMS = {
@@ -29,7 +29,7 @@
         { x0: G.gate.chop[0], x1: G.gate.chop[1], z0: G.gate.chop[2], z1: G.gate.chop[3], h: 1.1 }, ...crewBlocks('c_gate')],
       doors: [
         { id: 'c_gateToPower', side: 'left', za: G.gate.toPower[0], zb: G.gate.toPower[1], to: 'c_power', name: 'Trailer yard', walk: { x: -5.4, z: 9.3 }, spawn: { x: 5.2, z: 9.1 } },
-        { id: 'c_gateToDeck', side: 'right', za: G.gate.stairs[0], zb: G.gate.stairs[1], to: 'c_deck', name: 'Stairs to the deck', walk: { x: 4.8, z: 9.0 }, spawn: { x: -5.2, z: 9.0 } }
+        { id: 'c_gateToDeck', side: 'right', za: G.gate.stairs[0], zb: G.gate.stairs[1], pts: () => hull(boxPts(BOX.x1 - 1.5, BOX.x1 - .05, 0, 4.5, G.gate.stairs[0], G.gate.stairs[1])), to: 'c_deck', name: 'Stairs to the deck', walk: { x: 4.8, z: 9.0 }, spawn: { x: -5.2, z: 9.0 } }
       ],
       features: {
         c_crew: { pts: () => hull([...crewPts('c_gate', 'cutter'), ...boxPts(G.gate.chop[0], G.gate.chop[1], 0, 1.1, G.gate.chop[2], G.gate.chop[3])]), walk: { x: .9, z: 10.2 } },
@@ -68,10 +68,10 @@
       blocks: () => [{ x0: G.trench.pump[0], x1: G.trench.pump[1], z0: G.trench.pump[2], z1: G.trench.pump[3], h: .45 }, ...crewBlocks('c_trench')],
       doors: [{ id: 'c_trenchToPower', side: 'right', za: G.trench.door[0], zb: G.trench.door[1], to: 'c_power', name: 'Trailer yard', walk: { x: 5.6, z: 9.1 }, spawn: { x: -5.2, z: 9.1 } }],
       features: {
-        c_trenchbox: { pts: () => hull(boxPts(G.trench.x[0], G.trench.x[1], -2.8, .3, G.trench.box[0], G.trench.box[1] + 1.4)), walk: { x: -.9, z: 10.4 } },
+        c_trenchbox: { pts: () => hull(boxPts(G.trench.x[0], G.trench.x[1], 0, .3, G.trench.box[0], G.trench.box[1] + 1.4)), walk: { x: -.9, z: 10.4 } },   // what shows of it: the box's top edges, inside the cut
         c_spoil: { pts: () => hull(boxPts(G.trench.spoil[0], G.trench.spoil[1] + .3, 0, 1.75, G.trench.spoil[2], G.trench.spoil[3])), walk: { x: -.9, z: 8.4 } },
         c_trladder: { pts: () => { const z = cond('c_trladder') === 2 ? 15 : G.trench.ladder; return hull(boxPts(G.trench.x[0] + .1, G.trench.x[1] - .1, z > 12 ? -2 : -.5, 1.3, z - .1, z + .1)); }, walk: { x: -.9, z: 7.4 } },
-        c_water: { pts: () => hull([...boxPts(G.trench.pump[0], G.trench.pump[1], 0, .6, G.trench.pump[2], G.trench.pump[3]), ...Q.floor(G.trench.x[0], G.trench.x[1], 6.6, 8.6)]), walk: { x: -.4, z: 6.2 } },
+        c_water: { pts: () => hull(boxPts(G.trench.pump[0] - .05, G.trench.pump[1] + .05, 0, .55, G.trench.pump[2] - .05, G.trench.pump[3] + .05)), walk: { x: -.4, z: 6.2 } },   // the pump on the lip (its close-up shows the meter, too)
         c_excavator: { pts: () => hull(A.excavatorPts()), walk: { x: 1.6, z: 11.6 } },
         c_locate: { pts: () => hull([...Q.floor(G.trench.locate[0], G.trench.locate[1], G.trench.locate[2], G.trench.locate[3]), P(G.trench.locate[0] + .7, .5, G.trench.locate[2] + .4), P(G.trench.locate[0] + 2, .5, G.trench.locate[2] + .4)]), walk: { x: 2.2, z: 5.4 } }
       },
@@ -95,7 +95,7 @@
       ],
       features: {
         c_trailer: { pts: () => hull([P(G.power.door[0] - .5, 0, G.power.steps[0]), P(G.power.door[1] + .9, 0, G.power.steps[0]), P(G.power.door[1] + .9, 2.9, G.power.trailer[2]), P(G.power.door[0] - .5, 2.9, G.power.trailer[2])]), walk: { x: 0, z: 12.6 } },
-        c_powerline: { pts: () => hull([P(G.power.pole[0] - .3, 0, G.power.pole[1]), P(G.power.pole[0] + .3, 0, G.power.pole[1]), P(G.power.pole[0] + 1.3, 6.4, G.power.pole[1]), P(-2, 6.0, G.power.pole[1] + .2), P(-2, 5.6, G.power.pole[1] + .2)]), walk: { x: 4.4, z: 12.6 } },
+        c_powerline: { pts: () => { const [px, pz] = G.power.pole; return unionOutline([[P(px - .2, 0, pz), P(px + .2, 0, pz), P(px + .2, 6.5, pz), P(px - .2, 6.5, pz)], [P(px + 1.35, 6.35, pz), P(px - 1.35, 6.35, pz), P(-8, 6.2, pz + .5), P(-8, 5.5, pz + .5), P(px - 1.35, 5.75, pz), P(px + 1.35, 5.75, pz)]]); }, walk: { x: 4.4, z: 12.6 } },   // the pole and the wires off its crossarm
         c_panel: { pts: () => hull(boxPts(G.power.panel[0], G.power.panel[1], 0, 2.6, G.power.panel[2], G.power.panel[3])), walk: { x: -5, z: 10.2 } },
         c_cords: { pts: () => { const path = A.cordPath(cond('c_cords'));
           return [...path.map(([x, z]) => P(x, 0, z - .35)), ...path.slice().reverse().map(([x, z]) => P(x, 0, z + .35))]; }, walk: { x: -1, z: 8.6 } },
@@ -109,7 +109,13 @@
         crewScenery('c_power', 'super', 'Superintendent', { x: -.6, z: 12.4 }, "The superintendent, on the trailer steps with a phone at one ear. From the sound of it, the concrete supplier is having a bad morning too.",
           '"Yeah, hang on." They cover the phone. "Whatever you find, write it up and I\'ll get it fixed today. Promise." Back to the phone.', { when: () => cond('c_trailer') !== 3 }),
         { id: 'c_s_trailerwin', name: 'Trailer window', pts: () => Q.back({ ...BOX, zb: G.power.trailer[2] }, G.power.trailer[1] - 2, G.power.trailer[1] - .6, 1.6, 2.6), walk: { x: 2.4, z: 12.6 },
-          look: 'Through the trailer window: plans pinned to the wall, a coffee maker, a hard hat full of donuts, and the super, on the phone, pacing.', touch: 'You tap. The super holds up one finger without looking.' }
+          get look() { return cond('c_trailer') === 3 ? 'Through the trailer window: plans pinned to the wall, a coffee maker, a hard hat full of donuts, and the super at the desk, on the phone.' : "Through the trailer window: plans pinned to the wall, a coffee maker, and a hard hat full of donuts. Nobody's at the desk; the super's out on the steps."; },
+          get touch() { return cond('c_trailer') === 3 ? 'You tap. The super holds up one finger without looking, then points at the door: come on in.' : 'You tap on the glass. Nobody inside to hear it.'; } },
+        /* the super indoors, on the day somebody's hurt on the steps: there when the door's open (the window shows them, too) */
+        { id: 'c_crew_superin', name: 'Superintendent', live: true, when: () => cond('c_trailer') === 3, walk: { x: 0, z: 12.6 },
+          pts: () => Openables.amt('c_trailerdoor') > .5 ? Q.back({ ...BOX, zb: G.power.trailer[2] }, G.power.door[0], G.power.door[1], .5, 2.8) : [[0, 0], [1, 0], [1, 1]],
+          look: "The superintendent, at the desk inside with the phone, getting the worker on the steps a ride to the clinic. The first aid kit's already open on the desk.",
+          talk: '"Yeah, I see you." They cover the phone. "Clinic\'s sending a van for his hand. Write up whatever you find, I\'ll get it fixed today." Back to the phone.' }
       ]
     })
   };
@@ -118,16 +124,43 @@
   const PPE_LOOK = { hardhat: 'White visitor hard hats, Type I. Nobody gets past this table without one.', vest: 'Orange hi-vis vests, Class 2. Trucks back up across this yard all day.',
     glasses: 'A box of clear safety glasses, Z87+ on every temple.', ears: 'Foam earplugs and a pair of muffs. The cut station is loud.', boots: 'Loaner safety-toe boots, sprayed and bagged after every use.' };
   ROOMS.c_gate.scenery = [
-    ...Object.keys(A.PPE_X).map(id => ({ id: 'c_ppe_' + id, name: PPE_ITEMS[id].name, ppe: id, when: () => !PPE.has(id),
-      pts: () => id === 'boots' ? around(P(A.PPE_X.boots, 0, G.gate.ppe.z - .2), 18, 9, -3) : around(P(A.PPE_X[id], G.gate.ppe.top, G.gate.ppe.z + .3), 13, 9, -3),
-      walk: { x: -3.2, z: 5.4 }, look: PPE_LOOK[id], touch: PPE_ITEMS[id].on, smell: id === 'boots' ? 'Disinfectant spray. Mostly.' : 'New plastic.' })),
-    { id: 'c_s_signin', name: 'Sign-in sheet', pts: () => around(P(G.gate.ppe.x1 - .25, G.gate.ppe.top, G.gate.ppe.z + .3), 12, 8, -2), walk: { x: -2.4, z: 5.4 },
+    ...Object.keys(A.PPE_X).filter(id => PPE_ITEMS[id]).map(id => ({ id: 'c_ppe_' + id, name: PPE_ITEMS[id].name, ppe: id, when: () => !PPE.has(id),
+      pts: () => A.ppePts(id),
+      walk: { x: -1.0, z: 5.3 }, look: PPE_LOOK[id], touch: PPE_ITEMS[id].on, smell: id === 'boots' ? 'Disinfectant spray. Mostly.' : 'New plastic.' })),
+    { id: 'c_s_signin', name: 'Sign-in sheet', pts: () => A.ppePts('signin'), walk: { x: -1.0, z: 5.6 },
       look: "The visitor sign-in sheet. You write your name, the time, and 'Brickroad, owner's rep.' The line above yours says 'Mom' in a kid's handwriting.", touch: 'You sign in. Every visitor does, so the super knows who to count if something goes wrong.' },
-    { id: 'c_s_ppesign', name: 'PPE sign', pts: () => { const p = P(G.gate.ppe.x0 - .3, 0, G.gate.ppe.z + .3); return [[p[0] - 24, p[1] - 42], [p[0] + 26, p[1] - 42], [p[0] + 26, p[1] - 6], [p[0] - 24, p[1] - 6]]; }, walk: { x: -3.6, z: 5.4 },
-      look: 'VISITOR PPE: hard hat, safety glasses, hi-vis vest, and safety-toe boots past this point. Hearing protection at the cut station. NO EXCEPTIONS. Somebody added: (THIS MEANS YOU, KEVIN)', touch: 'Plywood and spray paint. Sturdy.' },
-    { id: 'c_s_frame', name: 'The building', pts: () => Q.right(box('c_gate'), 11.4, 15.8, 3.0, 5.8), walk: { x: 4.2, z: 12 },
+    { id: 'c_s_ppesign', name: 'PPE banner', pts: () => { const T0 = G.gate.ppe, a = P(T0.x0 + .62, T0.top - .08, T0.z), b = P(T0.x1 - .62, .5, T0.z); return [[a[0], a[1]], [b[0], a[1]], [b[0], b[1]], [a[0], b[1]]]; }, walk: { x: -4.6, z: 5.6 },
+      look: 'VISITOR PPE: hard hat, safety glasses, hi-vis vest, and safety-toe boots past this point. Hearing protection at the cut station. NO EXCEPTIONS. Somebody added: (THIS MEANS YOU, KEVIN)', touch: 'Vinyl, zip-tied to the table at its grommets. It isn\'t going anywhere.' },
+    { id: 'c_s_frame', name: 'The building', pts: () => Q.right(box('c_gate'), 9.9, 15.8, 0, 5.8), walk: { x: 4.2, z: 12 },
       look: "Brickroad's new addition: two floors of steel and concrete. The second-floor deck is poured; the steel for the roof goes up next week, if the weather holds.", touch: 'Out of reach.' }
   ];
+
+  /* everyone else on the crew you can Look at and Talk to (the ones with their own lines above stay as they are);
+     each shows up only while the art has them there (Crew.hot's when) */
+  const TALKERS = {
+    c_gate: [
+      ['laborer', 'Laborer', { x: -1.4, z: 11.6 }, 'A laborer hauling 2x4s across the yard, a stack on one shoulder, eyes on the mud.', '"Coming through!" They swing the boards wide around you. "Sorry. Can\'t stop, these get heavier."'],
+      ['spotter', 'Spotter', { x: 1.2, z: 11.8 }, 'A spotter off the back corner of the dump truck, standing where the driver can see them in the mirror.', '"I\'m his eyes back here." They wave the driver back another foot. "Okay, that\'s good. HOLD."'],
+      ['walker', 'Worker behind the truck', { x: 3.4, z: 11.8 }, 'Someone walking right behind the dump truck with a phone out. No vest, no glasses.', '"Huh?" They look up from the phone. "Oh, the truck? Nah, he sees me." The backup alarm keeps beeping.'],
+      ['stroller', 'Passerby', { x: .2, z: 11.8 }, 'Someone from the sidewalk wandering along the fence line in sandals, looking around like the site is a museum.', '"Is this going to be condos? My cousin said condos." They take a photo of the crane.']
+    ],
+    c_deck: [
+      ['ironworker', 'Ironworker', { x: 1.4, z: 14.2 }, 'An ironworker out at the far edge, reaching up to bolt a beam connection.', '"Little busy!" A wrench clanks. "Talk to the super!"']
+    ],
+    c_trench: [
+      ['spotter', 'Excavator spotter', { x: 5.2, z: 11.0 }, 'A spotter in a vest, watching the excavator\'s swing and keeping everybody outside it.', '"Stay this side of the tape, please." They point at the barricade. "He can\'t see behind the counterweight."'],
+      ['piper', 'Pipe layer', { x: -.6, z: 10.6 }, 'A pipe layer down in the trench, bedding the new line in gravel.', '"Grade\'s good!" They call up without looking. "Tell the operator one more bucket, then stop."'],
+      ['crew2', 'Crew member', { x: 5.2, z: 11.2 }, 'A crew member waiting by the excavator for the next stick of pipe.', '"We\'re just waiting on pipe." Behind them, the excavator swings around. They don\'t look.'],
+      ['crew3', 'Crew member', { x: 5.2, z: 11.2 }, 'Another crew member next to them, coffee in hand.', '"Want a coffee? There\'s a cooler by the gate." They raise the cup. "This is my third."'],
+      ['under', 'Worker in the trench', { x: -.6, z: 11.8 }, 'Someone down in the trench, right under the bucket, guiding it with one hand.', '"Little lower!" They wave the bucket closer. "I got it, I got it."']
+    ],
+    c_power: [
+      ['mason', 'Mason', { x: -2.6, z: 9.8 }, 'A mason at the masonry saw, cutting block for the elevator shaft.', '"WHAT?" The saw winds down. "Elevator shaft. Eleven hundred more block to go." The saw roars back up.'],
+      ['hurt', 'Injured worker', { x: 1.8, z: 11.6 }, 'A worker kneeling by the trailer steps, holding one hand and waiting.', '"I\'m fine. It\'s fine." It is not fine. "Somebody went for the kit."'],
+      ['smoker', 'Worker on break', { x: -4.8, z: 11.8 }, 'A worker on break by the fuel cans, cigarette going.', '"Break time." They take a drag. "What? I\'m outside."']
+    ]
+  };
+  for (const [room, list] of Object.entries(TALKERS)) ROOMS[room].scenery.push(...list.map(([who, name, walk, look, talk]) => Crew.hot(() => crewOf(room), who, name, walk, look, talk)));
 
   /* ============================== DOORS THAT OPEN ==============================
      The gang box's lid lifts on its back hinge (js/openables.js 'lid'), and the trailer door swings out on its hinge,
@@ -145,7 +178,8 @@
         drawInside: (g, d) => { const z = d.z + d.depth; fillPoly(g, [P(d.x0, 1.5, z), P(d.x1, 1.5, z), P(d.x1, 2.4, z), P(d.x0, 2.4, z)], '#f4f2ea');   // plans pinned to the far wall
           for (let k = 0; k < 4; k++) lineW(g, P(d.x0 + .1, 1.6 + k * .2, z), P(d.x1 - .1, 1.6 + k * .2, z), '#3a6ad0');
           fillPoly(g, [P(d.x0, .5, d.z + .6), P(d.x1, .5, d.z + .6), P(d.x1, 1.25, d.z + .6), P(d.x0, 1.25, d.z + .6)], '#6a5a4a');   // the desk
-          const hh = P(d.x1 - .25, 1.25, d.z + .7); pxRect(g, hh[0] - 3, hh[1] - 3, 7, 3, '#f4f4ee'); pxRect(g, hh[0] - 2, hh[1] - 4, 2, 1, '#c87a4a'); } }   // a hard hat full of donuts
+          const hh = P(d.x1 - .25, 1.25, d.z + .7); pxRect(g, hh[0] - 3, hh[1] - 3, 7, 3, '#f4f4ee'); pxRect(g, hh[0] - 2, hh[1] - 4, 2, 1, '#c87a4a');   // a hard hat full of donuts
+          if (cond('c_trailer') === 3) Crew.person(g, (d.x0 + d.x1) / 2 + .1, d.z + 1.3, { ...A.SUPER_IN, y: .22 }, Game.t); } }   // the super, on the phone at the desk (set a touch low, so the door frame doesn't take their hat)
     ]
   };
   const CONTAINERS = { c_gang: { doors: ['c_gangbox'], items: ['c_level', 'c_hammer', 'c_tape'] }, c_trailer: { doors: ['c_trailerdoor'], items: ['c_thermos', null] } };
@@ -154,10 +188,12 @@
   const FEATURES = [
     /* ---------------- GATE AND LAYDOWN ---------------- */
     { id: 'c_crew', room: 'c_gate', name: 'Crew PPE', say: 'worker at the chop saw', art: 'c_crew',
+      talk: '"Yeah?" The worker at the chop saw lets the blade spin down. "Owner\'s rep? Super\'s over at the trailer." The saw spins back up.',
       hint: 'Check what the crew is wearing: hard hat, glasses, vest, and hearing protection at a saw.',
       osha: 'Hard hats where anything can fall or strike the head (1926.100(a)); eye protection when cutting (1926.102(a)(1)); hearing protection over the noise limit (1926.101(a)); PPE fits and is worn the way it was made to be (1926.95(c)).',
-      parts: [{ id: 'hat', name: 'hard hat', r: [70, 0, 70, 30] }, { id: 'eyes', name: 'eyes', r: [80, 28, 54, 16] }, { id: 'ears', name: 'ears', r: [66, 26, 82, 24] }, { id: 'vest', name: 'vest', r: [56, 56, 104, 79] }, { id: 'saw', name: 'chop saw', r: [160, 50, 80, 85] }],
-      base: { saw: { look: 'A 12-inch miter saw on a pair of sawhorses, guard working, cutting 2x4 blocking.', touch: "You don't touch a saw someone else is running." } },
+      parts: [{ id: 'hat', name: 'hard hat', r: [72, 0, 68, 28] }, { id: 'eyes', name: 'eyes', r: [97, 28, 42, 18] }, { id: 'ears', name: 'ears', r: [74, 28, 23, 28] }, { id: 'vest', name: 'vest', r: [74, 72, 62, 63] }, { id: 'saw', name: 'chop saw', r: [160, 50, 80, 85] }],
+      base: { saw: { look: 'A 12-inch miter saw on a pair of sawhorses, guard working, cutting 2x4 blocking.', touch: "You don't touch a saw someone else is running." },
+        ...Object.fromEntries(['hat', 'eyes', 'ears', 'vest'].map(k => [k, { talk: '"Yeah?" They let the saw spin down. "Owner\'s rep? Super\'s over at the trailer." The saw spins back up.' }])) },
       variants: [
         { cat: 0, desc: 'A worker cutting blocking at the chop saw, fully suited up.', key: ['kit'],
           resp: { hat: { look: { t: 'A white hard hat, brim forward.', clue: 'kit' } }, eyes: { look: { t: 'Safety glasses.', clue: 'kit' } }, ears: { look: 'Earmuffs.' }, vest: { look: 'Orange vest, zipped.' } },
@@ -176,7 +212,7 @@
       hint: 'Every site posts how to get help, and keeps the public out.',
       osha: 'Emergency numbers are posted where there is no 911 service (1926.50(f)), the OSHA poster goes up where workers can see it (1903.2(a)), and work next to a sidewalk is barricaded or flagged (1926.200(g); 1926.201).',
       parts: [{ id: 'sign', name: 'site sign', r: [10, 12, 128, 34] }, { id: 'numbers', name: 'emergency numbers', r: [12, 48, 60, 44] }, { id: 'poster', name: 'OSHA poster', r: [76, 48, 60, 44] }, { id: 'gate', name: 'the gate', r: [150, 4, 90, 110] }],
-      base: { sign: { look: 'SITE 204. HARD HAT AREA. PPE REQUIRED PAST GATE. SUPER: 555-0142.' } },
+      base: { sign: { get look() { return `SITE ${Game.unit || '204'}. HARD HAT AREA. PPE REQUIRED PAST GATE. SUPER: 555-0142.`; } } },
       variants: [
         { cat: 0, desc: 'The site board by the gate, with the emergency numbers and the OSHA poster.', key: ['posted'],
           resp: { numbers: { look: { t: 'CALL 911. Mercy Hospital, 2.1 miles. First aid kit in the trailer.', clue: 'posted' } }, poster: { look: { t: "Job Safety and Health: It's the Law. Current version.", clue: 'posted' } }, gate: { look: 'Shut and latched. You came in the pedestrian side.', touch: 'Latched tight.' } },
@@ -443,7 +479,7 @@
     { id: 'c_water', room: 'c_trench', name: 'Water & Air in the Trench', say: 'pump and gas meter', art: 'c_water',
       hint: 'Water weakens trench walls. Bad air can kill. Read the meter.',
       osha: 'Water is controlled before work continues (1926.651(h)(1)); the air is tested where a hazardous atmosphere could exist (1926.651(g)(1)).',
-      parts: [{ id: 'meter', name: 'gas meter', r: [20, 16, 54, 60] }, { id: 'pump', name: 'pump', r: [166, 0, 74, 34] }, { id: 'floor', name: 'trench floor', r: [0, 96, 240, 39] }],
+      parts: [{ id: 'meter', name: 'gas meter', r: [18, 12, 58, 74] }, { id: 'pump', name: 'pump', r: [156, 0, 84, 38] }, { id: 'floor', name: 'trench floor', r: [0, 100, 240, 35] }],
       base: { pump: { look: 'A trash pump on the lip.' } },
       variants: [
         { cat: 0, desc: 'A pump on the trench lip, a gas meter on the ladder.', key: ['clear'],
@@ -501,7 +537,7 @@
     { id: 'c_trailer', room: 'c_power', name: 'Trailer, Steps & First Aid', say: 'trailer steps and the first aid kit', art: 'c_trailer',
       hint: 'A kit, someone trained to use it, and a handrail on the steps.',
       osha: 'A first aid kit and a trained person (1926.50(c), (d)); stairs with 4 or more risers get a handrail (1926.1052(c)(1)).',
-      parts: [{ id: 'kit', name: 'first aid kit', r: [150, 16, 64, 54] }, { id: 'log', name: 'kit log', r: [212, 18, 26, 46] }, { id: 'rail', name: 'handrails', r: [44, 66, 120, 30] }, { id: 'steps', name: 'steps', r: [56, 96, 100, 39] }],
+      parts: [{ id: 'kit', name: 'first aid kit', r: [134, 16, 80, 52] }, { id: 'log', name: 'kit log', r: [212, 18, 26, 46] }, { id: 'rail', name: 'handrails', r: [34, 60, 140, 40] }, { id: 'steps', name: 'steps', r: [40, 92, 132, 43] }],
       base: { steps: { look: 'Metal steps up to the trailer door.' } },
       variants: [
         { cat: 0, desc: 'A first aid kit by the trailer door, and steps with handrails.', key: ['ready'],
@@ -616,7 +652,10 @@
       hint: 'Approved cans, chained cylinders, an extinguisher, and no smoking.',
       osha: 'Gas in approved containers (1926.152(a)(1)); cylinders secured (1926.350(a)(9)); an extinguisher within 100 feet (1926.150(c)(1)); no smoking near fuel (1926.151(a)(3)).',
       parts: [{ id: 'cans', name: 'fuel cans', r: [10, 56, 90, 64] }, { id: 'cylinders', name: 'propane cylinders', r: [112, 20, 74, 100] }, { id: 'ext', name: 'extinguisher', r: [192, 34, 44, 64] }, { id: 'sign', name: 'sign', r: [8, 4, 88, 34] }],
-      base: { sign: { look: 'NO SMOKING. NO FLAMES.' } },
+      base: { sign: { look: 'NO SMOKING. NO FLAMES.', smell: 'Plywood and spray paint.' },
+        cans: { smell: 'Gasoline, faintly, around the spouts. Every gas can smells a little.' },
+        cylinders: { smell: "Nothing much. Propane itself has no smell; they add one that smells like rotten eggs, so you'd know right away if one leaked." },
+        ext: { smell: 'Dusty red paint.' } },
       variants: [
         { cat: 0, desc: 'Red safety cans and propane cylinders, chained.', key: ['stored'],
           resp: { cans: { look: { t: 'Approved safety cans.', clue: 'stored' } }, cylinders: { touch: { t: 'Chained and capped.', clue: 'stored' } }, ext: { look: 'Tagged this month.' } },
@@ -673,11 +712,47 @@
   /* ============================== LEFT BEHIND ============================== */
   const spr = kind => (g, x, y, k) => drawSprite(g, A.SPRITES[kind], x, y + 1, sprScale(k), SPR_PAL);
   const CLUTTER = {
-    c_tape: { name: 'Tape measure', look: 'A 25-foot tape measure.', touch: 'You pull out a foot. SNAP.', smell: 'Metal.', draw: spr('c_tape') },
-    c_level: { name: 'Level', look: 'A yellow two-foot level.', touch: 'Dead level on the dirt.', smell: 'Aluminum.', draw: spr('c_level') },
-    c_thermos: { name: 'Thermos', look: 'A green thermos. Coffee, still warm.', touch: 'Warm.', smell: 'Coffee.', draw: spr('c_thermos') },
-    c_hammer: { name: 'Framing hammer', look: 'A framing hammer.', touch: 'Heavy.', smell: 'Wood.', draw: spr('c_hammer') },
-    c_cone: { name: 'Small cone', look: 'A little orange cone.', touch: 'Floppy.', smell: 'Rubber.', draw: spr('c_cone') }
+    c_tape: { name: 'Tape measure', owned: 'tool', owner: "the framers'", look: 'A 25-foot tape measure.', touch: 'You pull out a foot. SNAP.', smell: 'Metal.', draw: spr('c_tape') },
+    c_level: { name: 'Level', owned: 'tool', owner: "the framers'", look: 'A yellow two-foot level.', touch: 'Dead level on the dirt.', smell: 'Aluminum.', draw: spr('c_level') },
+    c_thermos: { name: 'Thermos', owned: 'personal', owner: "somebody's", look: 'A green thermos. Coffee, still warm.', touch: 'Warm.', smell: 'Coffee.', draw: spr('c_thermos') },
+    c_hammer: { name: 'Framing hammer', owned: 'tool', owner: "a framer's", look: 'A framing hammer.', touch: 'Heavy.', smell: 'Wood.', draw: spr('c_hammer') },
+    c_cone: { name: 'Small cone', owned: 'tool', owner: "the site's", look: 'A little orange cone.', touch: 'Floppy.', smell: 'Rubber.', draw: spr('c_cone') },
+    // dug out of the spoil pile, never left lying around (dug: kept off the floors)
+    c_bottle: { name: 'Old bottle', dug: true, look: "A little brown glass bottle, embossed DR. KILMER'S SWAMP ROOT. A patent medicine from before anybody's grandparents.", touch: 'Cold, and gritty with clay.', smell: 'Dirt. And, faintly, something medicinal from 1910.', draw: spr('c_bottle') },
+    c_marble: { name: 'Clay marble', dug: true, look: 'A clay marble, chipped, a little blue paint left on it.', touch: 'You roll it in your palm. Perfectly round, except where it isn\'t.', smell: 'Clay.', draw: spr('c_marble') },
+    c_horseshoe: { name: 'Rusty horseshoe', dug: true, look: 'A horseshoe, rusted almost through. Nail holes and all.', touch: 'You hold it points up, so the luck doesn\'t run out.', smell: 'Rust.', draw: spr('c_horseshoe') },
+    c_quarter: { name: '1964 quarter', dug: true, look: 'A 1964 quarter, dull gray: the last year they were silver.', touch: 'You flip it. Heads.', smell: 'Old pennies, somehow.', draw: spr('c_quarter') },
+    c_toycar: { name: 'Toy car', dug: true, look: 'A die-cast toy car, green, missing a wheel.', touch: 'Vroom. Vroo. Vr-clunk.', smell: 'Clay and old paint.', draw: spr('c_toycar') }
+  };
+  /* ============================== THE SPOIL PILE ==============================
+     What the bucket brought up with the dirt. Touch the loose dirt at the foot of the pile in its close-up to rifle
+     through it: five tries a shift, each turning something up, and then it's only clay. */
+  const SPOIL_FINDS = [
+    { item: 'c_bottle', t: "A little brown glass bottle, embossed DR. KILMER'S SWAMP ROOT. Older than the building. Older than the last building, too." },
+    { t: 'An earthworm, deeply offended. You put it back.' },
+    { item: 'c_marble', t: 'A clay marble, chipped, still a little blue. Somebody lost this a long time ago and probably still thinks about it.' },
+    { t: "Half a red brick with a maker's stamp: ...ON BRICK CO. The other half is somewhere else in the pile." },
+    { item: 'c_horseshoe', t: 'A horseshoe, rusted almost through. There was a livery stable on this block once, or somebody got very lucky here.' },
+    { item: 'c_quarter', t: 'A 1964 quarter, dull gray. The last year they made them out of silver: worth more than a quarter. Not a lot more.' },
+    { t: 'The stem of a clay smoking pipe, the kind people used a hundred years ago. It crumbles when you pick it up.' },
+    { item: 'c_toycar', t: 'A die-cast toy car, green, missing a wheel. It rolls in a circle on your palm.' }
+  ];
+  const digSpoil = () => {
+    const fl = Game.flags.c_spoil = Game.flags.c_spoil || {}, n = fl.dug || 0;
+    if (!fl.order) fl.order = SPOIL_FINDS.map((_, i) => i).sort(() => Math.random() - .5);
+    if (n >= 5) return 'You dig a little more. Clay, clay, and more clay. Whatever else is in there, the pile is keeping it.';
+    const f = SPOIL_FINDS[fl.order[n]]; fl.dug = n + 1; Audio2.sfx('swish', .5);
+    if (f.item) Bag.add(f.item, 'spoil-' + n);
+    return 'You rifle through the loose dirt at the foot of the pile' + (cond('c_spoil') === 2 ? ', on the side away from the edge' : '') + '. ' + f.t + (f.item ? ' Into the bag it goes.' : '');
+  };
+  const pilePart = () => FEATURES.find(f => f.id === 'c_spoil').parts.find(p => p.id === 'pile');
+  const EXTRAS_C = {
+    c_spoil: { parts: () => { const toe = cond('c_spoil') === 2 ? 148 : 108; return [{ id: 'dig', name: 'loose dirt at the foot of the pile', r: [Math.round(toe * .06), 96, Math.round(toe * .58), 32],
+      act: tool => tool === 'touch' ? digSpoil()
+        : tool === 'look' ? ((Game.flags.c_spoil || {}).dug >= 5 ? 'Loose clay at the foot of the pile, well picked over now.' : 'Loose clay at the foot of the pile, crumbly with stones and roots. Here and there, something that isn\'t dirt pokes out.')
+        : tool === 'flashlight' && ((Game.flags.c_spoil || {}).dug || 0) < 5 ? 'Something glints in the dirt, down near the bottom of the pile.'
+        : tool === 'smell' ? 'Wet clay, old iron, and something like a basement.'
+        : Inspect.act('c_spoil', pilePart(), tool) }]; } }
   };
   const CLUTTER_SPOTS = {
     c_gate: [[-1.6, 8.6], [2.8, 7.2], [-3.4, 9.8], [.6, 11.2], [3.6, 10.4]],
@@ -702,7 +777,7 @@
     { title: "We're not OSHA", art: 'camera', text: "We can't fine anybody. We document, require correction under the contract, and for imminent danger we <b>stop the work</b> and <b>call it in</b>." }
   ];
   const SOP = `
-    <div class="pg title-pg"><p class="pg-co">BRICKROAD PROPERTY MGMT.</p><h2>Standard Operating Procedure 9.6</h2><p class="pg-sub">Construction Site Walks</p><p class="pg-note">Hard hat before clipboard.</p><span class="coffee" aria-hidden="true"></span></div>
+    <div class="pg title-pg"><p class="pg-co">BRICKROAD PROPERTY MGMT.</p><h2>Standard Operating Procedure 9.6</h2><p class="pg-sub">Construction Site Walks</p><p class="pg-note">Keep this binder in the truck. Do not use as a coaster. Hard hat before clipboard.</p><span class="coffee" aria-hidden="true"></span></div>
     <div class="pg"><h3>The four calls</h3>
       <div class="sop-cat c0" data-sop="c0"><b>0 &middot; OK</b><p>Compliant. Nothing to do.</p></div>
       <div class="sop-cat c1" data-sop="c1"><b>1 &middot; Note</b><p>Housekeeping: a loose tarp, a missing flag, a muddy rung. Mention it; no charge.</p></div></div>
@@ -736,21 +811,33 @@
   Sites.register({
     music: 'jobsite',
     id: 'construction', place: 'Site', kind: 'Construction', tag: 'A Jobsite Safety Adventure',
-    form: 'SITE SAFETY WALK', report: 'Site Safety Report', start: 'c_gate', calls: false,
-    words: { tenant: 'contractor', deposit: 'contract', damage: 'violation', where: 'site' },
+    form: 'SITE SAFETY WALK', report: 'Site Safety Report', exit: { id: 'c_signboard', name: 'Gate' }, start: 'c_gate', calls: false,
+    words: { tenant: 'contractor', deposit: 'contract', damage: 'violation', where: 'site', air: 'dust and diesel' },
+    dana: {
+      small: ["Hard hat hair is real. I'm not taking it off. But it's real.",
+        "The super offered me a donut from inside his hard hat. I said yes. I regret nothing.",
+        "I watched a whole episode of Dirty Jobs to get ready for today. I feel ready.",
+        "My dad says every jobsite radio only gets one station. He's right. It's always this one.",
+        "If it rains any harder, I'm writing up the sky.",
+        "Somebody wrote KEVIN in the wet concrete over there. Kevin, if you're out there: we know."],
+      barks: ["Stay off the leading edge, boss.", "Everything out here is either beeping, banging, or both.", "I can smell the diesel from here."],
+      wear: ["What's a Note versus a Correct?", "A Note is housekeeping: a loose tarp, a muddy rung, a missing flag. A Correct is a rule broken under the contract: a guardrail down, a scaffold with no tag, somebody without PPE. The contractor fixes it, and we get a photo of it fixed."],
+      hazard: ["When is something Stop Work?", "Most people who die on jobsites die from the Focus Four: falls, getting struck, getting caught between things, and electrocution. Anything that could do one of those today is Stop Work. Stop it, then call it in."],
+      photos: "Every correction under the contract needs a photo, and a Stop Work needs one before anybody touches it. Also, the super likes to argue. Extra photos never hurt.",
+      smell: 'Vanilla body spray and sunscreen.', flashlight: "'Ow! Boss, it is broad daylight!'" },
     opener: unit => `Site ${unit}! Gear up at the visitor table first: hard hat, glasses, vest, boots, and earplugs. Then the deck, the trench, and the trailer yard. Hit Finish when you're done.`,
     ppe: { need: { c_deck: ['hardhat', 'glasses', 'vest', 'boots'], c_trench: ['hardhat', 'glasses', 'vest', 'boots'], c_power: ['hardhat', 'glasses', 'vest', 'boots', 'ears'] }, where: "The visitor PPE table is back at the gate." },
     title: A.title,
     sop: SOP,
     tables: {
       ROOMS, FEATURES, ANOMALIES, ZOOM_ART: A.ZOOM_ART || {},
-      CATS, BRIEFING, BLANK, CLUTTER, CLUTTER_SPOTS, DOORS, CONTAINERS,
+      CATS, BRIEFING, BLANK, CLUTTER, CLUTTER_SPOTS, DOORS, CONTAINERS, EXTRAS: EXTRAS_C,
       // gray areas: calls a reasonable inspector could defend, worth partial credit (js/partial-marks.js)
       ACCEPTABLE: {
         'c_signboard:1': [0], 'c_stacks:1': [0], 'c_rebar:1': [0], 'c_truck:1': [0], 'c_crew:1': [0], 'c_planks:1': [0], 'c_trladder:1': [0], 'c_water:1': [0],
         'c_excavator:1': [0], 'c_panel:1': [0], 'c_cutsaw:1': [0], 'c_silica:1': [0],
         c_a_coffee: [1], c_a_cone: [0], c_a_puddle: [0]
-      }, FLOOR_CLUTTER: Object.keys(CLUTTER), ITEM_SPRITES: A.SPRITES,
+      }, FLOOR_CLUTTER: Object.keys(CLUTTER).filter(k => !CLUTTER[k].dug), ITEM_SPRITES: A.SPRITES,
       PAINTS: Object.fromEntries(ids.map(k => [k, [['Jobsite', '#c8c8c0']]])),
       FLOORS: Object.fromEntries(ids.map(k => [k, [{ base: '#9a8262', dk: '#806a4c', lt: '#b09a78' }]])),
       UNITS: ['104', '118', '206', '212', '301', '315', '402', '410', '508', '516']

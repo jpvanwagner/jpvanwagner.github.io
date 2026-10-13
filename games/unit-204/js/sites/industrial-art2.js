@@ -189,7 +189,12 @@ INDA.G.shop = { bench: [-3.0, .2], shelf: [.8, 4.2], flam: [8, 9.6], cyl: [11, 1
         const sd = Q.back(r.box, xb - .9, xb - .3, 3.2, 3.8); fillPoly(g, sd, cv === 1 ? '#e8dcb0' : '#f4f0e0'); const sb = polyBox(sd); pxRect(g, sb.x0, sb.y0, sb.x1 - sb.x0, 2, '#d43a2a'); }   // the SDS box
       // the flammables cabinet on the right wall
       { const [za, zb2] = GS.flam, x1 = r.box.x1; box3(g, x1 - .9, x1, 0, 2.2, za, zb2, { front: '#f2c418', side: '#d8aa0a', top: '#ffe060' });
-        const q = Q.right({ ...r.box, x1: x1 - .9 }, za + .1, zb2 - .1, 1.4, 1.8), c = polyBox(q); if (fv !== 1) { pxRect(g, c.x0, c.y0, c.x1 - c.x0, c.y1 - c.y0, '#d82020'); }
+        // its doors face into the room: the seam, two handles, a kick plate, and the same warning sign the close-up shows,
+        // on the left door, foreshortened with the face (column 0 at the deep end, so it reads left to right)
+        const fx = x1 - .9, zm = (za + zb2) / 2;
+        lineW(g, P(fx, .1, zm), P(fx, 2.1, zm), '#c89a08'); for (const dz of [-.08, .08]) { const a = P(fx, 1.05, zm + dz), b = P(fx, 1.35, zm + dz); pxLine(g, a[0], a[1], b[0], b[1], '#5a5e66', 2); }
+        fillPoly(g, Qx(fx, za + .05, zb2 - .05, .05, .2), '#d8aa0a');
+        INDA.decalX(g, INDA.decal('flamsign', 46, 30, h => { h.fillStyle = '#d82020'; h.fillRect(0, 0, 46, 30); txt(h, 'FLAMMABLE', 23, 4, '#ffffff', 1, 'c'); txt(h, 'KEEP FIRE', 23, 14, '#ffffff', 1, 'c'); txt(h, 'AWAY', 23, 22, '#ffffff', 1, 'c'); }), fx - .005, zb2 - .1, zm + .1, 1.4, 1.85);
         if (fv === 1) { box3(g, x1 - 1.6, x1 - 1.0, 0, .5, za - .5, za, { front: '#6a6e76', top: '#4a4c52' }); }   // a rag pile in an open bin
         if (fv >= 2) { box3(g, x1 - .8, x1 - .5, 2.2, 2.55, za + .2, za + .6, { front: '#d82020', top: '#e85050' }); box3(g, x1 - .8, x1 - .45, 2.2, 2.5, za + .8, za + 1.1, { front: '#f2f2ea', top: '#ffffff' }); }   // cans on the roof, a milk jug of gas
         if (fv === 3) { const p = P(x1 - 1.6, .3, za + .4); pxRect(g, p[0] - 4, p[1] - 6, 8, 6, '#3a3c42'); pxRect(g, p[0] - 3, p[1] - 5, 6, 3, '#ff6a2a'); fillPoly(g, floorBlob(x1 - 1.4, za + 1, .4, .2, 3, .4, 12), 'rgba(140,140,120,0.5)'); } }   // a glowing heater by an open solvent pan
@@ -440,22 +445,48 @@ INDA.G.shop = { bench: [-3.0, .2], shelf: [.8, 4.2], flam: [8, 9.6], cyl: [11, 1
     },
     /* ---------------- MAINTENANCE SHOP ---------------- */
     i_grinder(g, v, fl, t) {
-      R(g, 0, 0, ZW, 92, '#c8a878'); for (let x = 6; x < ZW; x += 10) for (let y = 6; y < 92; y += 10) R(g, x, y, 2, 2, '#8a6a48');   // pegboard
-      R(g, 0, 92, ZW, 43, '#6a6e76'); R(g, 0, 92, ZW, 3, '#9aa0aa');                                      // the bench
-      const wob = v === 3 && Settings.get('motion') ? Math.round(Math.sin(t * 40) * 2) : 0;
-      R(g, 92 + wob, 70, 56, 26, '#3a5a3a'); R(g, 92 + wob, 70, 56, 3, '#4a6a4a');                      // the motor
-      for (const [cx, side] of [[62, -1], [178, 1]]) {
-        const x = cx + wob; pxEllipse(g, x, 60, 30, 30, '#8a8e96'); pxEllipse(g, x, 60, 22, 22, v === 1 ? '#c8c8c0' : '#a8a49a'); pxEllipse(g, x, 60, 4, 4, '#5a5e66');
-        if (v === 1) for (let k = 0; k < 4; k++) pxEllipse(g, x, 60, 18 - k * 3, 18 - k * 3, 'rgba(255,255,255,0.12)');
-        if (v === 3 && side < 0) pxCrack(g, x - 18, 50, .3, 26, '#1a1a1e', 7, 1);
-        // the work rest below the wheel and the tongue guard above it
-        const gap = v === 2 ? 9 : 3, tg = v === 2 ? 12 : 4;
-        R(g, x - 26 * side - (side < 0 ? 0 : 20), 84 + gap - 2, 20, 6, '#5a5e66');
-        if (v !== 3) { R(g, x - 10, 26 - tg, 20, 5, '#5a5e66'); R(g, x - 16, 16, 32, 10, 'rgba(220,235,245,0.6)'); }   // eye shield
+      // the pegboard behind, with a few tools hanging on it, and the steel bench top seen a little from above
+      R(g, 0, 0, ZW, 92, '#c8a878'); for (let x = 6; x < ZW; x += 10) for (let y = 6; y < 92; y += 10) R(g, x, y, 2, 2, '#8a6a48');
+      R(g, 8, 14, 3, 40, '#8a8e96'); R(g, 5, 12, 9, 6, '#8a8e96'); R(g, 216, 10, 4, 34, '#5a5e66'); R(g, 214, 44, 8, 14, '#c8202a');   // a wrench and a file
+      R(g, 0, 92, ZW, 26, '#9aa0aa'); for (let i = 0; i < 14; i++) R(g, hash(i + 3) * ZW, 96 + hash(i + 9) * 20, 6 + hash(i) * 14, 1, '#b4bac2');   // scuffs on the top
+      R(g, 0, 118, ZW, 17, '#5a5e66'); R(g, 0, 118, ZW, 2, '#7a8088');
+      const run = !!(fl && fl.run) && v !== 3, mo = Settings.get('motion'), wob = v === 3 && mo ? Math.round(Math.sin(t * 40) * 1.5) : 0, M = '#4f6a5c', MD = '#3a5246', ML = '#6a8a7a';
+      // the base and its mounting bolts (or the empty holes, on the one that walks across the bench)
+      fillPoly(g, [[70 + wob, 96], [170 + wob, 96], [174 + wob, 108], [66 + wob, 108]], MD); R(g, 66 + wob, 108, 108, 4, '#2a3a32');
+      for (const x of [76, 164]) { if (v === 3) pxEllipse(g, x, 104, 3, 2, '#2a2c32'); else bolt(g, x - 2 + wob, 101); }
+      // the motor: a finned cast housing between two end bells, a nameplate, and the paddle switch on its pedestal
+      R(g, 100 + wob, 84, 40, 14, MD); R(g, 100 + wob, 84, 40, 2, M);
+      R(g, 90 + wob, 44, 60, 42, M); R(g, 90 + wob, 44, 60, 5, ML); R(g, 90 + wob, 80, 60, 6, MD);
+      for (let x = 96; x < 146; x += 4) R(g, x + wob, 50, 1, 30, MD);
+      for (const x of [86, 146]) { R(g, x + wob, 47, 8, 36, MD); R(g, x + wob, 47, 8, 3, M); }
+      R(g, 108 + wob, 56, 24, 11, '#c8ccd4'); txt(g, '3450', 120 + wob, 58, '#2a2c32', 1, 'c');
+      R(g, 114 + wob, 88, 12, 9, '#2a2c32'); R(g, 116 + wob, run ? 88 : 92, 8, 4, run ? '#3fbf4f' : '#d82020');   // the switch, ON up and green or OFF down and red
+      // the arbors out to the wheels
+      for (const x of [70, 154]) R(g, x + wob, 64, 16, 4, '#a8acb4');
+      for (const [cx, side] of [[58, -1], [182, 1]]) {
+        const x = cx + wob, wc = v === 1 ? '#c4c0b4' : '#8a8678', gap = v === 2 ? 6 : 1, tg = v === 2 ? 7 : 1;
+        if (v === 3) {                                                     // no guards at all: the bare wheel, and a crack across the left one
+          pxEllipse(g, x, 64, 11, 28, '#6a6658'); pxEllipse(g, x - side * 2, 64, 9, 27, wc); speckle(g, x - 8, 38, 16, 52, '#5a5648', 60, 7);
+          if (side < 0) pxCrack(g, x - 6, 42, .3, 40, '#1a1a1e', 7, 1); continue;
+        }
+        // the cast-iron guard around the wheel, open at the front
+        pxEllipse(g, x, 58, 23, 26, '#5a6e64'); R(g, x - 23, 58, 46, 30, '#5a6e64'); R(g, x + side * 18 - 5, 40, 10, 46, '#4a5a52');
+        R(g, x - 23, 86, 46, 2, '#3a4a42');
+        R(g, x - 10, 34, 20, 38, '#16181c');                                // the opening
+        R(g, x - 8, 36, 16, 34, wc); speckle(g, x - 8, 36, 16, 34, mix(wc, '#000000', .25), 50, x);   // the wheel's grinding face, seen edge-on
+        R(g, x - 8, 36, 2, 34, mix(wc, '#ffffff', .25));
+        if (v === 1) for (let y = 40; y < 68; y += 7) R(g, x - 8, y, 16, 1, 'rgba(255,255,255,0.45)');   // glazed and grooved
+        if (run && mo) for (let k = 0; k < 4; k++) R(g, x - 8, 36 + ((t * 140 + k * 9) % 34), 16, 1, 'rgba(255,255,255,0.35)');   // spinning
+        // the tongue guard over the opening (gap = how far it sits off the wheel), and the clear eye shield on its bracket
+        R(g, x - 11, 30 - tg, 22, 4, '#a8acb4'); R(g, x - 11, 30 - tg, 22, 1, '#c8ccd4'); bolt(g, x - 2, 30 - tg);
+        pxLine(g, x + side * 10, 22, x + side * 16, 34, '#6a6e76', 2);
+        fillPoly(g, [[x - 15, 8], [x + 15, 8], [x + 17, 22], [x - 17, 22]], 'rgba(150,200,240,0.35)'); for (const k of [-8, 2]) pxLine(g, x + k, 10, x + k + 6, 20, 'rgba(255,255,255,0.6)'); pxLine(g, x - 15, 8, x + 15, 8, '#e8f4fc'); pxLine(g, x - 17, 22, x + 17, 22, '#8aa0b0');
+        // the work rest, sticking out toward you at the bottom of the opening (gap = how far it is from the wheel)
+        fillPoly(g, [[x - 13, 70 + gap], [x + 13, 70 + gap], [x + 16, 77 + gap], [x - 16, 77 + gap]], '#a8acb4'); R(g, x - 16, 77 + gap, 32, 3, '#6a6e76');
+        R(g, x - 2, 80 + gap, 4, 86 - 80 - gap + 2, '#6a6e76'); pxEllipse(g, x + side * 18, 82, 3, 3, '#2a2c32');   // its bracket and adjusting knob
+        if (run && mo) for (let k = 0; k < 9; k++) { const q = ((t * 2.2 + hash(k + cx) ) % 1), sx = x + (hash(k * 3 + cx) - .5) * 10 + q * 18 * (hash(k) - .5), sy = 72 + q * 40; R(g, sx, sy, 1, 1, q < .5 ? '#ffe080' : '#ff8a30'); }   // sparks off the wheel, down onto the bench
       }
-      if (v === 2) { txt(g, '3/8', 30, 100, '#f2c418'); txt(g, '1 IN', 160, 8, '#f2c418'); }
-      if (v === 3) { for (const x of [96, 144]) pxEllipse(g, x, 98, 3, 2, '#1a1a1e'); txt(g, 'NO BOLTS', 120, 110, '#f2c418', 1, 'c'); }
-      for (const [x, y] of [[98, 96], [142, 96]]) if (v !== 3) bolt(g, x, y);
+      if (run) softGlow(g, 120, 70, 140, 40, '#ffd080', .08);
       Z.vignette(g);
     },
     i_loto(g, v, fl, t) {
@@ -494,7 +525,9 @@ INDA.G.shop = { bench: [-3.0, .2], shelf: [.8, 4.2], flam: [8, 9.6], cyl: [11, 1
     },
     i_flamcab(g, v, fl, t) {
       cmu(g, 0, 0, ZW, 112, wallOf('i_shop'), 91); concrete(g, 0, 112, ZW, 23, '#8a8e96', 92);
+      fillPoly(g, [[190, 14], [208, 22], [208, 120], [190, 124]], '#d8aa0a'); pxLine(g, 190, 14, 208, 22, '#ffe060');   // its right side, seen a little from the room the way you walk up to it
       R(g, 50, 14, 140, 110, '#f2c418'); R(g, 50, 14, 140, 4, '#ffe060'); R(g, 119, 22, 2, 98, '#c89a08');   // two doors
+      R(g, 54, 112, 132, 10, '#d8aa0a'); for (const x of [58, 182]) R(g, x, 18, 2, 100, '#e0b010');            // the kick plate and the door hinges' edges
       R(g, 112, 66, 6, 14, '#5a5e66'); R(g, 122, 66, 6, 14, '#5a5e66');
       R(g, 64, 30, 46, 30, '#d82020'); txt(g, 'FLAMMABLE', 87, 34, '#ffffff', 1, 'c'); txt(g, 'KEEP FIRE', 87, 44, '#ffffff', 1, 'c'); txt(g, 'AWAY', 87, 52, '#ffffff', 1, 'c');
       if (v === 1) { R(g, 196, 90, 40, 34, '#6a6e76'); for (let i = 0; i < 8; i++) R(g, 198 + hash(i) * 30, 84 + hash(i + 2) * 12, 8, 6, ['#d8c8a0', '#c8b890', '#e8e0c8'][i % 3]); }   // oily rags in an open bin
@@ -503,18 +536,43 @@ INDA.G.shop = { bench: [-3.0, .2], shelf: [.8, 4.2], flam: [8, 9.6], cyl: [11, 1
       Z.vignette(g);
     },
     i_chemshelf(g, v, fl, t) {
-      cmu(g, 0, 0, ZW, ZH, wallOf('i_shop'), 101);
-      for (const y of [44, 90]) { R(g, 0, y, 170, 5, '#8a8e96'); R(g, 0, y, 170, 2, '#a8acb4'); }
-      const bot = (x, y, w, h, c, label) => { R(g, x, y - h, w, h, c); R(g, x + w / 2 - 2, y - h - 4, 4, 4, '#3a3c42'); if (label) { R(g, x + 2, y - h + 6, w - 4, h / 2, '#f8f4e0'); R(g, x + 2, y - h + 6, w - 4, 3, label); } };
-      bot(10, 44, 18, 30, '#3a6ad0', '#d82020'); bot(34, 44, 16, 26, '#f2f2ea', v === 2 ? null : '#f2c418'); bot(56, 44, 20, 34, '#e8c030', '#d82020'); bot(82, 44, 14, 24, '#f2f2ea', v === 2 ? null : '#3a6ad0');
-      bot(10, 90, 30, 38, '#5a6a7a', '#d82020'); bot(46, 90, 18, 30, '#3f9a3a', '#f2c418'); bot(70, 90, 22, 34, '#f2f2ea', v === 2 ? null : '#3a6ad0');
-      if (v === 2) txt(g, '???', 80, 64, '#d82020', 1, 'c');
-      if (v === 3) { fillPoly(g, blobPts(80, 124, 60, 9, 11, .4, 16), 'rgba(160,190,90,0.6)'); for (let i = 0; i < 5; i++) pxRect(g, 60 + i * 10, 100 - ((t * 12 + i * 9) % 30), 1, 4, 'rgba(200,230,150,0.6)'); txt(g, 'ACID', 24, 66, '#ffffff'); txt(g, 'BLEACH', 52, 98, '#ffffff'); }
-      // the SDS binder box and the eyewash station
-      R(g, 120, 4, 44, 34, v === 1 ? '#e8dcb0' : '#f4f0e0'); R(g, 120, 4, 44, 8, '#d82020'); txt(g, 'SDS', 142, 6, '#ffffff', 1, 'c'); R(g, 126, 18, 32, 16, '#2a5aa8');
-      if (v === 1) txt(g, '2004', 142, 24, '#f2c418', 1, 'c');
-      if (v !== 2) { R(g, 182, 8, 50, 30, '#2a9a4a'); txt(g, 'EYEWASH', 207, 12, '#ffffff', 1, 'c'); txt(g, 'STATION', 207, 20, '#ffffff', 1, 'c'); R(g, 190, 52, 34, 8, '#c8ccd4'); for (const x of [196, 218]) pxEllipse(g, x, 50, 5, 3, '#f2c418'); R(g, 204, 60, 6, 70, '#8a8e96'); R(g, 194, 66, 26, 6, '#2a9a4a'); }
-      else { R(g, 182, 8, 50, 30, 'rgba(0,0,0,0.08)'); txt(g, 'NONE', 207, 50, '#5a5e66', 1, 'c'); }
+      cmu(g, 0, 0, ZW, 118, wallOf('i_shop'), 101); concrete(g, 0, 118, ZW, 17, '#8a8e96', 102); R(g, 0, 118, ZW, 1, '#6a6e76');
+      // a steel shelving unit: uprights, two shelves seen a little from above (their tops show), shadows under them
+      for (const x of [2, 108]) { R(g, x, 0, 4, 120, '#6a7078'); R(g, x, 0, 1, 120, '#8a9098'); }
+      for (const y of [46, 92]) { fillPoly(g, [[3, y], [111, y], [107, y - 7], [7, y - 7]], '#9aa0aa'); R(g, 3, y, 108, 4, '#7a8088'); R(g, 3, y, 108, 1, '#b8bec6'); R(g, 6, y + 4, 102, 3, 'rgba(0,0,0,0.2)'); }
+      // a container: a rounded body with a highlight and a shaded side, shoulders, a cap, and (if it has one) a label with
+      // its GHS pictogram; jugs get a handle
+      const jug = (x, yb, w, h, c, label, word, handle) => {
+        pxEllipse(g, x + w / 2, yb - 1, w / 2 + 1, 2, 'rgba(0,0,0,0.25)');
+        R(g, x, yb - h + 4, w, h - 4, c); R(g, x + 2, yb - h + 2, w - 4, 2, c); R(g, x + 4, yb - h, w - 8, 2, c);                 // body and shoulders
+        R(g, x + 1, yb - h + 4, 2, h - 6, mix(c, '#ffffff', .35)); R(g, x + w - 3, yb - h + 4, 3, h - 4, mix(c, '#000000', .25));   // light from the left
+        const cw = Math.max(4, Math.round(w / 3)); R(g, x + w / 2 - cw / 2, yb - h - 4, cw, 4, '#2a2c32'); R(g, x + w / 2 - cw / 2, yb - h - 4, cw, 1, '#5a5e66');   // the cap
+        if (handle) { R(g, x + w - 6, yb - h + 1, 4, 8, mix(c, '#000000', .15)); R(g, x + w - 5, yb - h + 3, 2, 4, wallOf('i_shop')); }
+        if (label) { const ly = yb - h + 8, lh = Math.min(16, h - 12); R(g, x + 2, ly, w - 5, lh, '#f8f4e0'); R(g, x + 2, ly, w - 5, 3, label);
+          const dx = x + 5, dy = ly + (word ? 4 : 6); for (let k = 0; k < 3; k++) { R(g, dx + 2 - k, dy + k, 1 + k * 2, 1, '#d82020'); R(g, dx + 2 - k, dy + 4 - k, 1 + k * 2, 1, '#d82020'); }   // the red GHS diamond
+          if (word) txt(g, word, x + w / 2 - 1, ly + lh - 6, '#1d1f26', 1, 'c'); else for (let k = 0; k < 2; k++) R(g, x + 10, ly + 6 + k * 3, w - 15, 1, '#8a8a90'); }
+      };
+      jug(12, 46, 18, 30, '#3a6ad0', '#d82020'); jug(36, 46, 16, 26, '#f2f2ea', v === 2 ? null : '#f2c418'); jug(58, 46, 22, 34, '#e8c030', '#d82020', null, true); jug(86, 46, 15, 24, '#f2f2ea', v === 2 ? null : '#3a6ad0');
+      jug(10, 92, 30, 40, '#5a6a7a', '#d82020', v === 3 ? 'ACID' : null, true); jug(46, 92, 19, 30, '#3f9a3a', '#f2c418', v === 3 ? 'BLCH' : null); jug(72, 92, 24, 36, '#f2f2ea', v === 2 ? null : '#3a6ad0', null, true);
+      if (v === 2) { R(g, 38, 30, 12, 4, '#e8d8a0'); txt(g, '?', 44, 30, '#5a5e66', 1, 'c'); }   // a strip of masking tape where a label should be
+      if (v === 3) { fillPoly(g, blobPts(80, 126, 62, 7, 11, .4, 16), 'rgba(160,190,90,0.6)'); pxEllipse(g, 70, 125, 14, 2, 'rgba(220,240,180,0.5)');
+        for (let i = 0; i < 6; i++) { const k = ((t * .5 + i * .17) % 1), x = 54 + i * 9 + Math.sin(t * 2 + i) * 3; pxEllipse(g, x, 120 - k * 40, 3 + k * 4, 2 + k * 2, `rgba(200,230,150,${.5 * (1 - k)})`); } }   // the fumes off the mixed spill
+      // the SDS box: a wall-mounted plastic case with a lid lip, a side, and the binders through its window
+      fillPoly(g, [[120, 6], [164, 6], [168, 2], [124, 2]], v === 1 ? '#d8ccA0' : '#e4e0d0'); R(g, 164, 6, 4, 34, v === 1 ? '#c8bc90' : '#d4d0c0'); fillPoly(g, [[164, 6], [168, 2], [168, 36], [164, 40]], v === 1 ? '#c0b488' : '#ccc8b8');
+      R(g, 120, 6, 44, 34, v === 1 ? '#e8dcb0' : '#f4f0e0'); R(g, 120, 6, 44, 8, '#d82020'); txt(g, 'SDS', 142, 8, '#ffffff', 1, 'c');
+      R(g, 125, 18, 34, 18, '#3a3c42'); for (const [x, c] of [[127, '#2a5aa8'], [134, '#d82020'], [141, '#2a9a4a'], [148, '#2a5aa8']]) { R(g, x, 20, 6, 16, c); R(g, x, 20, 1, 16, mix(c, '#ffffff', .3)); }   // binder spines
+      R(g, 125, 18, 34, 3, 'rgba(255,255,255,0.25)');
+      if (v === 1) txt(g, '2004', 142, 26, '#f2c418', 1, 'c');
+      if (v !== 2) {
+        R(g, 182, 6, 50, 30, '#2a9a4a'); R(g, 182, 6, 50, 1, '#4aba6a'); txt(g, 'EYEWASH', 207, 9, '#ffffff', 1, 'c'); txt(g, 'STATION', 207, 17, '#ffffff', 1, 'c');
+        pxEllipse(g, 207, 29, 5, 3, '#ffffff'); pxEllipse(g, 207, 29, 2, 2, '#2a9a4a');                                     // the eye pictogram
+        R(g, 204, 66, 7, 54, '#9aa0aa'); R(g, 204, 66, 2, 54, '#c8ccd4'); R(g, 209, 66, 2, 54, '#6a7078'); R(g, 200, 116, 15, 4, '#7a8088');   // the supply pipe
+        R(g, 202, 72, 11, 8, '#8a9098'); R(g, 213, 74, 6, 4, '#8a9098');                                                    // the valve body
+        fillPoly(g, [[219, 70], [232, 64], [233, 68], [221, 78]], '#2a9a4a'); pxLine(g, 219, 70, 232, 64, '#4aba6a');        // the push paddle
+        pxEllipse(g, 207, 62, 23, 9, '#7a8088'); pxEllipse(g, 207, 59, 23, 7, '#c8ccd4'); pxEllipse(g, 207, 59, 19, 5, '#6a7078'); pxEllipse(g, 207, 60, 15, 3, '#8a9098');   // the stainless bowl
+        pxLine(g, 186, 56, 228, 56, '#e8ecf0');
+        for (const x of [198, 216]) { R(g, x - 3, 49, 7, 8, '#e0b010'); pxEllipse(g, x, 49, 3, 1, '#ffe060'); R(g, x - 3, 49, 1, 8, '#f2d040'); }   // the nozzles' dust caps
+      } else { R(g, 182, 6, 50, 30, 'rgba(0,0,0,0.08)'); for (const [x, y] of [[188, 10], [226, 10], [188, 32], [226, 32]]) R(g, x, y, 2, 2, '#6a6e76'); txt(g, 'NONE', 207, 60, '#5a5e66', 1, 'c'); }   // just the screw holes where a sign was
       Z.vignette(g);
     },
     i_hoist(g, v, fl, t) {
@@ -538,29 +596,64 @@ INDA.G.shop = { bench: [-3.0, .2], shelf: [.8, 4.2], flam: [8, 9.6], cyl: [11, 1
   INDA.SPRITES = {
     i_boxcutter: ['............', '.....oooooo.', '..oooYYYYYoo', 'ooggoYYYYYo.', '..oooooooo..'],
     i_radio: ['....o.......', '....o.......', '.oooooooooo.', 'oYYYYYYYYYYo', 'oYKKKYgggYYo', 'oYKKKYgYgYYo', 'oYKKKYgggYYo', 'oYYYYYYYYYYo', '.oooooooooo.'],
-    i_cooler: ['.oooooooooo.', 'oWWWWWWWWWWo', 'oRRRRRRRRRRo', 'oRRRRWWRRRRo', 'oRRRRRRRRRRo', 'oRRRRRRRRRRo', '.oooooooooo.'],
+    i_cooler: ['....oooo....', '...o....o...', '..oooooooo..', '.oKKkkKKKKo.', 'oKkKKKKKKKKo', 'oGGGGGGGGGGo', 'oKKGKKKKGKKo', 'oKKKKKKKKKKo', '.oooooooooo.'],   // a black dome-top lunch pail, its handle and latches
     i_gloves: ['.o.o.o......', '.YoYoYo.....', '.YYYYYYo....', 'oYYYYYYYo...', '.oYYYYYYo...', '..oYYYYo....', '..oooooo....'],
     i_tapegun: ['...oooo.....', '..oKKKKo....', '.oKgggKoooo.', '.oKgWgKKKKo.', '.oKgggKo....', '..oKKKo.....', '...oKo......', '...ooo......']
   };
 
   /* ============================== TITLE: the truck yard outside Lot 204 ============================== */
   let cache = null;
+  /* the title screen: Lot 204's truck court at the end of the day. A tilt-up warehouse with its dock doors and seals,
+     two trailers backed in (their sides running toward you), the concrete apron and the asphalt with its stall lines,
+     bollards, a pair of yard lights, and the monument sign on its strip of grass. You and Dana stand on the asphalt. */
   INDA.title = (g, t) => {
     if (!cache) {
       cache = document.createElement('canvas'); cache.width = SW; cache.height = SH; const h = cache.getContext('2d'), T = Decor.time;
-      const sky = h.createLinearGradient(0, 0, 0, CAM.hy); sky.addColorStop(0, T.sky[0]); sky.addColorStop(1, T.sky[2]); h.fillStyle = sky; h.fillRect(0, 0, SW, CAM.hy + 4);
-      for (let i = 0; i < 4; i++) { const cx = 40 + i * 120 + hash(i) * 40, cy = 14 + hash(i + 3) * 20; pxEllipse(h, cx, cy, 16, 4, '#f4f8fb'); pxEllipse(h, cx + 10, cy - 2, 10, 3, '#ffffff'); }
-      // the asphalt yard, with parking stripes running toward the building
-      fillPoly(h, [P(-12, 0, 1.5), P(12, 0, 1.5), P(12, 0, 30), P(-12, 0, 30)], '#4a4c52'); speckle(h, 0, CAM.hy, SW, SH - CAM.hy, '#5a5c62', 2400, 7);
-      for (const x of [-6, -3, 3, 6]) for (let z = 2; z < 20; z += 2) fillPoly(h, [P(x - .08, 0, z), P(x + .08, 0, z), P(x + .08, 0, z + 1.2), P(x - .08, 0, z + 1.2)], '#e8e0a0');
-      // the warehouse: a long tilt-up wall with dock doors, a sign, and a light pole
-      const zb = 22, box = { x0: -12, x1: 12, h: 6, zb };
-      fillPoly(h, Q.back(box, -12, 12, 0, 6), '#c8c0b0'); fillPoly(h, Q.back(box, -12, 12, 5.4, 6), '#2a5aa8');
-      for (const x of [-9, -5, -1, 3, 7]) { fillPoly(h, Q.back(box, x, x + 2.6, 0, 3.2), '#1d1f26'); fillPoly(h, Q.back(box, x + .1, x + 2.5, .2, 3.2), x === -1 ? '#c4c8ce' : '#9aa0a8'); for (let y = .4; y < 3.2; y += .3) { const a = P(x + .1, y, zb), b = P(x + 2.5, y, zb); pxLine(h, a[0], a[1], b[0], b[1], 'rgba(40,40,46,0.3)'); } }
-      const s = P(-3, 4.8, zb); pxRect(h, s[0], s[1] - 2, 52, 13, '#f4f4ee'); pxRect(h, s[0], s[1] - 2, 52, 3, '#c82020'); txt(h, 'LOT 204', s[0] + 26, s[1] + 3, '#1d1f26', 1, 'c');
-      // a trailer backed into a door, a light pole, a fence line
-      box3(h, 3.2, 5.4, 0, 3.4, 12, zb, { front: '#e8e8e2', side: '#c8c8c0', top: '#f4f4ee' });
-      for (const x of [-10.5, 9.5]) { const a = P(x, 0, 8), b = P(x, 7, 8); pxLine(h, a[0], a[1], b[0], b[1], '#6a6e76', 2); pxRect(h, b[0] - 5, b[1], 10, 3, '#3a3c42'); }
+      const sky = h.createLinearGradient(0, 0, 0, CAM.hy); sky.addColorStop(0, T.sky[0]); sky.addColorStop(.7, T.sky[1]); sky.addColorStop(1, T.sky[2]); h.fillStyle = sky; h.fillRect(0, 0, SW, CAM.hy + 4);
+      for (let i = 0; i < 4; i++) AmbFX.cloud(h, 30 + i * 130 + hash(i) * 40, 16 + hash(i + 3) * 16, 40 + hash(i + 7) * 26, i * 9);
+      const zb = 24, W = 20, box = { x0: -W, x1: W, h: 7, zb };
+      // the asphalt court (a few oil spots, a patch), and the lighter concrete apron in front of the docks with its joints
+      fillPoly(h, [P(-W, 0, 1.4), P(W, 0, 1.4), P(W, 0, zb), P(-W, 0, zb)], '#4a4c52');
+      for (let i = 0; i < 8; i++) { const x = -6 + hash(i + 3) * 12, z = 9 + hash(i + 8) * 8; fillPoly(h, floorEllipse(x, z, .3 + hash(i) * .4, .15 + hash(i + 1) * .15, 12), 'rgba(24,24,30,0.3)'); }
+      fillPoly(h, [P(-3, 0, 11), P(-1, 0, 11), P(-1, 0, 13), P(-3, 0, 13)], '#424449');                       // a patched square
+      fillPoly(h, [P(-W, 0, 19), P(W, 0, 19), P(W, 0, zb), P(-W, 0, zb)], '#8e8c86');
+      for (let x = -W; x <= W; x += 3) lineW(h, P(x, 0, 19), P(x, 0, zb), '#7e7c76'); lineW(h, P(-W, 0, 21.5), P(W, 0, 21.5), '#7e7c76'); lineW(h, P(-W, 0, 19), P(W, 0, 19), '#aeaca4');
+      // the building: tilt-up panels with their joints, a blue band along the top, and a parapet
+      fillPoly(h, Q.back(box, -W, W, 0, 7), '#cfc7b6'); for (let x = -18; x < W; x += 4) lineW(h, P(x, 0, zb), P(x, 7, zb), '#b8b0a0');
+      fillPoly(h, Q.back(box, -W, W, 5.9, 6.5), '#2a5aa8'); fillPoly(h, Q.back(box, -W, W, 6.5, 7), '#e0d8c8');
+      // the dock doors: black seals, roll-up doors (slats), bumpers, a dock light on its arm, the driver's signal; two stand open on trailers
+      const doors = [-12.5, -8, 4.5, 9], open = [-12.5, 9];
+      for (const x of doors) {
+        const isOpen = open.includes(x);
+        fillPoly(h, Q.back(box, x - .35, x + 3.05, .9, 4.4), '#1d1f26');
+        fillPoly(h, Q.back(box, x, x + 2.7, 1.2, 4.1), isOpen ? '#2a2c32' : '#a8aeb6');
+        if (!isOpen) for (let y = 1.4; y < 4.1; y += .3) lineW(h, P(x, y, zb), P(x + 2.7, y, zb), '#8a9098');
+        for (const bx of [x + .1, x + 2.3]) fillPoly(h, Q.back(box, bx, bx + .3, .9, 1.3), '#2a2c32');
+        const l = P(x + 3.2, 4.6, zb); pxRect(h, l[0], l[1], 1, 3, '#5a5e66'); pxRect(h, l[0] - 2, l[1] - 1, 3, 1, '#3a3c42');
+        const sg = P(x - .6, 2.6, zb); pxRect(h, sg[0] - 1, sg[1], 2, 4, '#1d1f26'); pxRect(h, sg[0], sg[1] + 1, 1, 1, isOpen ? '#40e060' : '#ff3a30');
+      }
+      { const sg = Q.back(box, -11, -6.9, 4.8, 5.7), c = polyBox(sg); fillPoly(h, sg, '#f4f4ee'); pxRect(h, c.x0, c.y0, c.x1 - c.x0, 2, '#c82020'); txt(h, 'LOT 204', c.cx, c.y0 + 3, '#1d1f26', 1, 'c'); }
+      // two 53-foot trailers backed into the open doors: white boxes with corrugated sides, the red-and-white tape, landing gear, tandem wheels
+      for (const [x0, x1] of [[-12.4, -9.9], [9.1, 11.6]]) {
+        const z0 = 8, z1 = zb - .05, sx = x0 > 0 ? x0 : x1;
+        AmbFX.shadow(h, x0, x1, z0, z1, .9);
+        box3(h, x0, x1, 1.25, 4.05, z0, z1, { front: '#eceae4', side: '#d6d4cc', top: '#f4f2ec' });
+        for (let z = z0 + .8; z < z1; z += .8) lineW(h, P(sx, 1.3, z), P(sx, 4.0, z), '#c4c2ba');
+        for (let z = z0; z < z1 - .4; z += .8) { const a = P(sx, 1.38, z), c = P(sx, 1.38, z + .4); pxLine(h, a[0], a[1], c[0], c[1], '#c82020'); }
+        fillPoly(h, [P(sx, 1.0, z0 + 1), P(sx, 1.25, z0 + 1), P(sx, 1.25, z1), P(sx, 1.0, z1)], '#2a2c32');
+        { const a = P(sx, 1.0, z0 + 2.4), c = P(sx, 0, z0 + 2.4); pxLine(h, a[0], a[1], c[0], c[1], '#5a5e66', 2); pxRect(h, c[0] - 2, c[1] - 1, 5, 2, '#3a3c42'); }
+        for (const z of [z1 - 3.2, z1 - 1.9]) { const c = P(sx, .5, z), rr = 300 * .5 / z; pxEllipse(h, c[0], c[1], Math.max(2, rr * .5), rr, '#1a1a1e'); pxEllipse(h, c[0], c[1], Math.max(1, rr * .22), rr * .45, '#8a8e96'); }
+      }
+      // stall lines out from between the docks, and yellow bollards at each door
+      for (const x of [-13.2, -8.7, -4.2, 3.8, 8.3, 12.8]) fillPoly(h, [P(x - .07, 0, 9), P(x + .07, 0, 9), P(x + .07, 0, 19), P(x - .07, 0, 19)], '#e0d070');
+      for (const x of doors) for (const bx of [x - .7, x + 3.2]) box3(h, bx, bx + .25, 0, 1.1, zb - .7, zb - .45, { front: '#f2c418', side: '#c89a10', top: '#1d1f26' });
+      // the yard lights, sodium heads glowing at the end of the day
+      for (const x of [-7.6, 7.6]) { const z = 14, a = P(x, 0, z), c = P(x, 5.6, z); pxLine(h, a[0], a[1], c[0], c[1], '#5a5e66', 2); const sd = x < 0 ? 1 : -1, e = P(x + sd * .8, 5.6, z); pxLine(h, c[0], c[1], e[0], e[1], '#5a5e66', 2); pxRect(h, e[0] - 3, e[1], 7, 2, '#3a3c42'); softGlow(h, e[0], e[1] + 6, 26, 20, '#ffb860', .16); pxRect(h, e[0] - 2, e[1] + 2, 5, 1, '#ffd890'); }
+      // the monument sign on its island of grass, front left
+      fillPoly(h, [P(-6.8, 0, 7.4), P(-4.2, 0, 7.4), P(-4.2, 0, 9.4), P(-6.8, 0, 9.4)], '#5a7a3a'); lineW(h, P(-4.2, 0, 7.4), P(-4.2, 0, 9.4), '#c8c4b8'); lineW(h, P(-6.8, 0, 7.4), P(-4.2, 0, 7.4), '#c8c4b8');
+      for (let i = 0; i < 40; i++) { const p = P(-6.7 + hash(i) * 2.4, 0, 7.5 + hash(i + 9) * 1.8); pxRect(h, p[0], p[1] - 1, 1, 1, '#6e9048'); }
+      box3(h, -6.2, -4.6, 0, 1.15, 8.2, 8.55, { front: '#8a8478', side: '#6a6458', top: '#a8a296' });
+      { const sg = [P(-6.05, .4, 8.19), P(-4.75, .4, 8.19), P(-4.75, 1.0, 8.19), P(-6.05, 1.0, 8.19)], c = polyBox(sg); fillPoly(h, sg, '#2a5aa8'); txt(h, 'LOT 204', c.cx, c.y0 + 2, '#f4f4ee', 1, 'c'); }
     }
     g.drawImage(cache, 0, 0);
   };

@@ -133,9 +133,9 @@ const UI = {
     const tb = $('toolbar'); if (!tb) return;
     tb.style.setProperty('--tbk', 1);
     if (document.body.classList.contains('portrait') || !tb.offsetWidth) return;
-    const kids = [...tb.children].filter(c => c.offsetWidth); if (!kids.length) return;
     const cs = getComputedStyle(tb), room = tb.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-    const span = kids[kids.length - 1].offsetLeft + kids[kids.length - 1].offsetWidth - kids[0].offsetLeft;
+    const L = tb.querySelector('.tb-left'), Rt = tb.querySelector('.tb-right'), C = $('tbClock'); if (!L || !Rt) return;
+    const span = 2 * Math.max(L.scrollWidth, Rt.scrollWidth) + (C ? C.offsetWidth + 2 * parseFloat(getComputedStyle(C).marginLeft) : 0);   // the clock stays centered, so the wider side counts twice
     if (span > room) tb.style.setProperty('--tbk', (Math.floor(room / span * 1000) / 1000 * .99).toFixed(3));
   },
   syncTools(id) {
@@ -179,7 +179,7 @@ const Briefing = {
   show(i) {
     this.i = clamp(i, 0, BRIEFING.length - 1);
     const p = BRIEFING[this.i];
-    $('introPage').textContent = `MEMO ${this.i + 1}/${BRIEFING.length}`; $('introTitle').textContent = p.title; $('introText').innerHTML = p.text;
+    $('introPage').textContent = `MEMO ${this.i + 1}/${BRIEFING.length}`; $('introTitle').textContent = p.title; $('introText').innerHTML = p.text.replace(/\b(Unit|Suite|Lot|Site) 204\b/g, `$1 ${Game.unit || '204'}`);   // later shifts are somewhere else
     $('introBack').disabled = this.i === 0; $('introNext').textContent = this.i === BRIEFING.length - 1 ? 'Start >' : 'Next >';
     this.art(p.art);
   },
@@ -188,12 +188,12 @@ const Briefing = {
     g.fillStyle = '#2b2440'; g.fillRect(0, 0, 160, 64); g.fillStyle = '#332a4c'; for (let y = 0; y < 64; y += 4) g.fillRect(0, y, 160, 2);
     const icon = (id, x, y, s = 1) => g.drawImage(Icons.base[id], x, y, 16 * s, 16 * s);
     const person = (who, x, o = {}) => g.drawImage(Sprites.get(who, o), x - SPR_OX, 64 - SPR_H + 6);
-    if (kind === 'door') { pxRect(g, 62, 4, 40, 60, '#f6f3ea'); pxRect(g, 66, 8, 32, 56, '#ece7da'); pxRect(g, 74, 18, 16, 8, '#c9a227'); g.fillStyle = '#2a1a00'; g.font = '7px monospace'; g.fillText('204', 76, 25); pxRect(g, 92, 38, 3, 3, '#c9a227'); person('you', 30, { pose: 'clip' }); }
+    if (kind === 'door') { pxRect(g, 62, 4, 40, 60, '#f6f3ea'); pxRect(g, 66, 8, 32, 56, '#ece7da'); pxRect(g, 74, 18, 16, 8, '#c9a227'); g.fillStyle = '#2a1a00'; g.font = '7px monospace'; g.fillText(String(Game.unit || '204'), 76, 25); pxRect(g, 92, 38, 3, 3, '#c9a227'); person('you', 30, { pose: 'clip' }); }
     if (kind === 'verbs') VERBS.forEach((v, i) => { pxRect(g, 14 + i * 28, 16, 22, 22, i === 1 ? '#f28c28' : '#4a3f66'); icon(v.id, 17 + i * 28, 19); });
     if (kind === 'zoom') { pxRect(g, 40, 8, 80, 46, '#000'); const th = this._thumbs || (this._thumbs = {}); g.drawImage(th[Sites.cur] || (th[Sites.cur] = (() => { const z = document.createElement('canvas'); z.width = ZW; z.height = ZH; const f = FEATURE.sink || FEATURES.find(x => ZOOM_ART[x.art]); if (f) drawZoom(z.getContext('2d'), f, f.id === 'sink' ? 3 : Math.max(0, f.variants.findIndex(v => v.cat > 1)), { open: 1 }, 1); return z; })()), 42, 10, 76, 42); icon('flashlight', 118, 36); icon('tape', 22, 30); }
     if (kind === 'cats') { icon('clipboard', 10, 22, 2); ['#7bd36b', '#6fb7ff', '#ffb03b', '#ff5f6d'].forEach((c2, i) => { pxRect(g, 52 + i * 26, 20, 22, 22, c2); g.fillStyle = '#17131f'; g.font = '10px monospace'; g.fillText(String(i), 59 + i * 26, 35); }); }
     if (kind === 'camera') { icon('camera', 56, 8, 3); }
-    if (kind === 'dana') { person('dana', 52, { pose: 'phone', led: true }); person('you', 82, {}); }
+    if (kind === 'dana') { person('dana', 52, { pose: 'phone', led: true, ppe: PPE.on() ? PPE.all().join(',') : undefined }); person('you', 82, {}); }   // Dana's suited up already on sites with PPE
   },
   next() { if (this.i >= BRIEFING.length - 1) Game.beginShift(); else { this.show(this.i + 1); Audio2.sfx('swish', .6); } },
   back() { this.show(this.i - 1); Audio2.sfx('swish', .6); }

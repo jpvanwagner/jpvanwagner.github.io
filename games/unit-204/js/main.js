@@ -44,7 +44,7 @@ function drawTitle(t) {
   else { g.drawImage(_hall, 0, 0);
   for (const [x, z] of _hall.lights) { const p = P(x, 2.2, z), fl = Settings.get('motion') ? (Math.sin(t * 9 + z) > .96 ? 2 : 4) : 4; const rad = 300 / z * 1.4, gr = g.createRadialGradient(p[0], p[1], 0, p[0], p[1], rad); gr.addColorStop(0, rgba('#ffe7a8', fl / 10)); gr.addColorStop(1, rgba('#ffe7a8', 0)); g.fillStyle = gr; g.fillRect(p[0] - rad, p[1] - rad, rad * 2, rad * 2); } }
   // you and Dana, waiting at the door with a clipboard and a BlackBerry
-  const you = Sprites.get('you', { pose: t % 7 < 1.6 ? 'clip' : undefined, blink: t % 4 < .12 }, 1.27), dana = Sprites.get('dana', { pose: 'phone', blink: (t + 1.7) % 4.4 < .12 }, 1.2);
+  const you = Sprites.get('you', { pose: t % 7 < 1.6 ? 'clip' : undefined, blink: t % 4 < .12 }, 1.27), dana = Sprites.get('dana', { pose: 'phone', blink: (t + 1.7) % 4.4 < .12, ppe: PPE.on() ? PPE.all().join(',') : undefined }, 1.2);
   const py = P(-2.1, 0, 6.2), dy = P(2.1, 0, 6.6);
   g.fillStyle = ditherPx('#1a1222', 9); g.beginPath(); g.ellipse(py[0], py[1] - 1, 14, 4, 0, 0, 7); g.fill(); g.beginPath(); g.ellipse(dy[0], dy[1] - 1, 13, 4, 0, 0, 7); g.fill();
   g.drawImage(you, Math.round(py[0] - you.width / 2), Math.round(py[1] - 88));
@@ -61,6 +61,7 @@ Icons.build().then(() => {                    // the icon art decodes first (it'
   Settings.apply();
   UI.buildTools();
   { const q = (location.search.match(/[?&]site=(\w+)/) || [])[1]; Sites.use(q || store('unit204-site') || 'residential'); SitePicker.build(); }   // which property (js/sites.js); ?site=office for testing
+TbClock.init();   // the toolbar clock (js/toolbar-clock.js)
   Game.setTool('walk');
   if (/[?&]play\b/.test(location.search)) Game.beginShift();   // dev shortcut: skip the title and briefing
 });
@@ -175,6 +176,11 @@ const zc = $('zoomCanvas');
 zc.addEventListener('mousemove', e => Inspect.move(e));
 zc.addEventListener('mouseleave', () => Inspect.leave());
 zc.addEventListener('mousedown', e => Inspect.click(e));
+// the scroll wheel cycles the senses and tools in a close-up too, over the picture or its tool row (the notes still scroll)
+for (const el of [zc, $('inspectTools')]) el.addEventListener('wheel', e => {
+  if (Game.mode !== 'play' || UI.top() !== 'inspectScreen' || Math.abs(e.deltaY) < 20) return;
+  e.preventDefault(); Game.cycleTool(e.deltaY > 0 ? 1 : -1); if (e.currentTarget === zc) Inspect.move(e);
+}, { passive: false });
 // right-click cycles the cursor, anywhere in the game
 $('game').addEventListener('contextmenu', e => {
   e.preventDefault();

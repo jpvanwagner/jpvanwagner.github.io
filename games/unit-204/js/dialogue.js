@@ -18,9 +18,9 @@ const DANA_TOPICS = [
     Game.danaPoint(f.id);
     return `The ${lower(f.name)}: ${f.hint} I'll show you.`;
   } },
-  { q: "What's the difference between wear and damage?", a: () => "Wear is what time and normal living do: matting, fading, small nail holes, old caulk. Damage is what an accident or carelessness does: stains, burns, big holes, broken stuff. Wear is never charged. Damage is, with a photo." },
-  { q: 'When is something a hazard?', a: () => "If it could hurt someone or the building is getting worse by the hour: gas, sparks, leaks, mold, a dead smoke alarm, something that could fall. It's a hazard even if the tenant caused it. Safety first, billing later." },
-  { q: 'Why all the photos?', a: () => "Deposit charges get disputed. No photo, no charge; that's office policy. And maintenance needs pictures of hazards before they send someone out. Snap anything you want, though. Extra photos never hurt." },
+  { q: () => danaSays('wear', 0, "What's the difference between wear and damage?"), a: () => danaSays('wear', 1, "Wear is what time and normal living do: matting, fading, small nail holes, old caulk. Damage is what an accident or carelessness does: stains, burns, big holes, broken stuff. Wear is never charged. Damage is, with a photo.") },
+  { q: () => danaSays('hazard', 0, 'When is something a hazard?'), a: () => danaSays('hazard', 1, "If it could hurt someone or the building is getting worse by the hour: gas, sparks, leaks, mold, a dead smoke alarm, something that could fall. It's a hazard even if the tenant caused it. Safety first, billing later.") },
+  { q: 'Why all the photos?', a: () => danaSays('photos', null, "Deposit charges get disputed. No photo, no charge; that's office policy. And maintenance needs pictures of hazards before they send someone out. Snap anything you want, though. Extra photos never hurt.") },
   { q: 'How are we doing?', a: () => {
     const done = Object.keys(Game.marks).length;            // never how many are left: finding them is the job
     const cold = Object.keys(ROOMS).filter(id => !FEATURES.some(f => f.room === id && Game.seen.has(f.id))).map(id => ROOMS[id].name.toLowerCase());
@@ -28,9 +28,12 @@ const DANA_TOPICS = [
       (cold.length ? ` You haven't really looked around the ${list(cold)} yet.` : ' Did you open every door and cabinet, flip every switch, and check under stuff?');
   } },
   { q: 'Can I borrow your BlackBerry?', a: () => { setTimeout(() => { UI.close('dialogueScreen'); BlackBerry.open(); }, 900); return BlackBerry.pending().length ? "For Gus? Sure. He's under GUS (MAINT). Don't read my texts." : "Sure. Don't read my texts. ...You're going to read my texts."; } },
-  { q: 'So... how are you?', a: () => DANA_SMALLTALK[Game.smallTalk++ % DANA_SMALLTALK.length] },
+  { q: 'So... how are you?', a: () => { const list = danaSays('small', null, DANA_SMALLTALK); return list[Game.smallTalk++ % list.length]; } },
   { q: "Let's get back to it.", a: null }
 ];
+/* what Dana says that depends on where you are: each site can give her its own lines (site.dana in js/sites/*.js), and
+   anything a site doesn't give falls back to the apartment's. k picks the line; i picks the question (0) or answer (1). */
+function danaSays(k, i, fallback) { const d = Sites.site.dana && Sites.site.dana[k]; return d == null ? fallback : i == null ? d : d[i]; }
 const Dialogue = {
   open() {
     Game.player.idle = 0;
@@ -42,7 +45,7 @@ const Dialogue = {
     Sprites.portrait($('danaPortrait'), 'dana', true); clearTimeout(this._m); this._m = setTimeout(() => Sprites.portrait($('danaPortrait'), 'dana', false), 900);
     const box = $('dlgOptions'); box.replaceChildren();
     DANA_TOPICS.forEach((tp, i) => {
-      const b = document.createElement('button'); b.type = 'button'; b.textContent = tp.q;
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = typeof tp.q === 'function' ? tp.q() : tp.q;
       if (Game.asked.has(i) && tp.a) b.classList.add('seen');
       b.addEventListener('click', () => {
         if (!tp.a) { UI.close('dialogueScreen'); UI.say('dana', 'Lead the way, boss.'); return; }
@@ -58,6 +61,6 @@ const Dialogue = {
     if (todo.length && Math.random() < .75) {
       const f = todo.find(x => !Game.seen.has(x.id)) || todo[Game.hintIx++ % todo.length];
       Game.danaPoint(f.id, Game.seen.has(f.id) ? `Psst. The ${lower(f.name)}. ${f.hint}` : `Don't forget the ${lower(f.name)}. Give it a Look.`);   // said once she's standing by it
-    } else UI.say('dana', pick(["Don't fall asleep on me, boss.", 'My feet hurt. These flats were a mistake.', 'Is it just me, or is this unit weirdly quiet?']));
+    } else UI.say('dana', pick(danaSays('barks', null, ["Don't fall asleep on me, boss.", 'My feet hurt. These flats were a mistake.', 'Is it just me, or is this unit weirdly quiet?'])));
   }
 };

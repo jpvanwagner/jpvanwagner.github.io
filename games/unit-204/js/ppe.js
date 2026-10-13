@@ -26,10 +26,10 @@ const PPE_ICON = {
 };
 const PPE_COL = { hardhat: '#f4f4ee', vest: '#d4f03a', glasses: '#bfe3f4', ears: '#f28c28', boots: '#8a5a2c', gloves: '#e8c34a', mask: '#e8e8e2' };
 const PPE = {
-  worn: new Set(), missed: new Set(), warned: new Set(),
+  worn: new Set(), missed: new Set(), warned: new Set(), walked: new Set(), acts: [],
   on() { return !!Sites.site.ppe; },
   has(id) { return this.worn.has(id); },
-  reset() { this.worn = new Set(); this.missed = new Set(); this.warned = new Set(); this.hud(); },
+  reset() { this.worn = new Set(); this.missed = new Set(); this.warned = new Set(); this.walked = new Set(); this.acts = []; this.hud(); },
   /* everything this site asks for, anywhere */
   all() { const p = Sites.site.ppe; return p ? [...new Set(Object.values(p.need || {}).flat())] : []; },
   need(room) { const p = Sites.site.ppe; return (p && p.need && p.need[room]) || []; },
@@ -43,10 +43,17 @@ const PPE = {
   check(room) {
     if (!this.on() || Game.mode !== 'play') return;
     const miss = this.need(room).filter(id => !this.worn.has(id)); if (!miss.length) return;
-    for (const id of miss) this.missed.add(id);
+    for (const id of miss) { this.missed.add(id); this.walked.add(id); }
     if (this.warned.has(room)) return; this.warned.add(room);
     const names = miss.map(id => PPE_ITEMS[id].short);
     setTimeout(() => UI.say('dana', `Boss! No ${list(names)}? Not in here. ${Sites.site.ppe.where || "It's on the rack by the entrance."}`), 600);
+  },
+  /* running a machine without the PPE it calls for (a bench grinder without safety glasses): it counts against
+     you like walking in without it, Dana says so on the spot, and your manager brings it up in the debrief */
+  unsafe(id, what) {
+    if (!this.on() || this.has(id) || !PPE_ITEMS[id]) return;
+    this.missed.add(id); if (!this.acts.some(a => a.id === id && a.what === what)) this.acts.push({ id, what });
+    setTimeout(() => UI.say('dana', `Boss! Your ${PPE_ITEMS[id].short}! You don't run a ${what} without them. That's going on your report.`), 500);
   },
   /* the corner row of what you have on */
   hud() {

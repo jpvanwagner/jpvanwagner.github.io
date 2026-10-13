@@ -54,6 +54,6 @@ const OFD = (() => {
     o_freezer: { doors: ['o_freezer'], items: [null] }
   };
   /* a plain touch on these features in the room opens them, the same as from the close-up */
-  const ROOM_TOUCH = { o_fridge: 'handle', o_sink: 'cabinet' };
+  const ROOM_TOUCH = { o_fridge: 'handle', o_sink: 'cabinet', o_window: 'cord', o_panel: 'latch' };   // (the blinds go up and down from the room, too)
   return { DOORS, CONTAINERS, ROOM_TOUCH };
 })();

@@ -17,7 +17,7 @@ const Reveal = {
       const p = growPoly(h.pts, 1.5);
       fillPoly(g, p, `rgba(255,236,170,${(.22 * k).toFixed(3)})`);
       g.setLineDash([]); strokePoly(g, growPoly(h.pts, 2.5), `rgba(30,20,40,${(.55 * k).toFixed(3)})`);   // a dark edge outside the light one, so it shows on any wall
-      strokePoly(g, p, `rgba(255,${h.kind === 'door' ? 210 : 245},150,${(k * this.pulse()).toFixed(3)})`);
+      strokePoly(g, p, isExit(h) ? `rgba(120,220,255,${(k * this.pulse()).toFixed(3)})` : `rgba(255,245,150,${(k * this.pulse()).toFixed(3)})`);   // ways out in cyan, like their hover outline
     }
     g.restore();
   },

@@ -89,43 +89,50 @@ const OFC = (() => {
   /* ============================== CLOSE-UPS ============================== */
   const ZOOM = {
     /* ---------------- LOBBY ---------------- */
-    /* the inside of the glass entry door: bronze storefront frame, the corridor through the glass, SUITE 204 backwards */
+    /* the inside of the glass entry doors: a pair of leaves in a bronze storefront frame, the corridor through the glass,
+       the suite's name and number backwards on the left leaf (the round's own number, not always 204) */
     o_entry(g, v, fl, t) {
       const wall = wallOf('o_lobby'), fp = Decor.pal('o_lobby').floor;
       Z.wall(g, 0, 0, ZW, ZH, wall, 31);
       tileTop(g, fp, 46, 20, 126, 126, ZH); pxRect(g, 0, 126, ZW, 1, mix(fp[0], '#000000', .3));
-      const BZ = '#5e4a34', BH = '#82694a', BD = '#3a2c1e';
-      pxRect(g, 10, 0, 204, 126, BZ); pxRect(g, 10, 0, 2, 126, BH); pxRect(g, 212, 0, 2, 126, BD);   // the frame
-      // the corridor outside, through the glass: the far wall, a neighbor's door, the carpet, a sconce
-      const gx = 28, gy = 18, gw = 158, gh = 88;
-      pxRect(g, gx, gy, gw, gh, '#d8cdb8'); speckle(g, gx, gy, gw, gh, 'rgba(0,0,0,0.05)', 200, 4);
-      pxRect(g, gx, 92, gw, 14, '#5c6676'); for (let x = gx; x < gx + gw; x += 6) pxRect(g, x, 94 + (x % 4), 3, 1, '#6c7686');
-      pxRect(g, gx, 89, gw, 3, '#3a3a40');
-      pxRect(g, 118, 30, 40, 62, '#e6dccb'); pxRect(g, 122, 34, 32, 58, '#8a5e36'); for (let y = 36; y < 92; y += 5) pxRect(g, 123, y, 30, 1, '#7a5230');
-      pxRect(g, 134, 40, 8, 4, '#c9a227'); ftext(g, '205', 135, 41, '#3a2a10'); pxRect(g, 125, 62, 6, 2, '#c9ccd4');
-      pxRect(g, 64, 42, 8, 10, '#f6ead0'); softGlow(g, 68, 44, 26, 18, '#fff2cc', .35);
-      g.fillStyle = 'rgba(150,190,205,0.18)'; g.fillRect(gx, gy, gw, gh);   // the glass, tinted
-      for (const [a, b] of [[40, 70], [52, 96]]) pxLine(g, a, gy + 1, a - 30 + b - 70, gy + gh - 2, 'rgba(255,255,255,0.22)');
-      pxRect(g, gx, 58, gw, 4, 'rgba(255,255,255,0.42)');                 // a frosted band, so nobody walks into the glass
-      ftext(g, 'SUITE 204', 72, 34, '#ffffff', 2, true);                 // vinyl lettering, backwards from in here
-      // the door leaf: stiles and rails, darker bronze
-      pxRect(g, 16, 6, 12, 116, BZ); pxRect(g, 186, 6, 22, 116, BZ); pxRect(g, 16, 6, 192, 12, BZ); pxRect(g, 16, 106, 192, 16, BZ);
-      pxRect(g, 16, 6, 192, 1, BH); pxRect(g, 16, 6, 1, 116, BH); pxRect(g, 28, 18, 1, 88, BD); pxRect(g, 185, 18, 1, 88, BH); pxRect(g, 16, 121, 192, 1, BD);
+      const BZ = '#5e4a34', BH = '#82694a', BD = '#3a2c1e', unit = String(Game.unit || '204'), across = String((+unit || 204) + 1);
+      pxRect(g, 10, 0, 204, 126, BZ); pxRect(g, 10, 0, 2, 126, BH); pxRect(g, 212, 0, 2, 126, BD);   // the storefront frame
+      // the corridor outside, seen through both leaves: the far wall, the door across the hall, the carpet, a sconce
+      const gx = 22, gy = 14, gw = 180, gh = 92;
+      pxRect(g, gx, gy, gw, gh, '#d8cdb8'); speckle(g, gx, gy, gw, gh, 'rgba(0,0,0,0.05)', 220, 4);
+      pxRect(g, gx, 92, gw, 14, '#5c6676'); for (let x = gx; x < gx + gw; x += 6) pxRect(g, x, 94 + (x % 4), 3, 1, '#6c7686'); pxRect(g, gx, 89, gw, 3, '#3a3a40');
+      pxRect(g, 134, 30, 40, 62, '#e6dccb'); pxRect(g, 138, 34, 32, 58, '#8a5e36'); for (let y = 36; y < 92; y += 5) pxRect(g, 139, y, 30, 1, '#7a5230');
+      pxRect(g, 150, 40, 14, 5, '#c9a227'); ftext(g, across, 151, 41, '#3a2a10'); pxRect(g, 141, 62, 6, 2, '#c9ccd4');
+      pxRect(g, 60, 40, 8, 10, '#f6ead0'); softGlow(g, 64, 42, 26, 18, '#fff2cc', .35);
+      g.fillStyle = 'rgba(150,190,205,0.18)'; g.fillRect(gx, gy, gw, gh);                                // the glass, tinted
+      for (const [a, b] of [[40, 70], [52, 96], [136, 70], [148, 96]]) pxLine(g, a, gy + 1, a - 30 + b - 70, gy + gh - 2, 'rgba(255,255,255,0.22)');   // reflections, a pair on each leaf
+      pxRect(g, gx, 60, gw, 4, 'rgba(255,255,255,0.42)');                                                 // a frosted band, so nobody walks into the glass
+      // the suite's lettering, on the left leaf's glass only: SUITE over the number, backwards from in here
+      for (const [str, y] of [['SUITE', 26], [unit, 42]]) { const w = str.length * 8 - 2; ftext(g, str, 64 - Math.round(w / 2), y, '#ffffff', 2, true); }
+      // the two leaves: outer stiles, the meeting stiles in the middle with a gap between, top and bottom rails
+      for (const [x0, x1] of [[16, 111], [113, 208]]) {
+        pxRect(g, x0, 6, x1 - x0, 8, BZ); pxRect(g, x0, 104, x1 - x0, 18, BZ);                              // rails
+        pxRect(g, x0, 6, 8, 116, BZ); pxRect(g, x1 - 8, 6, 8, 116, BZ);                                     // stiles
+        pxRect(g, x0, 6, x1 - x0, 1, BH); pxRect(g, x0, 6, 1, 116, BH); pxRect(g, x1 - 1, 6, 1, 116, BD); pxRect(g, x0, 121, x1 - x0, 1, BD);
+        pxRect(g, x0 + 8, 14, 1, 90, BD); pxRect(g, x1 - 9, 14, 1, 90, BH);                                 // the glazing stops
+      }
+      pxRect(g, 111, 6, 2, 116, '#1e160e');                                                                 // the gap where the leaves meet
       pxRect(g, 10, 122, 204, 4, '#a8a69e'); for (let x = 12; x < 212; x += 3) pxRect(g, x, 123, 1, 2, '#8a887e');   // threshold
-      // the closer up top, and its arm to the frame
-      pxRect(g, 120, 8, 56, 8, '#b4b0a6'); pxRect(g, 120, 8, 56, 1, '#d8d4ca'); pxRect(g, 120, 15, 56, 1, '#7a766c'); pxRect(g, 118, 9, 3, 6, '#8a867c'); pxRect(g, 175, 9, 3, 6, '#8a867c');
-      pxLine(g, 172, 10, 190, 3, '#9a968c', 2); pxLine(g, 190, 3, 206, 2, '#9a968c', 2); pxEllipse(g, 190, 3, 1, 1, '#5a564c');
+      // the closer up top on the right leaf, and its arm to the frame
+      pxRect(g, 128, 8, 56, 8, '#b4b0a6'); pxRect(g, 128, 8, 56, 1, '#d8d4ca'); pxRect(g, 128, 15, 56, 1, '#7a766c'); pxRect(g, 126, 9, 3, 6, '#8a867c'); pxRect(g, 183, 9, 3, 6, '#8a867c');
+      pxLine(g, 180, 10, 196, 3, '#9a968c', 2); pxLine(g, 196, 3, 208, 2, '#9a968c', 2); pxEllipse(g, 196, 3, 1, 1, '#5a564c');
       if (v === 1) {                                     // the closer is weeping its hydraulic fluid
-        g.fillStyle = 'rgba(70,50,20,0.65)'; g.fillRect(132, 16, 2, 10); g.fillRect(133, 26, 1, 14); pxEllipse(g, 133, 41, 1, 2, 'rgba(70,50,20,0.7)');
-        speckle(g, 122, 15, 30, 3, 'rgba(60,40,10,0.6)', 18, 3);
+        g.fillStyle = 'rgba(70,50,20,0.65)'; g.fillRect(140, 16, 2, 10); g.fillRect(141, 26, 1, 14); pxEllipse(g, 141, 41, 1, 2, 'rgba(70,50,20,0.7)');
+        speckle(g, 130, 15, 30, 3, 'rgba(60,40,10,0.6)', 18, 3);
       }
-      // the lock stile: a deadbolt (thumb-turn, or a key cylinder on the bad one) over a lever handle
-      if (v === 3) { pxEllipse(g, 197, 52, 5, 5, '#8a6e1a'); pxEllipse(g, 197, 52, 4, 4, '#c9a227'); pxRect(g, 197, 49, 1, 6, '#2a1a00'); pxRect(g, 196, 50, 1, 1, '#2a1a00'); pxRect(g, 198, 52, 1, 1, '#2a1a00'); pxRect(g, 195, 49, 2, 1, '#f2d870'); }
+      // the lock, on the right leaf's meeting stile: a deadbolt (thumb-turn, or a key cylinder on the bad one) over its lever
+      const lx = 117;
+      if (v === 3) { pxEllipse(g, lx, 52, 3, 3, '#8a6e1a'); pxEllipse(g, lx, 52, 2, 2, '#c9a227'); pxRect(g, lx, 50, 1, 4, '#2a1a00'); pxRect(g, lx - 1, 51, 1, 1, '#2a1a00'); pxRect(g, lx - 1, 50, 1, 1, '#f2d870'); }   // (sized to sit inside the 8-pixel stile)
       else {
-        pxEllipse(g, 197, 52, 5, 5, '#8a8e98'); pxEllipse(g, 197, 52, 4, 4, '#c9ccd4');
-        if (fl.bolt) pxRect(g, 192, 51, 11, 3, '#e8eaee'); else pxRect(g, 196, 47, 3, 11, '#e8eaee');
+        pxEllipse(g, lx, 52, 3, 3, '#8a8e98'); pxEllipse(g, lx, 52, 2, 2, '#c9ccd4');
+        if (fl.bolt) pxRect(g, lx - 3, 51, 7, 2, '#e8eaee'); else pxRect(g, lx, 49, 2, 7, '#e8eaee');
       }
-      pxEllipse(g, 197, 72, 5, 5, '#8a8e98'); pxEllipse(g, 197, 72, 4, 4, '#c9ccd4'); pxRect(g, 176, 70, 22, 4, '#c9ccd4'); pxRect(g, 176, 70, 22, 1, '#eef0f4'); pxEllipse(g, 177, 72, 2, 2, '#b9bcc4');
+      for (const [rx, dir] of [[lx, 1], [107, -1]]) { pxEllipse(g, rx, 72, 3, 3, '#8a8e98'); pxEllipse(g, rx, 72, 2, 2, '#c9ccd4'); const ax = dir > 0 ? rx : rx - 21; pxRect(g, ax, 70, 22, 4, '#c9ccd4'); pxRect(g, ax, 70, 22, 1, '#eef0f4'); pxEllipse(g, dir > 0 ? rx + 20 : rx - 20, 72, 2, 2, '#b9bcc4'); }   // a lever on each leaf
       if (v === 2) {                                     // where the tenant's card reader was: a pale square, four screw holes, a ragged hole, cut wires
         pxRect(g, 216, 44, 20, 28, mix(wall, '#ffffff', .3)); for (const [x, y] of [[218, 46], [233, 46], [218, 69], [233, 69]]) { pxRect(g, x, y, 2, 2, '#3a3028'); pxRect(g, x, y - 1, 2, 1, '#f8f4ec'); }
         fillPoly(g, blobPts(226, 58, 4, 4, 9, .5, 10), '#ece6da'); fillPoly(g, blobPts(226, 58, 3, 3, 11, .4, 9), '#1e1812');
@@ -219,7 +226,13 @@ const OFC = (() => {
       for (const x of [72, 146]) { pxRect(g, x, 54, 3, 66, rev); pxRect(g, x + 3, 54, 1, 66, '#d8b07a'); }
       pxRect(g, 0, 118, 222, 13, '#aeb2ba'); for (let y = 120; y < 131; y += 2) pxRect(g, 0, y, 222, 1, '#9ea2aa'); pxRect(g, 0, 118, 222, 1, '#d4d8de');
       pxRect(g, 0, 131, ZW, 4, Decor.pal('o_lobby').floor[1]);
-      fillPoly(g, [[222, 48], [240, 40], [240, 124], [222, 131]], '#9a7444'); fillPoly(g, [[226, 30], [240, 24], [240, 40], [226, 48]], edge);   // the desk's end, turning away
+      // the desk's end: everything carries around the same corner at the same heights (the top and its edge band, the
+      // veneer in shade, the kick plate), and past it, the lobby wall and floor
+      Z.wall(g, 234, 30, 6, 101, wallOf('o_lobby'), 16); pxRect(g, 234, 30, 6, 101, 'rgba(0,0,0,0.08)');   // the wall beyond, in the desk's shadow
+      pxRect(g, 222, 30, 12, 18, mix(top, '#000000', .06)); pxRect(g, 222, 30, 12, 1, '#f6f2ea'); pxRect(g, 233, 30, 1, 24, '#a8a08c');   // the top, around the corner
+      pxRect(g, 222, 48, 12, 6, mix(edge, '#000000', .12)); pxRect(g, 222, 53, 12, 1, '#a8a08c');
+      pxRect(g, 222, 54, 12, 64, mix(veneer, '#000000', .22)); pxRect(g, 222, 54, 1, 64, '#d8b07a'); for (let x = 224; x < 234; x += 4) pxRect(g, x, 56, 1, 62, 'rgba(80,50,20,0.18)');   // the end panel, its corner catching light
+      pxRect(g, 222, 118, 12, 13, '#9ea2aa'); pxRect(g, 222, 118, 12, 1, '#c4c8ce'); pxRect(g, 233, 54, 1, 77, 'rgba(0,0,0,0.25)');
       if (v === 1) {                                   // the front edge worn pale where everyone leans to sign in
         g.fillStyle = 'rgba(250,248,240,0.65)'; g.fillRect(40, 46, 150, 6); g.fillStyle = 'rgba(250,248,240,0.35)'; g.fillRect(28, 42, 174, 4);
         for (let i = 0; i < 16; i++) { const x = 40 + hash(i) * 150, y = 33 + hash(i + 4) * 12; pxLine(g, x, y, x + 5 + hash(i + 2) * 10, y + hash(i + 6) * 2, '#c8bfaa'); }
@@ -283,5 +296,22 @@ const OFC = (() => {
     }
   };
 
-  return { FONT, ftext, ftw, cove, acoustic, ceilGrid, carpetTiles, tornHole, tileTop, concreteTop, lit, ZOOM };
+  /* a fire extinguisher standing in the room at (x, z), from yb to yt, radius rad: a red cylinder shaded round (dark at
+     both edges, a highlight down its lit side), a domed shoulder, a white label band, the black valve head with its
+     chrome lever; an ABC has a gauge and a short black hose, a CO2 has no gauge and a big black discharge horn on its hose */
+  function extRoom(g, x, z, yb, yt, rad, kind = 'abc', empty = false) {
+    const b = P(x, yb, z), tp = P(x, yt, z), w = Math.max(2, Math.round(rad * CAM.f / z)), h = Math.round(b[1] - tp[1]), x0 = Math.round(b[0] - w);
+    const cols = ['#7a1410', '#a81a14', '#c41e18', '#e8483a', '#d42a20', '#c41e18', '#a81a14', '#7a1410'];
+    for (let i = 0; i < 2 * w; i++) pxRect(g, x0 + i, tp[1], 1, h, cols[Math.min(cols.length - 1, Math.floor(i / (2 * w) * cols.length))]);
+    pxEllipse(g, b[0], tp[1], w - 1, Math.max(1, Math.round(w * .45)), '#c41e18'); pxRect(g, x0 + Math.round(w * .55), tp[1] - 1, Math.max(1, Math.round(w * .4)), 1, '#f07060');   // the shoulder, lit
+    pxEllipse(g, b[0], b[1], w, Math.max(1, Math.round(w * .3)), '#5a0e0a');                                                  // the base
+    const ly = Math.round(tp[1] + h * .35), lh = Math.max(2, Math.round(h * .28)); pxRect(g, x0 + 1, ly, 2 * w - 2, lh, kind === 'co2' ? '#f4f2ec' : '#f4f2ec'); pxRect(g, x0 + 1, ly, 2 * w - 2, 1, kind === 'co2' ? '#1a1a1a' : '#2a5ac8');   // the label
+    const vh = Math.max(2, Math.round(w * .9)); pxRect(g, Math.round(b[0] - w * .45), tp[1] - vh - 1, Math.max(2, Math.round(w * .9)), vh, '#26262a');   // the valve head
+    pxLine(g, Math.round(b[0] - w * .9), tp[1] - vh - 2, Math.round(b[0] + w * .9), tp[1] - vh - 3, '#c9ccd4');                // the lever
+    if (kind === 'abc') { pxRect(g, Math.round(b[0] + w * .45), tp[1] - vh, 2, 2, '#f8f8f4'); pxRect(g, Math.round(b[0] + w * .45) + 1, tp[1] - vh, 1, 1, empty ? '#d43a2a' : '#3ac04a');   // the gauge
+      pxLine(g, Math.round(b[0] - w * .45), tp[1] - vh + 1, x0 - 1, Math.round(tp[1] + h * .2), '#1a1a1c'); pxLine(g, x0 - 1, Math.round(tp[1] + h * .2), x0 - 1, Math.round(tp[1] + h * .55), '#1a1a1c'); }   // its hose
+    else { pxLine(g, Math.round(b[0] - w * .45), tp[1] - vh + 1, x0 - 2, Math.round(tp[1] + h * .3), '#1a1a1c'); fillPoly(g, [[x0 - 4, Math.round(tp[1] + h * .3)], [x0, Math.round(tp[1] + h * .3)], [x0 + 1, Math.round(tp[1] + h * .75)], [x0 - 5, Math.round(tp[1] + h * .75)]], '#1a1a1c'); }   // the CO2 horn
+  }
+
+  return { FONT, ftext, ftw, extRoom, cove, acoustic, ceilGrid, carpetTiles, tornHole, tileTop, concreteTop, lit, ZOOM };
 })();

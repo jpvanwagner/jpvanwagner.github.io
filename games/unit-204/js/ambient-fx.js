@@ -38,6 +38,18 @@ const AmbFX = {
     if (!this.moving()) return;
     for (let i = 0; i < 4; i++) { const k = (t * .9 + i * .25) % 1, r = 1 + k * 3; pxEllipse(g, p[0] + k * 6 + Math.sin(t * 2 + i) * 2, p[1] - k * 16, r, r * .8, dark ? `rgba(70,70,74,${.5 * (1 - k)})` : `rgba(200,200,204,${.45 * (1 - k)})`); }
   },
+  /* a cumulus cloud at (cx, cy), w wide: a flat, shaded base with puffs heaped on it, lit from above, tinted by the time
+     of day; dark = a rain cloud, gray and heavy */
+  cloud(g, cx, cy, w, seed = 0, dark = false) {
+    const T = Decor.time, h = w * .32, n = Math.max(3, Math.round(w / 14));
+    const lit = dark ? mix(T.sky[0], '#b8bec8', .55) : mix('#ffffff', T.sky[2], .12), mid = dark ? mix(T.sky[0], '#7a808c', .55) : mix('#e8eef4', T.sky[1], .3), shade = dark ? mix(T.sky[0], '#4a505c', .6) : mix('#c4ccd8', T.sky[1], .35);
+    pxEllipse(g, cx, cy, w / 2, h * .3, shade);                                                      // the flat base
+    const puffs = [];
+    for (let i = 0; i < n; i++) { const u = (i + .5) / n, mid2 = 1 - Math.abs(u - .5) * 1.6, r = h * (.35 + .5 * mid2 + hash(seed + i) * .25); puffs.push([cx - w / 2 + w * u + (hash(seed + i + 7) - .5) * 4, cy - r * .55, r]); }
+    for (const [x, y, r] of puffs) pxEllipse(g, x, y + r * .15, r, r * .8, shade);                     // the shadowed undersides
+    for (const [x, y, r] of puffs) pxEllipse(g, x, y, r * .92, r * .72, mid);
+    for (const [x, y, r] of puffs) pxEllipse(g, x - r * .2, y - r * .22, r * .62, r * .45, lit);       // the sunlit tops
+  },
   /* everything an open-air area gets every frame */
   outdoor(g, t, seed) { this.birds(g, t, seed); this.rain(g, t); }
 };

@@ -8,7 +8,7 @@
 <title>Unit 204</title>
 <meta name="description" content="A point-and-click move-out inspection. Look, touch, smell, and measure your way through Unit 204, then mark every finding on your clipboard.">
 <meta name="theme-color" content="#14111c">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=c0d8bf28">
 </head>
 <body>
 
@@ -26,11 +26,14 @@
   <div id="tb-trigger"></div>
   <div id="tb-tab" aria-hidden="true">&#9660; TOOLS &#9660;</div>
   <nav id="toolbar" aria-label="Tools">
-    <div class="tb-group" id="tb-verbs"></div>
-    <div class="tb-sep"></div>
-    <div class="tb-group" id="tb-items"></div>
-    <div class="tb-sep"></div>
-    <div class="tb-group tb-right">
+    <!-- three columns: your senses and tools on the left, the clock in the middle (js/toolbar-clock.js), everything else on the right -->
+    <div class="tb-side tb-left">
+      <div class="tb-group" id="tb-verbs"></div>
+      <div class="tb-sep"></div>
+      <div class="tb-group" id="tb-items"></div>
+    </div>
+    <button class="tb-clock" id="tbClock" type="button" aria-label="Clock" data-tip="Clock|The shift's clock. Click it for a different one."><canvas id="tbClockArt" width="54" height="23"></canvas></button>
+    <div class="tb-group tb-side tb-right">
       <button class="tb-btn tb-text" id="tbReport" type="button" data-tip="Your form|How many things you've marked so far."><span class="ico ico-report"></span><span id="tbProgress">0/0</span></button>
       <button class="tb-btn tb-text tb-finish" id="tbFinish" type="button" data-tip="Finish the inspection|Walk out and file your move-out report. You can also leave through the front door.">FINISH &#9656;</button>
       <button class="tb-btn tb-text" id="tbBag" type="button" data-tip="Bag|Things you picked up. No use on the job, but they're yours now."><span class="ico ico-bag"></span><span id="tbBagN">0</span></button>
@@ -270,8 +273,7 @@
         </ul>
         <p>The camera shutter, pencil, tape measure, phone ring, and alarm beeps are synthesized live in the browser.</p>
         <h3>Music</h3>
-        <p>Inspired by various free tracks on <a href="https://pixabay.com/music/" target="_blank" rel="noopener">Pixabay</a>, but synthesized by Joe VanWagner using the ZzFXM tracker.</p>
-        <p>Nine original songs written for the game as <a href="https://keithclark.github.io/ZzFXM/" target="_blank" rel="noopener">ZzFXM</a> tracker files (they're in the game's <code>music</code> folder, ready to open in the ZzFXM tracker), played with <a href="https://github.com/keithclark/ZzFXM" target="_blank" rel="noopener">ZzFXM</a> by Keith Clark and Frank Force and <a href="https://github.com/KilledByAPixel/ZzFX" target="_blank" rel="noopener">ZzFX</a> by Frank Force, both MIT License.</p>
+        <p>Nine original songs by Joe VanWagner, all synthesized in <a href="https://github.com/keithclark/ZzFXM" target="_blank" rel="noopener">ZzFXM</a> (Keith Clark and Frank Force) and <a href="https://github.com/KilledByAPixel/ZzFX" target="_blank" rel="noopener">ZzFX</a> (Frank Force), both MIT License.</p>
         <p>The tenant phone calls were built in <a href="https://github.com/Nostalginaut/Scenemaker" target="_blank" rel="noopener">Scenemaker</a>, a branching-scenario tool.</p>
         <h3>Icons</h3>
         <ul>
@@ -408,77 +410,78 @@
   </section>
 </div>
 
-<script src="js/config.js"></script>
-<script src="js/util.js"></script>
-<script src="js/crisp.js"></script>
-<script src="js/settings.js"></script>
-<script src="js/sounds.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/iconart.js"></script>
-<script src="js/icons.js"></script>
-<script src="js/sprites.js"></script>
-<script src="js/features.js"></script>
-<script src="js/osha-notes.js"></script>
-<script src="js/decor.js"></script>
-<script src="js/itemsprites.js"></script>
-<script src="js/zoomart.js"></script>
-<script src="js/closeup-extras.js"></script>
-<script src="js/rooms.js"></script>
-<script src="js/obstacles.js"></script>
-<script src="js/ambient-fx.js"></script>
-<script src="js/crew-sprites.js"></script>
-<script src="js/crew.js"></script>
-<script src="js/openables.js"></script>
-<script src="js/windows.js"></script>
-<script src="js/utilities.js"></script>
-<script src="js/bag.js"></script>
-<script src="js/bag-verbs.js"></script>
-<script src="js/anomalies.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/inspect.js"></script>
-<script src="js/reveal.js"></script>
-<script src="js/doodles.js"></script>
-<script src="js/mark.js"></script>
-<script src="js/photo-ask.js"></script>
-<script src="js/dialogue.js"></script>
-<script src="js/tenant-scenes.js"></script>
-<script src="js/calls.js"></script>
-<script src="js/blackberry.js"></script>
-<script src="js/takeout.js"></script>
-<script src="js/report.js"></script>
-<script src="js/partial-marks.js"></script>
-<script src="js/share.js"></script>
-<script src="js/game.js"></script>
-<script src="js/calendar.js"></script>
-<script src="js/zzfxm.js"></script>
-<script src="js/music-songs.js"></script>
-<script src="js/music.js"></script>
-<script src="js/loops.js"></script>
-<script src="js/sink.js"></script>
-<script src="js/osha-book.js"></script>
-<script src="js/sopbook.js"></script>
-<script src="js/sop-links.js"></script>
-<script src="js/achievements.js"></script>
-<script src="js/progress.js"></script>
-<script src="js/badge-sets.js"></script>
-<script src="js/tips.js"></script>
-<script src="js/sites.js"></script>
-<script src="js/ppe.js"></script>
-<script src="js/site-picker.js"></script>
+<script src="js/config.js?v=9536b774"></script>
+<script src="js/util.js?v=e3e983ca"></script>
+<script src="js/crisp.js?v=bdcb5fe6"></script>
+<script src="js/settings.js?v=e386c4ed"></script>
+<script src="js/sounds.js?v=d3ac9701"></script>
+<script src="js/audio.js?v=dab18193"></script>
+<script src="js/iconart.js?v=ebe19352"></script>
+<script src="js/icons.js?v=7cddd270"></script>
+<script src="js/sprites.js?v=3d7aec26"></script>
+<script src="js/features.js?v=67d4af64"></script>
+<script src="js/osha-notes.js?v=16961fe7"></script>
+<script src="js/decor.js?v=0400c416"></script>
+<script src="js/itemsprites.js?v=4d9780f2"></script>
+<script src="js/zoomart.js?v=02266e3d"></script>
+<script src="js/closeup-extras.js?v=54c106fb"></script>
+<script src="js/rooms.js?v=e8b9980a"></script>
+<script src="js/obstacles.js?v=251e2d8b"></script>
+<script src="js/ambient-fx.js?v=05aa88bc"></script>
+<script src="js/crew-sprites.js?v=a3827e96"></script>
+<script src="js/crew.js?v=6226ae95"></script>
+<script src="js/openables.js?v=43dc2a45"></script>
+<script src="js/windows.js?v=5531737c"></script>
+<script src="js/utilities.js?v=ab8c81b8"></script>
+<script src="js/bag.js?v=be9be341"></script>
+<script src="js/bag-verbs.js?v=ecdfeeb7"></script>
+<script src="js/anomalies.js?v=575d1b01"></script>
+<script src="js/ui.js?v=a395104e"></script>
+<script src="js/toolbar-clock.js?v=885fd151"></script>
+<script src="js/inspect.js?v=55f11ed4"></script>
+<script src="js/reveal.js?v=b4daba57"></script>
+<script src="js/doodles.js?v=9c6ac953"></script>
+<script src="js/mark.js?v=4ea7bc83"></script>
+<script src="js/photo-ask.js?v=f56b7a24"></script>
+<script src="js/dialogue.js?v=22b27f80"></script>
+<script src="js/tenant-scenes.js?v=50e0f33e"></script>
+<script src="js/calls.js?v=b84a8038"></script>
+<script src="js/blackberry.js?v=9caaada3"></script>
+<script src="js/takeout.js?v=dd03c4a9"></script>
+<script src="js/report.js?v=e8fafa50"></script>
+<script src="js/partial-marks.js?v=90e359d0"></script>
+<script src="js/share.js?v=3f180426"></script>
+<script src="js/game.js?v=d81f93a4"></script>
+<script src="js/calendar.js?v=2afc0420"></script>
+<script src="js/zzfxm.js?v=037b9bf8"></script>
+<script src="js/music-songs.js?v=8ff4dd63"></script>
+<script src="js/music.js?v=8343a9d0"></script>
+<script src="js/loops.js?v=02fcb949"></script>
+<script src="js/sink.js?v=dcac68a3"></script>
+<script src="js/osha-book.js?v=60a7e9a2"></script>
+<script src="js/sopbook.js?v=4b8d197e"></script>
+<script src="js/sop-links.js?v=8cd7271a"></script>
+<script src="js/achievements.js?v=624397a8"></script>
+<script src="js/progress.js?v=36fc7047"></script>
+<script src="js/badge-sets.js?v=00d45a12"></script>
+<script src="js/tips.js?v=7d4b863f"></script>
+<script src="js/sites.js?v=1d45fbfc"></script>
+<script src="js/ppe.js?v=68779959"></script>
+<script src="js/site-picker.js?v=00296247"></script>
 <!-- the other properties (docs/SITES.md): each registers itself with Sites -->
-<script src="js/sites/office-art.js"></script>
-<script src="js/sites/office-art2.js"></script>
-<script src="js/sites/office-doors.js"></script>
-<script src="js/sites/office.js"></script>
-<script src="js/sites/industrial-art.js"></script>
-<script src="js/sites/industrial-art2.js"></script>
-<script src="js/sites/industrial-areas.js"></script>
-<script src="js/sites/industrial-crew.js"></script>
-<script src="js/sites/industrial.js"></script>
-<script src="js/sites/construction-art.js"></script>
-<script src="js/sites/construction-zoom.js"></script>
-<script src="js/sites/construction.js"></script>
-<script src="js/spritesheets.js"></script>
-<script src="js/main.js"></script>
+<script src="js/sites/office-art.js?v=4380a281"></script>
+<script src="js/sites/office-art2.js?v=576e2135"></script>
+<script src="js/sites/office-doors.js?v=2eb86e75"></script>
+<script src="js/sites/office.js?v=9f3b4d92"></script>
+<script src="js/sites/industrial-art.js?v=5b855636"></script>
+<script src="js/sites/industrial-art2.js?v=654913ac"></script>
+<script src="js/sites/industrial-areas.js?v=dbd1bbb8"></script>
+<script src="js/sites/industrial-crew.js?v=4e7f3550"></script>
+<script src="js/sites/industrial.js?v=af27f3df"></script>
+<script src="js/sites/construction-art.js?v=a5498d34"></script>
+<script src="js/sites/construction-zoom.js?v=71db4bbd"></script>
+<script src="js/sites/construction.js?v=77ee9f5a"></script>
+<script src="js/spritesheets.js?v=ef4b8212"></script>
+<script src="js/main.js?v=91f91ed5"></script>
 </body>
 </html>

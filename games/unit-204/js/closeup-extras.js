@@ -46,7 +46,7 @@ const CloseupExtras = {
   take(def, o, c) {
     if (def.noTake && o.item === 'pizza') Takeout.note('tony');
     if (def.noTake) return def.noTake;
-    Game.taken.add(o.id); Bag.add(o.item); Rooms.invalidate(o.room); Game.refreshHots();
+    Game.taken.add(o.id); Bag.add(o.item, o.id); Rooms.invalidate(o.room); Game.refreshHots();
     return clutterText(def, 'take', c) || `You take the ${lower(def.name)} and drop it in your bag.`;
   },
 

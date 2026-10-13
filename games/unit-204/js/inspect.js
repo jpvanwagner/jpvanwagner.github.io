@@ -129,6 +129,7 @@ const Inspect = {
     const fl = Game.flags[fid] = Game.flags[fid] || {};
     if (r.set) { fl[r.set] = Game.t; Rooms.invalidate(f.room); }
     if (r.toggle) { fl[r.toggle] = fl[r.toggle] ? 0 : Game.t; Rooms.invalidate(f.room); Openables.flagged(fid, r.toggle, !!fl[r.toggle]); }
+    if (r.unsafe && (!r.toggle || fl[r.toggle])) PPE.unsafe(r.unsafe, lower(f.say || f.name));   // switching on a machine without the PPE it needs
     if (r.clue) { (Game.clues[fid] = Game.clues[fid] || new Set()).add(r.clue); Utilities.noticed(fid, r.clue); }
     if (r.clue && tool === 'tape') Game.measures[fid] = r.t;
     if (r.ach) Achievements.unlock(r.ach);                              // a response can earn a badge (trying a locked-out machine)            // the tenant may argue about this number later

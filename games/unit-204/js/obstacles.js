@@ -68,9 +68,12 @@ const Obstacles = {
     const drawn = [], r = ROOMS[room];
     for (const it of items) {
       if (it.w) { it.w.draw(g, t); drawn.push(it.w); continue; }
-      const pts = this.outline(it.b), bx = polyBox(pts);
+      // a block can be several solid pieces (b.parts: a forklift's body, its guard posts and roof, its mast), so whoever
+      // stands behind it shows through the gaps instead of vanishing behind one big outline
+      const shapes = it.b.parts ? it.b.parts() : [this.outline(it.b)], bx = polyBox(shapes.flat());
       if (!drawn.some(w => { const q = w.rect(); return q.x1 > bx.x0 && q.x0 < bx.x1 && q.y1 > bx.y0 && q.y0 < bx.y1; })) continue;
-      clipDo(g, pts, () => { g.drawImage(Rooms.layer(room), 0, 0); r.dynamic && r.dynamic(g, r, t); Openables.drawLive(g, r, t); });
+      g.save(); g.beginPath(); for (const p of shapes) { p.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); } g.clip();
+      g.drawImage(Rooms.layer(room), 0, 0); r.dynamic && r.dynamic(g, r, t); Openables.drawLive(g, r, t); g.restore();
     }
   }
 };

@@ -67,7 +67,7 @@ window.FolderApp = {
         const unit = ((window.SiteConfig && SiteConfig.games) || []).find(g => g.id === 'unit-204');
         const unit204 = unit && { label: unit.label, icon: 'images/icons/apps/unit-204.png', thumb: unit.thumb,
             kind: 'Learning game', preview: 'images/previews/unit-204',
-            desc: 'My pixel-art point-and-click move-out inspection: gather evidence, then call wear, damage or hazard.',
+            desc: 'My pixel-art point-and-click inspection game: an apartment, an office suite, a warehouse, and a jobsite. Gather evidence, then call wear, damage, or hazard.',
             open: () => GamesApp.open('unit-204'), openLabel: 'Play', page: 'project-game-unit-204.html' };
         // Learning games that are also listed as projects (SiteConfig.games), opened the same way as in Games
         const asProject = (id, desc) => { const g = ((window.SiteConfig && SiteConfig.games) || []).find(x => x.id === id);

@@ -12,7 +12,8 @@ const Sink = {
   /* the loop levels: full in the kitchen, quieter in the next room */
   sounds(play) {
     const near = UI.isOpen('inspectScreen') && Inspect.fid === 'sink' ? 1 : Game.room === 'kitchen' ? .5 : Game.room === 'living' ? .14 : 0;   // loudest up close at the sink
-    Loops.set('faucet', play && this.running() ? near : 0);
+    const office = (Game.flags.o_sink || {}).run, nearO = UI.isOpen('inspectScreen') && Inspect.fid === 'o_sink' ? 1 : Game.room === 'o_break' ? .5 : Game.room === 'o_open' ? .12 : 0;   // the office break room's faucet uses the same loop
+    Loops.set('faucet', play ? Math.max(this.running() ? near : 0, office ? nearO : 0) : 0);
     Loops.set('disposal', play && this.grinding() ? near : 0);
   },
   /* the stream from the faucet into the left basin, in the room */

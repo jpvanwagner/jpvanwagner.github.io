@@ -11,12 +11,27 @@ const CONA = (() => {
   const { txt, R, stripes } = INDA;
   const lights = () => !Decor.time.rain;
   /* where each piece of visitor PPE sits along the gate table (x), so the hotspots in construction.js match */
-  const PPE_X = { hardhat: -4.05, vest: -3.5, glasses: -2.95, ears: -2.45, boots: -3.2 };
+  const SUPER_IN = { act: 'phone', face: -1, hat: '#ffffff', shirt: '#4a5a8a', y: .5, seed: 559 };   // 559: the seed Crew.draw gives the id 'super', so it's the same face   // the superintendent indoors (the hurt-worker day): same person as on the steps
+  const PPE_X = { hardhat: -3.6, vest: -3.1, glasses: -2.6, ears: -2.15, boots: -2.7, signin: -1.75 };
+  /* the visitor gear on the gate table, in the item sprites' palette (js/itemsprites.js): each one a shape you'd know
+     across the yard. A white cap-style hard hat with its ridge and brim, a folded orange vest with silver stripes, clear
+     wraparound glasses, yellow earmuffs on their band, a pair of work boots, and the sign-in clipboard. */
+  const PPE_SPR = {
+    hardhat: ['.....oooooo.....', '...ooWWWWWWoo...', '..oWWWWwWWWWWo..', '.oWWWWWwWWWWWWo.', '.oWWWWWwWWWWWWo.', '.owWWWWwWWWWWwo.', 'oooooooooooooooo', 'oGGGGGGGGGGGGGGo', '.oooooooooooooo.'],
+    vest: ['.ooo......ooo.', '.oOOo....oOOo.', '.oOOOo..oOOOo.', 'oOOOOOooOOOOOo', 'oSSSSSSSSSSSSo', 'oSSSSSSSSSSSSo', 'oOOOOOoGOOOOOo', 'oOOOOOoGOOOOOo', 'oSSSSSSSSSSSSo', 'oOOOOOoGOOOOOo', 'oooooooooooooo'],
+    glasses: ['.K............K.', '.K............K.', 'KKKKKKKKKKKKKKKK', 'KbbbbbbKKbbbbbbK', 'KbWbbbbKKbWbbbbK', '.KbbbbK..KbbbbK.', '..KKKK....KKKK..'],
+    ears: ['...oooooooo...', '..oKKKKKKKKo..', '.oKo......oKo.', '.oKo......oKo.', '.oKo......oKo.', 'oYYYo....oYYYo', 'oYYYo....oYYYo', 'oYYYo....oYYYo', 'oyyyo....oyyyo', '.ooo......ooo.'],
+    boot: ['.oooo.....', '.oNNo.....', '.oNNo.....', '.oNNoo....', '.oNNNNooo.', 'oNNNNNNNNo', 'oNNNNNNNNo', 'oKKKKKKKKo', 'oooooooooo'],
+    signin: ['...ooooo...', '..oGSSSGo..', '.ooGGGGGoo.', 'oNWWWWWWWNo', 'oNWkkkkkWNo', 'oNWWWWWWWNo', 'oNWkkkWWWNo', 'oNWWWWWWWNo', 'oNWkkkkWWNo', 'oNWWWWWWWNo', 'oNWkkWWWWNo', 'oNWWWWWWWNo', 'oNNNNNNNNNo', 'ooooooooooo']
+  };
+  /* where each piece of gear sits on screen (its sprite's foot, centered) and the rectangle around it, for its hotspot */
+  const ppeAt = id => id === 'boots' ? P(PPE_X.boots, 0, G.gate.ppe.z - .25) : P(PPE_X[id], G.gate.ppe.top, G.gate.ppe.z + .3);
+  const ppePts = id => { const p = ppeAt(id), s = PPE_SPR[id === 'boots' ? 'boot' : id], w = (id === 'boots' ? 22 : s[0].length) + 4, h = s.length + 3; return [[p[0] - w / 2, p[1] - h], [p[0] + w / 2, p[1] - h], [p[0] + w / 2, p[1] + 1], [p[0] - w / 2, p[1] + 1]]; };
 
   /* ---------- where things are (shared with the data file, so a hotspot always sits on its drawing) ---------- */
   const G = {
     gate: { gate: [-1.2, 1.2], board: [-3.8, -1.6], stacks: [-6.2, -4.4, 12.8, 15.4], toilet: [10.8, 12.0], cooler: [12.2, 12.8], truck: [2.2, 5.4, 13, 15.8],
-      rebar: [10.4, 13], stairs: [8.2, 9.8], chop: [2.2, 3.4, 10.6, 11.2], cutter: [1.75, 10.9], ppe: { x0: -4.4, x1: -2.0, z: 6.4, top: .9 }, toPower: [8.2, 10.4] },
+      rebar: [10.4, 13], stairs: [8.2, 9.8], chop: [2.2, 3.4, 10.6, 11.2], cutter: [1.75, 10.9], ppe: { x0: -3.9, x1: -1.5, z: 5.0, top: .9 }, toPower: [8.2, 10.4] },
     deck: { edge: 4.2, scaf: [4.3, 5.9], scafZ: [7, 15.4], tagZ: 8.2, hole: [-2.4, -1, 9, 10.4], worker: [1.4, 15.2], anchor: [2.6, 15.8], rail: [10.4, 16], stairs: [8.2, 9.8] },
     trench: { x: [-3.4, -1.4], z: [6.2, 15.6], box: [9, 13], depth: 2.8, ladder: 7.6, spoil: [-6.4, -3.8, 8, 14.4], sign: [12, 13.2], pump: [-.7, -.1, 7.0, 7.5], exc: [1, 4.8, 12.4, 15.4], locate: [.8, 3.8, 6.2, 9], door: [8.2, 10] },
     power: { trailer: [-4.4, 3.6, 14.2, 16], door: [-.6, .6], steps: [13.2, 14.2], pole: [5.6, 15.6], panel: [-6.4, -5.6, 10.6, 11.4], cut: [1.4, 4, 7.4, 8.6], silica: [-2.8, -.8, 10.4, 11.6], fuel: [-6.2, -4.8, 13.0, 14.6], doors: [8.2, 10], gang: [3.6, 5.0, 11.0, 11.8] }
@@ -26,8 +41,9 @@ const CONA = (() => {
   function sky(g) {
     const T = Decor.time;
     for (let i = 0; i < 8; i++) { const y0 = Math.floor(i * CAM.hy / 8), y1 = Math.floor((i + 1) * CAM.hy / 8); R(g, 0, y0, SW, y1 - y0 + 1, mix(i < 5 ? T.sky[0] : T.sky[1], i < 5 ? T.sky[1] : T.sky[2], i < 5 ? i / 5 : (i - 5) / 3)); }
-    if (!T.rain) for (let i = 0; i < 5; i++) { const cx = 30 + i * 100 + hash(i + 40) * 50, cy = 12 + hash(i + 7) * 26; pxEllipse(g, cx, cy, 18, 4, mix(T.sky[1], '#ffffff', .6)); pxEllipse(g, cx + 8, cy - 2, 10, 3, '#ffffff'); }
-    else for (let i = 0; i < 6; i++) { const cx = hash(i + 3) * SW, cy = 10 + hash(i + 9) * 30; pxEllipse(g, cx, cy, 34, 7, mix(T.sky[0], '#5a6070', .3)); }
+    // fair-weather cumulus scattered across the sky; on a rainy shift, a low gray deck of heavy ones
+    if (!T.rain) for (let i = 0; i < 5; i++) AmbFX.cloud(g, 30 + i * 100 + hash(i + 40) * 50, 20 + hash(i + 7) * 24, 34 + hash(i + 13) * 30, i * 11);
+    else { R(g, 0, 0, SW, 10, mix(T.sky[0], '#5a606c', .5)); for (let i = 0; i < 8; i++) AmbFX.cloud(g, -20 + i * 72 + hash(i + 3) * 30, 12 + hash(i + 9) * 16, 80 + hash(i + 5) * 40, i * 17 + 3, true); }
   }
   /* the town beyond the fence: a band of rooftops and trees sitting on the horizon */
   function farView(g, seed = 1, base = CAM.hy) {
@@ -81,6 +97,78 @@ const CONA = (() => {
     const w = String(str).length * 4 + 3, x0 = clamp(Math.round(align === 'r' ? x - w : align === 'c' ? x - w / 2 : x), 2, SW - w - 2), y0 = Math.round(y);   // never off the edge of the screen
     R(g, x0 - 1, y0 - 1, w + 2, 9, '#3a3c42'); R(g, x0, y0, w, 7, bg); txt(g, str, x0 + 2, y0 + 1, fg); return w;
   }
+  /* signs that belong to the place instead of floating in front of it. A sign is drawn once into a little canvas: a dark
+     edge, a light face, its words, and maybe an arrow at one end pointing the way. Laid onto a fence or a
+     rail would be squashed past reading, so every sign faces you: standSign is a sandwich board on the ground by an opening,
+     arrow 'l' or 'r' pointing the way on screen; postSign bolts one flat onto a post, a column, or a tower, centered on (x, y, z). */
+  function signImg(str, bg, fg, arrow) {
+    const w = String(str).length * 4 + 5 + (arrow ? 6 : 0), h = 9;
+    return decal(`csign:${str}:${bg}:${arrow || ''}`, w, h, c => { c.fillStyle = '#3a3c42'; c.fillRect(0, 0, w, h); c.fillStyle = bg; c.fillRect(1, 1, w - 2, h - 2);
+      const tx = arrow === 'l' ? 8 : 3; txt(c, str, tx, 2, fg); if (!arrow) return;
+      c.fillStyle = fg; const ax = arrow === 'l' ? 2 : w - 6; for (let i = 0; i < 4; i++) { const col = arrow === 'l' ? ax + i : ax + 3 - i; c.fillRect(col, 4 - i, 1, 1 + i * 2); } });   // a little solid arrowhead
+  }
+  function standSign(g, x, z, str, arrow, bg = '#f4f2ea', fg = '#1d1f26') {
+    // a sandwich board: two hinged panels leaning together, the near one facing you, its back legs splayed behind it
+    const img = signImg(str, bg, fg, arrow), base = P(x, 0, z), top = P(x, .62, z + .12), back = P(x, 0, z + .32), w = img.width + 4, h = Math.max(img.height + 6, Math.round(base[1] - top[1]));
+    const x0 = Math.round(base[0] - w / 2), y0 = Math.round(base[1] - h);
+    fillPoly(g, floorBlob(x, z + .15, w / 60, .2, 4, .1, 10), 'rgba(30,24,18,0.3)');                             // its shadow
+    for (const dx of [2, w - 3]) pxLine(g, x0 + dx, y0 + 1, x0 + dx + (dx < w / 2 ? 1 : -1), back[1], '#6a6e76');    // the back panel's legs
+    R(g, x0, y0, w, h - 2, '#2a2c32'); R(g, x0 + 1, y0 + 1, w - 2, h - 4, bg);                                       // the near panel
+    g.drawImage(img, x0 + 2, y0 + Math.round((h - 2 - img.height) / 2));
+    for (const fx of [x0, x0 + w - 2]) R(g, fx, y0 + h - 2, 2, 2, '#2a2c32');                                        // its feet
+    R(g, x0 + Math.round(w / 2) - 2, y0 - 1, 4, 1, '#8a8e96');                                                       // the hinge on top
+  }
+  function postSign(g, x, y, z, str, bg = '#f4f2ea', fg = '#1d1f26', arrow) {
+    const img = signImg(str, bg, fg, arrow), p = P(x, y, z), x0 = Math.round(p[0] - img.width / 2), y0 = Math.round(p[1] - img.height / 2);
+    R(g, x0 + 1, y0 + img.height, img.width, 1, 'rgba(20,20,24,0.35)'); g.drawImage(img, x0, y0);
+    for (const bx of [x0 + 2, x0 + img.width - 3]) R(g, bx, y0 + 2, 1, 1, '#8a8e96');   // its bolts
+  }
+  /* spray paint through a cut stencil, the way a crew marks a hole cover: letters a touch crooked and uneven in
+     coverage, a stencil's bridges left unpainted across the top and bottom of an O (at bigger sizes), a haze of overspray around
+     the strokes, and a drip or two running down. Centered on (cx, cy); s is the pixel size of the letters. */
+  function spray(g, str, cx, cy, col, s = 1, seed = 1, alpha = 1) {
+    const n = String(str).length, w = n * 4 * s + 8, h = 5 * s + 14, m = document.createElement('canvas'); m.width = w; m.height = h;
+    const mg = m.getContext('2d'); for (let i = 0; i < n; i++) txt(mg, str[i], 4 + i * 4 * s, 3 + Math.round((hash(seed + i) - .5) * 2 * Math.min(s, 2)), '#000', s);   // each letter set a little off line
+    const d = mg.getImageData(0, 0, w, h).data, x0 = Math.round(cx - w / 2), y0 = Math.round(cy - h / 2) + 2, ink = (x, y) => d[(y * w + x) * 4 + 3] > 0;
+    g.save(); g.fillStyle = col;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      if (!ink(x, y)) {   // overspray: a faint haze just outside the strokes
+        if (((x > 0 && ink(x - 1, y)) || (x < w - 1 && ink(x + 1, y)) || (y > 0 && ink(x, y - 1)) || (y < h - 1 && ink(x, y + 1))) && hash(seed * 31 + x * 7 + y * 13) < .35) { g.globalAlpha = alpha * .22; g.fillRect(x0 + x, y0 + y, 1, 1); }
+        continue; }
+      const lx = (x - 4) % (4 * s), ch = str[Math.floor((x - 4) / (4 * s))] || ''; if (s >= 2 && /[ODQ0]/.test(ch) && lx >= Math.floor(1.5 * s) - 1 && lx < Math.floor(1.5 * s) + Math.max(1, Math.floor(s / 2)) - 1 && (y < 4 + s || y > 2 + 4 * s)) continue;   // the stencil's bridges, top and bottom of an O
+      g.globalAlpha = alpha * (.62 + hash(seed * 17 + x * 3 + y * 11) * .38); g.fillRect(x0 + x, y0 + y, 1, 1);
+    }
+    for (let k = 0; k < 2; k++) {   // drips, off the bottom of a stroke
+      const lx = 4 + Math.floor(hash(seed + 40 + k) * n) * 4 * s + Math.floor(hash(seed + 50 + k) * 3 * s); let by = h - 1; while (by > 0 && !ink(lx, by)) by--; if (by <= 0) continue;
+      const len = 2 + Math.round(hash(seed + 60 + k) * 3 * s); for (let j = 1; j <= len; j++) { g.globalAlpha = alpha * .8 * (1 - j / (len + 1)); g.fillRect(x0 + lx, y0 + by + j, 1, 1); } }
+    g.restore();
+  }
+  /* the spoil pile up close: a heap of clay from the left edge to its toe (at x = toe), lit from the upper left column by
+     column, crumbly with clods and stones and roots, a few old things poking out of it, and a scar at its foot for every
+     time you've dug in (fl.dug) */
+  function spoilZoom(g, toe, fl) {
+    const base = 132, top = x => base - Math.pow(Math.sin(Math.PI * clamp(x / toe, 0, 1)), .8) * 74 - (hash(Math.round(x / 4)) - .5) * 5;
+    const outline = [[0, base]]; for (let x = 0; x <= toe; x += 2) outline.push([x, top(x)]); outline.push([toe, base]);
+    for (let x = 0; x < toe; x++) {
+      const y0 = Math.round(top(x)), b = clamp(.55 - (top(x + 2) - top(x - 2)) * .09, .12, 1), h = base - y0;   // rising toward the light: brighter
+      R(g, x, y0, 1, 2, mix('#7a5a3a', '#d0aa78', b)); R(g, x, y0 + 2, 1, Math.max(0, Math.round(h * .45)), mix('#5e4430', '#b08a5a', b)); R(g, x, y0 + 2 + Math.round(h * .45), 1, base - y0, mix('#4a3424', '#8a6a48', b));
+    }
+    speckPoly(g, outline, 'rgba(50,36,22,0.5)', .25, 41); speckPoly(g, outline, 'rgba(210,180,140,0.35)', .08, 43);
+    clipDo(g, outline, () => {
+      for (let q = 0; q < 46; q++) { const x = 4 + hash(q * 3 + 1) * (toe - 8), y = top(x) + 4 + hash(q * 5 + 2) * (base - top(x) - 8), r = 2 + Math.round(hash(q + 9) * 2);   // clods: lit on top, shadowed under
+        pxEllipse(g, x + 1, y + 1, r, r - 1, '#3e2c1c'); pxEllipse(g, x, y, r, r - 1, hash(q + 4) < .5 ? '#9a7650' : '#86643f'); R(g, x - r + 1, y - r + 2, 2, 1, '#caa676'); }
+      for (let q = 0; q < 30; q++) { const x = 3 + hash(q * 7 + 3) * (toe - 6), y = top(x) + 3 + hash(q * 11 + 5) * (base - top(x) - 6); R(g, x, y, 3, 2, hash(q) < .5 ? '#a8a49a' : '#8a8680'); R(g, x, y, 2, 1, '#d0ccc2'); R(g, x, y + 2, 3, 1, 'rgba(30,20,10,0.5)'); }   // stones
+      for (let q = 0; q < 5; q++) { let x = 8 + hash(q * 17) * (toe - 16), y = top(x) + 6 + hash(q * 19) * 30; for (let k = 0; k < 8; k++) { const nx = x + (hash(q * 23 + k) - .5) * 4, ny = y - 2; pxLine(g, x, y, nx, ny, '#3a2a1a'); x = nx; y = ny; } }   // roots
+      { const x = Math.round(toe * .36), y = Math.round(top(toe * .36)) + 16; R(g, x, y - 9, 4, 10, '#6a3a12'); R(g, x + 1, y - 12, 2, 3, '#6a3a12'); R(g, x, y - 8, 1, 6, '#b8783a'); }   // a brown bottle's neck
+      { const x = Math.round(toe * .66), y = Math.round(top(toe * .66)) + 28; R(g, x, y, 12, 6, '#a8483a'); R(g, x, y, 12, 1, '#c8685a'); R(g, x + 3, y + 2, 2, 2, '#7a2a20'); }   // the corner of an old brick
+      { const x = Math.round(toe * .16), y = 112; pxEllipse(g, x, y, 4, 3, '#7a4a2a'); pxEllipse(g, x, y, 2, 1, '#2a1a10'); }   // a rusty pipe end
+    });
+    // where you've dug: a dark hollow, its lower rim catching light, crumbs thrown out around it
+    const spots = [[.2, 112], [.42, 118], [.3, 102], [.55, 108], [.12, 122]];
+    for (let k = 0; k < Math.min(fl.dug || 0, spots.length); k++) { const x = Math.round(spots[k][0] * toe), y = spots[k][1];
+      pxEllipse(g, x, y, 7, 4, '#2a1c12'); pxEllipse(g, x, y - 1, 5, 2, '#1a120a'); R(g, x - 5, y + 3, 10, 1, '#a8845a');
+      for (let c = 0; c < 6; c++) R(g, x - 9 + hash(k * 9 + c) * 18, y + 4 + hash(k * 5 + c) * 4, 2, 1, '#8a6a46'); }
+  }
   /* people are drawn by js/crew.js (shared with the warehouse) */
   const person = (...a) => Crew.person(...a), drawCrew = (...a) => Crew.draw(...a), personPts = c => Crew.pts(c);
 
@@ -96,12 +184,14 @@ const CONA = (() => {
       const zb = r.box.zb, GT = G.gate, sv = cond('c_signboard'), kv = cond('c_stacks'), tv = cond('c_toilet'), rv = cond('c_rebar'), dv = cond('c_truck');
       // the back fence, with the gate in it (latched shut, or swung wide open onto the sidewalk)
       fenceBack(g, r, r.box.x0, GT.gate[0]); fenceBack(g, r, GT.gate[1], r.box.x1);
+      // the left fence, with its opening out to the trailer yard (drawn first, so the toilet and cooler stand in front of it)
+      { const [za, zb2] = GT.toPower; fenceSide(g, r, 'left', 1.6, za); fenceSide(g, r, 'left', zb2, r.box.zb); }
       if (sv === 3) { for (const [hx, ex] of [[GT.gate[0], GT.gate[0] + .6], [GT.gate[1], GT.gate[1] - .6]]) { const q = [P(hx, 0, zb), P(ex, 0, zb - 2.2), P(ex, 2.4, zb - 2.2), P(hx, 2.4, zb)]; mesh(g, q, 'rgba(170,176,184,0.85)'); strokePoly(g, q, '#8a9098'); }
         }
       else { const q = Q.back(r.box, GT.gate[0], GT.gate[1], 0, 2.4); mesh(g, q, 'rgba(170,176,184,0.85)'); strokePoly(g, q, '#8a9098'); const c = P(0, 1.2, zb); R(g, c[0] - 1, c[1] - 2, 3, 4, '#4a4c52'); }
       // the posted board: the site sign, the emergency numbers, and the OSHA poster
       { const [xa, xb] = GT.board, q = Q.back(r.box, xa, xb, .7, 2.3), c = polyBox(q); fillPoly(g, q, '#f4f2ea'); strokePoly(g, q, '#3a3c42');
-        R(g, c.x0 + 1, c.y0 + 1, c.x1 - c.x0 - 2, 4, '#2a5aa8'); txt(g, 'SITE 204', (c.x0 + c.x1) / 2, c.y0 + 7, '#1d1f26', 1, 'c');
+        R(g, c.x0 + 1, c.y0 + 1, c.x1 - c.x0 - 2, 4, '#2a5aa8'); txt(g, 'SITE ' + (Game.unit || '204'), (c.x0 + c.x1) / 2, c.y0 + 7, '#1d1f26', 1, 'c');
         if (sv !== 2) { R(g, c.x0 + 2, c.y0 + 14, 9, 10, '#f2e8c0'); R(g, c.x0 + 2, c.y0 + 14, 9, 2, '#c8202a'); R(g, c.x1 - 11, c.y0 + 14, 9, 10, '#f8f6ee'); R(g, c.x1 - 11, c.y0 + 14, 9, 2, '#2a5aa8'); }
         if (sv === 1) { g.fillStyle = 'rgba(244,242,234,0.55)'; g.fillRect(c.x0, c.y0, c.x1 - c.x0, c.y1 - c.y0); fillPoly(g, Q.back(r.box, xa - .1, xa + .9, .7, 2.0), '#2f5a3a'); } }
       // laydown: block on pallets (tapered, stacked straight up, or leaning off its dunnage), and a lumber pile
@@ -112,7 +202,15 @@ const CONA = (() => {
           for (let y = .4; y < (kv === 2 ? 3.2 : 1.7); y += .33) lineW(g, P(xa + (y > 1.1 && kv !== 2 ? .2 : 0), y, za), P(xb - (y > 1.1 && kv !== 2 ? .2 : 0), y, za), '#8a8880'); }
         box3(g, xa, xb + .4, 0, .8, za + 1.6, zb2, { front: '#c8a070', top: '#d8b484', side: '#a8844a' });
         for (let y = .2; y < .8; y += .2) lineW(g, P(xa, y, za + 1.6), P(xb + .4, y, za + 1.6), '#8a6a3a');
-        if (kv === 1) fillPoly(g, [P(xa - .2, .8, za + 1.6), P(xb + .2, .8, za + 1.6), P(xb + .8, .5, za + 1.2), P(xa + .4, .4, za + 1.3)], '#3a6ad0'); }
+        if (kv === 1) {   // a blue poly tarp over the lumber: tied down at the left by its grommets, the right end loose (it flaps, js dynamic)
+          const zf = za + 1.55, x0 = xa - .05, x1 = xb + .1;
+          fillPoly(g, [P(x0, .84, zf), P(xb + .45, .84, zf), P(xb + .45, .84, zb2), P(x0, .84, zb2)], '#3a6ad0');
+          for (let i = 1; i < 4; i++) lineW(g, P(x0 + (xb + .5 - x0) * i / 4, .84, zf), P(x0 + (xb + .5 - x0) * i / 4 + .1, .84, zb2), '#2a58b8');   // folds across the top
+          const drape = [P(x0, .84, zf), P(x1, .84, zf)]; for (let i = 6; i >= 0; i--) { const x = x0 + (x1 - x0) * i / 6; drape.push(P(x, .5 + Math.sin(i * 1.7) * .04, zf)); }
+          fillPoly(g, drape, '#3462c8'); for (let i = 1; i < 6; i++) { const x = x0 + (x1 - x0) * i / 6; lineW(g, P(x, .82, zf), P(x + .03, .52, zf), '#2a52a8'); }
+          for (const [x, y, z] of [[x0 + .06, .54, zf], [(x0 + x1) / 2, .5, zf], [x0, .84, zb2 - .05]]) { const p = P(x, y, z); R(g, p[0] - 1, p[1] - 1, 3, 3, '#c8ccd4'); R(g, p[0], p[1], 1, 1, '#1d1f26'); }   // brass grommets
+          { const a = P(x0 + .06, .54, zf), b = P(x0 - .05, .12, zf - .05); pxLine(g, a[0], a[1] + 1, b[0], b[1], '#e8d8a0'); }   // tied down to the pallet
+        } }
       // the portable toilet and the water cooler on the left fence
       { const [za, zb2] = GT.toilet, x0 = r.box.x0;
         box3(g, x0, x0 + 1.1, 0, 2.9, za, zb2, { front: '#3a6ad0', side: '#2a5ab0', top: '#4a7ae0' }); box3(g, x0 - .05, x0 + 1.15, 2.9, 3.05, za - .05, zb2 + .05, { front: '#e8e8e0', side: '#d8d8d0' });
@@ -162,12 +260,13 @@ const CONA = (() => {
         for (const [y0, y1] of [[.1, L1], [L1, L2]]) { run([xa, y0, za], [xa, y1, zb2], steelD); run([xa, y0, zb2], [xa, y1, za], steelD); }
         for (const y of [L2 + .55, L2 + 1.1]) { run([xa, y, za], [xa, y, zb2], '#d8dce4'); run([xa, y, za], [x1, y, za], '#d8dce4'); }   // the top guardrail
         fillPoly(g, [P(xa, L2, za), P(xa, L2, zb2), P(xa, L2 + .15, zb2), P(xa, L2 + .15, za)], wood);                    // its toeboard
-        const p = P(xa, 2.6, za); label(g, p[0] - 28, p[1] - 8, 'STAIRS'); }
+        postSign(g, xa, 2.2, za - .02, 'STAIRS'); }
       // the chop saw on a pair of sawhorses, where the crew cuts blocking (the worker at it is drawn live, with the rest of the crew)
       { const [xa, xb, za, zb2] = GT.chop; box3(g, xa, xb, .85, .95, za, zb2, { front: '#c8a070', top: '#d8b484', side: '#a8844a' });
         for (const x of [xa + .2, xb - .2]) { const a = P(x - .2, 0, za + .25), b = P(x, .85, za + .25), c = P(x + .2, 0, za + .25); pxLine(g, a[0], a[1], b[0], b[1], '#8a6a3a', 2); pxLine(g, c[0], c[1], b[0], b[1], '#8a6a3a', 2); }
         const m = P(xa + .3, .95, za + .2); R(g, m[0] - 4, m[1] - 3, 9, 3, '#3a3c42'); pxEllipse(g, m[0], m[1] - 5, 4, 4, '#b8bcc4'); R(g, m[0] - 1, m[1] - 9, 3, 3, '#d8a020');
         for (let k = 0; k < 3; k++) { const p = P(xa + .6 + k * .12, .95, za + .1 + k * .08); R(g, p[0], p[1] - 1, 8, 1, '#d8b484'); } }
+      standSign(g, r.box.x0 + .55, GT.toPower[1] - .45, 'TRAILER', 'l');   // a sandwich board by the opening out to the trailer yard
       // the dump truck in the back right, its spotter, and maybe someone walking behind it
       { const [xa, xb, za, zb2] = GT.truck;
         // seen from behind: the cab roof over the dump body, the body's flared sides and its tailgate (hinged at the top, ribbed),
@@ -186,15 +285,30 @@ const CONA = (() => {
         for (const x of [xa + .3, xb - .45]) { const p = P(x, 1.05, za + .4); R(g, p[0], p[1] - 3, 4, 3, '#d82020'); }
         { const p = P((xa + xb) / 2 - .25, .88, za + .34); R(g, p[0], p[1] - 3, 7, 3, '#f4f2ea'); }
         }
-      // the visitor PPE table by the sign-in sheet: plywood on two sawhorses, facing you as you come in
-      { const T0 = G.gate.ppe; box3(g, T0.x0, T0.x1, T0.top - .06, T0.top, T0.z, T0.z + .6, { front: '#c8a070', top: '#d8b484', side: '#a8844a' });
-        for (const x of [T0.x0 + .3, T0.x1 - .3]) { const a = P(x - .25, 0, T0.z + .3), b = P(x, T0.top - .06, T0.z + .3), c = P(x + .25, 0, T0.z + .3); pxLine(g, a[0], a[1], b[0], b[1], '#8a6a3a', 2); pxLine(g, c[0], c[1], b[0], b[1], '#8a6a3a', 2); }
-        const cb = P(T0.x1 - .25, T0.top, T0.z + .3); R(g, cb[0] - 4, cb[1] - 3, 8, 4, '#8a6a3a'); R(g, cb[0] - 3, cb[1] - 3, 6, 3, '#f4f2ea');
-        const sp = P(T0.x0 - .3, 0, T0.z + .3); R(g, sp[0], sp[1] - 30, 2, 30, '#6a6e76'); label(g, sp[0] + 1, sp[1] - 40, 'VISITOR PPE', 'c', '#e8f4ea', '#1a5a2a'); }
-      // the opening in the left fence, out to the trailer yard
-      { const [za, zb2] = G.gate.toPower; fenceSide(g, r, 'left', 1.6, za); fenceSide(g, r, 'left', zb2, r.box.zb);
-        const p = P(r.box.x0, 2.0, zb2 + .2); label(g, Math.max(2, p[0] + 2), p[1], 'TRAILER'); }
+      // the visitor PPE table: a sheet of plywood on two sawhorses, facing you as you come in, with a vinyl banner
+      // zip-tied along its front edge. Each sawhorse is a 2x4 beam running front to back under the plywood, with an
+      // A of splayed legs at each end and a spreader across them; the back A shows darker through the gap.
+      { const T0 = G.gate.ppe, y1 = T0.top - .07, zf = T0.z + .06, zk = T0.z + .54, wood = '#b88a4c', woodL = '#d0a466', woodD = '#7a5a30';
+        fillPoly(g, floorBlob((T0.x0 + T0.x1) / 2, T0.z + .3, 1.5, .45, 7, .2, 16), 'rgba(40,30,20,0.28)');   // its shadow on the dirt
+        const leg = (x, z, foot, col, w) => { const a = P(x, y1, z), b = P(x + foot, 0, z); pxLine(g, a[0], a[1], b[0], b[1], col, w); };
+        for (const xc of [T0.x0 + .35, T0.x1 - .35]) {
+          for (const s of [-1, 1]) leg(xc + s * .08, zk, s * .3, woodD, 2);                                   // the back A
+          lineW(g, P(xc - .2, .32, zk), P(xc + .2, .32, zk), woodD);
+          for (const s of [-1, 1]) { leg(xc + s * .08, zf, s * .3, wood, 3); const a = P(xc + s * .08, y1, zf), b = P(xc + s * .38, 0, zf); pxLine(g, a[0] + (s < 0 ? -1 : 1), a[1], b[0] + (s < 0 ? -1 : 1), b[1], woodL); }   // the front A, lit on its outer edge
+          box3(g, xc - .24, xc + .24, .28, .36, zf - .01, zf + .02, { front: wood, top: woodL });                // its spreader
+          box3(g, xc - .07, xc + .07, y1 - .12, y1, zf - .04, zk, { front: woodD, side: woodD, top: wood });     // the beam's end grain under the edge
+        }
+        box3(g, T0.x0, T0.x1, T0.top - .07, T0.top, T0.z, T0.z + .6, { front: '#c89a5a', top: '#dcb880', side: '#a8844a' });   // the plywood, with its plies showing
+        lineW(g, P(T0.x0, T0.top - .035, T0.z), P(T0.x1, T0.top - .035, T0.z), '#a8844a');
+        for (let i = 0; i < 5; i++) { const x = T0.x0 + .3 + hash(i + 61) * (T0.x1 - T0.x0 - .6); lineW(g, P(x, T0.top, T0.z + .08), P(x + .35, T0.top, T0.z + .5), 'rgba(160,120,70,0.45)'); }   // grain on top
+        // the banner, hung from the front edge by zip ties at its grommets
+        const bx0 = T0.x0 + .62, bx1 = T0.x1 - .62, b0 = P(bx0, T0.top - .08, T0.z - .01), b1 = P(bx1, .5, T0.z - .01), bw = Math.round(b1[0] - b0[0]), bh = Math.round(b1[1] - b0[1]);
+        g.drawImage(decal('c-visitor-ppe-' + bw + 'x' + bh, bw, bh, h => { h.fillStyle = '#1f6a34'; h.fillRect(0, 0, bw, bh); h.fillStyle = '#e8f4ea'; h.fillRect(1, 1, bw - 2, 1); h.fillRect(1, bh - 2, bw - 2, 1);
+          txt(h, 'VISITOR PPE', bw / 2, Math.round(bh / 2) - 6, '#ffffff', 1, 'c'); txt(h, 'SIGN IN, SUIT UP', bw / 2, Math.round(bh / 2) + 2, '#f2c418', 1, 'c');
+          h.fillStyle = 'rgba(0,0,0,0.18)'; for (const x of [Math.round(bw * .33), Math.round(bw * .7)]) h.fillRect(x, 2, 1, bh - 4); }), Math.round(b0[0]), Math.round(b0[1]));   // two fold creases
+        for (const [x, y] of [[b0[0] + 1, b0[1] + 1], [b1[0] - 2, b0[1] + 1]]) { R(g, x, y, 2, 2, '#c8ccd4'); R(g, x, y - 2, 1, 2, '#f4f2ea'); } }
     },
+    /* (the trailer-yard sign stands by the opening in the left fence: see walls' end) */
     /* the crew: the cutter at the chop saw (whose gear is the crew-PPE finding), a laborer carrying lumber across the
        yard, and whoever the truck's condition puts behind it; plus, on a bad day, someone from the sidewalk */
     crew() {
@@ -204,20 +318,26 @@ const CONA = (() => {
       const lx = -1.4 + Math.sin(t * .28) * 2.2; out.push({ id: 'laborer', x: lx, z: 12.7, o: { act: 'walk', carry: true, face: Math.cos(t * .28) > 0 ? 1 : -1, shirt: '#7a5a3a' } });
       if (dv === 0) out.push({ id: 'spotter', x: xa - .7, z: za - .2, o: { face: 1, act: 'idle' } });
       if (dv === 3) out.push({ id: 'walker', x: (xa + xb) / 2 + Math.sin(t * .5) * .6, z: za - .3, o: { act: 'walk', vest: false, glasses: false, shirt: '#8a5a3a', face: Math.cos(t * .5) > 0 ? 1 : -1 } });
-      if (cond('c_signboard') === 3) out.push({ id: 'stroller', x: .2 + Math.sin(t * .3) * .5, z: 17, o: { act: 'walk', vest: false, hat: false, glasses: false, shirt: '#c85a7a', hair: '#6a3a1a', face: 1 } });
+      if (cond('c_signboard') === 3) out.push({ id: 'stroller', x: .2 + Math.sin(t * .3) * .5, z: 15.2, o: { act: 'walk', vest: false, hat: false, glasses: false, shirt: '#c85a7a', hair: '#6a3a1a', face: 1 } });
       return out;
     },
     /* the PPE on the table, until you put it on (drawn every frame so it disappears the moment you take it) */
     dynamic(g, r, t) {
       AmbFX.birds(g, t, 3); AmbFX.exhaust(g, t, P(G.gate.truck[1] - .55, 3.5, G.gate.truck[3] - .7), true);   // from the stack behind the cab
       drawCrew(g, gate.crew(), t);
-      const T0 = G.gate.ppe, y = T0.top, z = T0.z + .3, at = x => P(x, y, z), X = CONA.PPE_X;
-      if (!PPE.has('hardhat')) { const p = at(X.hardhat); R(g, p[0] - 5, p[1] - 4, 10, 4, '#f4f4ee'); R(g, p[0] - 4, p[1] - 7, 8, 3, '#f4f4ee'); R(g, p[0] - 6, p[1] - 1, 12, 1, '#d8d8d0'); }
-      if (!PPE.has('vest')) { const p = at(X.vest); R(g, p[0] - 5, p[1] - 3, 10, 3, '#f07a1a'); R(g, p[0] - 5, p[1] - 2, 10, 1, '#f4f2dc'); }
-      if (!PPE.has('glasses')) { const p = at(X.glasses); R(g, p[0] - 4, p[1] - 2, 8, 2, '#c8e0f0'); R(g, p[0] - 4, p[1] - 3, 8, 1, '#2a2c32'); }
-      if (!PPE.has('ears')) { const p = at(X.ears); R(g, p[0] - 4, p[1] - 4, 3, 4, '#f2c418'); R(g, p[0] + 1, p[1] - 4, 3, 4, '#f2c418'); R(g, p[0] - 3, p[1] - 5, 6, 1, '#2a2c32'); }
-      if (!PPE.has('boots')) { const p = P(X.boots, 0, T0.z - .2); R(g, p[0] - 7, p[1] - 5, 6, 5, '#6a4a2a'); R(g, p[0] + 1, p[1] - 5, 6, 5, '#6a4a2a'); }
-      if (cond('c_stacks') === 1 && Settings.get('motion')) { const [xa, xb, za] = G.gate.stacks, k = Math.sin(t * 6) * .15; fillPoly(g, [P(xb + .2, .8, za + 1.6), P(xb + .9 + k, .7 + k, za + 1.3), P(xb + .7, .4, za + 1.4)], '#3a6ad0'); }
+      // the gear, sized for how close the table sits (it's up front by the gate, so it reads as something to pick up)
+      for (const id of ['hardhat', 'vest', 'glasses', 'ears']) if (!PPE.has(id)) { const p = ppeAt(id); R(g, p[0] - PPE_SPR[id][0].length / 2 + 1, p[1] - 1, PPE_SPR[id][0].length, 2, 'rgba(60,40,20,0.25)'); drawSprite(g, PPE_SPR[id], p[0], p[1] - 1, 1); }   // each with a little shadow on the plywood
+      if (!PPE.has('boots')) { const p = ppeAt('boots'); fillPoly(g, floorBlob(PPE_X.boots, G.gate.ppe.z - .25, .3, .08, 3, .1, 10), 'rgba(40,30,20,0.3)'); drawSprite(g, PPE_SPR.boot, p[0] - 5, p[1], 1); drawSprite(g, PPE_SPR.boot, p[0] + 6, p[1] + 1, 1); }
+      { const p = ppeAt('signin'); drawSprite(g, PPE_SPR.signin, p[0], p[1] - 1, 1); const pen = [p[0] + 7, p[1] - 2]; pxLine(g, p[0] + 2, p[1] - 13, pen[0], pen[1], '#e8e8e0'); R(g, pen[0] - 1, pen[1] - 1, 6, 1, '#2a4a9a'); R(g, pen[0] + 4, pen[1] - 1, 1, 1, '#1d1f26'); }   // the sign-in clipboard, its pen on a string
+      if (cond('c_stacks') === 1) {   // the tarp's loose end, lifting and snapping in uneven gusts, a grommet at its free corner
+        const [, xb, za] = G.gate.stacks, zf = za + 1.55, ex = xb + .1, tt = Settings.get('motion') ? t : 1.3;
+        const gust = clamp(.55 + .45 * Math.sin(tt * .9) * Math.sin(tt * 2.3 + 1), .15, 1), N = 7, top = [], bot = [];
+        for (let i = 0; i <= N; i++) { const u = i / N, w = Math.pow(u, 1.4) * gust, lift = w * (.55 + .22 * Math.sin(tt * 7.3 - u * 5) + .1 * Math.sin(tt * 13.1 - u * 9));
+          const x = ex + u * 1.2 * (1 - .12 * Math.abs(Math.sin(tt * 3 + u))), z = zf - u * .35 * gust;
+          top.push(P(x, .84 + lift * .8, z)); bot.push(P(x + w * .08, .45 + lift * 1.25, z - .02)); }
+        for (let i = 0; i < N; i++) { const rise = (top[i + 1][1] - top[i][1]); fillPoly(g, [top[i], top[i + 1], bot[i + 1], bot[i]], rise < -1 ? '#4a7ae0' : rise > 1 ? '#2a52a8' : '#3a6ad0'); }   // lit where it lifts, shadowed where it falls
+        const c = top[N]; R(g, c[0] - 1, c[1] - 1, 3, 3, '#c8ccd4'); R(g, c[0], c[1], 1, 1, '#1d1f26'); const d = bot[N]; R(g, d[0] - 1, d[1] - 2, 3, 3, '#c8ccd4'); R(g, d[0], d[1] - 1, 1, 1, '#1d1f26');
+      }
       if (cond('c_truck') === 3 && Settings.get('motion') && Math.floor(t * 2) % 2) { const p = P((G.gate.truck[0] + G.gate.truck[1]) / 2, 2.0, G.gate.truck[2] + .4); R(g, p[0] - 2, p[1], 4, 2, '#f8f8f0'); }
     }
   };
@@ -241,10 +361,28 @@ const CONA = (() => {
       // steel columns sticking up for the next floor, with their splice plates
       for (const [x, z] of [[-6.2, 4.2], [-6.2, 10], [-6.2, 15.6], [D.edge - .3, 4.2], [D.edge - .3, 10], [-1.6, 15.6], [D.anchor[0], 15.6]]) { box3(g, x - .15, x + .15, 0, 4.2, z, z + .3, { front: '#9a4a3a', side: '#7a3a2a' }); const p = P(x, 2.2, z); R(g, p[0] - 2, p[1], 4, 3, '#7a3a2a'); }
       // the floor opening and its cover
-      { const [xa, xb, za, zb2] = D.hole, q = Q.floor(xa, xb, za, zb2);
-        if (hv === 3) fillPoly(g, q, '#1d1f26');
-        else { if (hv === 2) fillPoly(g, q, '#1d1f26'); const sh = hv === 2 ? .5 : 0, cq = Q.floor(xa - .1 + sh, xb + .1 + sh, za - .1, zb2 + .1); fillPoly(g, cq, '#c8a070'); strokePoly(g, cq, '#8a6a3a');
-          if (hv !== 2) { const c = polyBox(cq); txt(g, 'HOLE', (c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2 - 2, hv === 1 ? 'rgba(200,32,42,0.35)' : '#c8202a', 1, 'c'); } } }
+      { const [xa, xb, za, zb2] = D.hole;
+        // the opening: dark, with the slab's cut edge showing on the far side and a little of the floor below
+        const opening = () => { const q = Q.floor(xa, xb, za, zb2); fillPoly(g, q, '#0e1014');
+          fillPoly(g, [P(xa, 0, zb2), P(xb, 0, zb2), P(xb, -.09, zb2), P(xa, -.09, zb2)], '#55554f');   // the slab's cut edge on the far side
+          lineW(g, P(xa, 0, zb2), P(xb, 0, zb2), '#9a9a92'); lineW(g, P(xa, 0, za), P(xb, 0, za), '#6a6a64');
+          lineW(g, P(xa, 0, za), P(xa, 0, zb2), '#6a6a64'); lineW(g, P(xb, 0, za), P(xb, 0, zb2), '#6a6a64'); };   // the lip all the way around
+        if (hv === 3 || hv === 2) opening();
+        if (hv !== 3) {
+          // the cover: a sheet of plywood with its thickness, grain, a couple of knots, screws at the corners, and the
+          // stenciled HOLE that OSHA wants on every cover (faded on a weathered one); shoved aside when it's been bumped
+          const sh = hv === 2 ? .5 : 0, x0 = xa - .1 + sh, x1 = xb + .1 + sh, z0 = za - .1, z1 = zb2 + .1, T = .04;
+          AmbFX.shadow(g, x0, x1, z0, z1, .6);
+          fillPoly(g, [P(x0, 0, z0), P(x1, 0, z0), P(x1, T, z0), P(x0, T, z0)], '#9a7448');                     // the near edge
+          fillPoly(g, [P(x1, 0, z0), P(x1, 0, z1), P(x1, T, z1), P(x1, T, z0)], '#a8804e');                     // the side edge
+          for (let k = 0; k < 4; k++) lineW(g, P(x0, T * (k + .5) / 4, z0), P(x1, T * (k + .5) / 4, z0), '#7a5a34');   // the plies
+          const top = [P(x0, T, z0), P(x1, T, z0), P(x1, T, z1), P(x0, T, z1)]; fillPoly(g, top, '#d0a670');
+          for (let i = 1; i < 9; i++) { const z = z0 + (z1 - z0) * i / 9, w = Math.sin(i * 2.3) * .06; lineW(g, P(x0 + .05, T, z), P((x0 + x1) / 2, T, z + w), '#b88e5a'); lineW(g, P((x0 + x1) / 2, T, z + w), P(x1 - .05, T, z - w * .5), '#b88e5a'); }
+          for (const [u, v] of [[.28, .3], [.7, .72]]) { const p = P(x0 + (x1 - x0) * u, T, z0 + (z1 - z0) * v); pxEllipse(g, p[0], p[1], 2, 1, '#9a6e3e'); }
+          strokePoly(g, top, '#8a6a3a');
+          for (const [u, v] of [[.06, .08], [.94, .08], [.06, .92], [.94, .92]]) { const p = P(x0 + (x1 - x0) * u, T, z0 + (z1 - z0) * v); R(g, p[0], p[1], 1, 1, '#5a5c62'); }
+          const c = polyBox(top); spray(g, 'HOLE', (c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2, '#d8401a', 1, 7, hv === 1 ? .32 : .9);   // spray paint, through a stencil
+        } }
       // the cable guardrail along the left edge: posts, two cables, flags (or a section left open)
       { const [za, zb2] = D.rail, x = r.box.x0 + .05, top = ev === 2 ? 1.1 : 1.4, gap = ev === 3 ? [10.4, 12.8] : null;
         for (let z = za; z <= zb2; z += 2.2) { if (gap && z > gap[0] && z < gap[1]) continue; lineW(g, P(x, 0, z), P(x, top + .05, z), '#6a6e76'); }
@@ -252,10 +390,11 @@ const CONA = (() => {
           for (const [a, b] of segs) { const n = 8, pts = []; for (let i = 0; i <= n; i++) { const z = a + (b - a) * i / n, sag = ev === 2 && y === top ? Math.sin(i / n * Math.PI) * .25 : 0; pts.push(P(x, y - sag, z)); } for (let k = 1; k < pts.length; k++) lineW(g, pts[k - 1], pts[k], '#a8acb4'); } }
         if (gap) for (const z of gap) { const a = P(x, top, z), b = P(x + .2, .1, z + (z === gap[0] ? .5 : -.5)); pxLine(g, a[0], a[1], b[0], b[1], '#a8acb4'); }
         if (ev !== 1) for (let z = za + .6; z < zb2; z += 2.4) { if (gap && z > gap[0] && z < gap[1]) continue; const p = P(x, top, z); R(g, p[0], p[1], 2, 3, '#f07a1a'); } }
+      postSign(g, -6.2, 1.5, 9.98, 'STAIRS', '#f4f2ea', '#1d1f26', 'l');   // zip-tied to the column past the stair landing, pointing back to it
       // the stair tower's landing at the left edge (where you came up), with its gate
       { const [za, zb2] = D.stairs, x = r.box.x0; fillPoly(g, Q.left(r.box, za, zb2, -.2, 0), '#8a8e96');
         for (const z of [za, zb2]) lineW(g, P(x, -.5, z), P(x, 1.5, z), '#b4b8c0'); lineW(g, P(x, 1.5, za), P(x, 1.5, zb2), '#b4b8c0'); lineW(g, P(x, .8, za), P(x, .8, za + .4), '#f2c418');
-        const p = P(x, 1.7, za); label(g, Math.max(2, p[0] + 3), p[1] - 8, 'STAIRS'); }
+        }
       // the scaffold along the right edge, in depth: frames (inner and outer posts, ledgers across) coming up from below the deck,
       // runners along both sides, X braces on the outer face, a planked platform at deck level with gaps between the boards,
       // a toeboard, a top rail and a midrail, the wall ties, and the inspection tag. Leaning out at the top, on a bad day.
@@ -362,7 +501,7 @@ const CONA = (() => {
       AmbFX.shadow(g, G.trench.exc[0], G.trench.exc[1], G.trench.exc[2], G.trench.exc[3], 1.3); AmbFX.shadow(g, G.trench.pump[0], G.trench.pump[1], G.trench.pump[2], G.trench.pump[3]);
       const T = G.trench, zb = r.box.zb, [xa, xb] = T.x, [za, zb2] = T.z, d = T.depth, bv = cond('c_trenchbox'), sv = cond('c_spoil'), lv = cond('c_trladder'), wv = cond('c_water'), ev = cond('c_excavator'), lc = cond('c_locate');
       fenceBack(g, r, r.box.x0, r.box.x1); fenceSide(g, r, 'left', 1.6, r.box.zb); fenceSide(g, r, 'right', 1.6, T.door[0]); fenceSide(g, r, 'right', T.door[1], r.box.zb);
-      { const p = P(r.box.x1, 2.0, T.door[0] - .2); label(g, Math.min(SW - 2, p[0] - 2), p[1], 'TRAILER', 'r'); }
+      standSign(g, r.box.x1 - .55, T.door[1] - .45, 'TRAILER', 'r');   // a sandwich board by the opening to the trailer yard
       { const q = Q.right(r.box, T.sign[0], T.sign[1], 1.0, 1.8), c = polyBox(q); fillPoly(g, q, '#f4f2ea'); strokePoly(g, q, '#3a3c42'); R(g, c.x0 + 1, c.y0 + 1, c.x1 - c.x0 - 2, 3, '#2a5aa8'); txt(g, '811', (c.x0 + c.x1) / 2, c.y0 + 6, '#c8202a', 1, 'c'); }
       // the cut: the ground opening, its far wall going down, and the floor at the bottom (wet, maybe)
       const cut = Q.floor(xa, xb, za, zb2);
@@ -385,13 +524,26 @@ const CONA = (() => {
       fillPoly(g, [P(xb, 0, za), P(xb, 0, zb2), P(xb + .25, .03, zb2), P(xb + .25, .03, za)], '#7a6040'); lineW(g, P(xa, 0, za), P(xa, 0, zb2), '#b09a78'); lineW(g, P(xa, 0, zb2), P(xb, 0, zb2), '#b09a78');
       // the spoil pile on the left: well back, or crowding the edge with pipe sections beside it
       { const [s0, s1, s2, s3] = T.spoil, toe = sv === 2 ? xa - .05 : xa - 1.2, mid = (toe + s0) / 2;
-        // a long mound of clay, rounded at both ends: its trench-facing slope lit, the far slope in shade
-        const N = 14, zs = Array.from({ length: N + 1 }, (_, i) => s2 + (s3 - s2) * i / N), top = z => Math.sqrt(Math.max(0, Math.sin(Math.PI * (z - s2) / (s3 - s2)))) * (1.5 + Math.sin(z * 2.1) * .12);
-        const ridge = zs.map(z => P(mid + Math.sin(z * 1.3) * .15, top(z), z));
-        fillPoly(g, [...zs.map(z => P(s0, 0, z)), ...ridge.slice().reverse()], '#6e5034');
-        fillPoly(g, [...zs.map(z => P(toe, 0, z)), ...ridge.slice().reverse()], '#9a7a52');
-        speckPoly(g, [...zs.map(z => P(toe, 0, z)), ...ridge.slice().reverse()], 'rgba(60,44,28,0.45)', .35, 77);
-        for (let k = 1; k < ridge.length; k++) lineW(g, ridge[k - 1], ridge[k], '#b09468');
+        // a long mound of dug-out clay, built as a lumpy height field and drawn back to front, every little facet lit by
+        // which way it faces (the sun from the upper left), so it reads as a heap and not a cutout; then clods, stones,
+        // and roots over it, and here and there something the bucket brought up with the dirt
+        const NX = 12, NZ = 26, H = (x, z) => { const u = (x - s0) / (toe - s0), w = (z - s2) / (s3 - s2); if (u <= 0 || u >= 1 || w <= 0 || w >= 1) return 0;
+          return Math.pow(Math.sin(Math.PI * u), .8) * Math.pow(Math.sin(Math.PI * w), .55) * 1.55 + (hash(Math.round(x * 5) * 31 + Math.round(z * 5) * 7) - .5) * .12 + Math.sin(z * 2.3 + x) * .06; };
+        const X = i => s0 + (toe - s0) * i / NX, Zs = k => s3 - (s3 - s2) * k / NZ, lit = [.55, .75, -.35];
+        for (let k = 0; k < NZ; k++) for (let i = 0; i < NX; i++) {
+          const x0 = X(i), x1 = X(i + 1), z0 = Zs(k), z1 = Zs(k + 1), h00 = H(x0, z0), h10 = H(x1, z0), h01 = H(x0, z1), h11 = H(x1, z1);
+          if (h00 + h10 + h01 + h11 <= 0) continue;
+          const dx = ((h10 - h00) + (h11 - h01)) / 2 / (x1 - x0), dz = ((h01 - h00) + (h11 - h10)) / 2 / (z1 - z0), n = [-dx, 1, -dz], m = Math.hypot(...n);
+          const b = clamp((n[0] * lit[0] + n[1] * lit[1] + n[2] * lit[2]) / m, 0, 1), c = mix(mix('#5a4028', '#b08a5a', b), '#7a5a3a', (hash(i * 13 + k * 7) - .5) * .25);
+          fillPoly(g, [P(x0, h00, z0), P(x1, h10, z0), P(x1, h11, z1), P(x0, h01, z1)], c);
+        }
+        const onPile = (x, z) => P(x, H(x, z), z);
+        for (let q = 0; q < 70; q++) { const x = s0 + .3 + hash(q * 3 + 1) * (toe - s0 - .6), z = s2 + .5 + hash(q * 5 + 2) * (s3 - s2 - 1), p = onPile(x, z), r = 1 + Math.round(hash(q + 9) * 1.5);   // clods
+          pxEllipse(g, p[0], p[1] + 1, r, Math.max(1, r - 1), '#4e3826'); pxEllipse(g, p[0], p[1], r, Math.max(1, r - 1), hash(q + 4) < .5 ? '#9a7650' : '#8a6a46'); R(g, p[0] - r + 1, p[1] - 1, 1, 1, '#c8a878'); }
+        for (let q = 0; q < 26; q++) { const x = s0 + .2 + hash(q * 7 + 3) * (toe - s0 - .4), z = s2 + .4 + hash(q * 11 + 5) * (s3 - s2 - .8), p = onPile(x, z); R(g, p[0], p[1], 2, 1, hash(q) < .5 ? '#a8a49a' : '#8a8680'); R(g, p[0], p[1] - 1, 1, 1, '#d0ccc2'); }   // stones
+        for (let q = 0; q < 4; q++) { const x = s0 + .6 + hash(q * 17) * (toe - s0 - 1.2), z = s2 + 1 + hash(q * 19) * (s3 - s2 - 2), p = onPile(x, z); pxLine(g, p[0], p[1], p[0] + 3 - q, p[1] - 4, '#3a2a1a'); }   // roots poking out
+        { const p = onPile(mid - .1, s2 + (s3 - s2) * .62); R(g, p[0], p[1] - 3, 2, 3, '#6a3a12'); R(g, p[0], p[1] - 4, 2, 1, '#8a5a2a'); }   // a bottle neck
+        { const p = onPile(mid + .3, s2 + (s3 - s2) * .35); R(g, p[0] - 2, p[1] - 2, 4, 2, '#a8483a'); R(g, p[0] - 2, p[1] - 2, 4, 1, '#c8685a'); }   // the corner of an old brick
         const pts = [P(s0, 0, s2), P(toe, 0, s2), P(toe, 0, s3), P(s0, 0, s3)];
         if (sv === 2) for (const z of [9, 10.2]) { const a = P(xa - .55, .22, z), b = P(xa - .55, .22, z + 1.1), r0 = Math.max(2, Math.round(.22 * CAM.f / z)), r1 = Math.max(2, Math.round(.22 * CAM.f / (z + 1.1)));   // lengths of blue water main, lying along the edge
           fillPoly(g, [[a[0] - r0, a[1]], [b[0] - r1, b[1]], [b[0] + r1, b[1]], [a[0] + r0, a[1]]], '#3a6ad0'); pxLine(g, a[0] + r0 - 1, a[1] - 1, b[0] + r1 - 1, b[1] - 1, '#5a8ae8');
@@ -403,14 +555,22 @@ const CONA = (() => {
         const rails = (y0, y1) => { for (const x of [xa + .25, xb - .25]) lineW(g, P(x, y0, z), P(x, y1, z), '#c8ccd4'); for (let y = -d + .4; y < top; y += .4) if (y >= y0 && y <= y1) lineW(g, P(xa + .25, y, z), P(xb - .25, y, z), lv === 1 ? '#7a6040' : '#a8acb4'); };
         clipDo(g, cut, () => rails(-d, 0)); if (top > 0) rails(0, top); }   // below grade it only shows through the cut
       // the pump on the right lip, its hose down into the trench, and the gas meter clipped to the ladder
-      { const [pa, pb, pz0, pz1] = T.pump, sP = CAM.f / pz0, [px0, py0] = P(pa, 0, pz0), u = v => Math.max(1, Math.round(v * sP));
-        // a gas trash pump in its roll cage: the red engine and its pull-start, the gray pump body and its suction port, the fuel tank on top
-        R(g, px0, py0 - u(.06), u(.6), u(.06), '#3a3c42');                                                     // the skid
-        R(g, px0 + u(.02), py0 - u(.3), u(.3), u(.24), '#d82020'); R(g, px0 + u(.02), py0 - u(.3), u(.3), u(.04), '#ff5a4a'); pxEllipse(g, px0 + u(.1), py0 - u(.18), u(.05), u(.05), '#2a2c32');   // the engine, its starter
-        R(g, px0 + u(.34), py0 - u(.26), u(.22), u(.2), '#8a8e96'); pxEllipse(g, px0 + u(.45), py0 - u(.16), u(.07), u(.07), '#4a4c52');   // the pump volute and its port
-        R(g, px0 + u(.06), py0 - u(.4), u(.22), u(.1), '#d82020'); R(g, px0 + u(.12), py0 - u(.43), u(.06), u(.03), '#2a2c32');   // the tank and its cap
-        for (const [x0, x1] of [[0, 0], [.6, .6]]) R(g, px0 + u(x0), py0 - u(.46), 1, u(.42), '#2a2c32'); R(g, px0, py0 - u(.46), u(.6), 1, '#2a2c32');   // the roll cage
-        if (wv !== 2) { const a = [px0 + u(.45), py0 - u(.16)], b = P(xb, .02, pz0 + 1.2), c = P(xb - .5, -.8, pz0 + 2.4); pxLine(g, a[0], a[1], b[0], b[1], '#2a2c32', 2); clipDo(g, cut, () => pxLine(g, b[0], b[1], c[0], c[1], '#2a2c32', 2)); } }
+      { const [pa, pb, pz0, pz1] = T.pump, w = pb - pa, dz = pz1 - pz0;
+        // a gas trash pump on its skid, built in depth: the red engine with its fins, the pull-start on its side, the fuel
+        // tank on top, the gray pump body and its suction port toward the trench, all inside a tube roll cage
+        box3(g, pa, pb, 0, .05, pz0, pz1, { front: '#3a3c42', top: '#4a4c52', side: '#2a2c32' });                                   // the skid
+        box3(g, pa + .04, pa + w * .55, .05, .32, pz0 + .06, pz1 - .06, { front: '#c81c1c', top: '#e84a3a', side: '#9a1414' });       // the engine
+        for (let k = 1; k < 4; k++) lineW(g, P(pa + .04 + k * w * .12, .08, pz0 + .06), P(pa + .04 + k * w * .12, .29, pz0 + .06), '#8a1010');   // its fins
+        box3(g, pa + .08, pa + w * .5, .32, .42, pz0 + .1, pz1 - .12, { front: '#d82020', top: '#ff6a5a', side: '#a81818' });          // the tank
+        { const c = P(pa + w * .3, .42, pz0 + .25); R(g, c[0] - 1, c[1] - 2, 3, 2, '#1d1f26'); }                                     // its cap
+        box3(g, pa + w * .6, pb - .03, .05, .28, pz0 + .08, pz1 - .1, { front: '#8a8e96', top: '#a8acb4', side: '#6a6e76' });         // the pump body
+        { const c = P(pa + w * .8, .16, pz0 + .08); pxEllipse(g, c[0], c[1], 2, 2, '#3a3c42'); }                                      // its port
+        { const c = P(pa, .2, pz0 + dz * .5); pxEllipse(g, c[0], c[1], 1, 2, '#5a5e66'); }                                            // the pull-start
+        for (const [x, z] of [[pa, pz0], [pb, pz0], [pa, pz1], [pb, pz1]]) lineW(g, P(x, .05, z), P(x, .5, z), '#2a2c32');            // the cage
+        lineW(g, P(pa, .5, pz0), P(pb, .5, pz0), '#4a4c52'); lineW(g, P(pa, .5, pz1), P(pb, .5, pz1), '#2a2c32'); lineW(g, P(pa, .5, pz0), P(pa, .5, pz1), '#2a2c32'); lineW(g, P(pb, .5, pz0), P(pb, .5, pz1), '#2a2c32');
+        if (wv !== 2) { const a = P(pa + w * .8, .16, pz0 + .08), b = P(xb, .02, pz0 + 1.2), c = P(xb - .5, -.8, pz0 + 2.4); pxLine(g, a[0], a[1], b[0], b[1], '#1d1f26', 2); clipDo(g, cut, () => pxLine(g, b[0], b[1], c[0], c[1], '#1d1f26', 2)); } }
+      // the four-gas meter, clipped to the ladder's top rung: a yellow handheld with its dark face
+      if (lv !== 3 && lv !== 2) { box3(g, xa + .18, xa + .34, .82, 1.08, T.ladder - .06, T.ladder, { front: '#f2c418', top: '#ffe060', side: '#b88a08' }); const f = P(xa + .26, .99, T.ladder - .06); R(g, f[0] - 1, f[1], 2, 2, wv === 3 ? '#c82020' : '#2a3a2a'); }
       // the locate marks at the front right: yellow for gas, orange for telephone, and little flags
       if (lc !== 2) { const [la, lb, lz0, lz1] = T.locate, fade = lc === 1 ? .35 : 1;
         for (const [x, c] of [[la + .6, '#f2c418'], [la + 1.8, '#f07a1a']]) { for (let z = lz0; z < lz1; z += .6) lineW(g, P(x, 0, z), P(x, 0, z + .35), rgba(c, fade));
@@ -449,18 +609,26 @@ const CONA = (() => {
       for (const k of ['gang', 'silica', 'cut', 'panel', 'fuel']) { const [a, b, c, d] = G.power[k]; AmbFX.shadow(g, a, b, c, d); } AmbFX.shadow(g, G.power.trailer[0], G.power.trailer[1], G.power.trailer[2] - .3, G.power.trailer[3], 1.2);
       const W = G.power, zb = r.box.zb, tv = cond('c_trailer'), lv = cond('c_powerline'), pv = cond('c_panel'), cv = cond('c_cords'), kv = cond('c_cutsaw'), sv = cond('c_silica'), fv = cond('c_fuel');
       fenceBack(g, r, r.box.x0, r.box.x1); for (const side of ['left', 'right']) { fenceSide(g, r, side, 1.6, W.doors[0]); fenceSide(g, r, side, W.doors[1], zb); }
-      { const a = P(r.box.x0, 2.0, W.doors[1] + .2), b = P(r.box.x1, 2.0, W.doors[1] + .2); label(g, Math.max(2, a[0] + 2), a[1], 'TRENCH'); label(g, Math.min(SW - 2, b[0] - 2), b[1], 'GATE', 'r'); }
+      standSign(g, r.box.x0 + .55, W.doors[1] - .45, 'TRENCH', 'l'); standSign(g, r.box.x1 - .55, W.doors[1] - .45, 'GATE', 'r');   // sandwich boards by the two openings
       // the utility pole at the back right, its crossarm, and the lines running off to the left
       { const [px, pz] = W.pole, base = P(px, 0, pz), top = P(px, 6.4, pz); pxLine(g, base[0], base[1], top[0], top[1], '#6a4a2a', 3);
         lineW(g, P(px - 1.2, 6.0, pz), P(px + 1.2, 6.0, pz), '#5a3a1a'); for (const dx of [-1, 0, 1]) { const a = P(px + dx, 6.05, pz); R(g, a[0] - 1, a[1] - 2, 2, 2, '#c8ccd4'); const b = P(-14, 5.8 + dx * .1, pz + 1); pxLine(g, a[0], a[1], b[0], b[1], '#2a2c32'); }
-        const sg = P(px - .2, 2.4, pz); label(g, sg[0], sg[1], 'LOOK UP', 'c', '#f2c418'); }
+        postSign(g, px, 2.4, pz - .1, 'LOOK UP', '#f2c418'); for (const y of [2.62, 2.18]) { const a = P(px - .12, y, pz - .1), b = P(px + .12, y, pz - .1); pxLine(g, a[0] - 1, a[1], b[0] + 1, b[1], '#8a8e96'); } }   // banded to the pole
       // the job trailer: white siding, a window, the door, its steps (with a handrail, or not)
       { const [xa, xb, za, zb2] = W.trailer; box3(g, xa, xb, .5, 3.3, za, zb2, { front: '#eceae2', side: '#d4d2ca', top: '#f4f2ea' });
         for (let x = xa + .2; x < xb; x += .4) lineW(g, P(x, .55, za), P(x, 3.25, za), '#d4d2ca');
         box3(g, xa, xb, 0, .5, za + .3, zb2, { front: '#3a3c42' });
-        for (const [wa, wb] of [[xa + .6, xa + 2], [xb - 2, xb - .6]]) { fillPoly(g, [P(wa, 1.6, za), P(wb, 1.6, za), P(wb, 2.6, za), P(wa, 2.6, za)], '#5a7a9a'); strokePoly(g, [P(wa, 1.6, za), P(wb, 1.6, za), P(wb, 2.6, za), P(wa, 2.6, za)], '#8a8e96'); }
+        for (const [wa, wb] of [[xa + .6, xa + 2], [xb - 2, xb - .6]]) {   // windows: glass set back in an aluminum frame, a sill sticking out under it, a glint
+          box3(g, wa - .06, wb + .06, 1.54, 2.66, za - .05, za, { front: '#a8acb4', top: '#c8ccd4', side: '#8a8e96' });
+          fillPoly(g, [P(wa, 1.6, za - .05), P(wb, 1.6, za - .05), P(wb, 2.6, za - .05), P(wa, 2.6, za - .05)], '#5a7a9a'); lineW(g, P((wa + wb) / 2, 1.6, za - .05), P((wa + wb) / 2, 2.6, za - .05), '#8a8e96');
+          lineW(g, P(wa + .12, 2.45, za - .05), P(wa + .4, 2.45, za - .05), '#a8c0d4');
+          box3(g, wa - .1, wb + .1, 1.48, 1.56, za - .16, za, { front: '#c8ccd4', top: '#e0e4ea', side: '#a8acb4' }); }
+        if (tv === 3 && !isOpen('c_trailerdoor')) { const wq = [P(xb - 2, 1.6, za), P(xb - .6, 1.6, za), P(xb - .6, 2.6, za), P(xb - 2, 2.6, za)];   // the super's inside today, on the phone at the desk (in the doorway instead, once it's open)
+          clipDo(g, wq, () => { Crew.person(g, xb - 1.3, za + 1.1, CONA.SUPER_IN, 0); fillPoly(g, wq, 'rgba(90,122,154,0.35)'); }); }
         const [da, db] = W.door; fillPoly(g, [P(da, .5, za), P(db, .5, za), P(db, 2.8, za), P(da, 2.8, za)], '#c8c6be'); strokePoly(g, [P(da, .5, za), P(db, .5, za), P(db, 2.8, za), P(da, 2.8, za)], '#8a8880');
-        const fa = P(db + .2, 1.6, za); R(g, fa[0], fa[1] - 4, 6, 6, '#f4f4ee'); R(g, fa[0] + 2, fa[1] - 3, 2, 4, '#2a9a4a'); R(g, fa[0] + 1, fa[1] - 2, 4, 2, '#2a9a4a');
+        if (tv !== 3) { box3(g, db + .2, db + .62, 1.3, 1.78, za - .14, za, { front: '#f4f4ee', top: '#ffffff', side: '#c8c8c0' });   // the first aid cabinet, a white box off the wall
+          const fa = P(db + .41, 1.54, za - .14); R(g, fa[0] - 1, fa[1] - 3, 2, 6, '#2a9a4a'); R(g, fa[0] - 3, fa[1] - 1, 6, 2, '#2a9a4a'); }
+        else for (const [x, y] of [[db + .24, 1.34], [db + .58, 1.34], [db + .24, 1.74], [db + .58, 1.74]]) { const p = P(x, y, za); R(g, p[0], p[1], 1, 1, '#6a6e76'); }   // gone: just its screw holes
         const [s0, s1] = W.steps; for (let k = 0; k < 4; k++) box3(g, da - .2, db + .2, k * .13, k * .13 + .06, s0 + k * .25, s0 + k * .25 + .25, { front: '#8a8e96', top: '#a8acb4' });
         if (tv !== 2) for (const x of [da - .25, db + .25]) { const a = P(x, .9, s0), b = P(x, 1.3, s1); pxLine(g, a[0], a[1], b[0], b[1], '#f2c418'); const f = P(x, 0, s0); pxLine(g, f[0], f[1], a[0], a[1], '#c89a08'); }
         }
@@ -551,37 +719,80 @@ const CONA = (() => {
     c_level: ['oooooooooooooo', 'oYYYYYoboYYYYo', 'oYYYYYoboYYYYo', 'oooooooooooooo'],
     c_thermos: ['..ooo...', '.oKKKo..', 'oEEEEEo.', 'oEEEEEoo', 'oEWEEEo.', 'oEEEEEo.', 'oEEEEEo.', 'oEEEEEo.', '.ooooo..'],
     c_hammer: ['ooooo.......', 'oKKKKoooooo.', 'oKKKKoNNNNNo', '.ooooooooooo'],
-    c_cone: ['....oo....', '...oOOo...', '...oWWo...', '..oOOOOo..', '..oWWWWo..', '.oOOOOOOo.', 'oooooooooo']
+    c_cone: ['....oo....', '...oOOo...', '...oWWo...', '..oOOOOo..', '..oWWWWo..', '.oOOOOOOo.', 'oooooooooo'],
+    // dug up out of the spoil pile (js/sites/construction.js SPOIL_FINDS)
+    c_bottle: ['..oo..', '..oN..', '.oNNo.', '.oNNo.', 'oNNNNo', 'oNWNNo', 'oNWNNo', 'oNNNNo', 'oNNNNo', 'oNNNNo', 'oNNNNo', '.oooo.'],
+    c_marble: ['.oooo.', 'obbBBo', 'obWBBo', 'oBBBBo', 'oBBBbo', '.oooo.'],
+    c_horseshoe: ['oooo..oooo', 'oCNo..oNCo', 'oCNo..oNCo', 'oCNo..oNCo', 'oCNo..oNCo', 'oCNNooNNCo', '.oCNNNNCo.', '..oCCCCo..', '...oooo...'],
+    c_quarter: ['.ooooo.', 'oGGGGGo', 'oGgGGGo', 'oGGgGGo', 'oGGGgGo', 'oGGGGGo', '.ooooo.'],
+    c_toycar: ['...oooo.....', '..oEbbEo....', '.oEEEEEEEoo.', 'oEEEEEEEEEEo', 'oKKoEEEEoooo', '.oo.........']
   };
 
   /* ============================== TITLE: Site 204 from across the street ============================== */
   let cache = null;
+  /* the title screen: Site 204 from the sidewalk, in proper perspective. A two-story steel frame going up on the right
+     (columns, beams, the poured deck with its guardrail cable, a scaffold with planks and braces on its face), a tower
+     crane far back on the left with its jib over the site and a load swaying on the hook, the laydown yard inside, and
+     a chain-link fence with green windscreen and the site sign. Nothing stands in a line behind you or Dana. */
   const title = (g, t) => {
     if (!cache) {
       cache = document.createElement('canvas'); cache.width = SW; cache.height = SH; const h = cache.getContext('2d'), T = Decor.time;
       sky(h); farView(h, 5);
-      R(h, 0, CAM.hy, SW, SH - CAM.hy, GROUND.dirt.base); speckle(h, 0, CAM.hy, SW, SH - CAM.hy, rgba(GROUND.dirt.dk, .9), 3000, 2);
-      // the frame of the building going up: columns, beams, a deck, and the tower crane over it all
-      const fx0 = 150, fx1 = 420, base = 196;
-      for (let k = 0; k < 3; k++) { const y = base - k * 38; R(h, fx0, y - 4, fx1 - fx0, 4, '#b4b2aa'); }
-      for (let x = fx0; x <= fx1; x += 45) R(h, x, base - 110, 4, 110, '#9a4a3a');
-      for (let k = 1; k < 3; k++) for (let x = fx0; x < fx1; x += 45) R(h, x, base - k * 38 - 8, 45, 3, '#9a4a3a');
-      R(h, fx0, base - 114, fx1 - fx0 + 4, 4, '#9a4a3a');
-      for (let y = base - 40; y < base; y += 8) R(h, fx1 + 6, y, 24, 2, '#b4b8c0'); for (const x of [fx1 + 6, fx1 + 28]) R(h, x, base - 76, 2, 76, '#b4b8c0');
-      R(h, 98, 18, 4, base - 18, '#f2c418'); for (let y = 22; y < base; y += 8) { R(h, 94, y, 12, 1, '#c89a08'); }
-      R(h, 60, 16, 300, 4, '#f2c418'); for (let x = 64; x < 356; x += 8) R(h, x, 20, 1, 4, '#c89a08'); R(h, 60, 20, 28, 10, '#5a5e66');
-      const hx = 290; R(h, hx, 20, 1, 60, '#2a2c32'); R(h, hx - 6, 80, 12, 8, '#b8b6ae');
-      // the fence along the front, and the sign on it
-      for (let x = 0; x < SW; x++) for (let y = 206; y < 246; y++) if ((x + y) % 4 === 0 || (x - y + 400) % 4 === 0) h.fillRect(x, y, 1, 1);
-      R(h, 0, 206, SW, 40, 'rgba(47,90,58,0.55)'); R(h, 0, 204, SW, 2, '#8a9098'); for (let x = 10; x < SW; x += 60) R(h, x, 204, 3, 46, '#7a8088');
-      R(h, 20, 212, 100, 26, '#f4f2ea'); R(h, 20, 212, 100, 6, '#2a5aa8'); txt(h, 'SITE 204', 70, 222, '#1d1f26', 2, 'c'); txt(h, 'HARD HAT AREA', 70, 232, '#c8202a', 1, 'c');
-      R(h, 0, 250, SW, 20, '#c4c0b6'); for (let x = 0; x < SW; x += 24) R(h, x, 250, 1, 20, '#a8a49a');
-      for (const [x, w] of [[200, 18], [260, 16]]) { R(h, x, 238, w, 12, '#f07a1a'); R(h, x + 3, 236, w - 6, 2, '#f4f2dc'); }
+      // the dirt, tire ruts curving in through the gate, a gravel pad, a light speckle
+      fillPoly(h, [P(-200, 0, 1.4), P(200, 0, 1.4), P(200, 0, 900), P(-200, 0, 900)], GROUND.dirt.base); speckle(h, 0, CAM.hy, SW, SH - CAM.hy, rgba(GROUND.dirt.dk, .7), 900, 2);
+      for (const dx of [-.9, .9]) { let prev = null; for (let z = 3; z < 24; z += .5) { const x = dx + Math.sin(z * .18) * 1.6, p = P(x, 0, z); if (prev) pxLine(h, prev[0], prev[1], p[0], p[1], rgba(GROUND.dirt.dk, .9), 2); prev = p; } }
+      fillPoly(h, [P(-9, 0, 13), P(-3, 0, 13), P(-3, 0, 19), P(-9, 0, 19)], GROUND.gravel.base); speckle(h, ...(() => { const a = P(-9, 0, 13), c = P(-3, 0, 19); return [a[0], c[1], c[0] - a[0], a[1] - c[1]]; })(), GROUND.gravel.lt, 120, 6);
+      // the tower crane, far back on the left: a lattice mast, the jib out over the site, the counter-jib and its weights, the cab
+      { const cx = -16, cz = 30, top = 11;
+        for (const dx of [-.5, .5]) lineW(h, P(cx + dx, 0, cz), P(cx + dx, top, cz), '#d8b018');
+        for (let y = 0; y < top; y += 1) { lineW(h, P(cx - .5, y, cz), P(cx + .5, y + 1, cz), '#c8a010'); lineW(h, P(cx - .5, y, cz), P(cx + .5, y, cz), '#c8a010'); }
+        lineW(h, P(cx - 5, top, cz), P(cx + 24, top, cz), '#f2c418'); lineW(h, P(cx - 5, top + .6, cz), P(cx + 24, top + .6, cz), '#f2c418');
+        for (let x = cx - 5; x < cx + 24; x += 1.2) lineW(h, P(x, top, cz), P(x + .6, top + .6, cz), '#d8b018');
+        lineW(h, P(cx, top + 2.2, cz), P(cx + 16, top + .6, cz), '#8a8e96'); lineW(h, P(cx, top + 2.2, cz), P(cx - 5, top + .6, cz), '#8a8e96');   // the pendant lines
+        lineW(h, P(cx, top, cz), P(cx, top + 2.2, cz), '#d8b018');
+        fillPoly(h, [P(cx - 5, top - 1, cz), P(cx - 3, top - 1, cz), P(cx - 3, top, cz), P(cx - 5, top, cz)], '#5a5e66');   // counterweights
+        fillPoly(h, [P(cx + .5, top - 1.1, cz), P(cx + 1.6, top - 1.1, cz), P(cx + 1.6, top, cz), P(cx + .5, top, cz)], '#e8e4d8');   // the cab
+        const tr = P(cx + 12, top, cz); pxRect(h, tr[0] - 2, tr[1], 4, 2, '#3a3c42');                                // the trolley (its hook is drawn live, swaying)
+      }
+      // the steel frame going up on the right: columns, beams, the poured deck and its cable rail, and a scaffold on its face
+      { const X = [9.5, 13.5, 17.5], Z = [22, 28], col = { front: '#9a4a3a', side: '#7a3a2a', top: '#aa5a4a' };
+        for (const z of Z.slice().reverse()) for (const x of X) box3(h, x - .15, x + .15, 0, 7.4, z - .15, z + .15, col);
+        for (const y of [3.6, 7.2]) { box3(h, X[0] - .15, X[2] + .15, y - .35, y, Z[0] - .15, Z[0] + .15, col); for (const x of X) box3(h, x - .12, x + .12, y - .3, y, Z[0], Z[1], col); }
+        box3(h, X[0] - .2, X[2] + .2, 3.25, 3.55, Z[0] - .2, Z[1], { front: '#b4b2aa', side: '#9c9a92', top: '#c8c6be' });   // the second-floor deck's slab edge
+        for (const y of [4.1, 4.6]) lineW(h, P(X[0] - .2, y, Z[0] - .2), P(X[2] + .2, y, Z[0] - .2), '#c8ccd4');            // its cable guardrail
+        for (const x of X) { const a = P(x, 3.55, Z[0] - .2), c = P(x, 4.7, Z[0] - .2); pxLine(h, a[0], a[1], c[0], c[1], '#8a8e96'); }
+        // the scaffold on the frame's face: two bays, posts front and back, ledgers, planks with toe boards, X braces
+        const sz0 = 20.6, sz1 = 21.6, sx = [10, 12.4, 14.8];
+        for (const z of [sz1, sz0]) for (const x of sx) lineW(h, P(x, 0, z), P(x, 5.4, z), '#b4b8c0');
+        for (const y of [1.8, 3.6, 5.4]) { for (const z of [sz0, sz1]) lineW(h, P(sx[0], y, z), P(sx[2], y, z), '#9aa0aa'); for (const x of sx) lineW(h, P(x, y, sz0), P(x, y, sz1), '#9aa0aa'); }
+        for (const y of [1.8, 3.6]) { fillPoly(h, [P(sx[0], y, sz0), P(sx[2], y, sz0), P(sx[2], y, sz1), P(sx[0], y, sz1)], '#c8a070'); fillPoly(h, [P(sx[0], y, sz0), P(sx[2], y, sz0), P(sx[2], y + .15, sz0), P(sx[0], y + .15, sz0)], '#a8844a'); }
+        for (let i = 0; i < 2; i++) { lineW(h, P(sx[i], 0, sz0), P(sx[i + 1], 1.8, sz0), '#8a9098'); lineW(h, P(sx[i], 1.8, sz0), P(sx[i + 1], 3.6, sz0), '#8a9098'); }
+        for (let k = 0; k < 6; k++) { const y = .3 + k * .3, a = P(sx[2] + .3, y, sz0 + .5), c = P(sx[2] + .3, y + .3, sz0 + .5); pxLine(h, a[0], a[1], c[0], c[1], '#b4b8c0'); }   // its access ladder
+        AmbFX.shadow(h, X[0], X[2], Z[0], Z[1], .6);
+      }
+      // the laydown yard inside the fence: block on pallets, a lumber pile, a portable toilet, a roll-off dumpster
+      box3(h, -8.5, -6.5, 0, .9, 14, 15.2, { front: '#b8b6ae', top: '#cac8c0', side: '#a4a29a' }); for (let y = .2; y < .9; y += .22) lineW(h, P(-8.5, y, 14), P(-6.5, y, 14), '#8a8880');
+      box3(h, -5.6, -3.4, 0, .55, 14.4, 15.6, { front: '#c8a070', top: '#d8b484', side: '#a8844a' }); for (let y = .12; y < .55; y += .14) lineW(h, P(-5.6, y, 14.4), P(-3.4, y, 14.4), '#8a6a3a');
+      box3(h, -11.6, -10.4, 0, 2.3, 16, 17.2, { front: '#2a5ab0', side: '#1f4a92', top: '#e8e8e8' }); { const p = P(-11, 1.9, 16); pxRect(h, p[0] - 3, p[1], 6, 2, '#e8e8e8'); }
+      box3(h, 4.6, 7.4, 0, 1.6, 13.5, 15.5, { front: '#3a6a3a', side: '#2a5a2a', top: '#4a7a4a' }); { const p = P(6, 1.0, 13.5); pxRect(h, p[0] - 6, p[1], 12, 3, '#f4f2ea'); txt(h, '30 YD', p[0], p[1], '#2a5a2a', 1, 'c'); }
+      // the fence: posts, top rail, chain-link and green windscreen, an open gate in the middle; the site sign on the left panel
+      { const z = 10, x0 = -14, x1 = 14, gx = 2.2;
+        for (const [a, b] of [[x0, -gx], [gx, x1]]) { const q = [P(a, 0, z), P(b, 0, z), P(b, 1.8, z), P(a, 1.8, z)], c = polyBox(q);
+          fillPoly(h, q, 'rgba(47,90,58,0.72)'); clipDo(h, q, () => { h.fillStyle = 'rgba(30,40,34,0.45)'; for (let x = c.x0; x < c.x1; x++) for (let y = c.y0; y < c.y1; y++) if ((x + y) % 4 === 0 || (x - y + 400) % 4 === 0) h.fillRect(x, y, 1, 1); });
+          lineW(h, P(a, 1.8, z), P(b, 1.8, z), '#a8aeb6'); for (let x = a; x <= b + .01; x += 3) lineW(h, P(x, 0, z), P(x, 1.85, z), '#8a9098'); }
+        for (const x of [-gx, gx]) { const a = P(x, 0, z), c = P(x, 2.0, z); pxLine(h, a[0], a[1], c[0], c[1], '#6a7078', 2); }
+        const sg = [P(-7.3, .55, z - .02), P(-4.1, .55, z - .02), P(-4.1, 1.65, z - .02), P(-7.3, 1.65, z - .02)], c = polyBox(sg);
+        fillPoly(h, sg, '#f4f2ea'); pxRect(h, c.x0, c.y0, c.x1 - c.x0, 3, '#2a5aa8'); txt(h, 'SITE 204', c.cx, c.y0 + 5, '#1d1f26', 1, 'c'); txt(h, 'HARD HAT AREA', c.cx, c.y0 + 12, '#c8202a', 1, 'c'); }
+      // out front: a couple of cones and a water-filled barrier by the sidewalk
+      for (const x of [-3.4, 3.6]) { const p = P(x, 0, 4.6); fillPoly(h, [[p[0] - 5, p[1]], [p[0] + 5, p[1]], [p[0] + 1, p[1] - 14], [p[0] - 1, p[1] - 14]], '#f28c28'); pxRect(h, p[0] - 3, p[1] - 9, 6, 2, '#f4f2dc'); pxRect(h, p[0] - 6, p[1] - 1, 12, 2, '#d86a10'); }
+      fillPoly(h, [P(-30, 0, 1.4), P(30, 0, 1.4), P(30, 0, 2.6), P(-30, 0, 2.6)], '#c4c0b6'); for (let x = -30; x < 30; x += 1.5) lineW(h, P(x, 0, 1.4), P(x, 0, 2.6), '#a8a49a');   // the sidewalk
     }
     g.drawImage(cache, 0, 0);
-    const sw = Math.sin(t * .4) * 6; R(g, 290 + sw, 20, 1, 60, '#2a2c32');
+    // the load on the crane's hook, swaying a little
+    const sw = Settings.get('motion') ? Math.sin(t * .4) * .5 : 0, cz = 30, top = 11, hx = -4 + sw, a = P(-4, top, cz), b = P(hx, top - 4.5, cz);
+    pxLine(g, a[0], a[1], b[0], b[1], '#2a2c32'); pxRect(g, b[0] - 5, b[1], 10, 2, '#5a5e66'); for (let i = 0; i < 4; i++) pxRect(g, b[0] - 5, b[1] + 2 + i, 10, 1, i % 2 ? '#7a4a2a' : '#8a5a3a');   // a bundle of rebar in its sling
   };
   /* the extension cord's route across the trailer yard: along the fence and under a ramp, or straight across the walkway */
   const cordPath = cv => cv === 0 ? [[-5.4, 7.0], [1.6, 7.0], [1.8, 7.6]] : [[-4.6, 9.6], [-2.4, 9.4], [0, 9.2], [1.6, 8.0]];
-  return { G, PPE_X, cordPath, person, personPts, drawCrew, excavatorPts: () => excavator(null, G.trench, cond('c_excavator'), G.trench.x[0], G.trench.x[1], true), sky, farView, ground, mesh, fenceBack, fenceSide, street, outdoor, person, gate, deck, trench, power, SPRITES, title };
+  return { G, PPE_X, ppePts, SUPER_IN, spray, spoilZoom, cordPath, person, personPts, drawCrew, excavatorPts: () => excavator(null, G.trench, cond('c_excavator'), G.trench.x[0], G.trench.x[1], true), sky, farView, ground, mesh, fenceBack, fenceSide, street, outdoor, person, gate, deck, trench, power, SPRITES, title };
 })();

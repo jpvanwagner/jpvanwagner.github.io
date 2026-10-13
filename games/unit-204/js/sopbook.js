@@ -28,7 +28,10 @@ const SopBook = {
     this.use('sop'); this._ready = true;
     $('tabSop').addEventListener('click', () => { if (this.book !== 'sop') { this.use('sop'); Audio2.sfx('swish', .5); } });
     $('tabOsha').addEventListener('click', () => { if (this.book !== 'osha') { this.use('osha'); Audio2.sfx('swish', .5); } });
-    $('sopSpread').addEventListener('click', e => { const go = e.target.closest('.osha-go'); if (go) SopLinks.open('osha-' + go.dataset.osha); });   // the handbook's contents
+    $('sopSpread').addEventListener('click', e => {
+      const go = e.target.closest('.osha-go'); if (go) SopLinks.open('osha-' + go.dataset.osha);   // the handbook's contents
+      if (e.target.closest('.osha-back')) { const i = this.pages.findIndex(p => p.classList.contains('osha-toc')); if (i >= 0) { this.at = i; this.show(); Audio2.sfx('swish', .5); } }   // each chapter's way back to them
+    });
     $('sopNext').addEventListener('click', () => this.turn(1));
     $('sopPrev').addEventListener('click', () => this.turn(-1));
     window.addEventListener('keydown', e => {

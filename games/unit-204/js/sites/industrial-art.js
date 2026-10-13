@@ -179,10 +179,11 @@ const INDA = (() => {
   }
   /* a lit EXIT sign: red letters on white, glowing a little */
   function exitSign(g, x, y, lit = true) {
+    if (lit) ExitGlow.add(x + 1, y + 3);
     pxRect(g, x - 9, y - 1, 19, 8, '#3a3a40'); pxRect(g, x - 8, y, 17, 6, lit ? '#fbf6f0' : '#c8c4bc'); txt(g, 'EXIT', x + 1, y + 1, lit ? '#d82020' : '#8a6060', 1, 'c');
   }
 
-  return { GL, tw, txt, R, concrete, cmu, ribbed, tread, stripes, bolt, sign, shell, opening, backOpening, highbay, highbayGlow, extinguisherBack, extinguisherSide, wallSign, exitSign };
+  return { GL, tw, txt, decalX, decal, R, concrete, cmu, ribbed, tread, stripes, bolt, sign, shell, opening, backOpening, highbay, highbayGlow, extinguisherBack, extinguisherSide, wallSign, exitSign };
 })();
 
 /* ============================== THE LOADING DOCK ==============================
@@ -304,10 +305,18 @@ INDA.G = {
       { const c = polyBox(Q.back(r.box, -2.5, -1.92, 1.5, 2.3)); for (let i = 0; i < 4; i++) pxRect(g, c.x0 + 2, c.y0 + 5 + i * 2, c.x1 - c.x0 - 4, 1, '#8a8e96'); }
       // ---- the right wall: the first aid cabinet and an extinguisher; the left wall: the battery chargers ----
       { const [za, zb2, ya, yb] = G.aid, av = cond('i_firstaid'), x1 = r.box.x1;
-        fillPoly(g, Q.right(r.box, za, zb2, ya, yb), '#f4f4ee'); strokePoly(g, Q.right(r.box, za, zb2, ya, yb), '#8a8e96');
-        const c = polyBox(Q.right(r.box, za, zb2, ya + .25, yb - .2)); pxRect(g, c.cx - 1, c.y0 + 2, 3, c.y1 - c.y0 - 4, '#2a9a4a'); pxRect(g, c.cx - 4, c.cy - 1, 9, 3, '#2a9a4a');
-        if (av === 2) { fillPoly(g, Q.right(r.box, za + .05, zb2 - .05, ya + .05, yb - .05), '#d8d8d0'); for (const y of [ya + .3, ya + .6]) lineW(g, P(x1, y, za), P(x1, y, zb2), '#a8aca8');   // its door hangs open on a near-empty box
-          const d = [P(x1, ya, za), P(x1 - .8, ya, za - .3), P(x1 - .8, yb, za - .3), P(x1, yb, za)]; fillPoly(g, d, '#e8e8e2'); strokePoly(g, d, '#8a8e96'); } }
+        // a white steel cabinet standing a hand's width off the wall; its door faces into the dock with the same sign the
+        // close-up shows. It opens (a plain click, or Touch in the close-up); the broken one hangs open on its own.
+        const fx = x1 - .25, open = av === 2 || !!(Game.flags.i_firstaid && Game.flags.i_firstaid.open);
+        fillPoly(g, [P(x1, ya - .06, za + .1), P(x1, ya - .06, zb2 + .12), P(x1, yb - .1, zb2 + .12), P(x1, yb - .1, za + .1)], 'rgba(30,30,36,0.18)');   // its shadow on the wall
+        box3(g, fx, x1, ya, yb, za, zb2, { front: '#c8ccc8', top: '#e8ece8', bottom: '#a8aca8' });
+        const face = [P(fx, ya, za), P(fx, ya, zb2), P(fx, yb, zb2), P(fx, yb, za)];
+        if (!open) { fillPoly(g, face, '#f4f4ee'); strokePoly(g, face, '#8a8e96');
+          INDA.decalX(g, INDA.decal('aidsign2', 30, 34, h => { h.fillStyle = '#f4f4ee'; h.fillRect(0, 0, 30, 34); h.fillStyle = '#2a9a4a'; h.fillRect(1, 1, 28, 8); h.fillStyle = '#ffffff'; h.fillRect(5, 4, 20, 2); h.fillStyle = '#2a9a4a'; h.fillRect(11, 12, 8, 20); h.fillRect(4, 18, 22, 8); }), fx - .005, zb2 - .06, za + .06, ya + .08, yb - .06);
+          const hd = P(fx, (ya + yb) / 2, za + .08); pxRect(g, hd[0], hd[1] - 2, 1, 4, '#8a8e96'); }
+        else { fillPoly(g, face, '#d8d8d0'); for (const y of [ya + .3, ya + .6]) lineW(g, P(fx, y, za), P(fx, y, zb2), '#a8aca8');
+          if (av !== 2) { const p = P(fx, ya + .32, (za + zb2) / 2); pxRect(g, p[0] - 2, p[1] - 3, 5, 3, '#f4f4ee'); pxRect(g, p[0] - 2, p[1] - 3, 5, 1, '#c8202a'); }   // supplies on the shelves
+          const W = zb2 - za, d = [P(fx, ya, zb2), P(fx - W * .98, ya, zb2 - W * .17), P(fx - W * .98, yb, zb2 - W * .17), P(fx, yb, zb2)]; fillPoly(g, d, '#e8e8e2'); strokePoly(g, d, '#8a8e96'); } }   // the door swung out on its hinges
       INDA.extinguisherSide(g, r, 'right', 13.6);
       { const [za, zb2] = G.charger, x0 = r.box.x0, cv = cond('i_charger');
         for (const z of [12.5, 13.7]) { fillPoly(g, Q.left(r.box, z, z + .8, 1.3, 2.5), '#9aa0a8'); fillPoly(g, Q.left(r.box, z + .1, z + .7, 2.1, 2.35), '#2a3a2a'); const p = P(x0, 2.22, z + .4); pxRect(g, p[0], p[1], 2, 1, '#60e060'); }
@@ -360,8 +369,18 @@ INDA.G = {
 
 /* ---------- the dock's forklift, parked side-on (forks to the left), and the turning lane's housekeeping ---------- */
 INDA.G.dock.fork = { x0: .5, x1: 5.2, z0: 10, z1: 11.5 };
+/* the forklift's outline on screen: the body, the overhead guard, the mast, and the forks (with their load, up high), traced
+   as one shape so its hotspot hugs it and someone walking behind it is hidden only where it really is */
+/* its solid pieces, for walking behind it: everything but the open air inside the overhead guard (js/obstacles.js) */
+INDA.forkliftParts = () => { const { z0, z1 } = INDA.G.dock.fork, up = cond('i_forklift') === 3, fy = up ? 3.3 : .05, top = up ? fy + 1.3 : 2.95;
+  return [hull(boxPts(2.2, 4.6, 0, 1.12, z0 + .05, z1 - .05)), hull(boxPts(4.55, 5.15, 0, 1.5, z0, z1)), hull(boxPts(2.25, 2.95, 1.12, 1.5, z0 + .15, z1 - .15)),
+    hull(boxPts(3.65, 4.3, 1.12, 1.42, z0 + .25, z1 - .25)), hull(boxPts(4.18, 4.4, 1.42, 2.05, z0 + .3, z1 - .3)), hull(boxPts(2.4, 4.6, 2.75, 2.88, z0, z1)),
+    ...[2.55, 4.4].map(x => growPoly([P(x, 1.12, z0 + .05), P(x, 2.8, z0 + .05), P(x + .001, 2.8, z0 + .05), P(x + .001, 1.12, z0 + .05)], 1.2)),
+    hull(boxPts(1.68, 2.05, 0, top, z0 + .1, z1 - .1)), hull(boxPts(.4, 1.85, fy, fy + (up ? .45 : .15), z0, z1))]; };
+INDA.forkliftOutline = () => { const up = cond('i_forklift') === 3, fy = up ? 3.3 : .05;
+  return unionOutline([hull(boxPts(2.2, 5.2, 0, 1.5, 10, 11.5)), hull(boxPts(2.3, 4.6, 1.4, 2.95, 10.1, 11.4)), hull(boxPts(1.65, 2.1, 0, up ? fy + 1.3 : 2.95, 10, 11.5)), hull(boxPts(.4, 1.85, fy, fy + (up ? .45 : .15), 10, 11.5))]); };
 INDA.G.dock.ppe = {                     // where each piece sits on the PPE station: [xa, xb, ya, yb], on its front face
-  hardhat: [-5.75, -5.1, 2.02, 2.36], glasses: [-4.95, -4.5, 2.02, 2.2], vest: [-4.75, -4.15, .95, 1.85], ears: [-5.75, -5.2, 1.2, 1.75], boots: [-5.6, -4.65, .1, .45]
+  hardhat: [-5.75, -5.1, 2.02, 2.36], glasses: [-4.95, -4.5, 2.02, 2.2], vest: [-4.75, -4.15, .95, 1.85], ears: [-5.75, -5.2, 1.2, 1.75], boots: [-5.7, -4.35, .06, .62]
 };
 INDA.forklift = function (g, v) {
   const { z0, z1 } = INDA.G.dock.fork, Y = '#f0b023', Yd = '#c8901a', Ys = '#a87010', K = '#24262c', fy = v === 3 ? 3.3 : .05;
@@ -433,7 +452,20 @@ INDA.ppeRack = function (g, r) {
   if (!PPE.has('ears')) { const b = q(S.ears), w = b.x1 - b.x0, h = b.y1 - b.y0;          // a clear foam-plug dispenser full of orange plugs, a pair of yellow muffs hung beside it
     pxRect(g, b.x0, b.y0 + h * .35, w * .55, h * .65, '#d8e4ea'); for (let i = 0; i < 6; i++) pxRect(g, b.x0 + 1 + (i % 3) * 2, b.y0 + h * .45 + Math.floor(i / 3) * 3, 1, 2, '#f28c28'); pxRect(g, b.x0, b.y1 - 2, w * .55, 2, '#5a5e66');
     const mx = b.x0 + w * .78; pxLine(g, mx - 3, b.y0 + 4, mx, b.y0, '#24262c'); pxLine(g, mx, b.y0, mx + 3, b.y0 + 4, '#24262c'); pxRect(g, mx - 4, b.y0 + 4, 3, 5, '#f2c418'); pxRect(g, mx + 2, b.y0 + 4, 3, 5, '#f2c418'); }
-  if (!PPE.has('boots')) { const b = q(S.boots), w = (b.x1 - b.x0) / 2; for (const x of [b.x0, b.x0 + w + 1]) { pxRect(g, x + 1, b.y0, w * .45, b.y1 - b.y0 - 2, '#7a4a24'); pxRect(g, x + 1, b.y1 - 4, w - 2, 3, '#7a4a24'); pxRect(g, x + 1, b.y1 - 1, w - 1, 1, '#24262c'); pxRect(g, x + 2, b.y0 + 1, 2, 1, '#c8a070'); } }
+  if (!PPE.has('boots')) {   // a pair of loaner steel-toes on a rubber mat, side-on, a VISITOR tag on one: plainly something to put on
+    const b = q(S.boots), W = b.x1 - b.x0, H = b.y1 - b.y0, bw = W * .44;
+    pxRect(g, b.x0 - 2, b.y1 - 2, W + 4, 3, '#2a2c32'); pxRect(g, b.x0 - 2, b.y1 - 2, W + 4, 1, '#4a4c52');
+    for (const x of [b.x0 + 1, b.x0 + W * .52]) {
+      const top = b.y0, foot = b.y1 - Math.round(H * .38), sole = b.y1 - 3;
+      pxRect(g, x, top, bw * .55, sole - top, '#8a5a2c'); pxRect(g, x, top, 2, sole - top, '#a8743c');                        // the shaft, lit on its heel side
+      pxRect(g, x, foot, bw, sole - foot, '#8a5a2c'); pxEllipse(g, x + bw - 2, foot + (sole - foot) / 2, 3, (sole - foot) / 2, '#8a5a2c');   // the foot and its round toe
+      pxEllipse(g, x + bw - 3, foot + 2, 3, 2, '#b8864c');                                                                  // the shine on the steel toe cap
+      pxRect(g, x - 1, sole, bw + 3, 2, '#24262c'); for (let k = 1; k < bw; k += 3) pxRect(g, x + k, sole + 1, 1, 1, '#4a4c52');   // the lugged sole
+      for (let y = top + 2; y < foot; y += 3) pxRect(g, x + bw * .55 - 1, y, 2, 1, '#e8d8a0');                                 // laces
+      pxRect(g, x + 1, top - 2, 3, 2, '#5a3a1c');                                                                          // the pull tab
+    }
+    const tx = b.x0 + W * .52 + bw * .3; pxLine(g, tx, b.y0 + 2, tx + 3, b.y0 + 6, '#c8ccd4'); pxRect(g, tx + 2, b.y0 + 6, 9, 6, '#f4f2ea'); pxRect(g, tx + 2, b.y0 + 6, 9, 2, '#2a8a4a');   // the VISITOR tag
+  }
 };
 
 /* ============================== CLOSE-UPS ==============================
@@ -517,11 +549,19 @@ INDA.ZOOM_ART = {};
     R(g, 42, 66, 10, 58, '#c89a10'); R(g, 42, 66, 2, 58, '#f2c418'); for (let y = 70; y < 122; y += 8) R(g, 44, y, 6, 1, '#8a6a10');
     if (locked) { R(g, 40, 88, 22, 12, '#f2c418'); R(g, 40, 88, 22, 2, '#ffe27a'); R(g, 58, 72, 6, 28, '#e0b020'); R(g, 58, 70, X + 22 - 58, 6, '#e0b020'); R(g, X + 16, 70, 5, 12, '#c89a10'); R(g, 58, 70, X + 22 - 58, 1, '#ffe27a'); }   // up and over the bar
     else { R(g, 40, 110, 22, 12, '#f2c418'); R(g, 40, 110, 22, 2, '#ffe27a'); R(g, 58, 104, 6, 8, '#c89a10'); }                         // stowed down on the dock face
-    // the tandem axles: eight tires, two seen from the side
-    R(g, X + 90, 58, 90, 10, '#2a2c32');
+    // the tandem axles: the slider subframe bolted under the floor, and for each axle a hanger, a trailing arm out to
+    // the hub, an air spring, and a shock, all behind the wheels; then eight tires, two seen from the side
+    R(g, X + 58, 64, 116, 13, '#2a2c32'); R(g, X + 58, 64, 116, 2, '#4a4e56'); for (let x = X + 64; x < X + 172; x += 12) R(g, x, 70, 3, 3, '#5a5e66');   // the slider rails and their locking-pin holes
+    for (const cx of [X + 84, X + 130]) {
+      R(g, cx - 18, 77, 7, 13, '#3a3c42'); R(g, cx - 18, 77, 2, 13, '#5a5e66');                                     // the hanger bracket
+      pxLine(g, cx - 14, 88, cx, 104, '#3a3c42', 5); pxLine(g, cx - 14, 87, cx - 2, 101, '#5a5e66');               // the trailing arm, down to the hub
+      R(g, cx + 6, 77, 13, 10, '#1d1f26'); pxEllipse(g, cx + 12, 87, 7, 3, '#2a2c32'); R(g, cx + 7, 78, 2, 8, '#3a3c42');   // the air spring
+      pxLine(g, cx + 3, 79, cx + 6, 98, '#6a6e76', 2);                                                             // the shock
+    }
+    R(g, X + 52, 66, 3, 14, '#3a3c42');                                                                              // the mud flap's hanger
     for (const cx of [X + 84, X + 130]) { pxEllipse(g, cx, 104, 21, 21, '#1a1a1e'); pxEllipse(g, cx, 104, 19, 19, '#2a2a30'); for (let a = 0; a < 6.28; a += .35) R(g, cx + Math.cos(a) * 19, 104 + Math.sin(a) * 19, 1, 1, '#3a3a42');
       pxEllipse(g, cx, 104, 10, 10, '#a8acb4'); pxEllipse(g, cx, 104, 8, 8, '#8a8e96'); pxEllipse(g, cx, 104, 3, 3, '#4a4e56'); for (let a = 0; a < 6.28; a += 1.05) R(g, cx + Math.cos(a) * 6, 104 + Math.sin(a) * 6, 1, 1, '#d8dce0'); R(g, cx - 6, 96, 4, 2, '#d8dce0'); }
-    R(g, X + 56, 84, 4, 36, '#1d1f26');                                                                                               // mud flap
+    R(g, X + 52, 78, 5, 42, '#1d1f26'); R(g, X + 52, 78, 5, 2, '#3a3c42');                                                          // the mud flap, behind the rear tires
     // the apron
     R(g, 0, 125, ZW, 10, '#4a4c50'); speckle(g, 0, 125, ZW, 10, 'rgba(0,0,0,0.3)', 80, 9); R(g, 0, 125, ZW, 1, '#6a6c70');
     // the wheel chock
@@ -643,14 +683,26 @@ INDA.ZOOM_ART = {};
     R(g, 54, 6, 120, 124, '#c8ccd0'); R(g, 170, 6, 4, 124, '#9aa0a8');
     if (!open) {
       R(g, 56, 8, 112, 120, '#f4f4ee'); R(g, 56, 8, 112, 2, '#ffffff'); R(g, 56, 126, 112, 2, '#c8ccd0');
-      R(g, 100, 46, 24, 56, '#2a9a4a'); R(g, 84, 62, 56, 24, '#2a9a4a'); R(g, 100, 46, 24, 2, '#4aba6a');
-      txt(g, 'FIRST AID', 112, 24, '#2a9a4a', 2, 'c');
-      R(g, 158, 58, 5, 18, '#8a8e96'); R(g, 158, 58, 5, 2, '#c8ccd2');
+      R(g, 66, 14, 92, 22, '#2a9a4a'); R(g, 66, 14, 92, 1, '#4aba6a'); txt(g, 'FIRST AID', 112, 19, '#ffffff', 2, 'c');   // the sign plate: white on green, the way they're made
+      R(g, 100, 48, 24, 56, '#2a9a4a'); R(g, 84, 64, 56, 24, '#2a9a4a'); R(g, 100, 48, 24, 2, '#4aba6a'); R(g, 84, 64, 16, 2, '#4aba6a'); R(g, 124, 64, 16, 2, '#4aba6a');
+      R(g, 158, 58, 5, 18, '#8a8e96'); R(g, 158, 58, 5, 2, '#c8ccd2'); R(g, 59, 20, 3, 10, '#a8acb4'); R(g, 59, 100, 3, 10, '#a8acb4');   // the latch and the hinges
       Z.vignette(g); return;
     }
-    // open: shelves inside, and the door swung out to the left
-    R(g, 56, 8, 112, 120, '#e8e8e2'); R(g, 56, 8, 112, 6, '#d0d0c8');
-    for (const y of [46, 84, 122]) { R(g, 56, y, 112, 4, '#c8ccd0'); R(g, 56, y, 112, 1, '#ffffff'); }
+    // open: shelves inside, and the door swung out to the left on its hinges (its inside face, and its edge)
+    // the inside in depth: the side walls, top, and bottom narrow toward a back panel (you look in at about the middle shelf)
+    const F = [56, 8, 168, 128], B = [65, 18, 159, 118], EYE = 68;
+    fillPoly(g, [[F[0], F[1]], [F[2], F[1]], [B[2], B[1]], [B[0], B[1]]], '#b8b8b0');           // the top, from below
+    fillPoly(g, [[F[0], F[3]], [F[2], F[3]], [B[2], B[3]], [B[0], B[3]]], '#d8d8d0');           // the floor of the cabinet
+    fillPoly(g, [[F[0], F[1]], [B[0], B[1]], [B[0], B[3]], [F[0], F[3]]], '#c4c4bc');           // the left side, in shade
+    fillPoly(g, [[F[2], F[1]], [B[2], B[1]], [B[2], B[3]], [F[2], F[3]]], '#dcdcd4');           // the right side, catching light
+    R(g, B[0], B[1], B[2] - B[0], B[3] - B[1], '#e8e8e2'); R(g, B[0], B[1], B[2] - B[0], 3, 'rgba(0,0,0,0.08)');   // the back panel, a little shadow under the top
+    const sag = v === 2 ? 7 : 0;                                          // the broken one sags off its latch side
+    fillPoly(g, [[54, 6], [22, 16 + sag], [22, 122 + sag], [54, 130]], '#dcdcd4'); fillPoly(g, [[22, 16 + sag], [18, 17 + sag], [18, 121 + sag], [22, 122 + sag]], '#a8acb4');
+    pxLine(g, 54, 6, 22, 16 + sag, '#ffffff'); R(g, 28, 56, 4, 14, '#8a8e96'); fillPoly(g, [[30, 30], [46, 26], [46, 40], [30, 44]], '#f8f6ee'); for (let k = 0; k < 3; k++) pxLine(g, 32, 34 + k * 3, 44, 31 + k * 3, '#a8acb4');   // the door's inside, with a contents list taped on
+    for (const y of [46, 84, 122]) {   // each shelf: its top (or underside, above eye level) running back to the back panel, a shadow under it, its lit front edge
+      const yb = Math.round(y + (EYE - y) * .14);
+      if (y > EYE) fillPoly(g, [[F[0], y], [F[2], y], [B[2], yb], [B[0], yb]], '#e4e4dc'); else fillPoly(g, [[F[0], y + 4], [F[2], y + 4], [B[2], yb + 4], [B[0], yb + 4]], '#b0b0a8');
+      R(g, B[0], yb + 4, B[2] - B[0], 3, 'rgba(0,0,0,0.1)'); R(g, 56, y, 112, 4, '#c8ccd0'); R(g, 56, y, 112, 1, '#ffffff'); }
     const box = (x, y, w, h, c, lbl) => { R(g, x, y - h, w, h, c); R(g, x, y - h, w, 1, mix(c, '#ffffff', .4)); if (lbl) R(g, x + 2, y - h + 3, w - 4, 2, lbl); };
     if (v === 0 || v === 1) {
       box(60, 46, 22, 20, '#f4f4ee', '#c8202a'); if (v === 0) box(84, 46, 18, 16, '#f4f4ee', '#2a5aa8'); else box(84, 46, 18, 5, '#f4f4ee', '#2a5aa8');   // bandages (running low in a lapsed cabinet)
@@ -665,9 +717,6 @@ INDA.ZOOM_ART = {};
       for (const x of [140, 154]) { R(g, x, 60, 10, 24, '#c8d8d8'); R(g, x + 3, 56, 4, 4, '#2a5aa8'); R(g, x + 2, 66, 6, 8, '#e8e4d0'); speckle(g, x, 56, 10, 28, 'rgba(120,110,90,0.5)', 14, x); }   // two dusty, expired eyewash bottles
       speckle(g, 58, 12, 108, 110, 'rgba(120,110,90,0.25)', 60, 4);
     }
-    // the door, swung open (on the broken one it sags off its latch side)
-    const sag = v === 2 ? 6 : 0;
-    fillPoly(g, [[54, 8], [26, 4], [26, 134 + sag], [54, 128]], '#f4f4ee'); fillPoly(g, [[30, 40], [50, 42], [50, 92], [30, 94]], '#2a9a4a'); pxLine(g, 54, 8, 54, 128, '#9aa0a8'); pxLine(g, 26, 4, 26, 134, '#c8ccd0');
     Z.vignette(g);
   };
   ZA.i_dockfloor = (g, v, fl, t) => {

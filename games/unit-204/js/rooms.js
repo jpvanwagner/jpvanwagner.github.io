@@ -23,6 +23,63 @@ function box3(g, x0, x1, y0, y1, z0, z1, c) {      // c = { front, top, side, bo
   if (y0 > CAM.eye && c.bottom) fillPoly(g, [P(x0, y0, z0), P(x1, y0, z0), P(x1, y0, z1), P(x0, y0, z1)], c.bottom);
   fillPoly(g, [P(x0, y0, z0), P(x1, y0, z0), P(x1, y1, z0), P(x0, y1, z0)], c.front);
 }
+/* a small flat drawing (a sign, a label) laid onto a side-wall-facing surface in perspective: src's left column
+   sits at z = zl and its right column at z = zr, on the plane x, between heights y0 and y1 (one source column at a
+   time, so the lettering foreshortens with the face it's on, the same as the close-up shows it) */
+function decalX(g, src, x, zl, zr, y0, y1) {
+  const W = src.width; g.save(); g.imageSmoothingEnabled = false;
+  for (let i = 0; i < W; i++) { const za = zl + (zr - zl) * i / W, zb = zl + (zr - zl) * (i + 1) / W, a = P(x, y1, za), b = P(x, y0, za), c = P(x, y1, zb);
+    const dx = Math.round(Math.min(a[0], c[0])), w = Math.max(1, Math.round(Math.abs(c[0] - a[0]))); g.drawImage(src, i, 0, 1, src.height, dx, Math.round(a[1]), w, Math.max(1, Math.round(b[1] - a[1]))); }
+  g.restore();
+}
+/* lit EXIT signs: a room's art records each one as it draws (ExitGlow.add), and the glow goes on after the room's
+   darkness, so a sign still shines with the lights off. a is how bright (a flickering, half-dead one is dimmer). */
+const ExitGlow = {
+  cur: null, list: {},
+  add(x, y, a = 1) { if (this.cur) (this.list[this.cur] = this.list[this.cur] || []).push({ x, y, a }); },
+  draw(g, id) {
+    const L = this.list[id]; if (!L) return;
+    g.save(); g.globalCompositeOperation = 'lighter';
+    for (const s of L) { softGlow(g, s.x, s.y, 26, 14, '#ff3a2a', .2 * s.a); softGlow(g, s.x, s.y, 11, 5, '#ffd8cc', .22 * s.a); softGlow(g, s.x, s.y + 16, 30, 10, '#ff3a2a', .07 * s.a); }   // the halo, the face, and red on the wall under it
+    g.restore();
+  }
+};
+/* a sign drawn once into its own little canvas (cached by key) for decalX */
+const _decals = {};
+function decal(key, w, h, draw) { if (!_decals[key]) { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d')); _decals[key] = c; } return _decals[key]; }
+
+/* one outline around several shapes together (a forklift's body, its mast, and a raised load; a person's head and
+   arms): the shapes are filled into a little mask, its outer edge traced (Moore neighborhood), and the trace simplified,
+   so a hotspot hugs something that isn't convex instead of stretching a hull over the gaps. Cached by shape. */
+const _outlines = new Map();
+function unionOutline(polys) {
+  polys = polys.filter(p => p && p.length > 2);
+  const key = polys.map(p => p.map(q => Math.round(q[0]) + ',' + Math.round(q[1])).join(';')).join('|');
+  if (_outlines.has(key)) return _outlines.get(key);
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const p of polys) for (const [x, y] of p) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+  const ox = Math.floor(x0) - 2, oy = Math.floor(y0) - 2, W = Math.ceil(x1) - ox + 3, H = Math.ceil(y1) - oy + 3;
+  const c = unionOutline.c || (unionOutline.c = document.createElement('canvas')); c.width = W; c.height = H;
+  const g = c.getContext('2d', { willReadFrequently: true }); g.fillStyle = '#000';
+  for (const p of polys) { g.beginPath(); p.forEach(([x, y], i) => i ? g.lineTo(x - ox, y - oy) : g.moveTo(x - ox, y - oy)); g.closePath(); g.fill(); }
+  const d = g.getImageData(0, 0, W, H).data, on = (x, y) => x >= 0 && y >= 0 && x < W && y < H && d[(y * W + x) * 4 + 3] > 127;
+  let sx = -1, sy = -1; for (let y = 0; y < H && sx < 0; y++) for (let x = 0; x < W; x++) if (on(x, y)) { sx = x; sy = y; break; }
+  if (sx < 0) return polys[0];
+  const D = [[-1, 0], [-1, -1], [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1]], trace = [[sx, sy]];
+  let cx = sx, cy = sy, bx = sx - 1, by = sy;
+  for (let guard = 0; guard < 40000; guard++) {
+    let i0 = D.findIndex(([dx, dy]) => cx + dx === bx && cy + dy === by), moved = false;
+    for (let k = 1; k <= 8; k++) { const [dx, dy] = D[(i0 + k) % 8]; if (on(cx + dx, cy + dy)) { const [px, py] = D[(i0 + k - 1) % 8]; bx = cx + px; by = cy + py; cx += dx; cy += dy; moved = true; break; } }
+    if (!moved || (cx === sx && cy === sy)) break;
+    trace.push([cx, cy]);
+  }
+  // simplify (Ramer-Douglas-Peucker) and put it back in screen space, on pixel centers
+  const rdp = (pts, eps) => { if (pts.length < 3) return pts; const [a, b] = [pts[0], pts[pts.length - 1]]; let best = 0, bi = 0;
+    for (let i = 1; i < pts.length - 1; i++) { const [x, y] = pts[i], dd = Math.abs((b[1] - a[1]) * x - (b[0] - a[0]) * y + b[0] * a[1] - b[1] * a[0]) / (Math.hypot(b[0] - a[0], b[1] - a[1]) || 1); if (dd > best) { best = dd; bi = i; } }
+    return best > eps ? [...rdp(pts.slice(0, bi + 1), eps).slice(0, -1), ...rdp(pts.slice(bi), eps)] : [a, b]; };
+  const half = Math.floor(trace.length / 2), out = [...rdp(trace.slice(0, half + 1), 1.1).slice(0, -1), ...rdp(trace.slice(half).concat([trace[0]]), 1.1).slice(0, -1)].map(([x, y]) => [x + ox + .5, y + oy + .5]);
+  if (_outlines.size > 400) _outlines.clear(); _outlines.set(key, out); return out;
+}
 function floorEllipse(cx, cz, rx, rz, n = 20) { const o = []; for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; o.push(P(cx + Math.cos(a) * rx, 0, cz + Math.sin(a) * rz)); } return o; }
 function clipDo(g, pts, fn) { g.save(); poly(g, pts); g.clip(); fn(); g.restore(); }
 function speckPoly(g, pts, color, density, seed) { const b = polyBox(pts); clipDo(g, pts, () => speckle(g, b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0, color, (b.x1 - b.x0) * (b.y1 - b.y0) * density, seed)); }
@@ -571,7 +628,7 @@ const ROOMS = {
       sideSwitch(g, r, 'right', 8.65, 8.95, 1.2, 1.55, !r.lightsOff); sideSwitch(g, r, 'right', 9.1, 9.4, 1.2, 1.55, !!r.ventOn);
       { const vv = cond('vent');                              // the vent fan in the ceiling
         if (vv === 3) for (let i = 0; i < 40; i++) { const p = P(.8 + hash(i) * 1.6, r.box.h, 7.1 + hash(i + 5) * 1.5); pxRect(g, p[0], p[1], 1, 1, i % 3 ? '#3a4030' : '#5a6a40'); }
-        fillPoly(g, Q.ceil(r.box, 1.05, 2.15, 7.35, 8.35), '#9a968a'); fillPoly(g, Q.ceil(r.box, 1.1, 2.1, 7.4, 8.3), '#e4e2da');   // its frame, edged in gray fillPoly(g, Q.ceil(r.box, 1.2, 2, 7.5, 8.2), vv === 2 ? '#2a2826' : '#cfccc2');
+        fillPoly(g, Q.ceil(r.box, 1.05, 2.15, 7.35, 8.35), '#9a968a'); fillPoly(g, Q.ceil(r.box, 1.1, 2.1, 7.4, 8.3), '#e4e2da'); fillPoly(g, Q.ceil(r.box, 1.2, 2, 7.5, 8.2), vv === 2 ? '#2a2826' : '#cfccc2');   // its frame, edged in gray
         if (vv !== 2) for (let z = 7.55; z < 8.2; z += .1) lineW(g, P(1.22, r.box.h, z), P(1.98, r.box.h, z), vv === 1 ? '#a8a49a' : '#8a877e');
         if (vv === 2) fillPoly(g, [P(1.2, r.box.h, 7.5), P(2, r.box.h, 7.5), P(2.05, r.box.h - .35, 7.8), P(1.25, r.box.h - .3, 7.85)], '#d8d6ce');
         if (vv === 1) fillPoly(g, Q.ceil(r.box, 1.2, 2, 7.5, 8.2), 'rgba(140,136,128,0.4)'); }
@@ -693,7 +750,7 @@ const Rooms = {
     if (!c) {
       c = document.createElement('canvas'); c.width = SW; c.height = SH;
       const g = c.getContext('2d'), r = ROOMS[id];
-      shell(g, r);
+      ExitGlow.cur = id; ExitGlow.list[id] = []; shell(g, r); ExitGlow.cur = null;   // (its EXIT signs sign themselves up as they're drawn)
       this.cache[id] = c;
     }
     return c;
@@ -702,9 +759,9 @@ const Rooms = {
   hotspots(id) {
     const r = ROOMS[id], out = [];
     for (const [fid, f] of Object.entries(r.features)) if (!f.when || f.when()) out.push({ kind: 'feature', id: fid, name: FEATURE[fid].name, pts: f.pts(), walk: f.walk });
-    for (const s of r.scenery) if (!s.when || s.when()) out.push({ kind: 'scenery', id: s.id, name: s.name, pts: s.pts(), walk: s.walk, data: s });
+    for (const s of r.scenery) if (!s.when || s.when()) out.push({ kind: 'scenery', id: s.id, name: s.name, pts: s.pts(), walk: s.walk, data: s, live: !!s.live, ptsFn: s.pts });   // live: a person who moves, re-outlined every frame (Game.liveHots)
     for (const d of r.doors) {
-      const pts = d.back ? Q.back(r.box, d.back[0], d.back[1], 0, 2.95) : (d.side === 'left' ? Q.left : Q.right)(r.box, d.za, d.zb, 0, 2.9);
+      const pts = d.pts ? d.pts() : d.back ? Q.back(r.box, d.back[0], d.back[1], 0, 2.95) : (d.side === 'left' ? Q.left : Q.right)(r.box, d.za, d.zb, 0, 2.9);   // a way out that's a thing (a stair tower) outlines the thing
       out.push({ kind: 'door', id: d.id, name: d.name, pts, walk: d.walk, data: d });
     }
     out.push(...Decor.clutterHots(id), ...Openables.hots(id), ...Anomalies.hots(id));
@@ -714,7 +771,7 @@ const Rooms = {
         walk: sp.floor ? { x: sp.x, z: sp.z - .6 } : { x: sp.x, z: sp.z - .4 }, data: { ...CLUTTER.tie, item: 'tie', look: sp.floor ? 'A loud necktie in a heap on the carpet, right where the fan flung it.' : CLUTTER.tie.look } });
     }
     for (const h of out) { const b = polyBox(h.pts); h.area = (b.x1 - b.x0) * (b.y1 - b.y0); h.box = b; }
-    return out.sort((a, b) => a.area - b.area);
+    return out.sort((a, b) => (a.live ? a.area * .3 : a.area) - (b.live ? b.area * .3 : b.area));   // smallest first, but people beat the big things they stand in front of
   },
   draw(g, id, t) {
     const r = ROOMS[id];
@@ -734,6 +791,7 @@ const Rooms = {
     if (r.lightsOff) { g.fillStyle = id === 'bath' ? 'rgba(14,10,24,0.62)' : 'rgba(14,10,24,0.42)'; g.fillRect(0, 0, SW, SH); for (const w of r.windows) if (!w.frosted && Decor.time.sun) fillPoly(g, sunPatch(r, w.xa, w.xb, w.ya, w.yb), rgba(Decor.time.sun, .22)); }
     Decor.tint(g, SW, SH);
     if (r.flickerDark) { g.fillStyle = id === 'bath' ? 'rgba(14,10,24,0.3)' : 'rgba(14,10,24,0.22)'; g.fillRect(0, 0, SW, SH); }
+    ExitGlow.draw(g, id);
     g.drawImage(vignette(), 0, 0);
   }
 };

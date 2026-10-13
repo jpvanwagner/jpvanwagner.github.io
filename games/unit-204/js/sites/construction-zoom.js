@@ -21,7 +21,7 @@
     'aVYYYYYYYYVa', 'aVVVVVVVVVVa', 'kVVVVVVVVVVk', '..JJJJJJJJ..', '..JJJJJJJJ..', '..JJJ..JJJ..', '..JJJ..JJJ..', '..JJJ..JJJ..', '..JJJ..JJJ..', '..JJJ..JJJ..', '..JJJ..JJJ..', '..JJJ..JJJ..', '.BBBB..BBBB.', '.BBBB..BBBB.'];
   /* a worker in the same sprite style as you, Dana, and Pat (js/crew-sprites.js), feet at (x, y), sized by s */
   function worker(g, x, y, s, o = {}) {
-    const spr = CrewSprites.get({ look: o.look ?? Math.round(x * 7 + y) % CREW_LOOKS.length, shirt: o.shirt, hat: o.hat, vest: o.vest, glasses: o.glasses, muffs: !!o.muffs, gloves: !!o.gloves, act: o.act || 'idle', frame: 0 }, s * .45);
+    const spr = CrewSprites.get({ look: o.look ?? Math.round(x * 7 + y) % CREW_LOOKS.length, shirt: o.shirt, hat: o.hat, vest: o.vest, glasses: o.glasses, muffs: !!o.muffs, gloves: !!o.gloves, kneel: !!o.kneel, act: o.act || 'idle', frame: 0 }, s * .45);
     g.save(); g.imageSmoothingEnabled = false; if (o.face < 0) { g.translate(Math.round(x), 0); g.scale(-1, 1); g.drawImage(spr, Math.round(-spr.width / 2), Math.round(y - spr.height + 2)); } else g.drawImage(spr, Math.round(x - spr.width / 2), Math.round(y - spr.height + 2)); g.restore();
   }
 
@@ -34,7 +34,7 @@
       chain(g, 0, 8, 146, 92); R(g, 0, 6, 150, 2, '#8a9098'); for (const x of [2, 144]) R(g, x, 6, 3, 96, '#7a8088');
       // the board: the site sign, then the emergency numbers and the OSHA poster
       R(g, 8, 10, 132, 86, '#3a3c42'); R(g, 10, 12, 128, 82, '#f4f2ea');
-      R(g, 10, 12, 128, 10, '#2a5aa8'); txt(g, 'SITE 204', 74, 14, '#ffffff', 1, 'c'); txt(g, 'HARD HAT AREA', 74, 25, '#c8202a', 1, 'c'); txt(g, 'PPE REQUIRED PAST GATE', 74, 32, '#1d1f26', 1, 'c'); txt(g, 'SUPER: 555-0142', 74, 39, '#1d1f26', 1, 'c');
+      R(g, 10, 12, 128, 10, '#2a5aa8'); txt(g, 'SITE ' + (Game.unit || '204'), 74, 14, '#ffffff', 1, 'c'); txt(g, 'HARD HAT AREA', 74, 25, '#c8202a', 1, 'c'); txt(g, 'PPE REQUIRED PAST GATE', 74, 32, '#1d1f26', 1, 'c'); txt(g, 'SUPER: 555-0142', 74, 39, '#1d1f26', 1, 'c');
       if (v !== 2) {
         R(g, 12, 48, 60, 44, '#f2e8c0'); R(g, 12, 48, 60, 8, '#c8202a'); txt(g, 'EMERGENCY', 42, 50, '#ffffff', 1, 'c'); txt(g, 'CALL 911', 42, 60, '#1d1f26', 1, 'c'); txt(g, 'MERCY HOSP', 42, 68, '#1d1f26', 1, 'c'); txt(g, '2.1 MI', 42, 75, '#1d1f26', 1, 'c'); txt(g, 'KIT: TRAILER', 42, 83, '#1d1f26', 1, 'c');
         R(g, 76, 48, 60, 44, '#f8f6ee'); R(g, 76, 48, 60, 10, '#2a5aa8'); txt(g, 'JOB SAFETY', 106, 50, '#ffffff', 1, 'c'); txt(g, "IT'S THE LAW", 106, 61, '#1d1f26', 1, 'c'); for (let k = 0; k < 4; k++) R(g, 80, 70 + k * 5, 52 - k * 6, 1, '#9a9ea6');
@@ -49,17 +49,11 @@
     c_crew(g, v, fl, t) {
       skyZ(g, 50); dirt(g, 96); R(g, 0, 50, ZW, 46, '#2f5a3a'); chain(g, 0, 50, ZW, 46);
       if (v === 3) { R(g, 170, 10, 70, 60, '#f2a018'); for (let x = 174; x < 240; x += 10) R(g, x, 10, 2, 60, '#c88008'); R(g, 166, 70, 74, 10, '#2a2c32'); R(g, 176, 72, 8, 6, Math.floor(t * 2) % 2 ? '#ffffff' : '#d8d8d0'); lab(g, 'BEEP', 205, 40, '#ffffff', 1, 'c'); }
-      // the worker, chest up: shirt, vest (zipped, open, or none), neck, and arms out to the saw
-      const shirt = v === 3 ? '#8a8a8a' : '#5a7aa8', vest = v === 3 ? null : '#f07a1a', saw = Math.sin(t * 6) * 2;
-      R(g, 50, 62, 112, 73, shirt); if (vest) { if (v === 1) { R(g, 50, 62, 36, 73, vest); R(g, 126, 62, 36, 73, vest); R(g, 50, 100, 36, 4, '#f4f2dc'); R(g, 126, 100, 36, 4, '#f4f2dc'); } else { R(g, 50, 62, 112, 73, vest); R(g, 50, 100, 112, 4, '#f4f2dc'); R(g, 98, 62, 16, 26, shirt); } }
-      R(g, 96, 52, 20, 12, '#b8845a'); pxLine(g, 150, 72, 196 + saw, 86, shirt, 10); R(g, 192 + saw, 80, 12, 12, '#c8946a');
-      // the head: face, eyes or safety glasses, earmuffs, and the hard hat (forward, backwards, or none)
-      R(g, 82, 14, 48, 42, '#c8946a'); R(g, 98, 46, 16, 3, '#9a6a4a');
-      if (v === 2 || v === 3) { R(g, 90, 30, 7, 5, '#ffffff'); R(g, 92, 31, 3, 3, '#2a2c32'); R(g, 114, 30, 7, 5, '#ffffff'); R(g, 116, 31, 3, 3, '#2a2c32'); }
-      else { R(g, 84, 28, 44, 9, '#2a2c32'); R(g, 88, 30, 14, 5, '#5a6a7a'); R(g, 110, 30, 14, 5, '#5a6a7a'); R(g, 90, 30, 4, 2, '#c8d8e8'); R(g, 112, 30, 4, 2, '#c8d8e8'); }
-      if (v !== 3) { R(g, 72, 24, 12, 20, '#f2c418'); R(g, 128, 24, 12, 20, '#f2c418'); R(g, 74, 26, 8, 16, '#d8aa0a'); R(g, 130, 26, 8, 16, '#d8aa0a'); }
-      if (v === 3) { R(g, 80, 6, 52, 12, '#3a2a1a'); speckle(g, 80, 6, 52, 12, '#5a3a2a', 60, 4); }
-      else { R(g, 76, 2, 60, 16, '#f4f4ee'); R(g, 80, 0, 52, 4, '#ffffff'); R(g, 104, 0, 4, 18, '#e0e0d8'); if (v === 1) { R(g, 60, 14, 20, 5, '#e0e0d8'); R(g, 126, 10, 8, 6, '#3a3c42'); } else R(g, 132, 14, 22, 5, '#e0e0d8'); }
+      // the worker at the saw, waist up: the same person and sprite as in the yard (js/crew-sprites.js), drawn big
+      const gear = [{ muffs: true }, { hat: 'back', vest: 'open', muffs: true }, { glasses: false, muffs: true }, { hat: false, vest: false, glasses: false, shirt: '#8a8a8a' }][v] || {};
+      const seed = [...'cutter'].reduce((a, ch) => a + ch.charCodeAt(0), 0), mo = Settings.get('motion');
+      const spr = CrewSprites.get({ look: seed % CREW_LOOKS.length, act: 'saw', frame: mo ? Math.floor(t * 5) % 2 : 0, ...gear }, 3);
+      g.save(); g.imageSmoothingEnabled = false; g.drawImage(spr, 31, 2); g.restore();
       // the chop saw on the sawhorse, sawdust flying
       R(g, 160, 112, 80, 8, '#c8a070'); R(g, 166, 120, 6, 15, '#8a6a3a'); R(g, 228, 120, 6, 15, '#8a6a3a'); R(g, 176, 100, 50, 12, '#3a3c42');
       pxEllipse(g, 204, 88, 18, 18, '#b8bcc4'); pxEllipse(g, 204, 88, 4, 4, '#4a4c52'); g.fillStyle = '#c8202a'; g.beginPath(); g.arc(204, 88, 20, Math.PI, Math.PI * 1.9); g.lineTo(204, 88); g.fill(); R(g, 196, 62, 18, 10, '#d8a020');
@@ -152,7 +146,10 @@
       if (v === 3) { lab(g, '30 IN', 120, 104, '#f2c418', 1, 'c'); R(g, 72, 102, 96, 1, '#f2c418'); }
       // the cover: screwed down and marked, faded, or kicked aside
       if (v !== 3) { const dx = v === 2 ? 52 : 0, dy = v === 2 ? 14 : 0; plywood(g, 60 + dx, 30 + dy, 120, 78);
-        if (v !== 2) { for (const [x, y] of [[64, 34], [176, 34], [64, 104], [176, 104], [120, 34], [120, 104]]) R(g, x, y, 2, 2, '#5a5e66'); txt(g, 'HOLE', 120, 58, v === 1 ? 'rgba(200,32,42,0.3)' : '#c8202a', 3, 'c'); txt(g, 'DO NOT REMOVE', 120, 82, v === 1 ? 'rgba(200,32,42,0.25)' : '#c8202a', 1, 'c'); } }
+        R(g, 60 + dx, 108 + dy, 120, 3, '#8a6a3a'); for (let k = 0; k < 3; k++) R(g, 60 + dx, 108 + dy + k, 120, 1, k % 2 ? '#a8804e' : '#7a5a34');   // the sheet's edge, plies and all
+        // the stencil, sprayed on (faded on a weathered sheet; on a kicked one it's still there, just not over the hole)
+        CONA.spray(g, 'HOLE', 120 + dx, 62 + dy, '#d8401a', 4, 7, v === 1 ? .32 : .92); CONA.spray(g, 'DO NOT REMOVE', 120 + dx, 92 + dy, '#d8401a', 1, 3, v === 1 ? .28 : .85);
+        if (v !== 2) for (const [x, y] of [[64, 34], [176, 34], [64, 104], [176, 104], [120, 34], [120, 104]]) { R(g, x, y, 2, 2, '#5a5e66'); R(g, x, y, 1, 1, '#8a8e96'); } }   // its screws, only where it's still fastened
       Z.vignette(g);
     },
     c_harness(g, v, fl, t) {
@@ -233,11 +230,11 @@
       skyZ(g, 40); dirt(g, 40);
       // the trench opening along the right, and the spoil pile beside it (back from the edge, or right at it)
       R(g, 150, 40, 90, 95, '#3a2c1e'); R(g, 150, 40, 4, 95, '#6a5038'); speckle(g, 150, 40, 90, 95, '#2a1e12', 400, 3);
-      const toe = v === 2 ? 148 : 108; g.fillStyle = '#8a6a48'; g.beginPath(); g.moveTo(0, 130); for (let i = 0; i <= 12; i++) g.lineTo(i * toe / 12, 120 - Math.sin(i / 12 * Math.PI) * 70 + hash(i) * 6); g.lineTo(toe, 130); g.closePath(); g.fill(); speckle(g, 0, 50, toe, 80, '#6a5038', 600, 9);
+      const toe = v === 2 ? 148 : 108; CONA.spoilZoom(g, toe, fl);
       if (v === 0) { R(g, toe, 124, 150 - toe, 1, '#f2c418'); lab(g, '3 FT', (toe + 150) / 2, 116, '#f2c418', 1, 'c'); }
       if (v === 1) { pxLine(g, 140, 120, 128, 70, '#8a6a3a', 2); R(g, 124, 66, 10, 6, '#8a8e96'); R(g, 132, 104, 14, 16, '#f07a1a'); R(g, 130, 102, 18, 3, '#d85a0a'); }
       if (v === 2) { for (const y of [100, 114]) { R(g, 90, y, 56, 12, '#3a6ad0'); R(g, 90, y, 56, 2, '#5a8ae8'); pxEllipse(g, 146, y + 6, 3, 6, '#1d1f26'); } lab(g, '6 IN', 140, 88, '#f2c418', 1, 'c'); }
-      if (v === 3) { for (const x of [196, 214]) { let y = 40; while (y < ZH) { const ny = y + 6; pxLine(g, x + Math.sin(y) * 2, y, x + Math.sin(ny) * 2, ny, '#1d1f26'); y = ny; } } R(g, 150, 70, 10, 30, '#7a5a3a'); lab(g, 'CRACKS', 205, 30, '#f2c418', 1, 'c');
+      if (v === 3) { for (const x of [196, 214]) { let y = 40; while (y < ZH) { const ny = y + 6; pxLine(g, x + Math.sin(y) * 2, y, x + Math.sin(ny) * 2, ny, '#1d1f26'); y = ny; } } R(g, 150, 70, 10, 30, '#7a5a3a');
         for (let k = 0; k < 6; k++) R(g, 152 + hash(k) * 6, 100 + ((t * 30 + k * 8) % 30), 2, 2, '#8a6a48'); }
       Z.vignette(g);
     },
@@ -253,15 +250,55 @@
       Z.vignette(g);
     },
     c_water(g, v, fl, t) {
-      R(g, 0, 0, ZW, ZH, '#6a5038'); speckle(g, 0, 0, ZW, ZH, '#4a3a28', 1600, 21); R(g, 0, 96, ZW, 39, '#3a2c1e');
-      // the trench floor: dry, a puddle at the low end, or flooded over the boot tops
-      if (v === 1) R(g, 150, 118, 90, 17, '#5a7a8a'); if (v === 2) { R(g, 0, 104, ZW, 31, '#5a7a8a'); for (let x = 0; x < ZW; x += 18) R(g, x + (t * 8 % 18), 106, 8, 1, '#8ab0c0'); worker(g, 120, 134, 2, { hat: '#f2c418' }); R(g, 100, 108, 40, 26, '#5a7a8a'); }
-      // the pump on the lip and its hose
-      if (v !== 2) { R(g, 170, 0, 70, 30, '#d82020'); R(g, 170, 0, 70, 4, '#e85050'); pxLine(g, 180, 30, 150, 120, '#2a2c32', 3); txt(g, 'PUMP', 205, 12, '#ffffff', 1, 'c'); }
-      // the four-gas meter clipped to the ladder
-      R(g, 24, 20, 46, 54, '#f2c418'); R(g, 28, 26, 38, 24, '#2a3a2a');
-      if (v === 3) { const on = Math.floor(t * 4) % 2; R(g, 28, 26, 38, 24, on ? '#5a1a1a' : '#2a3a2a'); txt(g, 'H2S 25', 47, 29, '#ff6060', 1, 'c'); txt(g, 'LEL 18', 47, 39, '#ff6060', 1, 'c'); R(g, 40, 54, 14, 8, on ? '#ff3030' : '#7a1a1a'); txt(g, 'ALARM', 47, 64, '#c8202a', 1, 'c'); }
-      else { txt(g, 'O2 20.9', 47, 29, '#8af08a', 1, 'c'); txt(g, 'LEL 0', 47, 39, '#8af08a', 1, 'c'); R(g, 40, 54, 14, 8, '#2a8a2a'); }
+      // looking down into the cut from its lip: the ground along the top, the far wall in layers of fill, clay, and
+      // gravel, the two side walls narrowing toward it in shade, and the floor at the bottom
+      R(g, 0, 0, ZW, 30, '#9a8262'); speckle(g, 0, 0, ZW, 30, '#806a4c', 480, 4); speckle(g, 0, 0, ZW, 30, '#b09a78', 300, 5);
+      const bands = [['#7a5a3c', 30], ['#6a4e34', 44], ['#8a6a48', 58], ['#5e4630', 74], ['#6e5238', 88]];
+      for (const [k, [c, y]] of bands.entries()) { const y1 = k + 1 < bands.length ? bands[k + 1][1] : 102; R(g, 30, y, 180, y1 - y, c); for (let x = 30; x < 210; x += 6) R(g, x, y + Math.round(Math.sin(x * .13 + k) * 1.5), 6, 1, mix(c, '#000000', .2)); }
+      speckle(g, 30, 30, 180, 72, '#4a3a28', 800, 21); speckle(g, 30, 58, 180, 16, '#b0a080', 110, 22);   // pebbles; a gravel layer
+      fillPoly(g, [[0, 30], [30, 30], [30, 102], [0, 128]], '#4e3a28'); speckle(g, 0, 30, 30, 98, '#3a2a1c', 220, 23);   // the side walls, in shade
+      fillPoly(g, [[240, 30], [210, 30], [210, 102], [240, 128]], '#5a4430'); speckle(g, 210, 30, 30, 98, '#3e2e1e', 220, 24);
+      R(g, 0, 28, ZW, 2, '#b09a78');                                                                          // the far lip, worn smooth
+      fillPoly(g, [[30, 102], [210, 102], [240, 128], [240, 135], [0, 135], [0, 128]], '#3a2c1e'); speckle(g, 0, 102, ZW, 33, '#2a2016', 300, 25);   // the floor
+      // water: a puddle at the low end, or the whole floor flooded over the boot tops
+      if (v === 1) { pxEllipse(g, 176, 122, 40, 7, '#4a6a7a'); pxEllipse(g, 176, 121, 38, 5, '#5a7a8a'); R(g, 160, 119, 14, 1, '#8ab0c0'); }
+      if (v === 2) { fillPoly(g, [[26, 104], [214, 104], [240, 124], [240, 135], [0, 135], [0, 124]], '#5a7a8a'); for (let x = 0; x < ZW; x += 18) R(g, x + Math.floor(t * 8 % 18), 108, 8, 1, '#8ab0c0');
+        worker(g, 120, 134, 2, { hat: '#f2c418' }); fillPoly(g, [[96, 112], [144, 112], [144, 135], [96, 135]], 'rgba(90,122,138,0.85)'); R(g, 98, 112, 44, 1, '#8ab0c0'); }   // standing in it, shins under water
+      // the ladder up the near-left corner: aluminum rails lit on one edge, its rungs, its feet in the floor
+      const lad = y => [44 + (135 - y) * .06, 76 + (135 - y) * .03];
+      for (let y = 8; y < 135; y += 14) { const [a, b] = lad(y); R(g, Math.round(a), y, Math.round(b - a), 3, '#a8acb4'); R(g, Math.round(a), y, Math.round(b - a), 1, '#d8dce4'); }
+      for (const side of [0, 1]) for (let y = 0; y < 135; y++) { const x = Math.round(lad(y)[side]); R(g, x - 2, y, 4, 1, '#8a8e96'); R(g, x - 2, y, 1, 1, '#d8dce4'); R(g, x + 1, y, 1, 1, '#5a5e66'); }
+      // the four-gas meter, clipped to a rung: a yellow rubber boot with its thickness showing down the right side, a
+      // black face, the screen, the sensor grille, two buttons, and the alarm light across the top
+      { const mx = 22, my = 18, mw = 48, mh = 62, on = Math.floor(t * 4) % 2;
+        R(g, mx + 14, my - 4, 20, 6, '#3a3c42'); R(g, mx + 16, my - 4, 16, 2, '#6a6e76');                          // the belt clip, over the rung
+        R(g, mx + mw, my + 3, 4, mh - 3, '#b88a08'); R(g, mx + 3, my + mh, mw, 4, '#9a7406');                      // its side and bottom, in depth
+        R(g, mx + 1, my, mw - 2, mh, '#f2c418'); R(g, mx, my + 1, mw, mh - 2, '#f2c418'); R(g, mx + 2, my + 1, mw - 4, 2, '#ffe060');   // the boot, corners rounded
+        R(g, mx + 4, my + 6, mw - 8, mh - 12, '#2a2c32');                                                           // the face
+        R(g, mx + 8, my + 1, mw - 16, 3, v === 3 ? (on ? '#ff3030' : '#7a1a1a') : '#2a8a2a');                       // the alarm bar
+        R(g, mx + 6, my + 9, mw - 12, 34, v === 3 ? (on ? '#5a1a1a' : '#2a3a2a') : '#2a3a2a'); R(g, mx + 6, my + 9, mw - 12, 1, '#4a5a4a');   // the screen
+        const lines = v === 3 ? [['O2 18.2', '#ff6060'], ['LEL 18', '#ff6060'], ['H2S 25', '#ff6060'], ['CO 9', '#8af08a']] : [['O2 20.9', '#8af08a'], ['LEL 0', '#8af08a'], ['H2S 0', '#8af08a'], ['CO 0', '#8af08a']];
+        lines.forEach(([s, c], k) => txt(g, s, mx + mw / 2, my + 11 + k * 8, c, 1, 'c'));
+        for (let k = 0; k < 4; k++) R(g, mx + 12 + k * 6, my + 47, 3, 1, '#6a6e76');                               // the sensor grille
+        for (const bx of [mx + 10, mx + mw - 18]) { R(g, bx, my + 51, 8, 4, '#4a4c52'); R(g, bx, my + 51, 8, 1, '#8a8e96'); } }   // buttons
+      // the trash pump up on the lip (or nowhere, and the water's rising): its roll cage, the red engine with cooling
+      // fins and a pull-start, the fuel tank and cap, the gray pump body, a ribbed suction hose down to a strainer
+      if (v !== 2) { const px = 164, py = 4;
+        const tube = (x0, y0, x1, y1) => { pxLine(g, x0, y0, x1, y1, '#2a2c32', 3); pxLine(g, x0, y0 - 1, x1, y1 - 1, '#6a6e76'); };
+        tube(px, py + 30, px + 64, py + 30); tube(px + 6, py + 24, px + 70, py + 24);                                // the skid frame, in depth
+        R(g, px + 6, py + 6, 30, 20, '#b81818'); R(g, px + 6, py + 6, 30, 3, '#e85050'); for (let x = px + 9; x < px + 34; x += 3) R(g, x, py + 10, 1, 14, '#8a1010');   // the engine and its fins
+        R(g, px + 36, py + 8, 4, 18, '#8a1010');                                                                     // its side, in depth
+        pxEllipse(g, px + 4, py + 16, 6, 7, '#3a3c42'); pxEllipse(g, px + 4, py + 16, 4, 5, '#5a5e66'); R(g, px - 1, py + 14, 3, 3, '#1d1f26');   // the pull-start housing and its handle
+        R(g, px + 10, py - 4, 22, 9, '#d82020'); R(g, px + 10, py - 4, 22, 2, '#ff6a5a'); R(g, px + 32, py - 2, 3, 7, '#a81818'); R(g, px + 18, py - 6, 5, 2, '#1d1f26');   // the tank and its cap
+        R(g, px + 34, py + 2, 8, 4, '#4a4c52'); R(g, px + 40, py + 1, 3, 3, '#2a2c32');                              // the muffler
+        pxEllipse(g, px + 52, py + 15, 11, 11, '#8a8e96'); pxEllipse(g, px + 51, py + 14, 9, 9, '#a8acb4'); pxEllipse(g, px + 52, py + 15, 4, 4, '#4a4c52');   // the volute
+        R(g, px + 62, py + 6, 10, 5, '#5a5e66'); R(g, px + 70, py + 4, 4, 9, '#3a3c42');                            // the discharge, off to the right
+        tube(px, py + 2, px, py + 30); tube(px + 64, py, px + 64, py + 30); tube(px, py + 2, px + 64, py); tube(px + 6, py - 4, px + 70, py - 6);   // the roll cage
+        // the suction hose, black and ribbed, from the pump's inlet down the right wall to a strainer in the low spot
+        const pts = []; for (let k = 0; k <= 24; k++) { const u = k / 24; pts.push([(1 - u) * (1 - u) * (px + 52) + 2 * u * (1 - u) * 222 + u * u * 178, (1 - u) * (1 - u) * (py + 24) + 2 * u * (1 - u) * 70 + u * u * 118]); }
+        for (let k = 1; k < pts.length; k++) pxLine(g, pts[k - 1][0], pts[k - 1][1], pts[k][0], pts[k][1], '#1d1f26', 5);
+        for (let k = 1; k < pts.length; k++) { const [x, y] = pts[k]; R(g, Math.round(x) - 2, Math.round(y), 4, 1, '#4a4c52'); }   // the ribs
+        R(g, 172, 114, 12, 8, '#6a6e76'); for (let x = 174; x < 183; x += 3) R(g, x, 116, 1, 4, '#2a2c32'); R(g, 172, 114, 12, 1, '#a8acb4'); }   // the strainer
       Z.vignette(g);
     },
     c_excavator(g, v, fl, t) {
@@ -298,17 +335,57 @@
 
     /* ============================== THE TRAILER YARD ============================== */
     c_trailer(g, v, fl, t) {
-      skyZ(g, 20); R(g, 0, 0, ZW, 100, '#eceae2'); for (let x = 0; x < ZW; x += 8) R(g, x, 0, 1, 100, '#d4d2ca'); gravel(g, 100);
-      R(g, 70, 6, 66, 94, '#c8c6be'); R(g, 72, 8, 62, 90, '#d8d6ce'); R(g, 126, 50, 6, 4, '#8a8e96');
-      // the steps: four risers, with a handrail on both sides or none
-      for (let k = 0; k < 5; k++) { R(g, 60 + k * 2, 100 + k * 7, 86 - k * 4, 3, '#a8acb4'); R(g, 60 + k * 2, 103 + k * 7, 86 - k * 4, 4, '#6a6e76'); }
-      if (v !== 2) for (const x of [52, 152]) { R(g, x, 70, 3, 65, '#f2c418'); R(g, x - 2, 70, 7, 3, '#f2c418'); }
-      else { R(g, 154, 100, 1, 34, '#f2c418'); lab(g, '5 STEPS', 158, 114, '#f2c418'); lab(g, 'NO RAIL', 158, 122, '#f2c418'); }
-      // the first aid kit beside the door, and its weekly check log
-      if (v !== 3) { R(g, 154, 20, 56, 46, '#f4f4ee'); R(g, 154, 20, 56, 46, '#f4f4ee'); R(g, 176, 28, 12, 30, '#2a9a4a'); R(g, 167, 37, 30, 12, '#2a9a4a'); txt(g, 'FIRST AID', 182, 60, '#2a9a4a', 1, 'c');
-        R(g, 214, 22, 22, 40, '#f4f2ea'); for (let k = 0; k < 5; k++) R(g, 216, 26 + k * 6, 16, 1, '#9a9ea6'); txt(g, 'OK', 225, 54, '#2a5aa8', 1, 'c'); }
-      if (v === 1) { R(g, 154, 20, 56, 46, '#f4f4ee'); R(g, 158, 24, 48, 38, '#e8e8e0'); for (const [x, y] of [[162, 28], [180, 28], [162, 44]]) R(g, x, y, 14, 12, '#d8a8a8'); R(g, 180, 44, 14, 12, '#d8d8d0'); txt(g, 'LOW', 187, 47, '#c8202a', 1, 'c'); }
-      if (v === 3) { R(g, 180, 28, 6, 6, '#8a8e96'); txt(g, 'NO KIT', 184, 40, '#c8202a', 1, 'c'); worker(g, 100, 134, 2, { vest: false, shirt: '#8a5a3a' }); R(g, 108, 104, 8, 6, '#c8202a'); txt(g, 'HELP!', 60, 80, '#c8202a'); }
+      // the trailer's face: ribbed white siding, shaded where each rib turns, over a dark skirt, on gravel
+      skyZ(g, 20); R(g, 0, 0, ZW, 96, '#eceae2'); for (let x = 0; x < ZW; x += 8) { R(g, x, 0, 1, 96, '#d0cec6'); R(g, x + 1, 0, 1, 96, '#f6f4ec'); }
+      R(g, 0, 96, ZW, 6, '#3a3c42'); R(g, 0, 96, ZW, 1, '#5a5e66'); gravel(g, 102);
+      // the door, set into its frame: the trim stands proud, the slab sits back in shadow, with a lever, a kick plate, and a little wired-glass light
+      R(g, 66, 4, 74, 94, '#f4f2ea'); R(g, 66, 4, 74, 1, '#ffffff'); R(g, 139, 4, 1, 94, '#c8c6be');
+      R(g, 71, 9, 64, 89, '#9a988e'); R(g, 73, 11, 62, 87, '#d8d6ce'); R(g, 73, 11, 62, 2, '#b8b6ae'); R(g, 73, 11, 2, 87, '#c4c2ba');
+      R(g, 92, 18, 22, 26, '#3a4a5a'); R(g, 93, 19, 20, 24, '#5a7a9a'); for (let y = 22; y < 42; y += 5) for (let x = 95; x < 112; x += 5) R(g, x, y, 1, 1, '#8aa0b4'); R(g, 94, 20, 6, 2, '#a8c0d4');
+      R(g, 123, 52, 9, 3, '#8a8e96'); R(g, 123, 55, 9, 1, '#5a5e66'); R(g, 125, 50, 4, 7, '#6a6e76');   // the lever on its rose
+      R(g, 75, 86, 58, 10, '#b8bcc4'); R(g, 75, 86, 58, 1, '#d8dce4');                                   // the kick plate
+      // the steps: a steel stair unit, its grated treads getting wider and lower as they come toward you, each one a lit
+      // tread on top of a shadowed riser, between two stringers
+      for (let k = 0; k < 5; k++) {
+        const y = 94 + k * 8, x0 = 58 - k * 4, x1 = 148 + k * 4, tread = 3 + Math.round(k * .4);
+        R(g, x0, y, x1 - x0, tread, '#b4b8c0'); for (let x = x0 + 2; x < x1 - 1; x += 3) R(g, x, y + 1, 1, tread - 1, '#8a8e96');   // the grating
+        R(g, x0, y, x1 - x0, 1, '#d8dce4');                                                                  // the nosing catches the light
+        R(g, x0, y + tread, x1 - x0, 8 - tread, '#4a4e56'); R(g, x0, y + tread, x1 - x0, 1, '#2a2c32');      // the open riser, dark behind
+        R(g, x0 - 3, y, 3, 8, '#6a6e76'); R(g, x1, y, 3, 8, '#5a5e66');                                      // the stringers
+      }
+      // handrails (or none): a post at the top landing and one at the bottom on each side, the rail and a mid-rail sloping
+      // down between them; the near post's foot sits on the gravel
+      if (v !== 2) for (const s of [-1, 1]) {
+        const xt = s < 0 ? 54 : 152, xb = s < 0 ? 38 : 168, top = [xt, 64], bot = [xb, 104];
+        R(g, xt - 1, top[1], 3, 32, '#c89a08'); R(g, xt - 1, top[1], 1, 32, '#f2c418');                     // the landing post (farther: thinner)
+        R(g, xb - 2, bot[1], 4, 31, '#c89a08'); R(g, xb - 2, bot[1], 2, 31, '#f2c418'); R(g, xb - 3, 133, 6, 2, '#5a5e66');   // the bottom post, on its base plate
+        pxLine(g, top[0], top[1], bot[0], bot[1], '#f2c418', 3); pxLine(g, top[0], top[1] + 2, bot[0], bot[1] + 2, '#a87a08');   // the top rail, lit above and shaded under
+        pxLine(g, top[0], top[1] + 16, bot[0], bot[1] + 16, '#e0b010', 2);                                    // the mid-rail
+      }
+      else for (const [x, y] of [[54, 94], [38, 126], [152, 94], [168, 126]]) { R(g, x - 2, y, 4, 2, '#5a5e66'); R(g, x - 1, y - 1, 2, 1, '#2a2c32'); }   // bolt plates where rails used to be, the rails nowhere
+      // the first aid cabinet beside the door: a white steel box with real depth (its left side shows, it throws a shadow
+      // on the siding), a hinge, a latch, and the cross; open and picked over when it's running low; gone when it's gone
+      const kx = 158, ky = 20, kw = 50, kh = 44;
+      if (v !== 3) {
+        R(g, kx + 3, ky + kh, kw, 3, 'rgba(40,40,44,0.25)'); R(g, kx + kw, ky + 3, 3, kh, 'rgba(40,40,44,0.25)');   // its shadow on the wall
+        R(g, kx - 5, ky + 2, 5, kh - 2, '#c8c8c0'); R(g, kx - 5, ky, 5, 2, '#e8e8e2'); R(g, kx - 5, ky + kh - 1, 5, 1, '#a8a8a0');   // its left side, in depth
+        if (v === 1) {   // open: the door swung out to the left, the shelves mostly bare
+          R(g, kx, ky, kw, kh, '#e8e8e0'); R(g, kx + 2, ky + 2, kw - 4, kh - 4, '#d8d8d0'); R(g, kx + 2, ky + 21, kw - 4, 2, '#b8b8b0');
+          R(g, kx + 5, ky + 12, 8, 9, '#f4f4ee'); R(g, kx + 7, ky + 15, 4, 3, '#c8202a'); R(g, kx + 30, ky + 33, 10, 6, '#d8b0a0');   // one box of gauze, one lone bandage
+          for (const [x, y] of [[kx + 16, ky + 18], [kx + 26, ky + 18], [kx + 8, ky + 37], [kx + 18, ky + 37]]) R(g, x, y, 8, 3, 'rgba(160,160,150,0.35)');   // clean spots where things used to sit
+          R(g, kx - 22, ky - 1, 22, kh + 2, '#f4f4ee'); R(g, kx - 22, ky - 1, 2, kh + 2, '#d8d8d0'); R(g, kx - 16, ky + 14, 10, 16, '#2a9a4a'); R(g, kx - 19, ky + 19, 16, 6, '#2a9a4a'); }   // the open door, seen edge-on-ish
+        else { R(g, kx, ky, kw, kh, '#f4f4ee'); R(g, kx, ky, kw, 1, '#ffffff'); R(g, kx + kw - 1, ky, 1, kh, '#d8d8d0');
+          R(g, kx + 20, ky + 7, 10, 26, '#2a9a4a'); R(g, kx + 12, ky + 15, 26, 10, '#2a9a4a'); txt(g, 'FIRST AID', kx + kw / 2, ky + 36, '#2a9a4a', 1, 'c');
+          for (const y of [ky + 6, ky + kh - 10]) R(g, kx + 1, y, 2, 5, '#a8acb4'); R(g, kx + kw - 5, ky + 18, 3, 8, '#8a8e96'); }   // hinges and the latch
+      } else {   // gone: four screw holes and a clean rectangle of unfaded siding where it hung
+        R(g, kx, ky, kw, kh, '#f4f2ea'); for (let x = kx; x < kx + kw; x += 8) R(g, x + ((8 - kx % 8) % 8), ky, 1, kh, '#dcdad2');
+        for (const [x, y] of [[kx + 4, ky + 4], [kx + kw - 6, ky + 4], [kx + 4, ky + kh - 6], [kx + kw - 6, ky + kh - 6]]) { R(g, x, y, 2, 2, '#5a5e66'); }
+      }
+      // the kit's weekly check log, on a clipboard hung from a nail: a little askew, its pages curling
+      R(g, 215, 25, 22, 38, 'rgba(40,40,44,0.22)'); R(g, 213, 22, 22, 38, '#8a6a3a'); R(g, 215, 25, 18, 33, '#f4f2ea');
+      for (let k = 0; k < 5; k++) { R(g, 217, 29 + k * 5, 14, 1, '#9a9ea6'); if (v !== 3 && k < 4) R(g, 228, 28 + k * 5, 3, 1, '#2a5aa8'); }
+      R(g, 220, 21, 8, 4, '#a8acb4'); R(g, 223, 18, 2, 3, '#5a5e66'); R(g, 231, 55, 2, 3, '#e4e2da');
+      if (v === 3) worker(g, 106, 134, 2, { vest: false, shirt: '#8a5a3a', kneel: true });   // somebody hurt, waiting on the steps, holding one hand
       Z.vignette(g);
     },
     c_powerline(g, v, fl, t) {

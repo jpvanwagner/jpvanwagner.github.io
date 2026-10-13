@@ -47,6 +47,8 @@ const Report = {
       extra.push({ id, name: a.name, room: a.room, cat: a.cat, why: a.why, m, ok: m.cat === a.cat, part: m.cat !== a.cat && acceptable(id, m.cat) });
     }
     // your own PPE, on sites that need it: points for each piece you never went without (js/ppe.js)
+    // somebody's tools and things you walked off with (js/bag.js): each one costs, and the manager brings it up
+    const kept = Game.bag.map(k => CLUTTER[k.split('|')[0]]).filter(d => d && d.owned); score -= kept.length * 20;
     const ppeAll = PPE.on() ? PPE.all() : [], ppeMiss = ppeAll.filter(id => PPE.missed.has(id));
     max += ppeAll.length * PTS.ppe; score += (ppeAll.length - ppeMiss.length) * PTS.ppe;
     const extraPts = extra.filter(e => e.ok).length * PTS.extra + extra.filter(e => e.part).length * Math.round(PTS.extra / 2);   // extra credit for optional calls, which never cancels a miss
@@ -55,7 +57,7 @@ const Report = {
     let pct = max ? score / max : 0;
     if (hazards < hazTotal || ppeMiss.length) pct = Math.min(pct, .89);   // a missed hazard, or skipping your own PPE, rules out an A               // a missed hazard rules out an A, however good the rest is
     const [grade, rank] = gradeFor(pct, !thin && safed === safeTotal);
-    return { ppeMiss, ppeTotal: ppeAll.length, rows, extra, bonus: extraPts, score, max, correct, partial, notified, notifyTotal, total: rows.length, hazards, hazTotal, safed, safeTotal, charged, chargeable, wrongful, evidence, photos: Game.shots, time: Game.elapsed(), grade, rank };
+    return { kept, ppeMiss, ppeWalk: ppeAll.filter(id => PPE.walked.has(id)), ppeActs: PPE.acts.slice(), ppeTotal: ppeAll.length, rows, extra, bonus: extraPts, score, max, correct, partial, notified, notifyTotal, total: rows.length, hazards, hazTotal, safed, safeTotal, charged, chargeable, wrongful, evidence, photos: Game.shots, time: Game.elapsed(), grade, rank };
   },
   confirmSubmit() {
     const n = Object.keys(Game.marks).length, calls = BlackBerry.pending();
@@ -198,8 +200,14 @@ const Debrief = {
     const thin = rows.filter(x => x.ok && !x.ev).length;
     if (thin >= 4) out.push(`A lot of your calls were right, but your notes are thin. Touch it, smell it, measure it. If a charge ends up in a dispute, your notes are all we have.`);
     else if (r.evidence >= r.total - 2) out.push(`Your field notes are great, by the way. Measurements, smells, all of it. That's exactly what holds up in a dispute.`);
-    if (r.ppeMiss && r.ppeMiss.length) out.push(`One more thing, and it's a big one: you walked in without your ${list(r.ppeMiss.map(id => PPE_ITEMS[id].short))}. You can't write a crew up for PPE you're not wearing yourself. Suit up at the rack first, every time.`);
-    else if (r.ppeTotal) out.push(`And you had your PPE on the whole time. That matters more than people think: the crews notice.`);
+    const walk = r.ppeWalk || r.ppeMiss || [];
+    if (walk.length) out.push(`One more thing, and it's a big one: you walked in without your ${list(walk.map(id => PPE_ITEMS[id].short))}. You can't write a crew up for PPE you're not wearing yourself. Suit up at the rack first, every time.`);
+    for (const a of r.ppeActs || []) out.push(`And you ran the ${a.what} without your ${PPE_ITEMS[a.id].short}. One chip off a wheel and that's an eye. Don't touch the equipment without the gear it calls for, and honestly, you don't need to run it at all to inspect it.`);
+    if (!walk.length && !(r.ppeActs || []).length && r.ppeTotal) out.push(`And you had your PPE on the whole time. That matters more than people think: the crews notice.`);
+    const keptTools = (r.kept || []).filter(d => d.owned === 'tool'), keptMine = (r.kept || []).filter(d => d.owned === 'personal' && !d.lunch), lunch = (r.kept || []).find(d => d.lunch);
+    if (keptTools.length) out.push(`Also, the crew called. You walked off with ${list(keptTools.map(d => `${d.owner} ${lower(d.name)}`))}. They spent the afternoon looking for ${keptTools.length > 1 ? 'them' : 'it'}. We inspect their site; we don't take their tools.`);
+    if (keptMine.length) out.push(`And ${list(keptMine.map(d => `${d.owner} ${lower(d.name)}`))} turned up in your bag. That's not left behind. That's somebody's. Bring ${keptMine.length > 1 ? 'them' : 'it'} back.`);
+    if (lunch) out.push("And Bud Kowalski called. Sixty-eight years old, forty of them at that building, and you took his lunch. An old man's lunch. I have a witness, a written statement, and one very hungry Bud. If this ever goes to trial, believe me, the jury is going to hear about the lunch.");
     const call = Debrief.callPage(); if (call) out.push(call);
     if (Decor.cur && Decor.cur.rug) out.push(Game.opened.rug ? `Oh, and the area rug the tenant left. I'll have maintenance haul it out. It really tied the room together, but it's not ours to keep.`
       : `Oh, and the area rug the tenant left. You know it really tied the room together, man. Still, I'll have maintenance haul it out before the cleaners come.${cond('carpet') === 2 ? ' Somebody should have looked under it, though.' : ''}`);

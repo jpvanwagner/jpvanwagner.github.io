@@ -96,33 +96,45 @@
           for (const [a, b] of [[-1.6, -.14], [.14, 1.6]]) {
             const gl = Q.back(r.box, a, b, .42, 2.8); fillPoly(g, gl, '#d6cbb6');
             fillPoly(g, Q.back(r.box, a, b, .42, .7), '#5c6676');                                   // the corridor's carpet
-            if (a < 0) { fillPoly(g, Q.back(r.box, -1.1, -.5, .7, 2.45), '#8a5e36'); const k = P(-.6, 1.4, zb); pxRect(g, k[0], k[1], 1, 1, '#c9ccd4'); }   // the door across the hall
+            if (a > 0) { fillPoly(g, Q.back(r.box, .5, 1.1, .7, 2.45), '#8a5e36'); const k = P(.6, 1.4, zb); pxRect(g, k[0], k[1], 1, 1, '#c9ccd4'); }   // the door across the hall, through the right leaf (as up close)
             fillPoly(g, gl, 'rgba(150,190,205,0.2)'); const s0 = P(a + .25, 2.7, zb), s1 = P(a + .05, 1.6, zb); pxLine(g, s0[0], s0[1], s1[0], s1[1], 'rgba(255,255,255,0.3)');
             fillPoly(g, Q.back(r.box, a, b, 1.55, 1.62), 'rgba(255,255,255,0.45)');                 // the frosted safety band
           }
-          { const c = P(0, 2.2, zb); A.ftext(g, 'SUITE 204', c[0] - 17, c[1], '#ffffff', 1, true); }
-          for (const x of [-.14, .14]) { const k = P(x * 1.4, 1.35, zb), l = P(x * 1.4, 1.12, zb); pxRect(g, k[0] - 1, k[1] - 1, 2, 2, ev === 3 && x > 0 ? '#c9a227' : '#c9ccd4'); pxRect(g, l[0] - (x < 0 ? 0 : 4), l[1], 5, 1, '#c9ccd4'); }
+          for (const [str, y] of [['SUITE', 2.35], [String(Game.unit || '204'), 2.12]]) { const c = P(-.87, y, zb), w = str.length * 4 - 1; A.ftext(g, str, Math.round(c[0] - w / 2), c[1], '#ffffff', 1, true); }   // on the left leaf's glass only, backwards from in here
+          for (const x of [-.14, .14]) { const k = P(x * .5, 1.35, zb), l = P(x * 1.4, 1.12, zb); pxRect(g, Math.round(k[0]), k[1] - 1, 1, 2, ev === 3 && x > 0 ? '#c9a227' : '#c9ccd4'); pxRect(g, l[0] - (x < 0 ? 0 : 4), l[1], 5, 1, '#c9ccd4'); }   // the deadbolt on each meeting stile, a pixel wide so it stays on the frame
           { const c = P(.6, 2.92, zb); pxRect(g, c[0], c[1], 9, 2, '#b4b0a6'); if (ev === 1) { pxRect(g, c[0] + 2, c[1] + 2, 1, 4, 'rgba(70,50,20,0.7)'); } }
           if (ev === 2) { const c = P(1.95, 1.3, zb); pxRect(g, c[0] - 1, c[1] - 3, 5, 6, mix(p.back, '#ffffff', .3)); pxRect(g, c[0] + 1, c[1], 1, 1, '#2a2018'); pxRect(g, c[0] + 2, c[1] + 1, 1, 3, '#9a9ea8'); }
         }
         // the EXIT sign over the door
         { const xv = cond('o_exitsign'), q = Q.back(r.box, -.45, .45, 3.16, 3.58), b = polyBox(q);
           fillPoly(g, q, '#f4f2ec'); strokePoly(g, q, '#a8a49a');
-          const col = xv === 3 ? '#8a5048' : '#ff2c1c'; A.ftext(g, 'EXIT', Math.round(b.cx - 7), Math.round(b.cy - 2), col);
+          const col = xv === 3 ? '#8a5048' : '#ff2c1c'; A.ftext(g, 'EXIT', Math.round(b.cx - 7), Math.round(b.cy - 2), col); if (xv !== 3) ExitGlow.add(b.cx, b.cy, xv === 1 ? .55 : 1);
           if (xv === 1) A.ftext(g, 'EX', Math.round(b.cx - 7), Math.round(b.cy - 2), '#c04a3a');
           if (xv === 2) { pxRect(g, b.x1 - 3, b.y0, 3, 2, '#3a3430'); pxLine(g, b.x1 - 4, b.y0 + 1, b.x1 - 9, b.y1 - 2, '#9a968a'); } }
         // the extinguisher cabinet
         { const xv = cond('o_extinguisher'), q = Q.back(r.box, 3.3, 3.8, .95, 2.25), b = polyBox(q);
-          fillPoly(g, q, '#f2f0ea'); strokePoly(g, q, '#a8a49a');
-          const w = Q.back(r.box, 3.38, 3.72, 1.08, 2.08); fillPoly(g, w, '#cfcbc2'); fillPoly(g, Q.back(r.box, 3.47, 3.63, 1.15, 1.85), '#c41e18');
+          box3(g, 3.3, 3.8, .95, 2.25, zb - .06, zb, { front: '#f2f0ea', side: '#c8c4ba', top: '#ffffff', bottom: '#b8b4aa' }); strokePoly(g, Q.back({ ...r.box, zb: zb - .06 }, 3.3, 3.8, .95, 2.25), '#a8a49a');   // the cabinet's trim, standing off the wall
+          const w = Q.back({ ...r.box, zb: zb - .06 }, 3.38, 3.72, 1.08, 2.08); fillPoly(g, w, '#bfbbb2'); fillPoly(g, Q.back({ ...r.box, zb: zb - .06 }, 3.38, 3.72, 1.96, 2.08), '#a8a49a');   // the recess, shadowed under its top
+          A.extRoom(g, 3.55, zb - .14, 1.12, 1.74, .085, 'abc', xv === 3);
           if (xv !== 2) fillPoly(g, w, xv === 1 ? 'rgba(236,236,230,0.45)' : 'rgba(200,225,235,0.25)');
           if (xv === 2) { pxRect(g, b.x0 + 2, b.y0 + 3, 2, 2, '#d8eef4'); const f = P(3.55, 0, zb - .15); pxRect(g, f[0] - 2, f[1] - 1, 2, 1, '#d8eef4'); pxRect(g, f[0] + 2, f[1], 1, 1, '#d8eef4'); }
           if (xv === 3) { const f = P(3.55, 0, zb - .25); speckle(g, f[0] - 7, f[1] - 3, 14, 4, '#f4f2ea', 22, 4); }
-          A.ftext(g, 'FIRE', Math.round(b.cx - 7), Math.round(b.y0 + 1), '#c41e18'); }
+          { const w = A.ftw('FIRE') + 4, x0 = Math.round(b.cx - w / 2), y0 = Math.round(b.y0) - 10; pxRect(g, x0, y0, w, 8, '#c41e18'); pxRect(g, x0, y0 + 7, w, 1, '#8a1410'); A.ftext(g, 'FIRE', x0 + 2, y0 + 2, '#ffffff'); } }   // its sign: a red plate on the wall above the cabinet, the word inside it
         { const s = plateBack(g, r, 2.5, 2.8, 1.2, 1.6); rockerIn(g, { ...s, x1: s.cx, cx: s.x0 + (s.x1 - s.x0) * .3 }, !r.lightsOff); rockerIn(g, { ...s, cx: s.x0 + (s.x1 - s.x0) * .7 }, false); }
         { const q = Q.back(r.box, 4.5, 4.85, 1.6, 1.9), b = polyBox(q); fillPoly(g, q, '#e6dcc4'); strokePoly(g, q, '#9a9484'); pxRect(g, b.x0 + 2, b.y0 + 2, b.x1 - b.x0 - 4, 2, '#8fc49a'); strokePoly(g, Q.back(r.box, 4.45, 4.9, 1.55, 1.95), 'rgba(200,220,230,0.6)'); }
-        { const q = Q.right(r.box, 10.9, 12, 1.45, 2.35); fillPoly(g, q, '#2a2a30'); fillPoly(g, Q.right(r.box, 11, 11.9, 1.53, 2.27), '#f4f2ea');
-          for (let k = 0; k < 4; k++) lineW(g, P(r.box.x1, 1.7 + k * .14, 11.1), P(r.box.x1, 1.7 + k * .14, 11.75), k % 2 ? '#c43a3a' : '#6a7080'); }
+        // the framed evacuation map: a little floor plan (walls, rooms, two stairwells), green routes to the stairs, YOU ARE HERE in red
+        { const x1 = r.box.x1; box3(g, x1 - .05, x1, 1.45, 2.35, 10.9, 12, { front: '#2a2a30', side: '#3a3a42', top: '#4a4a52', bottom: '#1a1a20' });
+          decalX(g, decal('o-evacmap', 44, 34, h => {
+            const R = (x, y, w, hh, c) => { h.fillStyle = c; h.fillRect(x, y, w, hh); };
+            R(0, 0, 44, 34, '#f4f2ea'); R(0, 0, 44, 5, '#c43a3a'); R(2, 1, 40, 1, '#f4c8c0'); R(2, 3, 26, 1, '#f4c8c0');   // the red header band and its lettering
+            R(3, 8, 38, 20, '#e2ded2'); for (const [x, y, w, hh] of [[3, 8, 38, 1], [3, 27, 38, 1], [3, 8, 1, 20], [40, 8, 1, 20], [3, 16, 38, 1], [3, 19, 38, 1], [14, 8, 1, 8], [26, 8, 1, 8], [11, 19, 1, 9], [30, 19, 1, 9]]) R(x, y, w, hh, '#3a3c42');   // outer walls, the corridor, the rooms
+            R(4, 17, 36, 2, '#f8f6ee');                                                                                         // the corridor
+            for (const x of [4, 36]) { R(x, 9, 4, 6, '#b8bcc4'); for (let k = 0; k < 3; k++) R(x, 10 + k * 2, 4, 1, '#6a6e76'); }   // the stairwells
+            for (let x = 9; x < 34; x += 3) R(x, 17, 2, 1, '#2a9a4a'); R(6, 15, 1, 2, '#2a9a4a'); R(37, 15, 1, 2, '#2a9a4a'); R(5, 14, 3, 1, '#2a9a4a'); R(36, 14, 3, 1, '#2a9a4a');   // the green routes, out both ways
+            R(21, 21, 3, 3, '#d42a20'); R(22, 22, 1, 1, '#ffffff');                                                                // YOU ARE HERE
+            R(3, 30, 6, 2, '#2a9a4a'); R(11, 30, 12, 1, '#9a9a96'); R(26, 30, 3, 2, '#d42a20'); R(31, 30, 9, 1, '#9a9a96');           // the legend
+          }), x1 - .055, 11.92, 10.98, 1.53, 2.27);
+          lineW(g, P(x1 - .055, 2.27, 11.92), P(x1 - .055, 2.27, 10.98), 'rgba(255,255,255,0.35)'); }   // a glint on the glass
         sideDoor(g, r, 'right', 8.4, 10.2, '#c8c0ae');
         outletBack(g, r, -1.95, .4); outletBack(g, r, 4.2, .4);
         // the walk-off mat inside the door
@@ -143,8 +155,7 @@
           if (dv === 3) fillPoly(g, [P(-2.1, 1.2, 9.3), P(-2.45, 1.2, 9.3), P(-2.4, .7, 9.3), P(-2.1, .45, 9.3)], '#c8a878'); }
       },
       dynamic(g, r, t) {
-        for (const [x, z] of [[0, 7.15], [-3.2, 10.15], [3.2, 10.15], [-3.2, 6.15], [3.2, 6.15]]) troffGlow(g, r, x, z, .8);
-        const xv = cond('o_exitsign'); if (xv !== 3) { const c = P(0, 3.37, r.box.zb); softGlow(g, c[0], c[1], 22, 10, '#ff4a3a', xv === 1 ? .12 : .2); }
+        for (const [x, z] of [[0, 7.15], [-3.2, 10.15], [3.2, 10.15], [-3.2, 6.15], [3.2, 6.15]]) troffGlow(g, r, x, z, .8);   // (the EXIT sign glows after the room's lighting: ExitGlow, js/rooms.js)
       }
     },
     /* ---------------- OPEN-PLAN WORKSPACE ---------------- */
@@ -152,6 +163,7 @@
       name: 'Open Office', box: { x0: -7, x1: 7, h: 4, zb: 14 }, amb: .45,
       floor: (g, r, p) => carpetTileFloor(g, r, p), floorBase: p => p.floor.base,
       walk: { x0: -6.2, x1: 6.2, z0: 4.8, z1: 13.2 }, start: { x: -5.4, z: 7.4 },
+      blocks: () => [{ x0: 4.6, x1: 5.3, z0: 8.6, z1: 9.3, h: 4 }],   // the column: walk around it, and it stands in front of whoever's behind it (js/obstacles.js)
       windows: [{ xa: -6.4, xb: .6, ya: 1, yb: 3.1, slats: 10, level: 4 }],
       doors: [
         { id: 'o_toLobby', back: [5.3, 6.7], to: 'o_lobby', name: 'Lobby', walk: { x: 6, z: 13.2 }, spawn: { x: 5.2, z: 9.3 } },
@@ -225,7 +237,7 @@
         // the floor box in the aisle where the cubicles plugged in
         { const fv = cond('o_floorbox'), q = Q.floor(2.25, 3.05, 7.95, 8.55), b = polyBox(q);
           fillPoly(g, q, '#b8a060'); fillPoly(g, Q.floor(2.31, 3, 8.01, 8.5), fv === 1 ? '#a8aab0' : '#8e9096');
-          if (fv === 2) { fillPoly(g, Q.floor(2.66, 2.98, 8.04, 8.48), '#1a1a1c'); for (let k = 0; k < 4; k++) { const a = P(2.8 + k * .04, .05, 8.25), c = P(3.6 + k * .2, 0, 7.6 - k * .15); pxLine(g, a[0], a[1], c[0], c[1], k % 2 ? '#9aa0a8' : '#7a8088'); } }
+          if (fv === 2) { fillPoly(g, Q.floor(2.66, 2.98, 8.04, 8.48), '#1a1a1c'); for (let k = 0; k < 4; k++) { const a = P(2.8 + k * .04, .05, 8.25), m = P(3.0 + k * .08, .18, 8.0), c = P(3.6 + k * .2, 0, 7.6 - k * .15); for (const [p0, p1] of [[a, m], [m, c]]) pxLine(g, p0[0], p0[1], p1[0], p1[1], k % 2 ? '#9aa0a8' : '#3a6ad0', 2); } }
           if (fv === 3) { fillPoly(g, Q.floor(2.33, 2.65, 8.04, 8.48), '#141416'); const c = P(2.5, .06, 8.25); pxLine(g, c[0] - 2, c[1] + 2, c[0] - 2, c[1] - 2, '#1a1a1a'); pxLine(g, c[0] + 1, c[1] + 2, c[0] + 2, c[1] - 2, '#f4f4ee'); pxRect(g, c[0] - 2, c[1] - 3, 1, 1, '#d8904a'); pxRect(g, c[0] + 2, c[1] - 3, 1, 1, '#d8904a'); }
           pxRect(g, b.cx, b.y0 + 1, 1, b.y1 - b.y0 - 2, 'rgba(60,50,30,0.5)'); }
         box3(g, 4.6, 5.3, 0, 4, 8.6, 9.3, { front: mix(p.wall, '#ffffff', .05), side: p.wallL });   // the column
@@ -253,7 +265,7 @@
         o_fridge: { pts: () => hull(boxPts(3, 4.4, 0, 2.75, 10.7, 11.5)), walk: { x: 3.4, z: 9.8 } },
         o_microwave: { pts: () => hull(boxPts(1.1, 2.3, .96, 1.62, 10.95, 11.4)), walk: { x: 1.6, z: 9.8 } },
         o_vct: { pts: () => Q.floor(-2.6, 2.2, 7, 10.4), walk: { x: 0, z: 6.6 } },
-        o_firstaid: { pts: () => Q.right(box('o_break'), 7.9, 8.9, 1.25, 2.35), walk: { x: 4.2, z: 8.4 } }
+        o_firstaid: { pts: () => { const x1 = box('o_break').x1, open = cond('o_firstaid') !== 2 && !!(Game.flags.o_firstaid && Game.flags.o_firstaid.open); return hull([...boxPts(x1 - .22, x1, 1.3, 2.3, 8, 8.8), ...(open ? [P(x1 - 1, 1.3, 8.66), P(x1 - 1, 2.3, 8.66)] : [])]); }, walk: { x: 4.2, z: 8.4 } }
       },
       scenery: [
         { id: 'o_bswitch', name: 'Light switch', pts: () => Q.left(box('o_break'), 9.5, 9.85, 1.15, 1.6), walk: { x: -4.2, z: 9.6 }, use: lightUse('o_break', 'the break room lights'), look: 'The switch for the break room lights.' },
@@ -296,7 +308,11 @@
         // the microwave on the counter
         { const mv = cond('o_microwave');
           box3(g, 1.1, 2.3, .96, 1.6, 11.0, 11.42, { front: '#26262a', top: '#3a3a40', side: '#1c1c20' });
-          fillPoly(g, [P(1.16, 1.02, 11.0), P(1.86, 1.02, 11.0), P(1.86, 1.54, 11.0), P(1.16, 1.54, 11.0)], mv === 2 ? '#20180e' : '#141416');
+          if ((Game.flags.o_microwave || {}).open) {   // open: the lit cavity, and the door swung out toward you on its left hinge
+            fillPoly(g, [P(1.16, 1.02, 11.0), P(1.86, 1.02, 11.0), P(1.86, 1.54, 11.0), P(1.16, 1.54, 11.0)], '#d8d4c8'); fillPoly(g, [P(1.22, 1.06, 11.3), P(1.8, 1.06, 11.3), P(1.8, 1.5, 11.3), P(1.22, 1.5, 11.3)], '#ece8dc');
+            const c = P(1.5, 1.06, 11.15); pxEllipse(g, c[0], c[1], 5, 1, 'rgba(200,220,230,0.8)');
+            fillPoly(g, [P(1.12, .98, 11.0), P(.62, .98, 10.55), P(.62, 1.58, 10.55), P(1.12, 1.58, 11.0)], '#26262a'); fillPoly(g, [P(1.06, 1.04, 10.95), P(.7, 1.04, 10.62), P(.7, 1.52, 10.62), P(1.06, 1.52, 10.95)], '#141416');
+          } else fillPoly(g, [P(1.16, 1.02, 11.0), P(1.86, 1.02, 11.0), P(1.86, 1.54, 11.0), P(1.16, 1.54, 11.0)], mv === 2 ? '#20180e' : '#141416');
           { const d = P(1.93, 1.5, 11.0); pxRect(g, d[0], d[1], 4, 1, '#5ae07a'); for (let k = 0; k < 3; k++) pxRect(g, d[0], d[1] + 3 + k * 2, 4, 1, '#4a4a52'); }
           const cd = P(2.3, 1.0, 11.2), pl = P(2.15, 1.25, zb); pxLine(g, cd[0], cd[1], pl[0], pl[1], '#1a1a1c');
           if (mv === 3) { const f = P(2.55, .96, 10.95); pxLine(g, cd[0], cd[1], f[0], f[1] + 2, '#1a1a1c'); pxRect(g, f[0], f[1] + 1, 2, 1, '#d8904a'); } }
@@ -310,9 +326,15 @@
           if (fv === 1) { const c = P(4.33, .3, 10.7); pxRect(g, c[0], c[1] - 3, 1, 4, '#5a5a56'); } }
         // the first aid cabinet on the right wall
         { const av = cond('o_firstaid'), q = Q.right(r.box, 8, 8.8, 1.3, 2.3), b = polyBox(q);
-          fillPoly(g, q, '#f6f6f2'); strokePoly(g, q, '#a8a8a2');
-          if (av === 2) fillPoly(g, [P(r.box.x1 - .25, 1.25, 8.0), P(r.box.x1, 1.3, 8.05), P(r.box.x1, 2.0, 8.05), P(r.box.x1 - .32, 1.95, 8.0)], '#e8e8e2');
-          pxRect(g, b.cx - 1, b.cy - 4, 2, 7, '#d42a2a'); pxRect(g, b.cx - 3, b.cy - 2, 7, 2, '#d42a2a'); }
+          // a white steel cabinet with thickness, the same FIRST AID sign the close-up shows (laid on in perspective), and
+          // when it's open (a plain click, or Touch in the close-up) its door swung out and the shelves inside
+          const x1 = r.box.x1, fx = x1 - .22, open = av !== 2 && !!(Game.flags.o_firstaid && Game.flags.o_firstaid.open), face = [P(fx, 1.3, 8), P(fx, 1.3, 8.8), P(fx, 2.3, 8.8), P(fx, 2.3, 8)];
+          box3(g, fx, x1, 1.3, 2.3, 8, 8.8, { front: '#dcdcd6', top: '#ececE6', bottom: '#bcbcb6' });
+          if (open) { fillPoly(g, face, '#e8e8e0'); for (const y of [1.6, 1.95]) lineW(g, P(fx, y, 8), P(fx, y, 8.8), '#b8b8b0'); const p = P(fx, 1.65, 8.4); pxRect(g, p[0] - 2, p[1] - 3, 5, 3, '#3a6ad0');
+            const d = [P(fx, 1.3, 8.8), P(fx - .78, 1.3, 8.66), P(fx - .78, 2.3, 8.66), P(fx, 2.3, 8.8)]; fillPoly(g, d, '#ececE6'); strokePoly(g, d, '#a8a8a2'); }
+          else { fillPoly(g, face, '#f6f6f2'); strokePoly(g, face, '#a8a8a2');
+            decalX(g, decal('aidsign-office', 30, 34, h => { h.fillStyle = '#f4f4ee'; h.fillRect(0, 0, 30, 34); h.fillStyle = '#2a9a4a'; h.fillRect(1, 1, 28, 9); h.fillStyle = '#ffffff'; h.fillRect(6, 4, 18, 2); h.fillStyle = '#2a9a4a'; h.fillRect(11, 13, 8, 19); h.fillRect(5, 19, 20, 7); }), fx - .005, 8.75, 8.05, 1.38, 2.24); }
+          if (av === 2) fillPoly(g, [P(fx, 1.25, 8.0), P(x1, 1.3, 8.05), P(x1, 2.0, 8.05), P(fx - .1, 1.95, 8.0)], '#e8e8e2'); }
         { const q = Q.right(r.box, 9.5, 10.9, 1.2, 2.5); fillPoly(g, q, '#2a2a30'); fillPoly(g, Q.right(r.box, 9.58, 10.15, 1.28, 2.42), '#f4f0e0'); fillPoly(g, Q.right(r.box, 10.22, 10.82, 1.28, 2.42), '#e8eef4');
           const t0 = P(r.box.x1, 2.3, 9.7), t1 = P(r.box.x1, 2.3, 10.05); pxLine(g, t0[0], t0[1], t1[0], t1[1], '#2a4a8a'); }
         { const q = Q.left(r.box, 9.55, 9.82, 1.2, 1.55); fillPoly(g, q, '#f2ecdc'); strokePoly(g, q, '#a8a08c'); toggleIn(g, q, !r.lightsOff); }
@@ -320,6 +342,7 @@
       },
       dynamic(g, r, t) {
         troffGlow(g, r, -1, 8.2); troffGlow(g, r, 2, 8.2);
+        if ((Game.flags.o_sink || {}).run) { const a = P(-1.95, 1.38, 11.2), b = P(-1.95, .96, 11.2); for (let y = Math.round(a[1]); y < b[1]; y++) pxRect(g, a[0] + ((y + Math.floor(t * 20)) % 4 === 0 ? 1 : 0), y, 1, 1, (y + Math.floor(t * 24)) % 3 ? '#bfe3f4' : '#ffffff'); pxEllipse(g, b[0], b[1], 2 + Math.floor(t * 10) % 2, 1, 'rgba(220,244,255,0.85)'); }   // the faucet, running
         if (cond('o_gfci') === 3 && Settings.get('motion') && (t * 1.3) % 1 < .1) { const c = polyBox(Q.back(r.box, -.58, -.3, 1.12, 1.46)); softGlow(g, c.cx, c.cy, 8, 6, '#ffe08a', .4); pxRect(g, c.cx, c.cy - 2, 1, 1, '#ffffff'); }
         if (cond('o_fridge') === 3 && Settings.get('motion') && (t * .5) % 1 < .5) { const c = P(3.8, 0, 10.5); pxRect(g, c[0] - 3, c[1], 3, 1, 'rgba(230,245,255,0.6)'); }
       }
@@ -367,11 +390,11 @@
         { const a = P(-4, 3.72, 8.9), b = P(4, 3.72, 8.9); pxLine(g, a[0], a[1], b[0], b[1], '#2e3034', 2); pxLine(g, a[0], a[1] - 1, b[0], b[1] - 1, '#5a5e64'); }
         drawSprinklerRoom(g, r);
         // the electrical panel, its clear-space floor marking, and what's (not) in front of it
-        { const pv = cond('o_panel'), fl = flags('o_panel'), q = Q.back(r.box, -3.3, -2.1, .8, 2.6);
+        { const pv = cond('o_panel'), fl = flags('o_panel'), rb = { ...r.box, zb: zb - .1 }, q = Q.back(rb, -3.3, -2.1, .8, 2.6);
           const hatch = Q.floor(-3.6, -1.8, 8.8, 9.98); fillPoly(g, hatch, '#d8b820'); clipDo(g, hatch, () => { for (let x = -4; x < -1.6; x += .25) lineW(g, P(x, 0, 9.98), P(x + .5, 0, 8.8), '#2a2a2a'); });
-          fillPoly(g, q, '#a4a8ae'); fillPoly(g, Q.back(r.box, -3.24, -2.16, .86, 2.54), pv === 3 || fl.open ? '#3a3c40' : '#b4b8be');
-          if (pv === 3 || fl.open) { const bus = Q.back(r.box, -2.75, -2.65, .95, 2.4); fillPoly(g, bus, pv === 3 ? '#d08a4a' : '#c4c6ca'); for (let y = 1; y < 2.4; y += .18) { fillPoly(g, Q.back(r.box, -3.1, -2.8, y, y + .1), '#1c1c20'); fillPoly(g, Q.back(r.box, -2.6, -2.3, y, y + .1), '#1c1c20'); } }
-          else { const s = polyBox(Q.back(r.box, -3.0, -2.4, 2.2, 2.42)); pxRect(g, s.x0, s.y0, s.x1 - s.x0, s.y1 - s.y0, '#1a1a1a'); pxRect(g, s.x0 + 1, s.y0 + 1, s.x1 - s.x0 - 2, 2, '#c42a2a'); const k = P(-2.25, 1.7, zb); pxRect(g, k[0], k[1], 2, 4, '#2a2a2e'); }
+          box3(g, -3.3, -2.1, .8, 2.6, zb - .1, zb, { front: '#a4a8ae', side: '#7a7e84', top: '#c4c8ce', bottom: '#6a6e74' }); fillPoly(g, Q.back(rb, -3.3, -2.1, .8, .86), '#8a8e94'); fillPoly(g, Q.back(rb, -3.24, -2.16, .86, 2.54), pv === 3 || fl.open ? '#3a3c40' : '#b4b8be');   // the panel's tub, standing off the wall
+          if (pv === 3 || fl.open) { const bus = Q.back(rb, -2.75, -2.65, .95, 2.4); fillPoly(g, bus, pv === 3 ? '#d08a4a' : '#c4c6ca'); for (let y = 1; y < 2.4; y += .18) { fillPoly(g, Q.back(rb, -3.1, -2.8, y, y + .1), '#1c1c20'); fillPoly(g, Q.back(rb, -2.6, -2.3, y, y + .1), '#1c1c20'); } }
+          else { const s = polyBox(Q.back(rb, -3.0, -2.4, 2.2, 2.42)); pxRect(g, s.x0, s.y0, s.x1 - s.x0, s.y1 - s.y0, '#1a1a1a'); pxRect(g, s.x0 + 1, s.y0 + 1, s.x1 - s.x0 - 2, 2, '#c42a2a'); const k = P(-2.25, 1.7, zb - .1); pxRect(g, k[0], k[1], 2, 4, '#2a2a2e'); }
           if (pv === 2) { box3(g, -3.4, -2.5, 0, .8, 8.9, 9.6, { front: '#b8905a', top: '#c8a06a', side: '#9a7444' }); box3(g, -2.5, -1.7, 0, .55, 9.05, 9.7, { front: '#ae8650', top: '#c09460', side: '#8a6a3e' }); box3(g, -3.2, -2.7, .8, 1.25, 9.0, 9.45, { front: '#d8d0b8', top: '#e4dcc4', side: '#b8b098' });
             const s = P(-2.95, 1.1, 9.0); pxRect(g, s[0] - 2, s[1] - 2, 5, 4, '#2a3a34'); } }
         // the mini-split AC head, and its line set down the wall
@@ -393,7 +416,7 @@
         { const q = Q.right(r.box, 7.4, 9.6, .9, 3.1); fillPoly(g, q, '#c8a46a'); strokePoly(g, q, '#8a6a3a');
           for (const [za, zb2] of [[7.6, 8.3], [8.6, 9.3]]) fillPoly(g, Q.right(r.box, za, zb2, 1.6, 2.6), '#f0ece0');
           for (let y = 1.7; y < 2.6; y += .12) lineW(g, P(r.box.x1, y, 7.65), P(r.box.x1, y, 8.25), y % .24 < .12 ? '#3a7ac8' : '#c86a3a'); }
-        { const q = Q.right(r.box, 5.65, 6.05, .55, 1.45), b = polyBox(q); pxRect(g, b.x0 + 1, b.y0 + 2, b.x1 - b.x0 - 2, b.y1 - b.y0 - 2, '#c41e18'); pxRect(g, b.x0 + 1, b.y0, 2, 2, '#1a1a1a'); }
+        { const hk = P(r.box.x1, 1.5, 5.85); pxRect(g, hk[0] - 3, hk[1], 3, 2, '#5a5e66'); A.extRoom(g, r.box.x1 - .2, 5.85, .5, 1.32, .11, 'co2'); }   // the CO2 extinguisher on its wall hook
         { const q = Q.left(r.box, 8.45, 8.72, 1.2, 1.55); fillPoly(g, q, '#f2ecdc'); strokePoly(g, q, '#a8a08c'); toggleIn(g, q, !r.lightsOff); }
         sideDoor(g, r, 'left', 6.4, 8.2, '#c4bca8');
         // a single bare-tube strip light hung from the deck
@@ -402,7 +425,7 @@
       dynamic(g, r, t) {
         if (!r.lightsOff) { const c = P(0, 3.6, 7); softGlow(g, c[0], c[1] + 2, 60, 12, '#fffef0', .2); }
         const rv = cond('o_rack'), uv = cond('o_ups'), blink = k => Math.floor(t * 6 + k * 1.7) % 3 === 0;
-        if (rv === 2) for (let k = 0; k < 6; k++) { const c = P(.5 + k * .14, 2.55, 8.4); if (blink(k)) pxRect(g, c[0], c[1], 1, 1, '#6aff6a'); }
+        if (rv === 2) for (let k = 1; k < 10; k += 2) { const c = P(.3 + (80 + k * 8 - 64) / 112 * 1.4, 3.15 * (1 - 11 / 112), 8.4); if (blink(k)) pxRect(g, c[0], c[1], 1, 1, '#6aff6a'); }   // the switch still blinking away
         { const c = P(2.2, .9, 8.7); pxRect(g, c[0], c[1], 1, 1, uv === 3 ? (Math.floor(t * 4) % 2 ? '#ff4a3a' : '#5a1a14') : uv === 1 ? '#f2c418' : '#6aff6a'); }
         if (cond('o_minisplit') === 3 && Settings.get('motion')) { const a = P(-1.4, 2.92, r.box.zb - .1), f = P(-1.45, 0, 9.7), k = (t * 1.3) % 1; pxRect(g, a[0], a[1] + (f[1] - a[1]) * k, 1, 2, '#bfe3f4'); }
         if (uv === 3 && Settings.get('motion')) for (let k = 0; k < 3; k++) { const c = P(2.2 + k * .25, 1.4, 9.1), y = (t * 9 + k * 4) % 8; pxRect(g, c[0] + Math.sin(t * 5 + k) * 1.5, c[1] - y, 1, 1, 'rgba(255,240,220,0.35)'); }
@@ -432,11 +455,14 @@
     for (let k = 0; k < 5; k++) fillPoly(g, floorBlob(-2 + k * 1.1, 6 + hash(k) * 3, .9, .4, k * 5, .3, 14), 'rgba(255,255,255,0.035)');
   }
   /* ---------- the open office's blinds: horizontal mini-blinds, lowered a third of the way, slats tilted open ---------- */
+  let blindLv = 0;   // how far up the blinds are right now (0 lowered a third of the way, 1 stacked at the head rail), easing toward the cord's setting
   function drawBlinds(g, r, t) {
-    const wv = cond('o_window'), zb = r.box.zb, bottom = 2.35;
+    const up = !!(Game.flags.o_window || {}).up; blindLv += ((up ? 1 : 0) - blindLv) * .12; if (Math.abs((up ? 1 : 0) - blindLv) < .01) blindLv = up ? 1 : 0;
+    const wv = cond('o_window'), zb = r.box.zb, bottom = 2.35 + (2.9 - 2.35) * blindLv, step = .065 * (1 - .65 * blindLv), shut = !!(Game.flags.o_window || {}).shut;
     for (const [xa, xb] of [[-6.4, -4.14], [-4.0, -1.8], [-1.66, .6]]) {
       fillPoly(g, Q.back(r.box, xa, xb, 3.0, 3.1), '#c8cacc');
-      for (let y = 2.97, i = 0; y > bottom; y -= .065, i++) {
+      if (shut) fillPoly(g, Q.back(r.box, xa, xb, bottom, 3.0), wv === 1 ? '#d8d4c4' : '#c8cacc');   // tilted shut: no gaps between the slats
+      for (let y = 2.97, i = 0; y > bottom; y -= step, i++) {
         const snapped = wv === 2 && xa === -4.0 && y < 2.8 && y > 2.45;
         const col = wv === 1 ? '#e6e6e0' : '#d8dadc';
         if (snapped) { if (i % 3 === 0) { const a = P(-3.3, y, zb), b = P(-2.9, y - .12, zb); pxLine(g, a[0], a[1], b[0], b[1], col); } lineW(g, P(xa, y, zb), P(-3.4, y, zb), col); lineW(g, P(-2.5, y, zb), P(xb, y, zb), col); continue; }
@@ -466,14 +492,25 @@
   /* the rack in the room view: four black posts, and whatever's (still) in it */
   function drawRackRoom(g, r) {
     const rv = cond('o_rack'), lean = rv === 3 ? .18 : 0, X = (x, y) => x + y * lean / 3.15;
-    const post = (x, z, c) => fillPoly(g, [P(X(x, 0), 0, z), P(X(x + .08, 0), 0, z), P(X(x + .08, 3.15), 3.15, z), P(X(x, 3.15), 3.15, z)], c);
+    // a four-post rack built in depth: back posts, side rails tying front to back, the gear, then the front posts with
+    // their punched mounting holes, a top frame, and the base
+    const post = (x, z, c) => lean ? fillPoly(g, [P(X(x, 0), 0, z), P(X(x + .08, 0), 0, z), P(X(x + .08, 3.15), 3.15, z), P(X(x, 3.15), 3.15, z)], c)   // a leaning rack, flat-sided as it tips
+      : box3(g, x, x + .08, 0, 3.15, z - .08, z, { front: c, side: mix(c, '#000000', .3), top: mix(c, '#ffffff', .15) });
     post(.3, 9.4, '#141416'); post(1.62, 9.4, '#141416');
-    if (rv === 2 || rv === 3) {
-      for (const [y0, y1, c] of rv === 2 ? [[2.4, 2.6, '#2a2a30'], [2.1, 2.35, '#3a4a6a'], [1.6, 1.95, '#1c1c20'], [1.2, 1.5, '#2a2a2e']] : [[2.5, 2.95, '#5a5e66']]) fillPoly(g, [P(X(.38, y0), y0, 8.4), P(X(1.62, y0), y0, 8.4), P(X(1.62, y1), y1, 8.4), P(X(.38, y1), y1, 8.4)], c);
-      if (rv === 2) for (let k = 0; k < 7; k++) { const a = P(.45 + k * .17, 2.45, 8.4), b = P(.5 + k * .15, 1.0 - hash(k) * .5, 8.4); pxLine(g, a[0], a[1], b[0], b[1], ['#3a7ac8', '#e8c34a', '#d43a2a', '#9aa0a8'][k % 4]); }
+    for (const y of [.15, 1.6, 3.05]) for (const x of [.34, 1.66]) lineW(g, P(X(x, y), y, 8.4), P(X(x, y), y, 9.4), '#2a2a30');   // side rails
+    if (rv === 2 || rv === 3) {   // the same gear and cords as the close-up (js/sites/office-art2.js o_rack), mapped onto the rack's front: close-up x 64..176 and y 0..112
+      const M = (x, y) => { const Y = 3.15 * (1 - y / 112); return P(X(.3 + (x - 64) / 112 * 1.4, Y), Y, 8.4); };
+      const gear = rv === 2 ? [[8, 10, '#3a3d46'], [20, 10, '#3a3d46'], [34, 14, '#2a2c32'], [52, 22, '#4a4c54'], [80, 24, '#3a3d46']] : [[4, 26, '#4a4c54'], [32, 22, '#3a3d46']];
+      fillPoly(g, [M(74, 0), M(166, 0), M(166, 112), M(74, 112)], '#16171c');
+      for (const [y, h, c] of gear) { fillPoly(g, [M(74, y), M(166, y), M(166, y + h), M(74, y + h)], c); lineW(g, M(74, y), M(166, y), '#6a6e78'); for (let k = 0; k < 10; k += 2) { const d = M(80 + k * 8, y + 3); pxRect(g, d[0], d[1], 1, 1, '#7bff6b'); } }
+      if (rv === 2) for (let k = 0; k < 12; k++) {   // the patch cords, from the switch ports, sagging, into the panel lower down
+        const a = [84 + k * 7, 15], b = [70 + (k * 13) % 30, 60 + k * 4], c = [(a[0] + b[0]) / 2 + (hash(k) - .5) * 30, Math.max(a[1], b[1]) + 10 + hash(k + 5) * 12], col = ['#3a6ad0', '#d43a2a', '#f2c418', '#f2f2ea'][k % 4];
+        let prev = M(...a); for (let i = 1; i <= 8; i++) { const u = i / 8, q = M((1 - u) * (1 - u) * a[0] + 2 * u * (1 - u) * c[0] + u * u * b[0], (1 - u) * (1 - u) * a[1] + 2 * u * (1 - u) * c[1] + u * u * b[1]); pxLine(g, prev[0], prev[1], q[0], q[1], col); prev = q; }
+      }
     }
     if (rv === 1) for (const x of [.6, 1.3]) { const c = P(x, .5, 8.4); pxRect(g, c[0], c[1], 1, 3, '#3a5ac8'); }
     post(.3, 8.4, '#202024'); post(1.62, 8.4, '#202024');
+    for (const x of [.33, 1.65]) for (let y = .3; y < 3.0; y += .22) { const c = P(X(x, y), y, 8.4); pxRect(g, c[0], c[1], 1, 1, '#5a5e66'); }   // mounting holes down the front posts
     fillPoly(g, [P(X(.3, 3.07), 3.07, 8.4), P(X(1.7, 3.07), 3.07, 8.4), P(X(1.7, 3.15), 3.15, 8.4), P(X(.3, 3.15), 3.15, 8.4)], '#202024');
     for (const x of [.34, 1.66]) { const f = P(x, 0, 8.4); pxRect(g, f[0] - 2, f[1] - (rv === 3 && x < 1 ? 2 : 0), 5, 1, '#3a3a40'); }
     if (rv === 1) { const f = P(1, 0, 8.2); pxLine(g, f[0] - 8, f[1], f[0] + 6, f[1] + 1, 'rgba(220,220,214,0.5)'); }
@@ -490,15 +527,15 @@
     { id: 'o_entry', room: 'o_lobby', name: 'Entry Doors & Lock', say: 'entry door', art: 'o_entry',
       hint: 'Work the lock from the inside, the way someone would in a fire. Then the closer, and the frame around the door.',
       osha: 'An exit door has to open from the inside, every time, without a key, a tool, or special knowledge (1910.36(d)(1)). Whoever swaps a lock cylinder here keeps that true, and keeps the route outside clear while they work (1910.37(a)(3)).',
-      parts: [{ id: 'closer', name: 'door closer', r: [116, 4, 64, 16] }, { id: 'deadbolt', name: 'deadbolt', r: [189, 44, 18, 16] }, { id: 'lever', name: 'lever handle', r: [172, 64, 36, 16] },
-        { id: 'frame', name: 'door frame and wall', r: [208, 0, 32, 124] }, { id: 'bottom', name: 'bottom of the door', r: [16, 104, 192, 22] }, { id: 'glass', name: 'door glass', r: [28, 18, 158, 88] }],
-      base: { glass: { look: 'Through the glass: the building corridor, the door to Suite 205 across the hall, and SUITE 204 in white vinyl, backwards from in here.', touch: 'Cool glass. Fingerprints at exactly the height people push on it.', talk: 'You wave at the corridor. The corridor does not wave back.' },
+      parts: [{ id: 'closer', name: 'door closer', r: [124, 4, 64, 16] }, { id: 'deadbolt', name: 'deadbolt', r: [109, 44, 18, 16] }, { id: 'lever', name: 'lever handles', r: [84, 64, 64, 16] },
+        { id: 'frame', name: 'door frame and wall', r: [208, 0, 32, 124] }, { id: 'bottom', name: 'bottom of the doors', r: [16, 104, 192, 22] }, { id: 'glass', name: 'door glass', r: [22, 14, 180, 90] }],
+      base: { glass: { look: 'Through the glass: the building corridor and the door to the suite across the hall. The suite number is in white vinyl on the left leaf, backwards from in here.', touch: 'Cool glass. Fingerprints at exactly the height people push on it.', talk: 'You wave at the corridor. The corridor does not wave back.' },
         lever: { look: 'A satin-chrome lever. Commercial grade, the kind you can open with an elbow when your hands are full.', touch: 'You press the lever and pull. The latch retracts cleanly. Out you could go.' },
         bottom: { look: 'A bronze bottom rail and an aluminum threshold. A thin rubber sweep.', touch: 'The sweep is soft and intact.' },
         frame: { look: 'A bronze aluminum storefront frame, and plain wall beside it.', touch: 'Solid.' },
         closer: { look: 'A surface door closer with its arm up to the frame. It keeps the door from slamming and makes sure it shuts.' } },
       variants: [
-        { cat: 0, desc: "The suite's glass entry door: a bronze frame, SUITE 204 in white letters on the glass (backwards, from in here).", key: ['lock'],
+        { cat: 0, desc: "The suite's glass entry doors: a bronze frame, the suite number in white letters on the glass (backwards, from in here).", key: ['lock'],
           resp: { deadbolt: { touch: [{ if: 'bolt', t: 'Clack. You turn the thumb-turn back and the bolt draws in.', toggle: 'bolt', sfx: 'click' }, { t: 'Clunk. The thumb-turn throws the deadbolt, and turns back just as easily. Locked from outside, and still one twist to get out from in here.', toggle: 'bolt', clue: 'lock', sfx: 'click' }], look: 'A thumb-turn deadbolt. A quarter turn, no key.' },
             closer: { touch: { t: 'You swing the door open and let go. The closer eases it shut, and the latch clicks home.', clue: 'lock', sfx: 'click' } } },
           why: 'It locks, closes, and opens from the inside without a key, which is what an exit door has to do (29 CFR 1910.36(d)(1)). Nothing to do.' },
@@ -689,12 +726,14 @@
       ] },
     { id: 'o_window', room: 'o_open', name: 'Windows & Blinds', art: 'o_window',
       hint: 'Look at the blinds and the glass. Cracked glass high up is never just cosmetic.',
-      parts: [{ id: 'wand', name: 'blind wand', r: [206, 8, 12, 56] }, { id: 'blinds', name: 'mini-blinds', r: [22, 4, 184, 52] }, { id: 'glass', name: 'window glass', r: [22, 56, 196, 56] }, { id: 'sill', name: 'window sill', r: [0, 114, 240, 21] }],
+      parts: [{ id: 'cord', name: 'lift cord', r: [24, 4, 12, 72] }, { id: 'wand', name: 'blind wand', r: [206, 8, 12, 56] }, { id: 'blinds', name: 'mini-blinds', r: [22, 4, 184, 52] }, { id: 'glass', name: 'window glass', r: [22, 56, 196, 56] }, { id: 'sill', name: 'window sill', r: [0, 114, 240, 21] }],
       base: { glass: { look: 'Second floor, over the parking lot, and the office park across the way.', talk: 'You wave at the building across the street. Nobody over there waves back. Nobody over there ever waves back.', touch: 'Cool, double-glazed.' },
-        sill: { look: 'A deep laminate sill. Every office plant in the building once lived on one of these.', touch: 'Dusty, and a little sticky where a plant leaked.' }, wand: { touch: 'You twist the wand. The slats tilt shut, then open again. Satisfying.' } },
+        cord: { look: 'The lift cord, knotted where somebody shortened it.', touch: [{ if: 'up', t: 'You ease the cord. The blinds clatter back down to where they were.', toggle: 'up', sfx: 'swish' }, { t: 'You pull the lift cord. The blinds rattle up and stack at the head rail.', toggle: 'up', sfx: 'swish' }] },
+        sill: { look: 'A deep laminate sill. Every office plant in the building once lived on one of these.', touch: 'Dusty, and a little sticky where a plant leaked.' }, wand: { touch: [{ if: 'shut', t: 'You twist the wand back. The slats tilt open and the daylight comes in in stripes.', toggle: 'shut', sfx: 'click' }, { t: 'You twist the wand. The slats tilt shut, and the room goes dim.', toggle: 'shut', sfx: 'click' }] },
+        blinds: { touch: [{ if: 'up', t: 'You let the blinds down. They clatter back to where they were.', toggle: 'up', sfx: 'swish' }, { t: 'You haul them up. The slats stack under the head rail with a rattle.', toggle: 'up', sfx: 'swish' }] } },
       variants: [
         { cat: 0, desc: 'A ribbon of windows with aluminum mini-blinds.', key: ['clear'],
-          resp: { glass: { look: { t: 'Clear glass, clean frames. The parking lot, the office park, a tree being a tree.', clue: 'clear' } }, blinds: { look: { t: 'Every slat straight and present.', clue: 'clear' }, touch: 'They clatter politely.' } },
+          resp: { glass: { look: { t: 'Clear glass, clean frames. The parking lot, the office park, a tree being a tree.', clue: 'clear' } }, blinds: { look: { t: 'Every slat straight and present.', clue: 'clear' }, touch: [{ if: 'up', t: 'You let the blinds down. They clatter back to where they were.', toggle: 'up', sfx: 'swish' }, { t: 'You haul them up. The slats stack under the head rail with a rattle.', toggle: 'up', sfx: 'swish' }] } },
           why: 'Clean glass, straight blinds. Nothing to do.' },
         { cat: 1, desc: 'The blinds are faded, with a few kinked slats.', key: ['kink'],
           resp: { blinds: { look: { t: 'Faded slats, and a few kinked where somebody bent them down to see out. Every day. For eight years.', clue: 'kink' }, touch: { t: 'You try to straighten a kink. It stays kinked.', clue: 'kink' } } },
@@ -752,7 +791,7 @@
       parts: [{ id: 'faucet', name: 'faucet', r: [96, 2, 48, 26] }, { id: 'basin', name: 'sink basin', r: [66, 28, 110, 34] }, { id: 'cabinet', name: 'cabinet under the sink', r: [26, 68, 188, 67] }],
       base: { cabinet: { touch: [{ if: 'open', t: 'You close the cabinet doors.', toggle: 'open', sfx: 'click' }, { t: 'You open the cabinet doors.', toggle: 'open', sfx: 'click' }], look: [{ if: 'open', t: 'Pipes, shut-off valves, and a lot of shadow. Try the flashlight.' }, { t: 'Two laminate doors with wire pulls.' }], smell: 'Old coffee grounds.' },
         basin: { look: 'A single stainless basin, a coffee-stained drain, and the ghost of a thousand rinsed mugs.' },
-        faucet: { look: 'A chrome single-lever gooseneck faucet.', touch: 'You lift the lever. Water runs hot after a few seconds. You shut it off.' } },
+        faucet: { look: 'A chrome single-lever gooseneck faucet.', touch: [{ if: 'run', t: 'You push the lever down. The water stops with a shudder in the pipes.', toggle: 'run', sfx: 'click' }, { t: 'You lift the lever. Water runs, hot after a few seconds.', toggle: 'run', sfx: 'click' }] } },
       variants: [
         { cat: 0, desc: 'A stainless break room sink, laminate cabinet below. Clean and dry.', key: ['dry'],
           resp: { cabinet: { flashlight: [DOORS_SHUT, { t: 'Dry, clean, nothing left behind. Tight fittings.', clue: 'dry', sfx: 'light' }] }, basin: { touch: { t: 'Dry and clean.', clue: 'dry' }, smell: 'Lemon dish soap.' } },
@@ -863,14 +902,14 @@
       hint: 'Open it. Is it stocked, and is the cabinet itself in one piece?',
       osha: 'First aid supplies have to be readily available (1910.151(b)), and where anyone works with corrosive chemicals, there is a place to flush the eyes (1910.151(c)). The next tenant restocks; the building keeps the cabinet.',
       parts: [{ id: 'latch', name: 'latch', r: [148, 56, 14, 18] }, { id: 'cabinet', name: 'first aid cabinet', r: [74, 10, 92, 112] }],
-      base: { cabinet: { touch: [{ if: 'open', t: 'You close the cabinet. Click.', toggle: 'open', sfx: 'click' }, { t: 'You flip the latch and open the cabinet.', toggle: 'open', sfx: 'click' }], look: [{ if: 'open', t: 'Shelves of first aid supplies.' }, { t: 'A white steel first aid cabinet with a red cross.' }], smell: 'Rubbing alcohol and adhesive bandages.' },
+      base: { cabinet: { touch: [{ if: 'open', t: 'You close the cabinet. Click.', toggle: 'open', sfx: 'click' }, { t: 'You flip the latch and open the cabinet.', toggle: 'open', sfx: 'click' }], look: [{ if: 'open', t: 'Shelves of first aid supplies.' }, { t: 'A white steel first aid cabinet with a green FIRST AID sign.' }], smell: 'Rubbing alcohol and adhesive bandages.' },
         latch: { touch: [{ if: 'open', t: 'You close it. Click.', toggle: 'open', sfx: 'click' }, { t: 'You flip the latch.', toggle: 'open', sfx: 'click' }] } },
       variants: [
         { cat: 0, desc: 'A wall-mounted first aid cabinet.', key: ['stocked'],
-          resp: { cabinet: { look: [{ if: 'open', t: 'Bandages, gauze, gloves, burn gel, an eyewash bottle, scissors. All stocked, all in date.', clue: 'stocked' }, { t: 'A white steel first aid cabinet with a red cross.' }], flashlight: [SHUT, { t: 'Everything sealed and in date.', clue: 'stocked' }] } },
+          resp: { cabinet: { look: [{ if: 'open', t: 'Bandages, gauze, gloves, burn gel, an eyewash bottle, scissors. All stocked, all in date.', clue: 'stocked' }, { t: 'A white steel first aid cabinet with a green FIRST AID sign.' }], flashlight: [SHUT, { t: 'Everything sealed and in date.', clue: 'stocked' }] } },
           why: 'Stocked, mounted, and easy to find (29 CFR 1910.151(b) wants first aid supplies readily available). Nothing to do.' },
         { cat: 1, desc: 'The first aid cabinet looks a little light.', key: ['used'],
-          resp: { cabinet: { look: [{ if: 'open', t: 'Raided: empty bandage boxes, one lonely gauze pad, and the burn gel used up. Nothing broken, just used.', clue: 'used' }, { t: 'A white steel first aid cabinet with a red cross.' }], touch: [{ if: 'open', t: 'You close the cabinet. Click.', toggle: 'open', sfx: 'click' }, { t: 'You open it. Hinges fine, latch fine.', toggle: 'open', clue: 'used', sfx: 'click' }] } },
+          resp: { cabinet: { look: [{ if: 'open', t: 'Raided: empty bandage boxes, one lonely gauze pad, and the burn gel used up. Nothing broken, just used.', clue: 'used' }, { t: 'A white steel first aid cabinet with a green FIRST AID sign.' }], touch: [{ if: 'open', t: 'You close the cabinet. Click.', toggle: 'open', sfx: 'click' }, { t: 'You open it. Hinges fine, latch fine.', toggle: 'open', clue: 'used', sfx: 'click' }] } },
           why: 'Supplies get used; that is what they are for. Restocking is routine. Normal wear.' },
         { cat: 2, cost: 110, desc: 'The first aid cabinet door is crooked.', key: ['hinge'],
           resp: { cabinet: { look: { t: 'The door hangs by its bottom hinge, wrenched sideways. The top hinge is torn out of the steel.', clue: 'hinge' }, touch: { t: 'It swings on one bent hinge. It won\'t close.', clue: 'hinge' }, screwdriver: { t: "The hinge screws pulled right through the metal. That can't be tightened, only replaced.", clue: 'hinge', sfx: 'unscrew' } },
@@ -937,9 +976,10 @@
         { cat: 1, desc: 'The UPS display is amber.', key: ['age'],
           resp: { display: { look: { t: 'REPL BATT: the batteries are five years old and reaching the end of their life. Everything else is green.', clue: 'age' } }, vents: { look: { t: 'Gray dust furring the intake vents.', clue: 'age' }, touch: 'The draft is weaker through the dust.' }, side: { touch: 'Barely warm.' } },
           why: 'UPS batteries age out after a few years, and vents collect dust. Swap the batteries and vacuum it: normal wear.' },
-        { cat: 2, cost: 180, desc: 'A brown streak runs down the front of the UPS.', key: ['spill'],
+        { cat: 2, cost: 180, desc: 'A paper coffee cup lies on its side on top of the UPS, and dried coffee runs down its front.', key: ['spill'],
           resp: { top: { look: { t: 'A coffee ring, and the dried trail of a whole cup down the front and into the vents. Somebody used it as a side table.', clue: 'spill' }, smell: 'Stale coffee.' },
-            vents: { look: { t: 'Dried coffee in the vent slots, and the front bezel cracked at the corner.', clue: 'spill' } }, display: { look: 'ONLINE. It survived. This time.' } },
+            vents: { look: { t: 'Dried coffee in the vent slots, and the front bezel cracked at the corner.', clue: 'spill' }, smell: 'Stale coffee, cooked a little by the fans.' },
+            display: { look: { t: 'ONLINE, 98%. It survived, this time. The plastic bezel around the screen is cracked from its top corner, like something hard hit it.', clue: 'spill' }, touch: { t: 'You run a finger along the crack in the bezel. It flexes; the clip behind it is broken.', clue: 'spill' } } },
           why: 'Spilled coffee into the vents and a cracked bezel are misuse, not wear. Clean and repair the unit and charge it, with a photo.' },
         { cat: 3, desc: 'There is a strange smell near the UPS.', key: ['sulfur', 'hot', 'swollen'],
           resp: { side: { look: { t: 'The side panel bows outward. The batteries inside have swollen.', clue: 'swollen' }, touch: { t: 'Hot. Far too hot to keep your hand on.', clue: 'hot' } }, vents: { smell: { t: 'Rotten eggs. A battery is venting.', clue: 'sulfur', sfx: 'hiss' } },
@@ -1109,8 +1149,8 @@
     o_plant: { name: 'Desk plant', look: 'A pothos in a plastic pot, still hanging on. It survived eight years of fluorescent light. Nobody took it to the new office.', touch: 'The soil is bone dry. You feel a little responsible now.', smell: 'Dusty leaves.', take: 'You take the plant. You are going to water it. You promise.', draw: sprite('o_plant') },
     o_motposter: { name: 'Motivational poster', look: "A framed poster: a mountain at sunrise, and under it in white capitals, ACHIEVEMENT. Smaller: 'The only limit is the one you set for yourself.'", touch: 'The frame is cheap and the glass is plastic. Like most promises.', smell: 'Dust.', draw: sprite('o_motposter') },
     o_nameplate: { name: 'Desk nameplate', look: "A brass desk nameplate: BILL L., VICE PRESIDENT. Yeah. If you could go ahead and pick that up, that'd be great.", touch: 'Heavy for its size. Brass-colored, anyway.', smell: 'Brass polish and authority.', draw: sprite('o_nameplate') },
-    o_fax: { name: 'Fax machine', look: "A beige fax machine with one fax still in the tray: 'URGENT: PLEASE CONFIRM RECEIPT OF THIS FAX.' Nobody confirmed.", touch: 'Heavy. The handset has a curly cord that has been twisted into a knot.', smell: 'Thermal paper.', draw: sprite('o_fax') },
-    o_crt: { name: 'CRT monitor', look: 'A 17-inch CRT monitor, beige, deep as it is wide. Flat panels killed it, and it knows.', touch: 'You try to lift it. It weighs as much as a small dog. A dense, beige dog.', smell: 'Static.', draw: sprite('o_crt') },
+    o_fax: { noTake: "It's still tethered to the wall jack by its phone cord, and it's the size of a bread box. It goes out with the e-waste, not in your bag.", name: 'Fax machine', look: "A beige fax machine with one fax still in the tray: 'URGENT: PLEASE CONFIRM RECEIPT OF THIS FAX.' Nobody confirmed.", touch: 'Heavy. The handset has a curly cord that has been twisted into a knot.', smell: 'Thermal paper.', draw: sprite('o_fax') },
+    o_crt: { noTake: "You get it about an inch off the floor before you think better of it. It weighs as much as a small dog, and it's headed for the e-waste pile, not your bag.", name: 'CRT monitor', look: 'A 17-inch CRT monitor, beige, deep as it is wide. Flat panels killed it, and it knows.', touch: 'You try to lift it. It weighs as much as a small dog. A dense, beige dog.', smell: 'Static.', draw: sprite('o_crt') },
     o_zipdisk: { name: 'Zip disk', look: "A 100 MB Zip disk labeled BACKUP FINAL FINAL (2). Whatever was on it is gone forever now.", touch: 'It rattles faintly. That is not a good sign for a disk.', smell: 'Plastic.', draw: sprite('o_zipdisk') },
     o_keyboard: { name: 'Keyboard', look: 'A beige keyboard. The Ctrl, C, and V keys are worn shiny. Someone was very productive.', touch: 'Crumbs rain out when you tilt it. A whole lunch, in installments.', smell: 'Crumbs and hand lotion.', draw: sprite('o_keyboard') },
     o_bossmug: { name: "'World's Best Boss' mug", look: "A white mug: WORLD'S BEST BOSS. Bought by the boss, you suspect. Still has a coffee ring inside.", touch: 'You hook a finger through the handle. You feel, briefly, like the best boss.', smell: 'Old coffee. Leadership.', draw: sprite('o_bossmug') },
@@ -1154,7 +1194,7 @@
       <p class="pg-co">BRICKROAD PROPERTY MGMT.</p>
       <h2>Standard Operating Procedure 7.1</h2>
       <p class="pg-sub">Commercial Lease-End Condition Codes</p>
-      <p class="pg-note">Keep this binder in the truck. Do not use it to prop open a fire door.</p>
+      <p class="pg-note">Keep this binder in the truck. Do not use as a coaster, or to prop open a fire door.</p>
       <span class="coffee" aria-hidden="true"></span>
     </div>
     <div class="pg">
@@ -1249,7 +1289,7 @@
         (cold.length ? ` You haven't really looked around the ${list(cold)} yet.` : ' Did you open every cabinet, work every lock, and look up at the ceilings?');
     } },
     { q: 'Can I borrow your BlackBerry?', a: () => { setTimeout(() => { UI.close('dialogueScreen'); BlackBerry.open(); }, 900); return BlackBerry.pending().length ? "For Gus? Sure. He's under GUS (MAINT). Don't read my texts." : "Sure. Don't read my texts. ...You're going to read my texts."; } },
-    { q: 'So... how are you?', a: () => DANA_SMALLTALK[Game.smallTalk++ % DANA_SMALLTALK.length] },
+    { q: 'So... how are you?', a: () => { const l = danaSays('small', null, DANA_SMALLTALK); return l[Game.smallTalk++ % l.length]; } },
     { q: "Let's get back to it.", a: null }
   ];
   /* sub-par but defensible calls: partial credit (js/partial-marks.js) */
@@ -1275,9 +1315,18 @@
     music: 'office',
     id: 'office', place: 'Suite', kind: 'Commercial Offices', tag: 'A Lease-End Inspection Adventure',
     form: 'LEASE-END INSPECTION', report: 'Lease-End Report',
-    start: 'o_lobby',
+    start: 'o_lobby', exit: { id: 'o_entry', name: 'Entry Doors' },
     calls: false,   // the apartment's deposit calls are about residents and an $800 deposit; a business tenant's dispute is a letter from counsel
-    words: { tenant: 'tenant', deposit: 'security deposit', damage: 'tenant damage', where: 'suite', manager: 'Pat' },
+    words: { tenant: 'tenant', deposit: 'security deposit', damage: 'tenant damage', where: 'suite', manager: 'Pat', air: 'stale office air and old toner' },
+    dana: {
+      small: ["I applied to Synergex once. They asked where I saw myself in five years. I said 'not here.' I didn't get the job.",
+        "Somebody left a Dilbert desk calendar here with every single day of 2007 still on it. That's commitment.",
+        "This carpet is the exact color of every office I've ever been bored in.",
+        "Did they have a ping pong table? There are scuff marks like they had a ping pong table. They took it, didn't they.",
+        "My mom keeps forwarding me chain emails. FW: FW: FW: Bill Gates will pay you to forward this.",
+        "I'm still on season two of LOST. No spoilers. I mean it. I will mark YOU as a hazard."],
+      barks: ["Smells like toner and sad birthday cake in here.", "Somebody's poster is still up. HANG IN THERE. I'm trying, kitten.", "I keep expecting a phone to ring in one of these cubicles."],
+      smell: 'Vanilla body spray and copier toner.', flashlight: "'Ow! Point that at the server rack!'" },
     opener: unit => `Suite ${unit}! Synergex moved out Friday, and the landlord wants to know what comes out of their security deposit. Walls, floors, ceilings, the server room, all of it. If they broke it or didn't put it back, write it up; if it could hurt somebody, flag it. Finish is up top, boss.`,
     ppe: null,      // nothing to suit up for in an office (you would look very silly in a hard hat)
     sop: SOP_O,
@@ -1307,9 +1356,9 @@
         o_break: [['#e4dcc8', '#b8c4c8', '#c8c0ac'], ['#ece6d6', '#c8b89a', '#d0c8b4'], ['#dcdcd4', '#a8b4a0', '#c4c4bc']],
         o_server: [{ base: '#a8a69e', dk: '#96948c', lt: '#bab8b0' }, { base: '#9a9c9e', dk: '#8a8c8e', lt: '#acaeb0' }]
       },
-      DOORS: OFD.DOORS, CONTAINERS: OFD.CONTAINERS, ROOM_TOUCH: OFD.ROOM_TOUCH,   // the break room's cabinets and fridge (js/sites/office-doors.js)
+      DOORS: OFD.DOORS, CONTAINERS: OFD.CONTAINERS,   // the break room's cabinets and fridge (js/sites/office-doors.js)
       BRIEFING: BRIEFING_O, BLANK: BLANK_O, DANA_TOPICS: DANA_TOPICS_O, ACCEPTABLE: ACCEPTABLE_O, EXTRAS: EXTRAS_O,
-      ROOM_TOUCH: { o_fridge: 'handle', o_microwave: 'door', o_firstaid: 'cabinet', o_extinguisher: 'door' },
+      ROOM_TOUCH: { ...OFD.ROOM_TOUCH, o_microwave: 'door', o_firstaid: 'cabinet', o_extinguisher: 'door' },   // one table (a second ROOM_TOUCH key here used to override the first and drop the sink, blinds, and panel)
       UNITS: ['110', '118', '206', '212', '300', '315', '402', '410', '501', '515']
     }
   });
