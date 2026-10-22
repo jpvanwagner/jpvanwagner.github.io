@@ -1,0 +1,36 @@
+/* Design tokens - muted, paper-y, professional office palette. */
+:root {
+  --paper: #ebe8e1;
+  --paper-2: #f4f2ed;
+  --card: #fbfaf7;
+  --ink: #262a31;
+  --ink-2: #4b5260;
+  --ink-3: #7b8190;
+  --line: #d9d4c8;
+  --line-2: #e7e3da;
+
+  --c-guest: #e28743;
+  --c-guest-soft: #fbeadb;
+  --c-employee: #6fae45;
+  --c-employee-soft: #e4f1da;
+  --c-officer: #1f2937;
+  --c-officer-soft: #e3e6ea;
+
+  --ok: #3f8a4c;
+  --ok-soft: #e1f0e2;
+  --danger: #c0473a;
+  --danger-soft: #f8e1dd;
+  --warn: #d38a1f;
+  --warn-soft: #fbefd8;
+  --info: #2f6fb0;
+  --info-soft: #dfeaf6;
+
+  --radius: 6px;
+  --shadow: 0 1px 2px rgba(40, 36, 28, 0.06), 0 4px 14px rgba(40, 36, 28, 0.07);
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+  --topbar-h: 58px;
+  --ui-zoom: 1; /* set by ui/Layout.js */
+  --dock-h: 264px;
+}

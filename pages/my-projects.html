@@ -10,20 +10,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="page-version" content="1f93e934">
+    <meta name="page-version" content="a4748621">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projects</title>
     <meta name="description" content="What Joseph VanWagner is building now: Scenemaker, a branching-scenario authoring tool, and Midnight at the Multiplex, a retro life and work sim with a supernatural streak.">
     <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
     <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
     <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
-    <link rel="stylesheet" href="css/classic.css?v=90379466">
+    <link rel="stylesheet" href="css/classic.css?v=36ab3463">
     <link rel="stylesheet" href="../shared/share.css?v=ebba4e48">
-    <link rel="stylesheet" href="css/modern.css?v=0ffe9a82">    <!-- Traditional View look (not used inside the Retro Desktop) -->
-    <script src="../config/site-config.js?v=bc1e2cbf"></script>
-    <script src="../config/shared-content.js?v=3cd2f224"></script>   <!-- stats, colleague quotes (shared) -->
+    <link rel="stylesheet" href="css/modern.css?v=3e888b3d">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=cfeec6d1"></script>
+    <script src="../config/shared-content.js?v=12d7c148"></script>   <!-- stats, colleague quotes (shared) -->
     <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
-    <script src="js/classic.js?v=8ddee710"></script>
+    <script src="js/classic.js?v=771fd672"></script>
+    <script src="js/page-toc.js?v=d252b5e8"></script>             <!-- "On this page" box from the headings -->
     <script src="js/search.js?v=92eeb169"></script>
     <script src="../shared/share.js?v=726959f6"></script>
 </head>
@@ -33,7 +34,7 @@
     <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
     <header class="site-header"></header>
 
-    <main id="content">
+    <main id="content" data-toc="nested">
         <!-- PROJECTS: what I'm building, in two groups (Tools, Games), each newest first, in the order I started them.
              (Past work, like sample courses and training games built for work, lives on the Portfolio page.) -->
         <section class="panel">
@@ -41,7 +42,8 @@
                 <h1>Projects</h1>
                 <p class="lede">What I'm building, newest first.</p>
                 <p>These are my own projects: tools that make course building faster and games that teach something while you
-                   play. Looking for finished client work, like sample courses? That's in my <a href="projects.html">Portfolio</a>.</p>
+                   play. For examples of the work I do as an instructional designer, like sample courses and training games,
+                   see my <a href="projects.html">Portfolio</a>.</p>
             </div>
         </section>
 
@@ -49,8 +51,27 @@
             <div class="panel-body">
                 <h2>Tools</h2>
                 <p>Software I build to solve problems I keep running into as an instructional designer: authoring branching
-                   scenarios without an expensive subscription, keeping a large course library organized, and more on the way.</p>
+                   scenarios without an expensive subscription, keeping a large course library organized, staying on top of
+                   busy Asana projects without the noise, taming a browser full of tabs, and more on the way.</p>
                 <div class="grid project-grid" id="building">
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-zentabs.html" tabindex="-1" aria-hidden="true" title="Open ZenTabs"><img src="../images/projects/zentabs/card.jpg" alt="The ZenTabs tab list in a light and a dark theme" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Tool · Free Windows download</p>
+                            <h3><a href="project-zentabs.html">ZenTabs</a></h3>
+                            <p>A calm list of every tab open in your browsers, how long each has been open, and a gentle &ldquo;still need this tab?&rdquo; for the ones that linger. As a window, or a slim bar docked like a second taskbar.</p>
+                            <div class="links"><a href="project-zentabs.html">About &amp; preview</a><a href="https://github.com/Nostalginaut/zentabs-releases/releases/latest/download/ZenTabs-portable.zip">Download</a></div>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="thumb"><a class="thumb-link" href="project-vinyasa.html" tabindex="-1" aria-hidden="true" title="Open Vinyasa"><img src="../images/projects/vinyasa/card.jpg" alt="The Vinyasa notification window in a light and a dark theme" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Tool · Free Windows download</p>
+                            <h3><a href="project-vinyasa.html">Vinyasa</a></h3>
+                            <p>Calm notifications for the Asana projects you care about: new, completed, and moved tasks, with a gentle singing-bowl chime. As a window, or a one-line ticker beside ZenTabs.</p>
+                            <div class="links"><a href="project-vinyasa.html">About &amp; preview</a><a href="https://github.com/Nostalginaut/vinyasa-releases/releases/latest/download/Vinyasa-portable.zip">Download</a></div>
+                        </div>
+                    </article>
                     <article class="card">
                         <div class="thumb"><a class="thumb-link" href="project-course-catalog.html" tabindex="-1" aria-hidden="true" title="Open LMS Course Catalog"><img src="../images/projects/course-catalog/card.jpg" alt="The course catalog: a table of courses with color-coded course codes" loading="lazy"></a></div>
                         <div class="content">
@@ -91,19 +112,39 @@
             </div>
         </section>
 
-        <section class="panel" id="games">
+        <section class="panel" id="my-games">
             <div class="panel-body">
                 <h2>Games</h2>
                 <p>Games I design and program myself, from arcade quizzes and training simulations to a story-driven adventure.
                    Most of them teach something along the way, and every one plays right in your browser.</p>
                 <div class="grid project-grid">
+                    <!-- id="beyond-the-stacks-card": games.html shows this same card too (js/collection.js), so edit it only here -->
+                    <article class="card" id="beyond-the-stacks-card">
+                        <div class="thumb"><a class="thumb-link" href="project-game-beyond-the-stacks.html" tabindex="-1" aria-hidden="true" title="Open Beyond The Stacks"><img src="../images/games/beyond-the-stacks.jpg" alt="An isometric 3D view of a public library during a morning storytime, beside a program calendar" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Learning game · Early development · Play it in your browser</p>
+                            <h3><a href="project-game-beyond-the-stacks.html">Beyond The Stacks</a></h3>
+                            <p>A job simulator for library programming, built from real-world scenarios and the experience of programming professionals: plan a year of programs for the whole community and see how it plays out.</p>
+                            <div class="links"><a href="project-game-beyond-the-stacks.html">About &amp; demo</a><a href="../games/beyond-the-stacks/index.html?v=9b13e9bb" target="_blank" rel="noopener">Play the game</a></div>
+                        </div>
+                    </article>
+                    <!-- id="restaurant-rush-card": games.html shows this same card too (js/collection.js), so edit it only here -->
+                    <article class="card" id="restaurant-rush-card">
+                        <div class="thumb"><a class="thumb-link" href="project-game-restaurant-rush.html" tabindex="-1" aria-hidden="true" title="Open Mama Maggie's Restaurant Rush"><img src="../images/games/restaurant-rush.jpg" alt="An overhead 3D view of a trattoria dining room at lunch, with labeled tables, the kitchen, and the bar" loading="lazy"></a></div>
+                        <div class="content">
+                            <p class="kicker">Game · Play it in your browser</p>
+                            <h3><a href="project-game-restaurant-rush.html">Mama Maggie's Restaurant Rush</a></h3>
+                            <p>A restaurant-management game set in a family Italian trattoria: seat guests, take orders, mix drinks, and fire pizzas through lunch and dinner, then hire and train the crew who keep it running.</p>
+                            <div class="links"><a href="project-game-restaurant-rush.html">About &amp; demo</a><a href="../games/restaurant-rush/index.html?v=fbb17b0a" target="_blank" rel="noopener">Play the game</a></div>
+                        </div>
+                    </article>
                     <article class="card">
                         <div class="thumb"><a class="thumb-link" href="project-game-unit-204.html" tabindex="-1" aria-hidden="true" title="Open Unit 204"><img src="../images/games/unit-204.jpg" alt="Unit 204 title screen: the inspector and Dana in a pixel-art apartment hallway, with a card for each of the four properties" loading="lazy"></a></div>
                         <div class="content">
                             <p class="kicker">Learning game · Play it in your browser</p>
                             <h3><a href="project-game-unit-204.html">Unit 204</a></h3>
                             <p>A pixel-art point-and-click inspection game: look, touch, smell, and measure your way through an empty apartment, an office suite, a warehouse, or a jobsite, then make the call on each finding.</p>
-                            <div class="links"><a href="project-game-unit-204.html">About &amp; demo</a><a href="../games/unit-204/index.html?v=d6b7887b" target="_blank" rel="noopener">Play the game</a></div>
+                            <div class="links"><a href="project-game-unit-204.html">About &amp; demo</a><a href="../games/unit-204/index.html?v=b2aa92e7" target="_blank" rel="noopener">Play the game</a></div>
                         </div>
                     </article>
                     <article class="card">
@@ -116,10 +157,10 @@
                         </div>
                     </article>
                     <article class="card">
-                        <div class="thumb"><a class="thumb-link" href="project-game-right-this-way.html" tabindex="-1" aria-hidden="true" title="Open Right This Way, Please"><img src="../images/games/right-this-way.jpg" alt="A 3D camera view of the visitor center with a waiting line and an officer" loading="lazy"></a></div>
+                        <div class="thumb"><a class="thumb-link" href="project-game-right-this-way.html" tabindex="-1" aria-hidden="true" title="Open Right This Way, Please!"><img src="../images/games/right-this-way.jpg" alt="A 3D camera view of the visitor center with a waiting line and an officer" loading="lazy"></a></div>
                         <div class="content">
                             <p class="kicker">Learning game · Play it in your browser</p>
-                            <h3><a href="project-game-right-this-way.html">Right This Way, Please</a></h3>
+                            <h3><a href="project-game-right-this-way.html">Right This Way, Please!</a></h3>
                             <p>An access control management simulator: run the front desk, check IDs, call escorts, and keep every visitor accounted for.</p>
                             <div class="links"><a href="project-game-right-this-way.html">About &amp; demo</a><a href="../games/right-this-way/index.html?v=6ce3976c" target="_blank" rel="noopener">Play the game</a></div>
                         </div>
@@ -130,7 +171,7 @@
                             <p class="kicker">Learning game · Play it in your browser</p>
                             <h3><a href="project-game-mall-run.html">Mall Run</a></h3>
                             <p>An endless 3D runner through a shopping mall: grab coins, dodge shoppers, and answer quick questions to earn power-ups.</p>
-                            <div class="links"><a href="project-game-mall-run.html">About &amp; demo</a><a href="../games/mall-run/index.html?v=3cb0bf8f" target="_blank" rel="noopener">Play the game</a></div>
+                            <div class="links"><a href="project-game-mall-run.html">About &amp; demo</a><a href="../games/mall-run/index.html?v=bc01029a" target="_blank" rel="noopener">Play the game</a></div>
                         </div>
                     </article>
                     <article class="card">
@@ -139,7 +180,7 @@
                             <p class="kicker">Game collection · Three games and a builder</p>
                             <h3><a href="project-quizcade.html">Quizcade</a></h3>
                             <p>Three arcade quiz games (Quizaga, Quiz-Guy, and Quizcavator) plus a builder for making your own versions, ready for Rise 360 or any LMS.</p>
-                            <div class="links"><a href="project-quizcade.html">About &amp; demo</a><a href="../games/builder/index.html?v=db6e96a1" target="_blank" rel="noopener">Open the builder</a></div>
+                            <div class="links"><a href="project-quizcade.html">About &amp; demo</a><a href="../games/builder/index.html?v=3df94cbb" target="_blank" rel="noopener">Open the builder</a></div>
                         </div>
                     </article>
                     <!-- id="midnight-card": games.html shows this same card too (js/collection.js), so edit it only here -->

@@ -206,7 +206,7 @@ window.Browser = {
                 </div>
 
                 <div class="bevel-in" style="flex-grow:1; position:relative; background:#fff; margin:2px; overflow:hidden;">
-                    <iframe id="browser-iframe-${instId}" src="${targetUrl}" style="width:100%; height:100%; border:none; position:absolute; top:0; left:0;" onload="window.Browser.onIframeLoad('${instId}')"></iframe>
+                    <iframe id="browser-iframe-${instId}" src="${targetUrl}" allow="fullscreen; autoplay; clipboard-write" allowfullscreen style="width:100%; height:100%; border:none; position:absolute; top:0; left:0;" onload="window.Browser.onIframeLoad('${instId}')"></iframe>
                 </div>
 
                 <div style="padding:2px 5px; font-size:11px; background:var(--ui-face); color:var(--ui-text); display:flex; justify-content:space-between; border-top: 1px solid var(--ui-light);">

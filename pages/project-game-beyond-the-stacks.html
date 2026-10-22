@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-GAME-BEYOND-THE-STACKS.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+    The game lives in /games/beyond-the-stacks/ (synced from the GAME--Beyond-The-Stacks repo by the hub sync).
+    Screenshots: images/games/beyond-the-stacks/<name>.webp + thumbs/<name>.jpg (480x300). The names are
+    generic (library-3d, basement, series...) so a new screenshot can simply replace the old file.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="a9ceb642">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beyond The Stacks: library programming simulator</title>
+    <meta name="description" content="Beyond The Stacks, a library programming job simulator by Joseph VanWagner, built from real-world scenarios and the experience of library programming professionals: plan a year of public programs for seniors, adults, teens and families. Early development.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=36ab3463">
+    <link rel="stylesheet" href="../shared/share.css?v=ebba4e48">
+    <link rel="stylesheet" href="css/modern.css?v=3e888b3d">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=cfeec6d1"></script>
+    <script src="../config/shared-content.js?v=12d7c148"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=771fd672"></script>
+    <script src="js/tip-bar.js?v=8c4ef0d2"></script>              <!-- "Buy me a coffee" bar below the tool/game -->
+    <script src="js/page-toc.js?v=d252b5e8"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/lightbox.js?v=af09d593">        </script>   <!-- click a screenshot to see it full size -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=32b0920c"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=726959f6"></script>
+</head>
+<body data-title="Beyond The Stacks" data-nav="my-projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="my-projects.html">&larr; Back to Projects</a></p>
+                <p class="kicker">Learning game · A library programming job simulator · HTML / JavaScript / 3D</p>
+                <h1>Beyond The Stacks</h1>
+                <!-- Early-development warning (styles: .dev-warning in css/classic.css and css/modern.css). Remove it when the game is finished. -->
+                <div class="dev-warning" role="note" aria-label="Early development warning">
+                    <span class="dev-warning-icon" aria-hidden="true">&#9888;</span>
+                    <div>
+                        <strong>This game is still in early development.</strong> You may run into graphical anomalies, and many
+                        features won't work correctly yet. I'd love to hear what you think, though: if something breaks or you have an
+                        idea, <a href="contact.html">get in touch</a> or <a href="#email" data-email>email me your feedback</a>.
+                    </div>
+                </div>
+                <p class="lede">A job simulator for public library programming: plan a year of programs for the whole community, then
+                   live with the results.</p>
+                <p>Beyond The Stacks puts you in the role of a library's programming director. It's built from real-world scenarios and
+                   from the experience of subject-matter experts who plan, market and run programs in public libraries, so the decisions
+                   are the ones the job actually asks for: which audience a program serves, when those people can come, which space it
+                   belongs in and what it does to everyone else in the building, how far ahead to promote it, and how to spend a
+                   limited budget and a busy staff's time.</p>
+                <p>You plan on a calendar that runs a full year, from September to September, with the holidays the library closes for
+                   and the school breaks that change who can come. Then you open the doors and watch the plan play out. Patrons arrive,
+                   find their way through a two-story building (by the stairs, or by the elevator if they need it), and react: a storytime packs the children's area, a loud program drives regulars out of the
+                   reading room, a late-promoted author talk plays to empty chairs. Every outcome shows up in the community's feedback
+                   and the numbers. Each quarter ends with a report, and at the end of the year the Library Board reviews goodwill, reach,
+                   outreach, budget, friction, marketing and circulation, with lessons drawn from your own choices.</p>
+                <p><strong>Controls:</strong> drag a program card onto a day (or click a card, then a day); click a booking to change it,
+                   and right-click almost anything for more. <kbd>Space</kbd> pause, <kbd>1</kbd>&ndash;<kbd>5</kbd> speed (&frac12;&times; to 8&times;). On the 3D map:
+                   drag to pan, scroll to zoom, right-drag to rotate and tilt (or <kbd>Q</kbd>/<kbd>E</kbd> and <kbd>T</kbd>). Fold any
+                   panel away with the arrow in its corner; full screen and sound are at the top. Best on a computer.</p>
+                <div class="btn-row">
+                    <!-- Retro Desktop only: open the game in its own desktop window -->
+                    <button class="btn retro-only" type="button" onclick="parent.GamesApp.open('beyond-the-stacks')" title="Opens the game as its own program on the desktop">Open as a desktop program</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- The game: /games/beyond-the-stacks/ (synced from the game's repo) -->
+        <section class="panel">
+            <div class="panel-body course-panel">
+                <div class="course-frame" style="aspect-ratio: 16 / 10; height: auto; max-height: 90vh;">
+                    <iframe data-demo-guard src="../games/beyond-the-stacks/index.html?v=9b13e9bb" title="Beyond The Stacks (playable game)" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
+                </div>
+                <p class="course-note">Tip: click inside the game first so it can detect your keyboard. Your year and the cards you
+                   design are saved in your browser. It needs a fairly wide screen: the button at the top of the game, next to the
+                   sound switch, plays it full screen.</p>
+
+                <h2>Screenshots</h2>
+                <div class="shots">
+                    <figure><a class="zoom" href="../images/games/beyond-the-stacks/library-3d.webp" data-caption="Storytime in progress: the calendar, the Community Pulse feed, and the library in 3D, with patrons arriving from the parking lot."><img src="../images/games/beyond-the-stacks/thumbs/library-3d.jpg" alt="The game screen: a social feed on the left, a calendar in the middle, and an isometric 3D view of the library on the right, with program cards along the bottom" loading="lazy"></a><figcaption>The library in 3D, mid-morning</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/beyond-the-stacks/basement.webp" data-caption="The basement on its own floor tab: the closed stacks, staff offices, the break room, and storage."><img src="../images/games/beyond-the-stacks/thumbs/basement.jpg" alt="A rotated 3D view of the library basement with rows of shelving, offices, a break room and a storage room" loading="lazy"></a><figcaption>The basement, rotated and tilted</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/beyond-the-stacks/series.webp" data-caption="Booking a weekly series: pick the days and the end date, see every session, and watch the projection update."><img src="../images/games/beyond-the-stacks/thumbs/series.jpg" alt="The program drawer with weekly repeat options, a list of session dates, and room choices, beside the 3D map tinted by how well each room fits" loading="lazy"></a><figcaption>Setting up a recurring program</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/beyond-the-stacks/workshop.webp" data-caption="The Card Workshop: design your own program, then see which rooms it suits and how many people it would draw."><img src="../images/games/beyond-the-stacks/thumbs/workshop.jpg" alt="The Card Workshop editor with fields for a new program card, a preview of the card, its best rooms, and its expected turnout" loading="lazy"></a><figcaption>Designing a new card</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/beyond-the-stacks/menu.webp" data-caption="Right-click a session of a series to change just that date, skip it, or edit the whole series."><img src="../images/games/beyond-the-stacks/thumbs/menu.jpg" alt="A right-click menu over a calendar booking with options to edit this session, edit the series, move, skip, or cancel" loading="lazy"></a><figcaption>Right-click a booking</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/beyond-the-stacks/blueprint.webp" data-caption="The blueprint view with the noise overlay: sound from a program spreading through open doorways."><img src="../images/games/beyond-the-stacks/thumbs/blueprint.jpg" alt="A flat blueprint plan of the library's ground floor with colored patron dots and an orange noise overlay" loading="lazy"></a><figcaption>The blueprint and the noise overlay</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/beyond-the-stacks/report.webp" data-caption="The Library Board's review: the grades and the lessons your own plan taught."><img src="../images/games/beyond-the-stacks/thumbs/report.jpg" alt="The Library Board review with an overall grade, six graded categories, totals, and a list of lessons learned" loading="lazy"></a><figcaption>The Board's review</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/beyond-the-stacks/title.webp" data-caption="The title screen, over a blueprint of the library."><img src="../images/games/beyond-the-stacks/thumbs/title.jpg" alt="The Beyond The Stacks title card over a blue blueprint of the library's ground floor" loading="lazy"></a><figcaption>The title screen</figcaption></figure>
+                </div>
+
+                <h2>What it teaches</h2>
+                <p>The scenarios and numbers behind the game come from the day-to-day work of library programming staff. A few of the
+                   lessons it's built around:</p>
+                <ul>
+                    <li><strong>Program for who's actually available.</strong> Older adults tend to come in the morning, school-age
+                        teens after school, working adults in the evening, and families with young children early in the day. The best
+                        program at the wrong hour still draws a small crowd.</li>
+                    <li><strong>Space shapes the experience.</strong> A program affects the whole building, not just its own room:
+                        noise carries, quiet-study patrons leave, and a room that's too small means turning people away.</li>
+                    <li><strong>Promotion takes lead time.</strong> Most promotion needs about a month to reach people, and print
+                        materials and community partners need even more planning.</li>
+                    <li><strong>Every audience notices when it's left out.</strong> Serving one group well while ignoring another
+                        shows up in community goodwill.</li>
+                    <li><strong>Public money is watched.</strong> Refreshments and extras boost turnout, and also draw comments from
+                        taxpayers. Leaving budget unspent has consequences too.</li>
+                    <li><strong>Staff capacity is a real limit.</strong> Overbooking a week wears the team down, and program quality
+                        drops.</li>
+                </ul>
+
+                <h2>How it plays</h2>
+                <ul>
+                    <li><strong>Plan the year.</strong> Twenty-six program cards, from Toddler Storytime and a Trading Card Tournament to
+                        a Medicare Q&amp;A, a Summer Reading kickoff and a Friends of the Library book sale. Drag them onto a 52-week
+                        calendar, jump between quarters, and book seasonal programs in the months they belong to.</li>
+                    <li><strong>Out in the community.</strong> Not every program happens in the library. Take one to two parks, the rec
+                        center, or a school: an elementary, a middle and a high school, and a college campus. Each keeps its own hours
+                        (schools only during the school day or after it, parks only in fair weather), and a class visit reaches a whole
+                        grade at once.</li>
+                    <li><strong>Your town.</strong> Set the town's population when you start, from a small village to a city. Bigger
+                        towns bring more walk-ins and bigger crowds, and the Board expects more.</li>
+                    <li><strong>Timing is everything.</strong> Each audience keeps its own hours: seniors in the morning, teens after school,
+                        working adults in the evening. Bars in the booking drawer show who's free in each time slot.</li>
+                    <li><strong>The right room.</strong> Each room has its own capacity and character. Quiet rooms are full of people
+                        who came for silence; noise spreads through open doorways, less through glass, and not through walls. Overfill a
+                        room and people get turned away at the door.</li>
+                    <li><strong>Niche or broad.</strong> A scope slider trades a small, devoted crowd that feels seen for a wide audience
+                        that barely converts, and each choice draws its own kind of criticism.</li>
+                    <li><strong>Marketing lead time.</strong> Flyers and glossy posters need four to six weeks to work. Too late and nobody
+                        hears about it; too early and they forget.</li>
+                    <li><strong>Recurring programs.</strong> Set up weekly or monthly series like a desk calendar, then change, move or
+                        skip single sessions without touching the rest.</li>
+                    <li><strong>Your own cards.</strong> The Card Workshop lets you design new programs (audience, cost, staff time,
+                        noise, the rooms they suit) and rename any card.</li>
+                    <li><strong>The Community Pulse.</strong> Every outcome turns into a post: thanks for a great storytime, a taxpayer
+                        upset about juice boxes, a regular who couldn't hear herself think. Goodwill is tracked for each audience, and
+                        fades for anyone you leave out.</li>
+                    <li><strong>Reports and the Board's review.</strong> A short report closes each quarter. After the year, the Board
+                        grades you in seven categories and lists lessons drawn from your own plan, like how programs with short notice
+                        drew compared with ones marketed a month out.</li>
+                </ul>
+
+                <h2>Built with Mapster</h2>
+                <p>The library isn't coded by hand. It's a map I made in <a href="project-mapster.html">Mapster</a>, my 3D level
+                   editor, and the game reads the whole building from that one file.</p>
+                <ul>
+                    <li><strong>Mapster zones are the rooms.</strong> Each zone painted in Mapster becomes a room, and its name ties it
+                        to the game's rules: how many people it holds, and whether it's quiet, loud, soundproof or staff-only.</li>
+                    <li><strong>Its walls decide where people walk and where sound goes.</strong> Patrons find their way through
+                        Mapster's doors and archways and take its stairs between floors. Noise carries through open doorways, is muffled
+                        by doors and glass, and stops at walls.</li>
+                    <li><strong>Its furniture is used too.</strong> Benches and computer seats are where patrons sit first, shelves and
+                        counters are in the way, and the map's start point and warp points are where visitors arrive: the parking lot
+                        and the bus stop.</li>
+                    <li><strong>The 3D view is Mapster's own engine.</strong> I gave Mapster a viewer mode for this game: no player and no
+                        first person, just a camera that pans, zooms, rotates and tilts, which the game uses to draw its patrons, tint
+                        rooms, and open doors as people walk through.</li>
+                    <li><strong>Edit the building, change the game.</strong> Move a wall or add a study room in Mapster, export the map,
+                        and the game plays on the new layout. A new floor gets its own tab: the library now has a basement, a ground floor
+                        and a second floor (teens, the PC lab, reference and quiet study rooms), joined by stairs and an elevator, which
+                        I added to Mapster for this.</li>
+                </ul>
+
+                <h2>How it's built</h2>
+                <p>Beyond The Stacks is plain HTML, CSS and JavaScript, with no build step. Each patron is simulated: they pathfind
+                   through the building, lose patience in noise and crowds, and check out books on the way out. In 3D they're Kenney's
+                   free Mini Characters, and the floors and walls use free photo textures from ambientCG. I tuned the grading by simulating whole years played different ways, from doing nothing to booking carelessly to
+                   planning well, and checking that the Board tells them apart.</p>
+
+                <h2>Design features</h2>
+                <ul class="tags"><li>Game design</li><li>Management sim</li><li>Agent simulation</li><li>Mapster</li><li>three.js</li><li>3D</li><li>JavaScript</li><li>Libraries &amp; community programming</li></ul>
+
+                <div class="btn-row">
+                    <a class="btn" href="my-projects.html">&larr; Back to Projects</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

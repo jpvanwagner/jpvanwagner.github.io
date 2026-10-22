@@ -16,58 +16,70 @@
 window.SharedContent = {
 
     // The stat boxes. data-years-since="YYYY-MM" = whole years since then, updating itself every June.
-    // Ordered experience > reach > results > speed > change > classroom.
+    // Grouped, four boxes to a row on wide screens: Training & leadership (8), Results & savings (4), In schools (6).
+    // A group that isn't a multiple of four stretches its last row to fill the width (css/classic.css "stat groups").
     // class="stat-tip" tabindex="0" + a <div class="stat-pop"> inside = a stat with a pop-up explanation
     // (shows on hover, keyboard focus, or a tap; dotted underline on the label).
     stats: `
-        <div class="stat"><strong><span data-years-since="2011-06">15</span>+</strong><span>years in education &amp; training</span></div>
-        <div class="stat"><strong>16,200+</strong><span>frontline workers trained nationwide</span></div>
-        <div class="stat"><strong>350+</strong><span>e-learning courses published</span></div>
-        <div class="stat stat-tip" tabindex="0"><strong>96%+</strong><span>training completion rate</span>
-            <div class="stat-pop" role="tooltip"><b>How it got there</b><ul>
-                <li>Before 2021, with no LMS (paper sign-offs): around 60%</li>
-                <li>2021 to 2023: the first LMS raised completions somewhat, but they weren&rsquo;t tracked consistently</li>
-                <li>2024 onward: 96%+, with automated enrollments, reminders, and completion reporting</li>
-            </ul></div></div>
-        <div class="stat stat-tip" tabindex="0"><strong>$0.9&ndash;1M</strong><span>in legal exposure prevented</span>
-            <div class="stat-pop" role="tooltip"><b>How I got there</b><ul>
-                <li>A workforce that grew from ~6,500 to nearly 10,000 between 2023 and 2026 (~8,200 on average); 16,200+ people trained in all, counting everyone on staff in 2023, everyone hired since, and those who have since left</li>
-                <li>Defending one employment claim: $75K+ in legal fees, even when the company wins (<a href="https://joinalliancerisk.com/employment-practices-liability-insurance-epli/" target="_blank" rel="noopener" title="Source, opens in a new tab">Alliance Risk</a>); ~$160K on average through settlement (<a href="https://www.hiscox.com/newsroom/press/hiscox-study-reveals-states-with-highest-employee-lawsuit-risk" target="_blank" rel="noopener" title="Source, opens in a new tab">Hiscox</a>)</li>
-                <li>Harassment claim settled out of court: ~$50K on average (<a href="https://www.blgwins.com/average-eeoc-settlement-amount/" target="_blank" rel="noopener" title="Source, opens in a new tab">EEOC data</a>)</li>
-                <li>Workplace injury: ~$47K per workers&rsquo; comp claim (<a href="https://injuryfacts.nsc.org/work/costs/workers-compensation-costs/" target="_blank" rel="noopener" title="Source, opens in a new tab">National Safety Council</a>); OSHA fines up to $16.5K per serious violation, $165K if willful (<a href="https://www.osha.gov/news/newsreleases/osha-trade-release/20250114" target="_blank" rel="noopener" title="Source, opens in a new tab">OSHA</a>)</li>
-                <li>Officer use of force: $25K&ndash;150K for minor incidents, up to $3M+ for severe ones (<a href="https://bencrump.com/how-much-is-police-misconduct-settlement-worth/" target="_blank" rel="noopener" title="Source, opens in a new tab">Ben Crump Law</a>)</li>
-                <li>Negligent security: median settlements of $1.1M (assault) and $1.6M (robbery) (<a href="https://barzakaylaw.com/blog/negligent-security-settlement-amounts/" target="_blank" rel="noopener" title="Source, opens in a new tab">Barzakay Law</a>)</li>
-                <li>Expected exposure for a workforce this size: ~$2.7M over four years</li>
-                <li>Training completion rose from ~60% to 96%+, so ~36% more of the workforce is now trained: ~$1M of that exposure prevented</li>
-            </ul></div></div>
-        <div class="stat stat-tip" tabindex="0"><strong>$5.5M</strong><span>in platform costs avoided</span>
-            <div class="stat-pop" role="tooltip"><b>How I got there</b><ul>
-                <li>16,200+ people have had a profile since 2023 (everyone on staff then, plus everyone hired since), but most who leave are deactivated and no longer billed</li>
-                <li>Billed, active profiles followed headcount: ~6,500 in 2023, growing to ~9,800 in 2026 (about 32,600 profile-years in all)</li>
-                <li>New enterprise suite: ~$500 per profile a year = ~$16.3M over four years</li>
-                <li>Plus ~$3.3M to implement it for 6,500 users in 2023; setup typically runs 1 to 2.5 times the first year&rsquo;s license (<a href="https://vendorbenchmark.com/benchmarks/hr-human-capital-management-pricing-guide" target="_blank" rel="noopener" title="Source, opens in a new tab">VendorBenchmark</a>)</li>
-                <li>Our existing systems: ~$430 per profile a year = ~$14M over four years, already in place</li>
-                <li>~$19.6M vs. ~$14M: running on what we had until 2027 saved ~$5.5M, more than half of it in deferred setup fees</li>
-            </ul></div></div>
-        <div class="stat stat-tip" tabindex="0"><strong>$4.4&ndash;12.5K</strong><span>saved on design software every year</span>
-            <div class="stat-pop" role="tooltip"><b>How I got there (per year, team of 4 to 5 designers)</b><ul>
-                <li>Video editing: Descript Pro at ~$288 a year per designer (<a href="https://www.descript.com/pricing" target="_blank" rel="noopener" title="Source, opens in a new tab">Descript</a>) instead of Adobe Premiere and After Effects at ~$1,080 (<a href="https://www.adobe.com/creativecloud/business/teams/plans.html" target="_blank" rel="noopener" title="Source, opens in a new tab">Adobe</a>): $792 saved</li>
-                <li>Screen recording: free, open-source ShareX (<a href="https://getsharex.com/" target="_blank" rel="noopener" title="Source, opens in a new tab">ShareX</a>) instead of Camtasia at ~$300 a year (<a href="https://www.techsmith.com/camtasia/pricing/" target="_blank" rel="noopener" title="Source, opens in a new tab">TechSmith</a>): $300 saved</li>
-                <li>Together: $1,092 per designer a year, or $4,368&ndash;5,460 for the team</li>
-                <li>With <a href="project-scenemaker.html" title="My branching-scenario authoring tool">Scenemaker</a> in place of Articulate 360 Teams at ~$1,400 a year (<a href="https://www.articulate.com/360/pricing/" target="_blank" rel="noopener" title="Source, opens in a new tab">Articulate</a>), the savings would grow to $2,492 per designer a year, or $9,968&ndash;12,460 for the team</li>
-            </ul></div></div>
-        <div class="stat stat-tip" tabindex="0"><strong>3x</strong><span>more e-courses built per designer with AI</span>
-            <div class="stat-pop" role="tooltip"><b>How I got there (from our LMS course records)</b><ul>
-                <li>Before AI tools (July 2023 to June 2024): ~12 new e-courses a month from a team of five, about 2.4 per designer</li>
-                <li>With AI tools (from mid-2024): our fastest stretch, July to September 2026, produced 89 new e-courses, about 30 a month from a team of four, about 7.4 per designer</li>
-                <li>Counts e-courses only, not instructor-led or live sessions</li>
-            </ul></div></div>
-        <div class="stat"><strong>1,200+</strong><span>students taught as a classroom teacher, in person, live online &amp; hybrid</span></div>
-        <div class="stat"><strong>500+</strong><span>students tutored privately</span></div>
-        <div class="stat"><strong>11%+</strong><span>student achievement gains, 3 years running</span></div>
-        <div class="stat"><strong>140+</strong><span>educators and staff trained on new platforms</span></div>
-        <div class="stat"><strong>1,700+</strong><span>students onboarded to Canvas</span></div>
-        <div class="stat"><strong>100%</strong><span>Canvas adoption in month one</span></div>
+        <div class="stat-group"><h3 class="stat-group-title">Training &amp; leadership</h3><div class="stat-row">
+            <div class="stat"><strong><span data-years-since="2011-06">15</span>+</strong><span>years in education &amp; training</span></div>
+            <div class="stat"><strong>16,200+</strong><span>frontline workers trained nationwide</span></div>
+            <div class="stat"><strong>4,147</strong><span>new client sites trained since 2023</span></div>
+            <div class="stat"><strong>101</strong><span>new national accounts since 2023</span></div>
+            <div class="stat"><strong>448</strong><span>leadership coaching &amp; onboarding sessions led</span></div>
+            <div class="stat"><strong>1,300+</strong><span>new leaders coached &amp; onboarded, from supervisors to executives</span></div>
+            <div class="stat"><strong>350+</strong><span>e-learning courses published</span></div>
+            <div class="stat stat-tip" tabindex="0"><strong>96%+</strong><span>training completion rate</span>
+                <div class="stat-pop" role="tooltip"><b>How it got there</b><ul>
+                    <li>Before 2021, with no LMS (paper sign-offs): around 60%</li>
+                    <li>2021 to 2023: the first LMS raised completions somewhat, but they weren&rsquo;t tracked consistently</li>
+                    <li>2024 onward: 96%+, with automated enrollments, reminders, and completion reporting</li>
+                </ul></div></div>
+        </div></div>
+        <div class="stat-group"><h3 class="stat-group-title">Results &amp; savings</h3><div class="stat-row">
+            <div class="stat stat-tip" tabindex="0"><strong>3x</strong><span>more e-courses built per designer with AI</span>
+                <div class="stat-pop" role="tooltip"><b>How I got there (from our LMS course records)</b><ul>
+                    <li>Before AI tools (July 2023 to June 2024): ~12 new e-courses a month from a team of five, about 2.4 per designer</li>
+                    <li>With AI tools (from mid-2024): our fastest stretch, July to September 2026, produced 89 new e-courses, about 30 a month from a team of four, about 7.4 per designer</li>
+                    <li>Counts e-courses only, not instructor-led or live sessions</li>
+                </ul></div></div>
+            <div class="stat stat-tip" tabindex="0"><strong>$0.9&ndash;1M</strong><span>in legal exposure prevented</span>
+                <div class="stat-pop" role="tooltip"><b>How I got there</b><ul>
+                    <li>A workforce that grew from ~6,500 to nearly 10,000 between 2023 and 2026 (~8,200 on average); 16,200+ people trained in all, counting everyone on staff in 2023, everyone hired since, and those who have since left</li>
+                    <li>Defending one employment claim: $75K+ in legal fees, even when the company wins (<a href="https://joinalliancerisk.com/employment-practices-liability-insurance-epli/" target="_blank" rel="noopener" title="Source, opens in a new tab">Alliance Risk</a>); ~$160K on average through settlement (<a href="https://www.hiscox.com/newsroom/press/hiscox-study-reveals-states-with-highest-employee-lawsuit-risk" target="_blank" rel="noopener" title="Source, opens in a new tab">Hiscox</a>)</li>
+                    <li>Harassment claim settled out of court: ~$50K on average (<a href="https://www.blgwins.com/average-eeoc-settlement-amount/" target="_blank" rel="noopener" title="Source, opens in a new tab">EEOC data</a>)</li>
+                    <li>Workplace injury: ~$47K per workers&rsquo; comp claim (<a href="https://injuryfacts.nsc.org/work/costs/workers-compensation-costs/" target="_blank" rel="noopener" title="Source, opens in a new tab">National Safety Council</a>); OSHA fines up to $16.5K per serious violation, $165K if willful (<a href="https://www.osha.gov/news/newsreleases/osha-trade-release/20250114" target="_blank" rel="noopener" title="Source, opens in a new tab">OSHA</a>)</li>
+                    <li>Officer use of force: $25K&ndash;150K for minor incidents, up to $3M+ for severe ones (<a href="https://bencrump.com/how-much-is-police-misconduct-settlement-worth/" target="_blank" rel="noopener" title="Source, opens in a new tab">Ben Crump Law</a>)</li>
+                    <li>Negligent security: median settlements of $1.1M (assault) and $1.6M (robbery) (<a href="https://barzakaylaw.com/blog/negligent-security-settlement-amounts/" target="_blank" rel="noopener" title="Source, opens in a new tab">Barzakay Law</a>)</li>
+                    <li>Expected exposure for a workforce this size: ~$2.7M over four years</li>
+                    <li>Training completion rose from ~60% to 96%+, so ~36% more of the workforce is now trained: ~$1M of that exposure prevented</li>
+                </ul></div></div>
+            <div class="stat stat-tip" tabindex="0"><strong>$5.5M</strong><span>in platform costs avoided</span>
+                <div class="stat-pop" role="tooltip"><b>How I got there</b><ul>
+                    <li>16,200+ people have had a profile since 2023 (everyone on staff then, plus everyone hired since), but most who leave are deactivated and no longer billed</li>
+                    <li>Billed, active profiles followed headcount: ~6,500 in 2023, growing to ~9,800 in 2026 (about 32,600 profile-years in all)</li>
+                    <li>New enterprise suite: ~$500 per profile a year = ~$16.3M over four years</li>
+                    <li>Plus ~$3.3M to implement it for 6,500 users in 2023; setup typically runs 1 to 2.5 times the first year&rsquo;s license (<a href="https://vendorbenchmark.com/benchmarks/hr-human-capital-management-pricing-guide" target="_blank" rel="noopener" title="Source, opens in a new tab">VendorBenchmark</a>)</li>
+                    <li>Our existing systems: ~$430 per profile a year = ~$14M over four years, already in place</li>
+                    <li>~$19.6M vs. ~$14M: running on what we had until 2027 saved ~$5.5M, more than half of it in deferred setup fees</li>
+                </ul></div></div>
+            <div class="stat stat-tip" tabindex="0"><strong>$4.4&ndash;12.5K</strong><span>saved on design software every year</span>
+                <div class="stat-pop" role="tooltip"><b>How I got there (per year, team of 4 to 5 designers)</b><ul>
+                    <li>Video editing: Descript Pro at ~$288 a year per designer (<a href="https://www.descript.com/pricing" target="_blank" rel="noopener" title="Source, opens in a new tab">Descript</a>) instead of Adobe Premiere and After Effects at ~$1,080 (<a href="https://www.adobe.com/creativecloud/business/teams/plans.html" target="_blank" rel="noopener" title="Source, opens in a new tab">Adobe</a>): $792 saved</li>
+                    <li>Screen recording: free, open-source ShareX (<a href="https://getsharex.com/" target="_blank" rel="noopener" title="Source, opens in a new tab">ShareX</a>) instead of Camtasia at ~$300 a year (<a href="https://www.techsmith.com/camtasia/pricing/" target="_blank" rel="noopener" title="Source, opens in a new tab">TechSmith</a>): $300 saved</li>
+                    <li>Together: $1,092 per designer a year, or $4,368&ndash;5,460 for the team</li>
+                    <li>With <a href="project-scenemaker.html" title="My branching-scenario authoring tool">Scenemaker</a> in place of Articulate 360 Teams at ~$1,400 a year (<a href="https://www.articulate.com/360/pricing/" target="_blank" rel="noopener" title="Source, opens in a new tab">Articulate</a>), the savings would grow to $2,492 per designer a year, or $9,968&ndash;12,460 for the team</li>
+                </ul></div></div>
+        </div></div>
+        <div class="stat-group"><h3 class="stat-group-title">In schools</h3><div class="stat-row">
+            <div class="stat"><strong>1,200+</strong><span>students taught as a classroom teacher, in person, live online &amp; hybrid</span></div>
+            <div class="stat"><strong>500+</strong><span>students tutored privately</span></div>
+            <div class="stat"><strong>11%+</strong><span>student achievement gains, 3 years running</span></div>
+            <div class="stat"><strong>140+</strong><span>educators and staff trained on new platforms</span></div>
+            <div class="stat"><strong>1,700+</strong><span>students onboarded to Canvas</span></div>
+            <div class="stat"><strong>100%</strong><span>Canvas adoption in month one</span></div>
+    
+        </div></div>
     `,
 
     // Excerpts from LinkedIn recommendations; full text at linkedin.com/in/jpvanwagner

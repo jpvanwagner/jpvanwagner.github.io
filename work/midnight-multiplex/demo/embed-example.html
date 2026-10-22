@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Midnight at the Multiplex — embed test</title>
+<style>
+  body { margin: 0; padding: 24px 16px; background: #0b0d14; color: #d8d2bd;
+         font: 16px/1.5 Georgia, "Times New Roman", serif; }
+  main { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 22px; color: #f1c84b; margin: 0 0 8px; }
+  p { margin: 0 0 16px; color: #a9a391; }
+  iframe { display: block; width: 100%; aspect-ratio: 16 / 10; height: auto; border: 0;
+           box-shadow: 0 0 0 2px #2a2f45, 0 10px 40px rgba(0,0,0,.6); background: #000; }
+  pre { background: #151a28; color: #cfe3c0; padding: 12px; overflow-x: auto; font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Midnight at the Multiplex — web demo</h1>
+  <p>This page just shows the demo embedded in an iframe. Copy the snippet below onto your own page.</p>
+  <iframe src="index.html" width="960" height="600" allow="fullscreen; autoplay"
+          title="Midnight at the Multiplex — web demo"></iframe>
+  <p style="margin-top:16px">Embed snippet (assumes the demo lives in a <code>/multiplex/</code> folder):</p>
+  <pre>&lt;iframe src="/multiplex/index.html" width="960" height="600"
+        style="border:0; max-width:100%; aspect-ratio:16/10; height:auto;"
+        allow="fullscreen; autoplay"
+        title="Midnight at the Multiplex — web demo">&lt;/iframe></pre>
+</main>
+</body>
+</html>

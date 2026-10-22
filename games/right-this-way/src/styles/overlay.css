@@ -1,0 +1,235 @@
+/* Things drawn over the 3D canvas, positioned from world coordinates. ------- */
+.tag {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: left, top;
+}
+.tag-name { font-size: 10.5px; font-weight: 700; color: var(--ink); }
+.tag-status { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-3); }
+.tag.is-loose { border-color: #e6a59c; background: rgba(255, 244, 242, 0.92); }
+.tag.is-loose .tag-status { color: var(--danger); }
+.tag.is-observed { border-color: #9cbfe6; background: rgba(240, 247, 255, 0.92); }
+.tag.is-observed .tag-status { color: var(--info); }
+.tag .timer-bar { width: 42px; height: 5px; flex: none; }
+.tag.is-you { background: var(--ink); border-color: var(--ink); }
+.tag.is-you .tag-name { color: #fff; }
+
+.tutorial.at-bottom { top: auto !important; bottom: 8px; }
+/* Covering what the arrow points at, with nowhere better to go: see-through, taps pass through. */
+.tutorial.is-ghost { opacity: 0.3; pointer-events: none; }
+.tutorial {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 6;
+  width: min(380px, calc(100% - 20px));
+  max-height: calc(100% - 20px);
+  overflow: auto;
+  padding: 10px 12px 11px;
+  border-radius: 10px;
+  background: rgba(251, 250, 247, 0.97);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--info);
+  box-shadow: 0 10px 28px rgba(30, 28, 24, 0.2);
+  zoom: var(--ui-zoom);
+}
+.tut-head { display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--info); }
+.tut-title { font-size: 15px; font-weight: 800; margin: 3px 0 4px; }
+.tut-text { font-size: 12.5px; line-height: 1.45; color: var(--ink-2); }
+.tut-text b { color: var(--ink); }
+.tut-done { margin-top: 6px; font-size: 12.5px; font-weight: 800; color: var(--ok); }
+.tut-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+#stage.is-small .tutorial { width: min(300px, calc(100% - 12px)); top: 6px; left: 6px; padding: 7px 9px; max-height: 46%; }
+#stage.is-small .tut-text { font-size: 11.5px; }
+/* Tutorial arrow: bounces above (or below) the thing to press next. */
+.tut-pointer { position: fixed; left: 0; top: 0; z-index: 1000; pointer-events: none; width: 0; height: 0; }
+.tut-pointer svg { position: absolute; left: -18px; bottom: 0; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35)); animation: tutBounce 0.9s ease-in-out infinite; }
+.tut-pointer.is-below svg { bottom: auto; top: 0; transform: rotate(180deg); animation-name: tutBounceUp; }
+@keyframes tutBounce { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+@keyframes tutBounceUp { 0%, 100% { translate: 0 0; } 50% { translate: 0 8px; } }
+.tut-target { outline: 3px solid #2f73b8 !important; outline-offset: 2px; box-shadow: 0 0 0 6px rgba(47, 115, 184, 0.25) !important; }
+.tut-focus { outline: 3px solid var(--info) !important; outline-offset: 2px; animation: tutPulse 1.4s ease-in-out infinite; }
+@keyframes tutPulse { 50% { outline-color: rgba(47, 111, 176, 0.25); } }
+
+.person-card {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 6px));
+  min-width: 170px;
+  max-width: 260px;
+  padding: 6px 9px 7px;
+  border-radius: 7px;
+  background: rgba(251, 250, 247, 0.97);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--ink-3);
+  box-shadow: 0 6px 18px rgba(30, 28, 24, 0.18);
+  pointer-events: none;
+  z-index: 4;
+}
+.person-card.type-guest { border-top-color: var(--c-guest); }
+.person-card.type-employee { border-top-color: var(--c-employee); }
+.person-card.type-officer { border-top-color: var(--c-officer); }
+.pc-name { font-weight: 800; font-size: 13px; }
+.pc-role { font-size: 11px; font-weight: 700; color: var(--ink-2); margin-bottom: 3px; }
+.pc-line { font-size: 11px; color: var(--ink-3); line-height: 1.35; }
+.pc-doing { color: var(--ink); font-weight: 600; }
+
+.room-chip {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: rgba(20, 24, 30, 0.62);
+  color: #fff;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.room-chip.is-secure { background: rgba(150, 40, 40, 0.7); }
+
+.cam-btn {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 3px 7px;
+  border-radius: 99px;
+  border: 1px solid #2a2f36;
+  background: #2a2f36;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+.cam-btn:hover { background: #fff; color: #2a2f36; }
+.cam-btn .led { width: 6px; height: 6px; border-radius: 50%; background: #e05247; }
+.cam-btn.has-loose { animation: camPulse 1s infinite; }
+@keyframes camPulse { 50% { box-shadow: 0 0 0 5px rgba(224, 82, 71, 0.35); } }
+
+.door-flag {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: var(--warn);
+  color: #fff;
+  pointer-events: auto;
+  cursor: pointer;
+  border: 0;
+  font-family: inherit;
+}
+
+.popup {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  font-weight: 800;
+  font-size: 15px;
+  pointer-events: none;
+  animation: popup 1.3s ease-out forwards;
+  text-shadow: 0 1px 0 #fff, 0 0 6px rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+}
+.popup small { display: block; font-size: 10px; font-weight: 700; text-align: center; }
+.popup.up { color: var(--ok); }
+.popup.down { color: var(--danger); }
+.popup.zero { color: var(--warn, #b7791f); }
+.popup.has-reason { animation-duration: 3.2s; }
+.popup.has-reason small { font-size: 11px; margin-top: 2px; padding: 2px 7px; border-radius: 999px; background: rgba(255, 255, 255, 0.92); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18); text-shadow: none; }
+@keyframes popup { 0% { opacity: 0; margin-top: 6px; } 15% { opacity: 1; } 100% { opacity: 0; margin-top: -34px; } }
+
+/* Camera view HUD -------------------------------------------------------------- */
+#camera-hud {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 2;
+}
+.cam-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(31, 35, 40, 0.85);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 99px;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.rec-dot { width: 9px; height: 9px; border-radius: 50%; background: #ff3b30; animation: blink 0.8s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0.2; } }
+.cam-hint { font-size: 11px; color: var(--ink-2); background: rgba(251, 250, 247, 0.9); padding: 2px 8px; border-radius: 4px; }
+.cam-rooms { font-size: 11px; font-weight: 700; color: #fff; background: rgba(20, 24, 30, 0.6); padding: 2px 9px; border-radius: 4px; max-width: min(92vw, 640px); text-align: center; }
+.cam-actions { display: flex; gap: 6px; }
+#stage.in-camera::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 120px rgba(20, 24, 30, 0.35);
+}
+#stage.in-camera #legend { display: none; }
+
+/* Small stages (phones / small embeds): lighter overlays --------------------------- */
+#stage.is-small .tag { padding: 1px 4px; }
+#stage.is-small .tag-name { font-size: 9px; }
+#stage.is-small .tag-status { font-size: 8px; }
+#stage.is-small .tag.is-quiet .tag-name { display: none; }
+#stage.is-small .cam-btn { font-size: 9px; padding: 2px 5px; }
+#stage.is-small .cam-btn .cam-word { display: none; }
+#stage.is-small .popup { font-size: 13px; }
+#stage.is-small .popup small { display: none; }
+#stage.is-small .popup.has-reason small { display: block; font-size: 9.5px; }
+#stage.is-small #camera-hud { top: 6px; }
+#stage.is-small .cam-hint { display: none; }
+#stage.is-small .cam-label { font-size: 10px; padding: 4px 10px; }
+
+/* "Send guard" buttons over people in a camera view ------------------------------------ */
+.guard-btn {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  pointer-events: auto;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 99px;
+  border: 2px solid #fff;
+  background: var(--danger);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  animation: guardPulse 1.2s infinite;
+}
+.guard-btn:disabled { background: #6b7280; animation: none; cursor: default; }
+@keyframes guardPulse { 50% { box-shadow: 0 0 0 6px rgba(192, 71, 58, 0.25), 0 3px 10px rgba(0, 0, 0, 0.3); } }
+html[data-input='touch'] .guard-btn { padding: 9px 14px; font-size: 13px; }
+.tut-retry { margin: 4px 0 6px; padding: 6px 8px; border-radius: 6px; background: var(--danger-soft); color: var(--danger); font-size: 12.5px; font-weight: 700; }

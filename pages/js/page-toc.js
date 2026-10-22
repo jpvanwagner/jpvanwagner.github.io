@@ -5,6 +5,7 @@
  *     the h3s instead. Pages with fewer than 3 sections get no box.
  *   - Headings without an id get one made from their text, so every section can be linked to
  *     directly (e.g. project-instructional-design.html#working-smarter-with-ai).
+ *   - <main data-toc="nested"> (the Projects page): each h2 with its h3s (the projects) listed under it.
  *   - The box floats to the left of the intro text, right under the page title and lede. On narrow
  *     screens it sits full width and starts folded up.
  * Section tags: each section can end with its own <ul class="tags section-tags"> list. Those are
@@ -18,24 +19,35 @@
     }
     function build() {
         var file = (location.pathname.split('/').pop() || '').replace(/\.html?$/, '');
-        if (!/^project-|^about$/.test(file)) return;
+        if (!/^project-|^about$|^projects$|^my-projects$/.test(file)) return;
         var main = document.querySelector('main');
         if (!main || main.querySelector('.page-toc')) return;
         var visible = function (h) { return !h.closest('.retro-only, .page-toc, [hidden]'); };
         var heads = [].slice.call(main.querySelectorAll('h2')).filter(visible);
-        if (heads.length < 3) {
+        if (heads.length < 3 && !(main.getAttribute('data-toc') === 'nested' && heads.length)) {
             var h3s = [].slice.call(main.querySelectorAll('h3')).filter(visible);
             if (h3s.length >= 3) heads = h3s; else return;
         }
         var used = {};
         [].forEach.call(document.querySelectorAll('[id]'), function (el) { used[el.id] = 1; });
-        var items = heads.map(function (h) {
+        var item = function (h) {
+            // a section heading whose panel already has an id (projects.html#courses) links to that
+            var sec = h.tagName === 'H2' && !h.id && h.closest('section[id]');
+            if (sec && sec.querySelector('h2') === h) return '<a href="#' + sec.id + '">' + h.textContent.trim().replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }) + '</a>';
             if (!h.id) {
                 var id = slug(h.textContent), n = 2, base = id;
                 while (used[id]) id = base + '-' + (n++);
                 h.id = id; used[id] = 1;
             }
-            return '<li><a href="#' + h.id + '">' + h.textContent.trim().replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }) + '</a></li>';
+            return '<a href="#' + h.id + '">' + h.textContent.trim().replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }) + '</a>';
+        };
+        var nested = main.getAttribute('data-toc') === 'nested';
+        var items = heads.map(function (h) {
+            if (!nested || h.tagName !== 'H2') return '<li>' + item(h) + '</li>';
+            // the section's own items: its h3s, up to the next section
+            var sec = h.closest('section') || h.parentNode;
+            var subs = [].slice.call(sec.querySelectorAll('h3')).filter(visible);
+            return '<li>' + item(h) + (subs.length ? '<ul>' + subs.map(function (s) { return '<li>' + item(s) + '</li>'; }).join('') + '</ul>' : '') + '</li>';
         });
         var nav = document.createElement('nav');
         nav.className = 'page-toc';

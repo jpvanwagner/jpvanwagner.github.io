@@ -109,6 +109,7 @@ html:not(.in-desktop) h2::after {
 html:not(.in-desktop) .lede { font-size: 19px; color: var(--m-muted); }
 html:not(.in-desktop) .tagline { color: var(--m-teal); font-size: 11px; }
 html:not(.in-desktop) .kicker { color: var(--m-teal); font-weight: 700; }
+html:not(.in-desktop) .dev-warning { border-radius: 10px; border-width: 1px 1px 1px 6px; font-size: 16px; }
 
 /* ---------- Buttons ---------- */
 html:not(.in-desktop) .btn {
@@ -342,6 +343,9 @@ html[data-theme="dark"]:not(.in-desktop) .tool-chips li { background: #1b2539; b
 html[data-theme="dark"]:not(.in-desktop) .panel .stat { background: linear-gradient(180deg, #1e2b45, #1a2438); }
 html[data-theme="dark"]:not(.in-desktop) .panel .card:hover { background: #202c44; }
 html[data-theme="dark"]:not(.in-desktop) .site-footer { background: #0a0f19; color: var(--m-muted); }
+html[data-theme="dark"]:not(.in-desktop) .dev-warning { background: #3a2c08; color: #f6e7bf; border-color: #c98a00; }
+html[data-theme="dark"]:not(.in-desktop) .dev-warning strong,
+html[data-theme="dark"]:not(.in-desktop) .dev-warning-icon { color: #ffcc4d; }
 html[data-theme="dark"]:not(.in-desktop) .btn { background: #1d2840; border-color: #34446a; color: var(--m-ink) !important; }
 html[data-theme="dark"]:not(.in-desktop) .btn:hover { background: #26345a; border-color: #4a5d8f; }
 html[data-theme="dark"]:not(.in-desktop) .btn.primary { background: #3552c4; border-color: #3552c4; color: #fff !important; }
@@ -537,3 +541,15 @@ html:not(.in-desktop) .tags.section-tags .tag-link { padding: 1px 9px; }
 html:not(.in-desktop) .credits-aside { background: var(--m-surface); border: 1px solid var(--m-line); border-radius: 10px; box-shadow: var(--m-shadow); padding: 12px 14px; }
 html:not(.in-desktop) .credits-aside img { border-radius: 6px; }
 html:not(.in-desktop) .credits-aside li { border-bottom-color: var(--m-line); }
+
+/* Tip bar (js/tip-bar.js): Traditional View, a soft slim bar with a small pill button */
+html:not(.in-desktop) .tip-bar { margin: 12px 0 4px; padding: 6px 8px 6px 14px; font-size: 14px; color: var(--m-ink);
+    background: var(--m-soft); border: 1px solid var(--m-line); border-radius: 999px; box-shadow: none; }
+html:not(.in-desktop) .tip-bar .tip-text b { color: var(--m-navy); }
+html:not(.in-desktop) .tip-btn { padding: 5px 14px 5px 11px; font-size: 13px; color: #fff !important; background: var(--m-magenta);
+    border: 0; border-radius: 999px; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18); transition: transform .15s, box-shadow .15s; }
+html:not(.in-desktop) .tip-btn:hover { background: var(--m-magenta); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(15, 23, 42, 0.22); }
+html:not(.in-desktop) .tip-btn:active { transform: translateY(1px); padding: 5px 14px 5px 11px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2); }
+html:not(.in-desktop) .tip-btn:focus-visible { outline: 2px solid var(--m-teal); outline-offset: 2px; }
+html:not(.in-desktop) .tip-cup { background: #fff; border-radius: 3px; padding: 1px; box-sizing: content-box; }
+@media (max-width: 520px) { html:not(.in-desktop) .tip-bar { border-radius: 12px; } }

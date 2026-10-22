@@ -70,7 +70,7 @@
      * (inside React), a visitor who chose dark mode would see a flash of the
      * light theme on every page load. Light is the default.
      * The try/catch covers browsers that block localStorage (private modes,
-     * strict iframe sandboxes); the page just falls back to light.
+     * strict iframe sandboxes) — the page just falls back to light.
      */
     try { document.documentElement.dataset.theme = localStorage.getItem("ccat_theme") === "dark" ? "dark" : "light"; } catch (e) {}
   </script>
@@ -406,7 +406,7 @@
     .quick-seps button:hover { border-color: var(--accent-line); color: var(--accent); }
 
     /* ══════════════════════════════════════════════════════════════════════
-       CODE PREVIEW; each segment is drawn with a bracket and a label under
+       CODE PREVIEW — each segment is drawn with a bracket and a label under
        it, like annotating a code on a whiteboard. --c = the segment colour.
        ══════════════════════════════════════════════════════════════════════ */
     .code-preview {
@@ -570,7 +570,7 @@
     .fmt-ex { font-family: var(--font-mono); font-size: 12px; color: var(--text-3); padding: 4px 0; border-bottom: 1px solid var(--line); word-break: break-all; }
 
     /* ══════════════════════════════════════════════════════════════════════
-       FOOTER CREDIT; "© 2026 Joe VanWagner" with the pixel-head icon
+       FOOTER CREDIT — "© 2026 Joe VanWagner" with the pixel-head icon
        ══════════════════════════════════════════════════════════════════════ */
     .jv-credit { display: flex; justify-content: center; padding: 4px 16px 28px; font-family: var(--font-head); font-size: 13px; color: var(--text-4); }
     .jv-credit a { display: inline-flex; align-items: center; gap: 7px; color: var(--accent); text-decoration: none; }
@@ -595,15 +595,15 @@
 /* ════════════════════════════════════════════════════════════════════════════
    APP SCRIPT
    Sections:
-     1. Reference data     ; subjects, audiences, customers, states, levels
-     2. Code format model  ; segments, separators, the default format
-     3. Sample & template  ; demo courses, CSV template, examples
-     4. Helpers            ; building, parsing and comparing codes
-     5. Storage            ; saving to / loading from localStorage
-     6. CSV import         ; parsing a CSV and checking each row
-     7. Small components   ; segmented control, code preview, credit footer
-     8. Format editor      ; the Code Structure panel
-     9. App                ; state, actions, and the three tabs
+     1. Reference data      — subjects, audiences, customers, states, levels
+     2. Code format model   — segments, separators, the default format
+     3. Sample & template   — demo courses, CSV template, examples
+     4. Helpers             — building, parsing and comparing codes
+     5. Storage             — saving to / loading from localStorage
+     6. CSV import          — parsing a CSV and checking each row
+     7. Small components    — segmented control, code preview, credit footer
+     8. Format editor       — the Code Structure panel
+     9. App                 — state, actions, and the three tabs
    ════════════════════════════════════════════════════════════════════════════ */
 const { useState, useEffect, useRef } = React;
 
@@ -726,9 +726,9 @@ const LEVELS = [
 const SEGMENTS = {
   type:     { label: "Subject",  short: "SUBJ",  color: "var(--seg-type)",     required: true,  desc: "Subject / course type code (e.g. MAN)" },
   number:   { label: "Number",   short: "NUM",   color: "var(--seg-number)",   required: true,  desc: "3-digit course number (e.g. 101, 099)" },
-  client:   { label: "Customer", short: "CUST",  color: "var(--seg-client)",   required: false, desc: "Customer code; skipped when no customer is chosen" },
+  client:   { label: "Customer", short: "CUST",  color: "var(--seg-client)",   required: false, desc: "Customer code — skipped when no customer is chosen" },
   audience: { label: "Audience", short: "AUD",   color: "var(--seg-audience)", required: true,  desc: "Audience code (e.g. SUP)" },
-  location: { label: "State",    short: "STATE", color: "var(--seg-location)", required: false, desc: "2-letter state code (e.g. CA); skipped when no state is chosen" },
+  location: { label: "State",    short: "STATE", color: "var(--seg-location)", required: false, desc: "2-letter state code (e.g. CA) — skipped when no state is chosen" },
 };
 const SEGMENT_IDS = Object.keys(SEGMENTS);
 
@@ -750,7 +750,7 @@ const CUSTOM = "__custom";   // sentinel <option> value meaning "let me type my 
 //   sep  – the separator written BEFORE this segment (ignored for the first one)
 //   keep – when sepMode is "custom", whether this separator survives into the final code
 // sepMode:   keep (all separators) | omit (none) | custom (per-separator "keep")
-// spaceMode: keep | remove | underscore; what happens to spaces in the final code
+// spaceMode: keep | remove | underscore — what happens to spaces in the final code
 const DEFAULT_FORMAT = {
   order: ["type", "number", "client", "audience", "location"],
   segs: {
@@ -770,10 +770,10 @@ const DEFAULT_FORMAT = {
 
 // Shown on the Reference tab, re-rendered in whatever format is current.
 const EXAMPLES = [
-  { vals: { type: "MAN", number: "101", client: "20417", audience: "SUP", location: "CA" }, name: "Supervisor Essentials (California)" },
+  { vals: { type: "MAN", number: "101", client: "20417", audience: "SUP", location: "CA" }, name: "Supervisor Essentials — California" },
   { vals: { type: "ONB", number: "100", audience: "ALL" },                                  name: "Welcome to the Company" },
   { vals: { type: "PRD", number: "150", client: "30017", audience: "SLS" },                 name: "Harbor & Pine Product Knowledge" },
-  { vals: { type: "SAF", number: "210", client: "52031", audience: "FLD", location: "TX" }, name: "Evergreen Grocers Field Safety (Texas)" },
+  { vals: { type: "SAF", number: "210", client: "52031", audience: "FLD", location: "TX" }, name: "Evergreen Grocers Field Safety — Texas" },
   { vals: { type: "LIC", number: "301", audience: "ALL", location: "WA" },                  name: "Washington Licensing (Advanced)" },
   { vals: { type: "COM", number: "099", audience: "REM" },                                  name: "Remedial Compliance Refresher" },
 ];
@@ -784,13 +784,13 @@ const EXAMPLES = [
 const SAMPLE_COURSES = [
   { id: "demo-1", code: "ONB100-ALL", name: "Welcome to the Company", parts: { type: "ONB", number: "100", audience: "ALL" },
     type: "ONB", number: 100, client: "", clientCode: "", audience: "ALL", location: "", createdAt: "2026-01-12T15:00:00.000Z" },
-  { id: "demo-2", code: "MAN101-20417-SUP-CA", name: "Supervisor Essentials (California)",
+  { id: "demo-2", code: "MAN101-20417-SUP-CA", name: "Supervisor Essentials — California",
     parts: { type: "MAN", number: "101", client: "20417", audience: "SUP", location: "CA" },
     type: "MAN", number: 101, client: "Bluebird Outfitters", clientCode: "20417", audience: "SUP", location: "CA", createdAt: "2026-02-03T15:00:00.000Z" },
   { id: "demo-3", code: "PRD150-30017-SLS", name: "Harbor & Pine Product Knowledge",
     parts: { type: "PRD", number: "150", client: "30017", audience: "SLS" },
     type: "PRD", number: 150, client: "Harbor & Pine Apparel", clientCode: "30017", audience: "SLS", location: "", createdAt: "2026-02-20T15:00:00.000Z" },
-  { id: "demo-4", code: "SAF210-52031-FLD-TX", name: "Evergreen Grocers Field Safety (Texas)",
+  { id: "demo-4", code: "SAF210-52031-FLD-TX", name: "Evergreen Grocers Field Safety — Texas",
     parts: { type: "SAF", number: "210", client: "52031", audience: "FLD", location: "TX" },
     type: "SAF", number: 210, client: "Evergreen Grocers", clientCode: "52031", audience: "FLD", location: "TX", createdAt: "2026-03-09T15:00:00.000Z" },
   { id: "demo-5", code: "COM305-31008-FIN-NY", name: "Financial Controls Refresher",
@@ -816,7 +816,7 @@ const TEMPLATE_HEAD = ["Course Name", "Course Code", "Subject", "Number", "Custo
 // Two sample rows showing both ways to fill a row in. The importer skips any
 // row whose name starts with "(Example)", so they can be left in the file.
 const TEMPLATE_ROWS = [
-  ["(Example) Supervisor Essentials (California)", "MAN101-20417-SUP-CA", "", "", "", "", ""],
+  ["(Example) Supervisor Essentials — California", "MAN101-20417-SUP-CA", "", "", "", "", ""],
   ["(Example) Evergreen Grocers Field Safety", "", "SAF", "210", "52031", "FLD", "TX"],
 ];
 const EXAMPLE_PREFIX = "(example)";
@@ -864,7 +864,7 @@ const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\\/-]/g, "\\$&");
 /** "1 course" / "3 courses" */
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
-/** Customer name for a code; but only when exactly one customer uses that code
+/** Customer name for a code — but only when exactly one customer uses that code
     (30017 belongs to three Harbor & Pine brands, so it returns ""). */
 const clientNameFor = code => {
   const hits = CLIENTS.filter(x => x.code === code);
@@ -1105,7 +1105,7 @@ function saveFormat(fmt) {
 
 /**
  * Parse CSV text into rows of trimmed cells.
- * • Detects the delimiter (comma, semicolon or tab) from the header line;
+ * • Detects the delimiter (comma, semicolon or tab) from the header line —
  *   Excel in many European locales saves "CSV" with semicolons.
  * • Handles quoted cells, "" escaped quotes, and line breaks inside quotes.
  * • Strips the apostrophe our own exporter adds in front of formula-like values.
@@ -1137,10 +1137,10 @@ function parseCsv(text) {
  * rows in the same file, so a file can't contain its own duplicates).
  *
  * A row needs a Course Name plus either:
- *   • a Course Code; imported exactly as written; if its segments can be read
+ *   • a Course Code — imported exactly as written; if its segments can be read
  *     from it (parseCode) they're stored, otherwise the course is marked
  *     `freeform` and will be flagged until someone re-codes it; or
- *   • its segments; the code is generated in the current format.
+ *   • its segments — the code is generated in the current format.
  *
  * Returns { error } when the file itself is unusable, otherwise { rows } where
  * each row is "ready" (with the course entry to add), "error" (with the
@@ -1167,7 +1167,7 @@ function analyzeImport(table, courses, fmt) {
     let code = get("code").trim();
     const out = (status, note, entry) => rows.push({ line, code, name, status, note, entry });
 
-    if (name.toLowerCase().startsWith(EXAMPLE_PREFIX)) return out("example", "Example row; ignored.");
+    if (name.toLowerCase().startsWith(EXAMPLE_PREFIX)) return out("example", "Example row — ignored.");
     if (!name) return out("error", "Missing course name.");
 
     // Read and validate the segment columns.
@@ -1325,7 +1325,7 @@ function FormatEditor({ format, setFormat, vals }) {
 
   /** Move a segment to a new position. Removing it first, then inserting at the
       target index, means dragging downward lands after the target and dragging
-      upward lands before it; what people expect from a drag-to-reorder list. */
+      upward lands before it — what people expect from a drag-to-reorder list. */
   const moveTo = (id, idx) => setFormat(f => {
     const order = f.order.filter(x => x !== id);
     order.splice(Math.max(0, Math.min(order.length, idx)), 0, id);
@@ -1347,7 +1347,7 @@ function FormatEditor({ format, setFormat, vals }) {
     <div className="fmt-grid">
       {/* Left: the ordered segment list with a "joined by" row between segments */}
       <div>
-        <div className="field-label">Segments <span className="opt">(drag or use arrows to reorder, tick to include)</span></div>
+        <div className="field-label">Segments <span className="opt">— drag or use arrows to reorder, tick to include</span></div>
         <div className="seg-list">
           {format.order.map((id, i) => {
             const s = format.segs[id], def = SEGMENTS[id];
@@ -1711,7 +1711,7 @@ function App() {
     // Explain each course that couldn't be regenerated.
     const blocked = [...pending].map(id => {
       const c = next.find(x => x.id === id), st = formatStatus(c, format);
-      if (c.freeform) return `${c.code} (no segments; use Re-code)`;
+      if (c.freeform) return `${c.code} (no segments — use Re-code)`;
       if (!st.expected) return `${c.code} (missing ${st.missing.map(m => SEGMENTS[m].label).join(", ")})`;
       const clash = findCodeConflict(next, st.expected, null, id, format);
       return normCode(clash.code) === normCode(st.expected)
@@ -1854,7 +1854,7 @@ function App() {
   );
 
   // Small render helpers
-  const dash = <span className="dash">–</span>;
+  const dash = <span className="dash">—</span>;
   const segLabel = (id) => (
     <>
       <span className="seg-dot" style={{ background: SEGMENTS[id].color }} />
@@ -1934,8 +1934,8 @@ function App() {
                   <div className="stack">
                     <div className="select-wrap">
                       <select className="glass-select" value={cType} onChange={e => setCType(e.target.value)}>
-                        <option value="">Select a subject...</option>
-                        {COURSE_TYPES.map(t => <option key={t.code} value={t.code}>{t.code}: {t.label}</option>)}
+                        <option value="">— Select subject —</option>
+                        {COURSE_TYPES.map(t => <option key={t.code} value={t.code}>{t.code} — {t.label}</option>)}
                         <option value={CUSTOM}>✎ Other / custom code…</option>
                       </select>
                     </div>
@@ -1968,8 +1968,8 @@ function App() {
                   <div className="stack">
                     <div className="select-wrap">
                       <select className="glass-select" value={audience} onChange={e => setAudience(e.target.value)}>
-                        <option value="">Select an audience...</option>
-                        {AUDIENCES.map(a => <option key={a.code} value={a.code}>{a.code}: {a.label}</option>)}
+                        <option value="">— Select audience —</option>
+                        {AUDIENCES.map(a => <option key={a.code} value={a.code}>{a.code} — {a.label}</option>)}
                         <option value={CUSTOM}>✎ Other / custom code…</option>
                       </select>
                     </div>
@@ -2009,7 +2009,7 @@ function App() {
                         <div className="client-dropdown">
                           <div className="client-item none-item"
                             onClick={() => { setSelClient(null); setClientSearch(""); setShowDrop(false); }}>
-                            No customer (left out of the code)
+                            — No customer (omit from code) —
                           </div>
                           {filteredClients.map((c, i) => (
                             <div key={i} className="client-item"
@@ -2039,7 +2039,7 @@ function App() {
                   <div className="field-label">{segLabel("location")} <span className="opt">(optional)</span> {excludedNote("location")}</div>
                   <div className="select-wrap">
                     <select className="glass-select" value={selState} onChange={e => setSelState(e.target.value)}>
-                      <option value="">No specific state</option>
+                      <option value="">— No specific state —</option>
                       {STATES.map(s => <option key={s.code} value={s.code}>{s.name} ({s.code})</option>)}
                     </select>
                   </div>
@@ -2068,7 +2068,7 @@ function App() {
                 <div className="section-head">Course Name & Generated Code</div>
 
                 <div className="field">
-                  <div className="field-label">Course Name <span className="req">*</span> <span className="opt">(the title shown in the catalog; must be unique)</span></div>
+                  <div className="field-label">Course Name <span className="req">*</span> <span className="opt">— the title shown in the catalog; must be unique</span></div>
                   <input type="text" className="glass-input" placeholder="e.g. Supervisor Essentials"
                     value={cName} maxLength={200} onChange={e => setCName(e.target.value)}
                     onKeyDown={e => { if (e.key === "Enter") handleSubmit(); }} />
@@ -2089,7 +2089,7 @@ function App() {
                 <div className="code-final-row">
                   <span className="code-final-lbl">Catalog label</span>
                   <span className={`code-final${fullLabel ? "" : " dim"}`}>
-                    {fullLabel || (fullCode ? `${fullCode}: (enter a course name)` : "–")}
+                    {fullLabel || (fullCode ? `${fullCode}: (enter a course name)` : "—")}
                   </span>
                   {fullLabel && (
                     <button className={`btn btn-copy${copiedId === "label" ? " copied" : ""}`}
@@ -2332,7 +2332,7 @@ function App() {
                           </td>
                           <td>{c.audience ? <span className="pill">{c.audience}</span> : dash}</td>
                           <td className="muted-cell">{c.location || dash}</td>
-                          <td className="muted-cell">{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "–"}</td>
+                          <td className="muted-cell">{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "—"}</td>
                           <td>
                             {!renaming && (
                               <div className="row-actions">

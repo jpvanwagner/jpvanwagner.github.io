@@ -245,6 +245,21 @@ const FloorTextures = {
         }
     },
 
+    // PARKING STALL: asphalt (hex) with a painted stall line (ac) down its WEST
+    // edge, so a row of these reads as a row of parking spaces. Leave the drive
+    // aisle as plain Concrete/asphalt; finish the row's east end with one more
+    // stall tile (or a line of your own).
+    parking: (ctx, hex, ac, size = 64) => {
+        ctx.fillStyle = hex || '#3d434c';
+        ctx.fillRect(0, 0, size, size);
+        for (let i = 0; i < 260; i++) {
+            ctx.fillStyle = (i % 2 === 0) ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.08)';
+            ctx.fillRect(Math.random() * size, Math.random() * size, 2, 2);
+        }
+        ctx.fillStyle = ac || '#f5f5f0';
+        ctx.fillRect(0, 0, Math.max(2, Math.round(size / 16)), size);
+    },
+
     // ---------------------------------------------------------
     // 5. STONE (Cobblestone / Path)
     // ---------------------------------------------------------

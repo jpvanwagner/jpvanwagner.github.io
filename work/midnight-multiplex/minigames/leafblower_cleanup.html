@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Grande Theatre - Theater Cleanup</title>
+  <style>
+    /* ═════════════════════════════════════════════════════════════════════════
+       MODIFY THIS: You can change the background colors and fonts here.
+       ═════════════════════════════════════════════════════════════════════════ */
+    body {
+      background: #08080a;
+      color: #92dfa4; 
+      font-family: 'Apple II', 'Cascadia Mono', 'Courier New', monospace;
+      font-size: 13px;
+      padding: 15px;
+      margin: 0;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #hardware-chassis {
+      background: #1a1a24;
+      border: 4px solid #5a5a6e;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 0 35px rgba(0, 255, 70, 0.06);
+      position: relative;
+      width: 840px; 
+      box-sizing: border-box;
+    }
+
+    #system-layout {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      width: 100%;
+    }
+
+    /* THE MAIN RENDER SCREEN */
+    canvas {
+      background: #000000;
+      border: 2px solid #323244;
+      image-rendering: pixelated; /* Forces the blocky retro look */
+      width: 440px;  
+      height: 480px;
+      flex-shrink: 0; 
+    }
+
+    #shift-sidebar {
+      width: 340px;
+      height: 480px;
+      background: #000000;
+      border: 2px solid #323244;
+      padding: 15px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0; 
+      overflow: hidden;
+    }
+
+    .panel-header { color: #ffffff; text-shadow: 0 0 4px #ffffff; font-weight: bold; margin-bottom: 8px; }
+    .amber        { color: #ffb834; } 
+    .warn         { color: #ff5252; } 
+    .ok           { color: #55ff55; }
+    .dim          { color: #5d7565; }
+
+    .modal-overlay {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 340px;
+      height: calc(100% - 30px);
+      background: rgba(10, 14, 20, 0.98);
+      border: 2px solid #92dfa4;
+      padding: 15px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.95);
+      z-index: 999;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+    }
+
+    button {
+      background: #000000;
+      color: #92dfa4;
+      border: 1px solid #92dfa4;
+      font-family: inherit;
+      padding: 6px 10px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 4px 0;
+      width: 100%;
+      text-align: left;
+    }
+    button:hover {
+      background: #92dfa4;
+      color: #000000;
+    }
+  </style>
+</head>
+<body>
+
+<div id="hardware-chassis">
+  <div id="system-layout">
+    
+    <canvas id="gameCanvas" width="440" height="480"></canvas>
+    
+    <div id="shift-sidebar">
+      <div class="panel-header">═ AUDITORIUM CONTEXT ═</div>
+      <p style="margin: 2px 0;">AUDITORIUM: <span class="ok">3</span></p>
+      <p style="margin: 2px 0;">LAST MOVIE: <span class="ok">STAR WARS: EPISODE I</span></p>
+      <p style="margin: 2px 0;">SHOWTIME:   <span class="ok">7:15 PM</span></p>
+      <p style="margin: 2px 0;">DATE:       <span class="ok">JUNE 12, 1999</span></p>
+      <hr style="border: 0; border-top: 1px dashed #323244; margin: 8px 0;">
+      
+      <p style="margin: 4px 0;">TIME REMAINING: <span id="hud-time" class="warn">04:00</span></p>
+      <p style="margin: 4px 0;">BLOWER SPEED:   <span id="hud-power" class="amber">OFF (0)</span></p>
+      <p style="margin: 4px 0;">CORD LENGTH:    <span id="hud-cord" class="ok">00 / 50 FT</span></p>
+      <p style="margin: 4px 0;">CORD STATUS:    <span id="hud-status" class="ok">OPERATIONAL</span></p>
+      <p style="margin: 4px 0;">OUTLET SOURCE:  <span id="hud-outlet" class="dim">UNPLUGGED</span></p>
+      <p style="margin: 4px 0;">CLEAN PROGRESS: <span id="hud-progress" class="ok">0% AMASSED</span></p>
+      <p style="margin: 4px 0;">BAG INVENTORY:  <span id="hud-inventory" class="amber">0 / 4 ITEMS</span></p>
+      <p style="margin: 4px 0;">FOUND CASH:     <span id="hud-cash" class="ok">$0.00</span></p>
+      
+      <div id="hud-alert-line" class="ok" style="margin-top: 10px; font-weight: bold; min-height: 18px; font-size:11px;"></div>
+      
+      <div id="hud-channel-box" style="margin-top:15px; display:none;">
+        <div class="amber">LIFTING CORD OVER SEATS:</div>
+        <div id="hud-channel-bar" class="amber">[░░░░░░░░░░░░]</div>
+      </div>
+
+      <div style="margin-top: auto; font-size:11px; line-height:1.4;" class="dim">
+        <span class="panel-header">CONTROL DIRECTORY:</span><br>
+        [W,A,S,D] Move (Cannot climb over seat backs)<br>
+        [0-3] Toggle Leaf Blower Motor Power<br>
+        [HOLD L] Lift Cord Over Seats (Untangle Line)<br>
+        [U] Yank Cord Unplugged (Up to 10ft away)<br>
+        [P] Plug Cord into Outlet (Must stand adjacent)<br>
+        [C] Call Manager for Inspection (End Cleaning)<br>
+        [I / H] Pause / View Instructions
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-container" class="modal-overlay" style="display: none;"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+//  1. CONFIGURATION DIALS
+//  MODIFY THIS: Adjust game difficulty, carry limits, and time limits here.
+// ════════════════════════════════════════════════════════════════════════════
+const CONFIG = {
+  SHIFT_DURATION_SECS: 240,         // Time limit in seconds (4 mins)
+  TICK_INTERVAL_MS: 100,            // Simulation loop rate (100ms = 10fps for that retro feel)
+  MAX_CORD_LENGTH: 50,              // Grid tiles the cord can trace before stopping you
+  UNPLUG_MAX_DISTANCE: 10,          // Tiles away you can press 'U' to yank the cord out
+  MAX_CARRY_LIMIT: 4                // Pieces of large trash you can pick up by walking over them
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+//  2. GLOBAL GAME STATE MEMORY
+//  HOW IT WORKS: This stores every moving part of the game. When something 
+//  changes, it changes here first, and the canvas draws based on this data.
+// ════════════════════════════════════════════════════════════════════════════
+let State = {
+  phase: 'SETUP_DIFFICULTY',        // Tracks which menu/game screen is active 
+  clockTime: CONFIG.SHIFT_DURATION_SECS,
+  shiftEvaluated: false,            // Tracks if the manager has already graded the player
+  powerLevel: 0,                    // 0 = off, 1-3 = blower speeds
+  activeOutletKey: null,            
+  player: { x: 4, y: 21, facing: 'N' }, 
+  playerInventory: [],              
+  cordTrace: [],                    // Array of {x,y} nodes drawing the cord path
+  tangled: false,
+  isHoldingL: false,                
+  untangleAccumulatedMs: 0,
+  untangleStartTs: 0,
+  untangleRequiredMs: 4000,
+  totalTrashCount: 0, 
+  foundCashAmount: 0.00,
+  messLevel: 3,                     
+  trashList: [],                    
+  
+  alertMessage: "",
+  alertMessageTicks: 0,
+  
+  animTickCount: 0,                 // Counts up forever to drive arm-swinging animations
+  floatingTexts: [],                // Array tracking UI popups flying across the screen
+
+  ushers: [],                       // Dynamically populated based on difficulty
+  frontUshers: [],                  // Dynamically populated based on difficulty
+  loopTimer: null
+};
+
+// Fixed positions on the map for obstacles and outlets
+const COORD_OUTLETS = {
+  LEFT:  { x: 0,  y: 23, name: "Back-Left Outlet" },
+  RIGHT: { x: 21, y: 23, name: "Back-Right Outlet" },
+  FRONT: { x: 11, y: 1,  name: "Front Stage Outlet" }
+};
+
+const TRASH_CANS = [
+  { x: 3,  y: 1 },
+  { x: 18, y: 1 }
+];
+
+// ════════════════════════════════════════════════════════════════════════════
+//  3. RETRO AUDIO SYNTHESIZER ENGINE
+//  HOW IT WORKS: Uses the browser's raw AudioContext to generate 90s-style 
+//  sawtooth waves (motor buzz) and white noise (wind rush).
+// ════════════════════════════════════════════════════════════════════════════
+let RetroAudioEngine = {
+  ctx: null,
+  oscNode: null,
+  noiseNode: null,
+  filterNode: null,
+  gainOsc: null,
+  gainNoise: null,
+
+  init() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  },
+
+  syncBlowerEngineSound(level) {
+    this.init();
+    if (level === 0 || !State.activeOutletKey || State.phase !== 'PLAYING' || State.powerLevel === 0) {
+      this.silence();
+      return;
+    }
+
+    try {
+      if (!this.oscNode) {
+        this.oscNode = this.ctx.createOscillator();
+        this.oscNode.type = 'sawtooth';
+        this.gainOsc = this.ctx.createGain();
+        this.oscNode.connect(this.gainOsc);
+        this.gainOsc.connect(this.ctx.destination);
+        this.oscNode.start();
+
+        let bufferSize = 2 * this.ctx.sampleRate;
+        let noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        let outputData = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) { outputData[i] = Math.random() * 2 - 1; }
+        this.noiseNode = this.ctx.createBufferSource();
+        this.noiseNode.buffer = noiseBuffer;
+        this.noiseNode.loop = true;
+
+        this.filterNode = this.ctx.createBiquadFilter();
+        this.filterNode.type = 'lowpass'; 
+        this.gainNoise = this.ctx.createGain();
+        
+        this.noiseNode.connect(this.filterNode);
+        this.filterNode.connect(this.gainNoise);
+        this.gainNoise.connect(this.ctx.destination);
+        this.noiseNode.start();
+      }
+
+      let pitchFrequencyHz = 42 + (level * 16); 
+      this.oscNode.frequency.setValueAtTime(pitchFrequencyHz, this.ctx.currentTime);
+      
+      // MODIFY THIS: Engine buzz is extremely low (0.003 multiplier)
+      this.gainOsc.gain.setValueAtTime(0.003 * level, this.ctx.currentTime);
+
+      let filterCutoffHz = 280 + (level * 240);
+      this.filterNode.frequency.setValueAtTime(filterCutoffHz, this.ctx.currentTime);
+      
+      // MODIFY THIS: Wind rush volume 
+      this.gainNoise.gain.setValueAtTime(0.04 * level, this.ctx.currentTime);
+
+    } catch (e) {}
+  },
+
+  silence() {
+    if (this.oscNode) { try { this.oscNode.stop(); this.oscNode.disconnect(); } catch(e){} this.oscNode = null; }
+    if (this.noiseNode) { try { this.noiseNode.stop(); this.noiseNode.disconnect(); } catch(e){} this.noiseNode = null; }
+    if (this.filterNode) { try { this.filterNode.disconnect(); } catch(e){} this.filterNode = null; }
+    this.gainOsc = null;
+    this.gainNoise = null;
+  }
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+//  4. THEATRE STRUCTURAL TILES GRID MAPPING
+//  HOW IT WORKS: Returns a string defining what "zone" a specific X/Y coordinate is.
+// ════════════════════════════════════════════════════════════════════════════
+function getTileStructure(x, y) {
+  if (y <= 1) return 'front_floor'; 
+  if (y >= 22 && x >= 6 && x <= 15) return 'bulkhead'; // Back hallway
+  if (y >= 22) return 'back_floor'; 
+  if (x === 4 || x === 5 || x === 16 || x === 17) return 'walkway';
+  if (x >= 0 && x <= 3) return 'seats_left';
+  if (x >= 6 && x <= 15) return 'seats_center';
+  if (x >= 18 && x <= 21) return 'seats_right';
+  return 'floor';
+}
+
+function isObstacleTile(gx, gy) {
+  for (let key in COORD_OUTLETS) {
+    if (COORD_OUTLETS[key].x === gx && COORD_OUTLETS[key].y === gy) return true;
+  }
+  for (let i = 0; i < TRASH_CANS.length; i++) {
+    if (TRASH_CANS[i].x === gx && TRASH_CANS[i].y === gy) return true;
+  }
+  return false;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  5. TRASH AND CURRENCY SEEDER
+//  MODIFY THIS: Adjust the math limits below to change how often money drops.
+// ════════════════════════════════════════════════════════════════════════════
+function initializeTheatreMessMatrix() {
+  State.trashList = [];
+  State.foundCashAmount = 0;
+  State.totalTrashCount = 0;
+  
+  let baseSpawnRatio = 0.05; 
+  if (State.messLevel === 2) baseSpawnRatio = 0.12;
+  else if (State.messLevel === 3) baseSpawnRatio = 0.26;
+  else if (State.messLevel === 4) baseSpawnRatio = 0.40;
+  else if (State.messLevel === 5) baseSpawnRatio = 0.55;
+
+  for (let y = 2; y <= 21; y++) {
+    for (let x = 0; x < 22; x++) {
+      let zone = getTileStructure(x, y);
+      if (zone.startsWith('seats')) {
+        let roll = Math.random();
+        
+        // Normal Garbage Spawn
+        if (roll < baseSpawnRatio) {
+          let selection = 'popcorn';
+          let subRoll = Math.random();
+          if (subRoll < 0.45) selection = 'popcorn';
+          else if (subRoll < 0.65) selection = 'wrapper';
+          else if (subRoll < 0.78) selection = 'cup';          
+          else if (subRoll < 0.84) selection = 'bag';          
+          else if (subRoll < 0.88) selection = 'bottle';       
+          else if (subRoll < 0.94) selection = 'bucket_filled';
+          else selection = 'bag_filled';                    
+
+          State.trashList.push({ type: selection, x: x + 0.3 + Math.random() * 0.4, y: y + 0.3 + Math.random() * 0.4, vx: 0, vy: 0, isCash: false });
+          State.totalTrashCount++; // We only track actual garbage for the 100% completion stat
+        } 
+        // -------------------------------------------------------------
+        // SYSTEM: ULTRA RARE CURRENCY SPAWN RATES
+        // -------------------------------------------------------------
+        else if (roll < baseSpawnRatio + 0.005) { 
+          // 0.5% chance for a quarter
+          State.trashList.push({ type: 'quarter', x: x + 0.5, y: y + 0.5, vx: 0, vy: 0, isCash: true });
+        }
+        else if (roll < baseSpawnRatio + 0.006) { 
+          // 0.1% chance for a $1 Bill
+          State.trashList.push({ type: 'bill_1', x: x + 0.5, y: y + 0.5, vx: 0, vy: 0, isCash: true });
+        }
+        else if (roll < baseSpawnRatio + 0.0063) { 
+          // 0.03% chance for a $5 Bill
+          State.trashList.push({ type: 'bill_5', x: x + 0.5, y: y + 0.5, vx: 0, vy: 0, isCash: true });
+        }
+        else if (roll < baseSpawnRatio + 0.0064) { 
+          // 0.01% chance for a $10 Bill
+          State.trashList.push({ type: 'bill_10', x: x + 0.5, y: y + 0.5, vx: 0, vy: 0, isCash: true });
+        }
+      }
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  6. GLOBAL KEYBOARD INPUT ROUTING ENGINE
+//  HOW IT WORKS: Intercepts all physical keypresses on the keyboard. 
+//  Also includes the logic to press "1-5" to select menu options.
+// ════════════════════════════════════════════════════════════════════════════
+window.addEventListener('keydown', (e) => {
+  const hotkey = e.key.toLowerCase();
+  
+  // MENU: Select Difficulty via number keys
+  if (State.phase === 'SETUP_DIFFICULTY') {
+    if (['1','2','3','4','5'].includes(hotkey)) {
+      confirmDifficultyLevelChoice(parseInt(hotkey));
+    }
+    return;
+  }
+  
+  // MENU: Wait for space/enter during inspection
+  if (State.phase === 'INSPECTING') {
+    if (hotkey === ' ' || e.key === 'Enter') displayStagingStancePromptWindow();
+    return;
+  }
+
+  // MENU: Select Starting Position via number keys
+  if (State.phase === 'SETUP_STANCE') {
+    if (hotkey === '1') confirmStartingStanceConfiguration('LEFT');
+    if (hotkey === '2') confirmStartingStanceConfiguration('RIGHT');
+    if (hotkey === '3') confirmStartingStanceConfiguration('FRONT');
+    if (hotkey === '4') confirmStartingStanceConfiguration('UNPLUGGED');
+    return;
+  }
+
+  // GAME LOOP CONTROLS
+  if (hotkey === 'i' || e.key === 'Escape' || hotkey === 'h') {
+    toggleSimulationPauseState();
+    return;
+  }
+
+  if (hotkey === 'l') {
+    // #1a: start (or continue) untangling. We DON'T require an active outlet —
+    // a tangled cord can be lifted/reset regardless — and we drive progress from
+    // a wall-clock start time rather than relying on uninterrupted key-repeat
+    // (browser auto-repeat fires stray keyup/keydown pairs that used to reset
+    // the bar so it only ever filled partway). e.repeat is ignored so holding
+    // the key doesn't restart the timer each frame.
+    if (e.repeat) return;
+    if (!State.isHoldingL && (State.phase === 'PLAYING' || State.phase === 'UNTANGLING')) {
+      State.isHoldingL = true;
+      State.phase = 'UNTANGLING';
+      State.untangleRequiredMs = 3000;
+      State.untangleStartTs = Date.now();
+      State.untangleAccumulatedMs = 0;
+    }
+    return;
+  }
+
+  if (State.phase !== 'PLAYING') return;
+
+  // Track intended movement direction
+  let moveX = 0;
+  let moveY = 0;
+  
+  if (hotkey === 'w' || e.key === 'ArrowUp')    { moveY = -1; State.player.facing = 'N'; }
+  else if (hotkey === 's' || e.key === 'ArrowDown') { moveY = 1;  State.player.facing = 'S'; }
+  else if (hotkey === 'a' || e.key === 'ArrowLeft') { moveX = -1; State.player.facing = 'W'; }
+  else if (hotkey === 'd' || e.key === 'ArrowRight') { moveX = 1;  State.player.facing = 'E'; }
+
+  // If a move key was pressed, send it to the collision calculator
+  if (moveX !== 0 || moveY !== 0) {
+    executeMovementTransformationStep(moveX, moveY);
+    return;
+  }
+
+  // Power level toggles (0-3)
+  if (['0', '1', '2', '3'].includes(hotkey)) {
+    let targetLevel = parseInt(hotkey, 10);
+    if (targetLevel > 0 && !State.activeOutletKey) {
+      triggerVisualFlashHUDAlert("⚠️ MOTOR FAULT: PLUG IN POWER TETHER");
+      State.powerLevel = 0;
+    } else {
+      State.powerLevel = targetLevel;
+    }
+    RetroAudioEngine.syncBlowerEngineSound(State.powerLevel);
+    updateInterfaceReadoutsPanel();
+    return;
+  }
+
+  // Outlet interactions
+  if (hotkey === 'u') executeYankCordDisconnection();
+  if (hotkey === 'p') executeConnectAdjacentOutletStation();
+  if (hotkey === 'c') {
+    terminateSimulationShift(false); // Press C to call manager early
+  }
+});
+
+// Resets cord tugging logic when you release 'L'
+window.addEventListener('keyup', (e) => {
+  if (e.key.toLowerCase() === 'l') {
+    if (State.phase === 'UNTANGLING') State.phase = 'PLAYING';
+    State.isHoldingL = false;
+    State.untangleAccumulatedMs = 0;
+    State.untangleStartTs = 0;
+    RetroAudioEngine.syncBlowerEngineSound(State.powerLevel);
+    updateInterfaceReadoutsPanel();
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+//  7. MOVEMENT & COLLISION CALCULATOR
+// ════════════════════════════════════════════════════════════════════════════
+function executeMovementTransformationStep(dx, dy) {
+  let oldX = State.player.x;
+  let oldY = State.player.y;
+  let nextX = oldX + dx;
+  let nextY = oldY + dy;
+
+  // Block walking off the absolute edges of the canvas grid
+  if (nextX < 0 || nextX >= 22 || nextY < 0 || nextY >= 24) return;
+
+  let currentTileType = getTileStructure(oldX, oldY);
+  let targetedTileType = getTileStructure(nextX, nextY);
+
+  // Prevent walking through an active usher
+  let helperCollision = State.ushers.some(u => u.x === nextX && u.y === nextY);
+  if (helperCollision) return;
+
+  // --- VERTICAL CHAIR JUMPING BLOCK ---
+  // You cannot move vertically (dy !== 0) to climb over the backs of seats.
+  if (dy !== 0) { 
+    if (currentTileType.startsWith('seats') || targetedTileType.startsWith('seats')) {
+      triggerVisualFlashHUDAlert("⚠️ MOVEMENT BLOCKED: CANNOT CLIMB OVER SEAT BACKS");
+      return;
+    }
+  }
+
+  // --- CORD TRACING & HALLWAY RESTRICTIONS ---
+  if (State.activeOutletKey) {
+    if (State.tangled) return;
+
+    let isBacktrackingStep = false;
+    if (State.cordTrace.length > 1) {
+      let prevNode = State.cordTrace[State.cordTrace.length - 2];
+      if (prevNode.x === nextX && prevNode.y === nextY) isBacktrackingStep = true;
+    }
+
+    // Hallway (Bulkhead) Cord Restriction
+    // Cord array ignores the hallway, but Euclidean distance checks if you're stretching too far
+    let distanceExt = 0;
+    if (targetedTileType === 'bulkhead') {
+       let lastCordNode = State.cordTrace.length > 0 ? State.cordTrace[State.cordTrace.length-1] : {x: oldX, y: oldY};
+       distanceExt = Math.abs(nextX - lastCordNode.x) + Math.abs(nextY - lastCordNode.y);
+    }
+
+    if (State.cordTrace.length + distanceExt >= CONFIG.MAX_CORD_LENGTH) {
+      if (!isBacktrackingStep) {
+        triggerVisualFlashHUDAlert("⚠️ MAX CABLE CAP REACHED [50 FT]");
+        return; 
+      }
+    }
+
+    if (targetedTileType !== 'bulkhead') {
+      if (processCordTangleEvaluation(nextX, nextY)) {
+        State.tangled = true;
+        State.powerLevel = 0; 
+        RetroAudioEngine.syncBlowerEngineSound(0); 
+        
+        // Spawn Floating Text for Tangle Warning
+        State.floatingTexts.push({
+            text: "⚠️ TANGLED!",
+            color: '#ff5252',
+            x: nextX * 20,
+            y: nextY * 20 - 10,
+            targetX: 430,
+            targetY: 175, // Aim for the CORD STATUS readout
+            life: 25
+        });
+
+        updateInterfaceReadoutsPanel();
+        return;
+      }
+
+      // Add or remove path node
+      if (isBacktrackingStep) {
+        State.cordTrace.pop(); 
+      } else {
+        State.cordTrace.push({ x: nextX, y: nextY });
+      }
+    }
+  }
+
+  // All checks passed, move the player
+  State.player.x = nextX;
+  State.player.y = nextY;
+
+  // --- MANUAL ITEM & CASH PICKUP LOGIC ---
+  for (let i = State.trashList.length - 1; i >= 0; i--) {
+    let t = State.trashList[i];
+    
+    // Only pick up if the blower is OFF (Level 0)
+    if (Math.floor(t.x) === nextX && Math.floor(t.y) === nextY && State.powerLevel === 0) {
+      
+      // If it's a cash item...
+      if (t.isCash) {
+        let val = 0;
+        if (t.type === 'quarter') val = 0.25;
+        if (t.type === 'bill_1') val = 1.00;
+        if (t.type === 'bill_5') val = 5.00;
+        if (t.type === 'bill_10') val = 10.00;
+        
+        State.foundCashAmount += val;
+        
+        // Trigger the Zooming Text Animation for Cash 
+        State.floatingTexts.push({
+            text: `+$${val.toFixed(2)}`,
+            color: '#55ff55', // Green text for cash
+            x: nextX * 20 + 10,
+            y: nextY * 20,
+            targetX: 430, // Right edge of canvas
+            targetY: 260, // Height matching the cash readout
+            life: 15      // Animation frame lifespan
+        });
+        
+        State.trashList.splice(i, 1);
+      } 
+      // If it's a large trash item (bag, cup, wrapper)...
+      else if (t.type !== 'popcorn') {
+        if (State.playerInventory.length < CONFIG.MAX_CARRY_LIMIT) {
+          State.playerInventory.push(t.type);
+          
+          // Trigger the Zooming Text Animation for Trash
+          State.floatingTexts.push({
+              text: `+ ${t.type.toUpperCase()}`,
+              color: '#ffb834', // Amber text for inventory
+              x: nextX * 20 + 10,
+              y: nextY * 20,
+              targetX: 430,
+              targetY: 240, // Height matching the bag inventory readout
+              life: 15
+          });
+          
+          State.trashList.splice(i, 1);
+        } else {
+          triggerVisualFlashHUDAlert("🎒 BAG SLOTS FULL! EMPTY OUT AT BARRELS / CORRIDOR");
+        }
+      }
+    }
+  }
+
+  processInventoryEmptyingLocationsCheck('PLAYER', State.player);
+  updateInterfaceReadoutsPanel();
+}
+
+// Logic that decides if a cord is tangled by snaking it through too many center seating rows
+function processCordTangleEvaluation(targetX, targetY) {
+  if (!State.activeOutletKey) return false;
+  let centerRowsOccupied = new Set();
+  State.cordTrace.forEach(coord => {
+    if (getTileStructure(coord.x, coord.y) === 'seats_center') centerRowsOccupied.add(coord.y);
+  });
+  return (centerRowsOccupied.size > 2 && getTileStructure(targetX, targetY) === 'seats_center');
+}
+
+// Power Plug logic
+function executeConnectAdjacentOutletStation() {
+  const px = State.player.x;
+  const py = State.player.y;
+  for (let key in COORD_OUTLETS) {
+    let out = COORD_OUTLETS[key];
+    if (Math.abs(px - out.x) + Math.abs(py - out.y) <= 1) {
+      State.activeOutletKey = key;
+      State.cordTrace = [{ x: px, y: py }];
+      State.tangled = false;
+      triggerVisualFlashHUDAlert(`* POWER TETHER PLUGGED INTO: ${key} *`);
+      updateInterfaceReadoutsPanel();
+      return;
+    }
+  }
+}
+
+// Power Unplug logic
+function executeYankCordDisconnection() {
+  if (!State.activeOutletKey) return;
+  let socket = COORD_OUTLETS[State.activeOutletKey];
+  if (Math.abs(State.player.x - socket.x) + Math.abs(State.player.y - socket.y) <= CONFIG.UNPLUG_MAX_DISTANCE) {
+    State.activeOutletKey = null;
+    State.cordTrace = [];
+    State.tangled = false;
+    State.powerLevel = 0; 
+    triggerVisualFlashHUDAlert("* POWER CORD YANKED FREE *");
+    RetroAudioEngine.syncBlowerEngineSound(0);
+    updateInterfaceReadoutsPanel();
+  }
+}
+
+// Dumping inventory logic at trashcans or the back hallway
+function processInventoryEmptyingLocationsCheck(actorType, posRecord) {
+  let struct = getTileStructure(posRecord.x, posRecord.y);
+  let clearTrigger = (struct === 'bulkhead') || TRASH_CANS.some(can => can.x === posRecord.x && can.y === posRecord.y);
+
+  if (clearTrigger) {
+    if (actorType === 'PLAYER' && State.playerInventory.length > 0) {
+      State.playerInventory = [];
+      triggerVisualFlashHUDAlert("🚮 * ITEMS DUMPED SAFELY IN BIN RECEPTACLE *");
+    }
+  }
+}
+
+function triggerVisualFlashHUDAlert(msg) {
+  State.alertMessage = msg;
+  State.alertMessageTicks = 18; 
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  8. PHYSICS & KINEMATICS ENGINE
+//  HOW IT WORKS: Calculates the air cone pushed by the blower, and how different
+//  items react to the wind force (Quarters are heavy, bills fly far).
+// ════════════════════════════════════════════════════════════════════════════
+function processExpandingConePhysicsAirflow() {
+  if (State.powerLevel === 0 || !State.activeOutletKey) return;
+
+  const px = State.player.x + 0.5;
+  const py = State.player.y + 0.5;
+  const heading = State.player.facing;
+
+  let coneReachMax = State.powerLevel * 2.8 + 1;
+
+  let unitVectorX = 0, unitVectorY = 0;
+  if (heading === 'N') unitVectorY = -1;
+  else if (heading === 'S') unitVectorY = 1;
+  else if (heading === 'E') unitVectorX = 1;
+  else if (heading === 'W') unitVectorX = -1;
+
+  State.trashList.forEach(t => {
+    // Upper bounds lock: Once trash is in the top 0.25 coordinate, it locks in for sweepers
+    if (t.y <= 0.25) return;
+
+    let deltaX = t.x - px;
+    let deltaY = t.y - py;
+    let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    if (distance > coneReachMax || distance < 0.2) return;
+
+    let insideCone = false;
+    if (heading === 'N' && deltaY < 0 && Math.abs(deltaX) <= Math.abs(deltaY) * 1.1) insideCone = true;
+    if (heading === 'S' && deltaY > 0 && Math.abs(deltaX) <= Math.abs(deltaY) * 1.1) insideCone = true;
+    if (heading === 'E' && deltaX > 0 && Math.abs(deltaY) <= Math.abs(deltaX) * 1.1) insideCone = true;
+    if (heading === 'W' && deltaX < 0 && Math.abs(deltaY) <= Math.abs(deltaX) * 1.1) insideCone = true;
+
+    if (!insideCone) return;
+
+    let baseForce = (State.powerLevel * 1.1) / distance;
+
+    if ((t.type === 'bucket_filled' || t.type === 'bag_filled') && baseForce >= 1.2) {
+      t.type = (t.type === 'bucket_filled') ? 'cup' : 'bag';
+      triggerVisualFlashHUDAlert("💥 VESSEL BURST OPEN: SPILLING LOOSE CORN!");
+      for (let k = 0; k < 5; k++) {
+        State.trashList.push({ type: 'popcorn', x: t.x + (Math.random() * 0.6 - 0.3), y: t.y + (Math.random() * 0.6 - 0.3), vx: (Math.random() * 2 - 1) * 0.8, vy: (Math.random() * 2 - 1) * 0.8, isCash: false });
+      }
+      State.totalTrashCount += 5;
+      return;
+    }
+
+    // WEIGHT & ACCELERATION SCALING
+    let isHeavy = (t.type === 'quarter');
+    let isPaper = (t.type.startsWith('bill_'));
+
+    let accelerationScale = 0.4;
+    if (t.type === 'popcorn') accelerationScale = 1.3;
+    else if (isPaper) accelerationScale = 1.8; // Paper bills fly significantly more freely
+    else if (isHeavy) {
+      if (State.powerLevel < 3 || distance > 1.8) return; // Quarters strictly require Max Power (3) and close range
+      accelerationScale = 0.18; // Very sluggish movement
+    }
+    else if (t.type === 'wrapper' || t.type === 'bag') accelerationScale = 0.7;
+    else if (t.type === 'cup' || t.type === 'bottle') {
+      if (State.powerLevel < 2) return; 
+      accelerationScale = 0.25;
+    }
+
+    let finalVx = unitVectorX * baseForce * accelerationScale;
+    let finalVy = unitVectorY * baseForce * accelerationScale;
+
+    // High power scatter chaos effect
+    if (distance <= 1.4 && State.powerLevel === 3) {
+      let scatterRange = (t.type === 'popcorn' || isPaper) ? 1.9 : 0.8;
+      finalVx += (Math.random() * 2 - 1) * scatterRange;
+      finalVy += (Math.random() * 2 - 1) * scatterRange;
+    }
+
+    t.vx += finalVx;
+    t.vy += finalVy;
+  });
+}
+
+function processFluidTrashPhysicsLoop() {
+  for (let i = State.trashList.length - 1; i >= 0; i--) {
+    let t = State.trashList[i];
+    
+    let projectedX = t.x + t.vx;
+    let projectedY = t.y + t.vy;
+    let gridX = Math.floor(projectedX);
+    let gridY = Math.floor(projectedY);
+
+    if (isObstacleTile(gridX, gridY)) {
+      t.vx *= -0.7;
+      t.vy *= -0.7;
+      continue;
+    }
+
+    t.x = projectedX;
+    t.y = projectedY;
+
+    // Friction slowdown
+    t.vx *= 0.55;
+    t.vy *= 0.55;
+
+    let popMultiplier = (t.type === 'popcorn' || t.type.startsWith('bill_')) ? 0.90 : 0.25;
+
+    // SIDE BOUNDS 
+    if (t.x < 0.1) { 
+      t.x = 0.1;  
+      // Corner Well side wall bounce
+      if (t.type === 'popcorn' && t.y >= 22) { t.vx = Math.abs(t.vx) * 1.5; t.vy -= 0.5; }
+      else { t.vx = Math.abs(t.vx) * popMultiplier; }
+    }
+    if (t.x > 21.9) { 
+      t.x = 21.9; 
+      // Corner Well side wall bounce
+      if (t.type === 'popcorn' && t.y >= 22) { t.vx = -Math.abs(t.vx) * 1.5; t.vy -= 0.5; }
+      else { t.vx = -Math.abs(t.vx) * popMultiplier; }
+    }
+    
+    // TOP BOUNDS
+    if (t.y < 0.1)  { t.y = 0.1;  t.vy = Math.abs(t.vy) * popMultiplier; }
+    
+    // -------------------------------------------------------------
+    // SYSTEM: CORNER "WELLS" POPCORN BOUNCER
+    // Prevents loose popcorn from getting permanently trapped in the back-bottom corners
+    // -------------------------------------------------------------
+    if (t.y > 23.9) { 
+      t.y = 23.9; 
+      if (t.type === 'popcorn' && (t.x < 4 || t.x > 17)) {
+        // Less pronounced, but still effective forward vertical boost to escape the well
+        t.vy = -Math.abs(t.vy) * 1.4 - 0.1; 
+        t.vx += (Math.random() - 0.5) * 0.4; 
+      } else {
+        t.vy = -Math.abs(t.vy) * popMultiplier; 
+      }
+    }
+
+    // Automatic trash disposal in the back hallway (bulkhead)
+    if (getTileStructure(gridX, gridY) === 'bulkhead') {
+      let currentVelocityMagnitude = Math.sqrt(t.vx * t.vx + t.vy * t.vy);
+      if (currentVelocityMagnitude < 0.08) {
+        State.trashList.splice(i, 1);
+      }
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  9. MASTER INTERVAL TICK CLOCK (THE GAME LOOP)
+//  HOW IT WORKS: Runs every 100ms. Processes timers, AI helpers, physics, 
+//  and floating text animations.
+// ════════════════════════════════════════════════════════════════════════════
+function runUniversalSimulationIntervalClockTick() {
+  State.animTickCount++; 
+
+  if (State.phase === 'PLAYING' || State.phase === 'UNTANGLING') {
+    State.clockTime -= (CONFIG.TICK_INTERVAL_MS / 1000);
+    // Auto-evaluate when time runs out, but only if we haven't done it yet
+    if (State.clockTime <= 0 && !State.shiftEvaluated) {
+      terminateSimulationShift(true);
+      return;
+    }
+  }
+
+  if (!State.activeOutletKey && State.powerLevel > 0) {
+    State.powerLevel = 0;
+    RetroAudioEngine.silence();
+  }
+
+  if (State.alertMessageTicks > 0) {
+    State.alertMessageTicks--;
+    if (State.alertMessageTicks <= 0) State.alertMessage = "";
+  }
+  
+  // Update zooming floating texts positions
+  State.floatingTexts.forEach(ft => {
+      // Move 15% of the remaining distance toward the target each tick (smooth slow-down curve)
+      ft.x += (ft.targetX - ft.x) * 0.15;
+      ft.y += (ft.targetY - ft.y) * 0.15;
+      ft.life -= 1; // Reduces life
+  });
+  // Clear dead texts
+  State.floatingTexts = State.floatingTexts.filter(ft => ft.life > 0);
+
+  // --- STAGE FRONT PUSHBROOM USHERS AI LOGIC ---
+  State.frontUshers.forEach(fu => {
+    if (fu.state === 'STATIONARY') {
+      // Look for a piece of trash that is locked at the front stage and isn't claimed yet
+      let incomingTrashIndex = State.trashList.findIndex(t => t.y <= 0.25 && !t.claimedByFrontUsher);
+      if (incomingTrashIndex !== -1) {
+        let trashNode = State.trashList[incomingTrashIndex];
+        trashNode.claimedByFrontUsher = true; // Claim it so the other usher ignores it
+        fu.state = 'SWEEPING_FORWARD';
+        fu.targetTrash = trashNode;
+      }
+    }
+    else if (fu.state === 'SWEEPING_FORWARD') {
+      // Failsafe: if the player somehow grabs the trash before the usher reaches it
+      if (!fu.targetTrash || !State.trashList.includes(fu.targetTrash)) {
+        fu.targetTrash = null;
+        fu.state = 'RETURNING';
+        return;
+      }
+      
+      let targetX = Math.floor(fu.targetTrash.x);
+      let dist = targetX - fu.currentX;
+      if (Math.abs(dist) <= 0.5) {
+        let idx = State.trashList.indexOf(fu.targetTrash);
+        if (idx !== -1) State.trashList.splice(idx, 1); // Trash disappears! (If it was cash, it is lost forever).
+        fu.targetTrash = null;
+        fu.state = 'RETURNING';
+      } else {
+        fu.currentX += Math.sign(dist) * 0.4;
+      }
+    }
+    else if (fu.state === 'RETURNING') {
+      let dist = fu.startX - fu.currentX;
+      if (Math.abs(dist) <= 0.5) {
+        fu.currentX = fu.startX;
+        fu.state = 'STATIONARY';
+      } else {
+        fu.currentX += Math.sign(dist) * 0.4;
+      }
+    }
+  });
+
+  // --- AISLE USHERS AI LOGIC ---
+  State.ushers.forEach(u => {
+    if (u.inventory.length >= CONFIG.MAX_CARRY_LIMIT) {
+      u.state = 'PATH_TO_EMPTY';
+    }
+
+    if (u.state === 'BROOM_SWEEPING') {
+      u.broomTicks++;
+      if (u.broomTicks >= 20) { 
+        for (let i = State.trashList.length - 1; i >= 0; i--) {
+          let t = State.trashList[i];
+          if (t.type === 'popcorn' && Math.abs(t.x - u.x) <= 1.5 && Math.abs(t.y - u.y) <= 1.5) {
+            State.trashList.splice(i, 1);
+          }
+        }
+        u.state = 'SWEEPING';
+      }
+      return; 
+    }
+
+    if (u.state === 'PATH_TO_EMPTY') {
+      let dumpBin = (u.id === 1) ? TRASH_CANS[0] : TRASH_CANS[1];
+      if (u.y > dumpBin.y) u.y--;
+      else if (u.x < dumpBin.x) u.x++;
+      else if (u.x > dumpBin.x) u.x--;
+      else {
+        u.inventory = [];
+        u.state = 'SWEEPING';
+      }
+      return;
+    }
+
+    if (u.state === 'SWEEPING') {
+      let closestTrashNode = null;
+      let closestDistanceVal = 7; 
+      
+      State.trashList.forEach(t => {
+        let dist = Math.abs(t.x - u.x) + Math.abs(t.y - u.y);
+        // Ushers ignore cash completely—they just sweep it away.
+        if (dist < closestDistanceVal && !t.isCash) { 
+          closestDistanceVal = dist;
+          closestTrashNode = t;
+        }
+      });
+
+      // SLOWED DOWN MOVEMENT: Changed from 0.08 to 0.035 for a slower pacing
+      if (closestTrashNode && Math.random() < 0.035) { 
+        let tx = Math.floor(closestTrashNode.x);
+        let ty = Math.floor(closestTrashNode.y);
+        if (u.x < tx) u.x++;
+        else if (u.x > tx) u.x--;
+        else if (u.y < ty) u.y++;
+        else if (u.y > ty) u.y--;
+
+        if (closestTrashNode.type === 'popcorn' && closestDistanceVal <= 1.2) {
+          u.state = 'BROOM_SWEEPING';
+          u.broomTicks = 0;
+          return;
+        }
+      } else if (Math.random() < 0.035) {
+        let homeWalkwayX = (u.id === 1) ? 4 : 17;
+        if (u.x !== homeWalkwayX) {
+          if (u.x < homeWalkwayX) u.x++; else u.x--;
+        } else {
+          let nextY = u.y + u.directionY;
+          if (nextY > u.maxY && u.directionY === 1) u.directionY = -1;
+          else if (nextY < u.minY && u.directionY === -1) u.directionY = 1;
+          else u.y = nextY;
+        }
+      }
+    }
+
+    for (let i = State.trashList.length - 1; i >= 0; i--) {
+      let t = State.trashList[i];
+      if (Math.floor(t.x) === u.x && Math.floor(t.y) === u.y) {
+        if (t.type === 'popcorn') {
+          State.trashList.splice(i, 1);
+        } else if (u.inventory.length < CONFIG.MAX_CARRY_LIMIT && !t.isCash) {
+          u.inventory.push(t.type);
+          State.trashList.splice(i, 1);
+        }
+      }
+    }
+  });
+
+  if (State.phase === 'UNTANGLING' && State.isHoldingL) {
+    // #1a: progress from elapsed wall-clock time since the hold began — robust
+    // against key-repeat hiccups. NOTE: the clock above already ticked, so the
+    // shift timer keeps running while untangling (#1b: lifting must NOT pause it).
+    State.untangleAccumulatedMs = Date.now() - (State.untangleStartTs || Date.now());
+    if (State.untangleAccumulatedMs >= State.untangleRequiredMs) {
+      State.tangled = false;
+      let targetOutlet = State.activeOutletKey ? COORD_OUTLETS[State.activeOutletKey] : null;
+      if (targetOutlet) {
+        State.cordTrace = [{ x: targetOutlet.x, y: targetOutlet.y }, { x: State.player.x, y: State.player.y }];
+      } else {
+        // No outlet plugged in — just clear the tangle and reset the trace to
+        // the player's position so the line is slack again.
+        State.cordTrace = [{ x: State.player.x, y: State.player.y }];
+      }
+      State.phase = 'PLAYING';
+      State.isHoldingL = false;
+      State.untangleAccumulatedMs = 0;
+      State.untangleStartTs = 0;
+      triggerVisualFlashHUDAlert("* CORD SLACK RESET SUCCESSFUL *");
+      RetroAudioEngine.syncBlowerEngineSound(State.powerLevel);
+    }
+    processFluidTrashPhysicsLoop();
+    updateInterfaceReadoutsPanel();
+    return;
+  }
+
+  processExpandingConePhysicsAirflow();
+  processFluidTrashPhysicsLoop();
+
+  // Auto-evaluation if theater gets completely spotless
+  if (!State.shiftEvaluated && getCleanProgressPercentage() === 100) terminateSimulationShift(false);
+  
+  updateInterfaceReadoutsPanel();
+}
+
+// Math that gauges percentage cleaned (ignores currency for math purposes)
+function getCleanProgressPercentage() {
+  let countsOutsideTargetFrontZone = 0;
+  State.trashList.forEach(t => {
+    if (Math.floor(t.y) > 1 && !t.isCash) countsOutsideTargetFrontZone++;
+  });
+  if (State.totalTrashCount === 0) return 100;
+  
+  let mathematicallyCleanedPoints = State.totalTrashCount - countsOutsideTargetFrontZone;
+  return Math.round((mathematicallyCleanedPoints / State.totalTrashCount) * 100);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  10. RENDERING GRAPHICS LOOPS
+// ════════════════════════════════════════════════════════════════════════════
+function updateInterfaceReadoutsPanel() {
+  let tEl = document.getElementById('hud-time');     if (tEl) tEl.innerText = formatTimerString(Math.max(0, Math.ceil(State.clockTime)));
+  let pEl = document.getElementById('hud-power');    if (pEl) pEl.innerText = State.powerLevel === 0 ? "OFF (0)" : "LEVEL " + State.powerLevel;
+  let oEl = document.getElementById('hud-outlet');   if (oEl) oEl.innerText = State.activeOutletKey ? State.activeOutletKey : "UNPLUGGED";
+  let cHUD = document.getElementById('hud-cord');    if (cHUD) cHUD.innerText = State.activeOutletKey ? `${State.cordTrace.length} / ${CONFIG.MAX_CORD_LENGTH} FT` : "00 / 00 FT";
+  let gHUD = document.getElementById('hud-progress'); if (gHUD) gHUD.innerText = getCleanProgressPercentage() + "% AMASSED";
+  let iHUD = document.getElementById('hud-inventory');if (iHUD) iHUD.innerText = `${State.playerInventory.length} / ${CONFIG.MAX_CARRY_LIMIT} ITEMS`;
+  let vHUD = document.getElementById('hud-cash');    if (vHUD) vHUD.innerText = `$${State.foundCashAmount.toFixed(2)}`;
+  
+  let sHUD = document.getElementById('hud-status');
+  if (sHUD) {
+    if (State.tangled) { sHUD.innerText = "⚠️ TANGLE LOCKED"; sHUD.className = "warn"; }
+    else { sHUD.innerText = "OPERATIONAL"; sHUD.className = "ok"; }
+  }
+  
+  let msgBox = document.getElementById('hud-alert-line');
+  if (msgBox) {
+    msgBox.innerText = State.alertMessage;
+    msgBox.className = State.alertMessage.includes("⚠️") ? "warn" : "ok";
+  }
+
+  let cBox = document.getElementById('hud-channel-box');
+  let cBar = document.getElementById('hud-channel-bar');
+  if (cBox && cBar) {
+    if (State.phase === 'UNTANGLING' && State.isHoldingL) {
+      cBox.style.display = "block";
+      let fill = Math.floor((State.untangleAccumulatedMs / State.untangleRequiredMs) * 12);
+      cBar.innerText = "[" + "█".repeat(fill) + "░".repeat(12 - fill) + "]";
+    } else {
+      cBox.style.display = "none";
+    }
+  }
+
+  renderGraphicCanvasPlayfieldFrame();
+}
+
+function drawPixelArtEGAPersonSprite(ctx, cx, cy, angleRadians, jacketColorHex, blowerLevel, currentUsherState, hasInventoryItems, isPushbroomUsher) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(angleRadians);
+
+  // Black block border
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(-10, -10, 20, 20);
+
+  // Jacket
+  ctx.fillStyle = jacketColorHex;
+  ctx.fillRect(-7, -4, 14, 10); 
+
+  // Head
+  ctx.fillStyle = '#ffdbac'; 
+  ctx.fillRect(-3, -8, 6, 5);
+  ctx.fillStyle = '#000000'; 
+  ctx.fillRect(-2, -7, 4, 1);
+
+  let limbOscillatorScale = Math.sin(State.animTickCount * 0.45);
+  let leftArmOffset = Math.floor(limbOscillatorScale * 3);
+  let rightArmOffset = Math.floor(-limbOscillatorScale * 3);
+
+  // Arms
+  ctx.fillStyle = jacketColorHex;
+  ctx.fillRect(-9, -2 + leftArmOffset, 2, 6);
+  ctx.fillRect(7, -2 + rightArmOffset, 2, 6);
+
+  // White inventory bag graphic
+  if (hasInventoryItems) {
+    ctx.fillStyle = '#ffffff'; 
+    ctx.fillRect(8, 2 + rightArmOffset, 4, 4);
+    ctx.strokeStyle = '#000000'; ctx.lineWidth = 0.5; ctx.strokeRect(8, 2 + rightArmOffset, 4, 4);
+  }
+
+  // Blower nozzle
+  if (blowerLevel !== undefined) {
+    ctx.fillStyle = '#333333'; 
+    ctx.fillRect(4, -12, 3, 10);
+    
+    if (blowerLevel > 0) {
+      ctx.fillStyle = 'rgba(146, 223, 164, 0.8)';
+      let sparkOffset = Math.floor(Math.random() * 4) - 2;
+      ctx.fillRect(3 + sparkOffset, -20, 5, 8);
+    }
+  }
+
+  // Sweeping broom
+  if (currentUsherState === 'BROOM_SWEEPING') {
+    ctx.fillStyle = '#ecc94b'; 
+    ctx.fillRect(-6, -14, 2, 12);
+    ctx.fillStyle = '#ffffff'; 
+    ctx.fillRect(-8, -16, 6, 3);
+  }
+
+  // Giant Front Pushbroom
+  if (isPushbroomUsher) {
+    ctx.fillStyle = '#a0aec0'; 
+    ctx.fillRect(-1, -12, 2, 10);
+    ctx.fillStyle = '#ecc94b'; 
+    ctx.fillRect(-12, -15, 24, 3);
+  }
+
+  ctx.restore();
+}
+
+function renderGraphicCanvasPlayfieldFrame() {
+  const canvas = document.getElementById('gameCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  // Background
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const scaleW = 20;
+  const scaleH = 20;
+
+  for (let y = 0; y < 24; y++) {
+    for (let x = 0; x < 22; x++) {
+      let structureType = getTileStructure(x, y);
+      let posX = x * scaleW;
+      let posY = y * scaleH;
+
+      if (structureType.startsWith('seats')) {
+        ctx.strokeStyle = '#2f5436'; 
+        ctx.strokeRect(posX + 2, posY + 2, scaleW - 4, scaleH - 4);
+        ctx.fillStyle = '#112215';
+        ctx.fillRect(posX + 5, posY + 12, scaleW - 10, 3);
+      }
+      else if (structureType === 'bulkhead') {
+        ctx.fillStyle = '#181820';
+        ctx.fillRect(posX, posY, scaleW, scaleH);
+        ctx.strokeStyle = '#2a2a35';
+        ctx.strokeRect(posX, posY, scaleW, scaleH);
+      }
+      else if (structureType === 'front_floor') {
+        ctx.fillStyle = '#051008'; 
+        ctx.fillRect(posX, posY, scaleW, scaleH);
+      }
+    }
+  }
+
+  // Back Hallway Scanline Visual Filter Overlay
+  let playerStruct = getTileStructure(State.player.x, State.player.y);
+  if (playerStruct === 'bulkhead') {
+    ctx.fillStyle = 'rgba(0, 40, 0, 0.15)'; // Dark green tint for mood
+    for(let i=0; i<480; i+=4) {
+      ctx.fillRect(0, i, 440, 2); // Thin horizontal bars creating scanlines
+    }
+  }
+
+  // Front Screen Marker
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, 10);
+  ctx.strokeStyle = '#92dfa4'; ctx.strokeRect(0, 0, canvas.width, 10);
+  ctx.fillStyle = "rgba(146, 223, 164, 0.22)";
+  ctx.font = "10px monospace";
+  ctx.fillText("══ SCREEN SWEEP COLLECTION AREA (ROWS 0 & 1) ══", 50, 32);
+
+  // Trash barrels
+  TRASH_CANS.forEach(can => {
+    let cx = can.x * scaleW + scaleW/2;
+    let cy = can.y * scaleH + scaleH/2;
+    ctx.fillStyle = '#4a5568';
+    ctx.beginPath(); ctx.arc(cx, cy, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = '#1a202c'; 
+    ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill();
+  });
+
+  // Cord Path
+  if (State.activeOutletKey && State.cordTrace.length > 0) {
+    ctx.strokeStyle = '#ed8936'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    let port = COORD_OUTLETS[State.activeOutletKey];
+    ctx.moveTo(port.x * scaleW + scaleW/2, port.y * scaleH + scaleH/2);
+    State.cordTrace.forEach(n => ctx.lineTo(n.x * scaleW + scaleW/2, n.y * scaleH + scaleH/2));
+    ctx.stroke();
+  }
+
+  // Electrical Outlets
+  for (let key in COORD_OUTLETS) {
+    let out = COORD_OUTLETS[key];
+    let ox = out.x * scaleW;
+    let oy = out.y * scaleH;
+    ctx.fillStyle = '#f2f0e6';
+    ctx.fillRect(ox + 2, oy + 2, scaleW - 4, scaleH - 4);
+    ctx.strokeStyle = '#bab8aa'; ctx.lineWidth = 1; ctx.strokeRect(ox + 2, oy + 2, scaleW - 4, scaleH - 4);
+    ctx.fillStyle = (State.activeOutletKey === key) ? '#55ff55' : '#718096';
+    ctx.beginPath(); ctx.arc(ox + scaleW/2, oy + 7, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#000000'; ctx.fillRect(ox + scaleW/2 - 1.5, oy + 5.5, 1, 3); ctx.fillRect(ox + scaleW/2 + 0.5, oy + 5.5, 1, 3);
+    ctx.fillStyle = (State.activeOutletKey === key) ? '#55ff55' : '#718096';
+    ctx.beginPath(); ctx.arc(ox + scaleW/2, oy + 14, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#000000'; ctx.fillRect(ox + scaleW/2 - 1.5, oy + 12.5, 1, 3); ctx.fillRect(ox + scaleW/2 + 0.5, oy + 12.5, 1, 3);
+  }
+
+  // Debris (Trash and Currency)
+  State.trashList.forEach(t => {
+    let px = t.x * scaleW;
+    let py = t.y * scaleH;
+
+    // Coins and Bills Custom Render Shapes
+    if (t.type === 'quarter') {
+      ctx.fillStyle = '#a0aec0'; ctx.fillRect(px - 3, py - 3, 6, 6); // Silver coin base
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(px - 1, py - 1, 2, 2); 
+      if (State.animTickCount % 8 < 4) { // Sparkle effect
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(px + 2, py - 4, 2, 2); ctx.fillRect(px - 4, py + 2, 2, 2);
+      }
+    }
+    else if (t.type.startsWith('bill_')) {
+      ctx.fillStyle = '#2f855a'; ctx.fillRect(px - 5, py - 3, 10, 6); // Green paper bill
+      ctx.fillStyle = '#48bb78'; ctx.fillRect(px - 3, py - 1, 6, 2);
+      if (State.animTickCount % 10 < 5) { // Sparkle effect
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(px + 3, py - 4, 2, 2);
+      }
+    }
+    // Regular Trash
+    else if (t.type === 'popcorn') {
+      ctx.fillStyle = '#ecc94b'; ctx.fillRect(px - 2, py - 2, 3, 3);
+    } 
+    else if (t.type === 'wrapper') {
+      ctx.fillStyle = '#b794f4'; ctx.fillRect(px - 4, py - 2, 8, 4);
+    } 
+    else if (t.type === 'bag') {
+      ctx.fillStyle = '#e2e8f0'; ctx.fillRect(px - 4, py - 4, 8, 8);
+      ctx.strokeStyle = '#a0aec0'; ctx.strokeRect(px - 4, py - 4, 8, 8);
+    }
+    else if (t.type === 'cup') {
+      ctx.fillStyle = '#e53e3e'; ctx.fillRect(px - 3, py - 5, 6, 10);
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(px - 0.5, py - 8, 1, 3);
+    }
+    else if (t.type === 'bottle') {
+      ctx.fillStyle = '#3182ce'; ctx.fillRect(px - 3, py - 6, 6, 12);
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(px - 2, py - 8, 4, 2);
+    }
+    else if (t.type === 'bucket_filled') {
+      ctx.fillStyle = '#dd6b20'; ctx.fillRect(px - 5, py - 5, 10, 10);
+      ctx.fillStyle = '#ecc94b'; ctx.fillRect(px - 5, py - 7, 10, 2);
+    }
+    else if (t.type === 'bag_filled') {
+      ctx.fillStyle = '#319795'; ctx.fillRect(px - 4, py - 4, 8, 8);
+      ctx.fillStyle = '#b794f4'; ctx.fillRect(px - 4, py - 4, 8, 2);
+    }
+  });
+
+  // Aisle Ushers
+  State.ushers.forEach(u => {
+    let ux = u.x * scaleW + scaleW/2;
+    let uy = u.y * scaleH + scaleH/2;
+    let uAngle = (u.directionY === 1) ? Math.PI : 0; 
+    let hasTrashInHand = u.inventory.length > 0;
+    let jacketColor = (u.state === 'BROOM_SWEEPING') ? '#ff9900' : '#800020';
+    drawPixelArtEGAPersonSprite(ctx, ux, uy, uAngle, jacketColor, undefined, u.state, hasTrashInHand, false);
+  });
+
+  // Pushbroom Front Ushers
+  State.frontUshers.forEach(fu => {
+    let fux = fu.currentX * scaleW + scaleW/2;
+    let fuy = fu.currentY * scaleH + scaleH/2;
+    let fAngle = (fu.side === 'LEFT') ? Math.PI / 2 : -Math.PI / 2;
+    drawPixelArtEGAPersonSprite(ctx, fux, fuy, fAngle, '#800020', undefined, undefined, false, true);
+  });
+
+  // Player
+  let pX = State.player.x * scaleW + scaleW/2;
+  let pY = State.player.y * scaleH + scaleH/2;
+  let angle = 0;
+  if (State.player.facing === 'S') angle = Math.PI;
+  if (State.player.facing === 'E') angle = Math.PI / 2;
+  if (State.player.facing === 'W') angle = -Math.PI / 2;
+  
+  let playerHasTrash = State.playerInventory.length > 0;
+  drawPixelArtEGAPersonSprite(ctx, pX, pY, angle, '#800020', State.powerLevel, undefined, playerHasTrash, false);
+
+  // --- FLOATING ZOOM ANIMATION TEXTS LAYER ---
+  ctx.font = "bold 14px monospace";
+  ctx.textAlign = "right"; // Right-aligned to anchor against the right edge of the screen as they fly towards HUD
+  State.floatingTexts.forEach(ft => {
+    ctx.fillStyle = ft.color;
+    ctx.fillText(ft.text, ft.x, ft.y);
+  });
+  ctx.textAlign = "left"; // Reset for global settings
+}
+
+function formatTimerString(totalSecs) {
+  let m = Math.floor(totalSecs / 60); let s = totalSecs % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  11. OPERATION DIALOG WINDOW MANAGERS (MANAGER EVALUATION)
+// ════════════════════════════════════════════════════════════════════════════
+function displayDifficultySelectionWindow() {
+  State.phase = 'SETUP_DIFFICULTY'; // Phase assignment maps to '1-5' keyboard listener
+  const modal = document.getElementById('modal-container');
+  if (!modal) return;
+  modal.style.display = "flex";
+  modal.innerHTML = `
+    <div>
+      <h2 class="panel-header" style="border-bottom:2px solid #92dfa4; padding-bottom:4px; margin-top:0;">THEATER CLEANUP SETUP</h2>
+      <p>Select the mess level for the theater before you start cleaning.</p>
+      <h3 class="amber" style="margin-bottom:4px;">SELECT AUDITORIUM MESS LEVEL (1-5):</h3>
+      <button onclick="confirmDifficultyLevelChoice(1)">[1] Light Matinee Trash (Cleaner Option!)</button><br>
+      <button onclick="confirmDifficultyLevelChoice(2)">[2] Midweek Attendance (Moderate Mess)</button><br>
+      <button onclick="confirmDifficultyLevelChoice(3)">[3] Standard Friday Night Crowds</button><br>
+      <button onclick="confirmDifficultyLevelChoice(4)">[4] Saturday Blockbuster Disastrous Pile</button><br>
+      <button onclick="confirmDifficultyLevelChoice(5)">[5] Absolute Opening Midnight Riot Chaos</button>
+    </div>
+  `;
+  initializeTheatreMessMatrix();
+  renderGraphicCanvasPlayfieldFrame();
+}
+
+function confirmDifficultyLevelChoice(selectedTier) {
+  State.messLevel = selectedTier;
+  
+  // DYNAMIC USHER SPAWNS
+  State.ushers = [];
+  State.frontUshers = [];
+  
+  if (selectedTier >= 2) State.ushers.push({ id: 1, x: 4, y: 3, minY: 2, maxY: 18, directionY: 1, inventory: [], state: 'SWEEPING', broomTicks: 0 });
+  if (selectedTier >= 4) State.ushers.push({ id: 2, x: 17, y: 19, minY: 3, maxY: 21, directionY: -1, inventory: [], state: 'SWEEPING', broomTicks: 0 });
+  if (selectedTier >= 3) State.frontUshers.push({ id: 3, side: 'LEFT', startX: 1, startY: 1, currentX: 1, currentY: 1, state: 'STATIONARY', targetTrash: null });
+  if (selectedTier >= 5) State.frontUshers.push({ id: 4, side: 'RIGHT', startX: 20, startY: 1, currentX: 20, currentY: 1, state: 'STATIONARY', targetTrash: null });
+
+  State.phase = 'INSPECTING';
+  initializeTheatreMessMatrix();
+  
+  const modal = document.getElementById('modal-container');
+  modal.style.display = "flex";
+  modal.innerHTML = `
+    <div>
+      <h2 class="panel-header">🔎 PRE-CLEANING INSPECTION</h2>
+      <p>The layout on the left shows loose garbage generated matching mess Tier <span class="amber">${State.messLevel}</span>.</p>
+      <p class="ok" style="font-weight:bold;">Take a look at the auditorium and map out your cleaning path.</p>
+    </div>
+    <div>
+      <button onclick="displayStagingStancePromptWindow()" style="padding:10px 16px; font-size:14px;">[SPACE / ENTER] Proceed to Position Selection Menu</button>
+    </div>
+  `;
+  updateInterfaceReadoutsPanel(); 
+}
+
+function displayStagingStancePromptWindow() {
+  State.phase = 'SETUP_STANCE'; 
+  const modal = document.getElementById('modal-container');
+  modal.style.display = "flex";
+  modal.innerHTML = `
+    <div>
+      <h2 class="panel-header" style="border-bottom:2px solid #92dfa4; padding-bottom:4px; margin-top:0;">CHOOSE STARTING LOCATION</h2>
+      <p><strong>Row Constraints:</strong> Inside seating groups, you can move horizontally left and right. Moving vertically over seat-backs is strictly blocked.</p>
+      <p><strong>Blower Physics:</strong> Air projects an expanding 45° cone. Turn blower off (0) to walk over and hand-collect containers safely, and keep your eyes peeled for lost change!</p>
+    </div>
+
+    <div style="border-top:1px solid #323244; padding-top:10px;">
+      <span class="amber" style="font-weight:bold;">SELECT INITIAL POWER OUTLET ATTACHMENT HUB OR START UNPLUGGED:</span><br><br>
+      <button onclick="confirmStartingStanceConfiguration('LEFT')">[1] Connect to Back-Left Sockets Station</button><br>
+      <button onclick="confirmStartingStanceConfiguration('RIGHT')">[2] Connect to Back-Right Sockets Station</button><br>
+      <button onclick="confirmStartingStanceConfiguration('FRONT')">[3] Connect to Front-Center Stage Sockets Station</button><br>
+      <button onclick="confirmStartingStanceConfiguration('UNPLUGGED')">[4] Start UNPLUGGED (Clear large items by hand first before managing cables!)</button>
+    </div>
+  `;
+  updateInterfaceReadoutsPanel();
+}
+
+function confirmStartingStanceConfiguration(choiceKey) {
+  if (choiceKey === 'UNPLUGGED') {
+    State.activeOutletKey = null; State.cordTrace = [];
+    State.player.x = 4; State.player.y = 21; 
+  } else {
+    State.activeOutletKey = choiceKey;
+    let basePort = COORD_OUTLETS[choiceKey];
+    if (choiceKey === 'LEFT')  { State.player.x = 4; State.player.y = 21; }
+    if (choiceKey === 'RIGHT') { State.player.x = 17; State.player.y = 21; }
+    if (choiceKey === 'FRONT') { State.player.x = 4; State.player.y = 1; }
+    State.cordTrace = [{ x: basePort.x, y: basePort.y }, { x: State.player.x, y: State.player.y }];
+  }
+
+  State.tangled = false;
+  document.getElementById('modal-container').style.display = "none";
+  State.phase = 'PLAYING';
+  
+  // HARD WINDOW FOCUS GRAB: Unlocks W A S D functionality instantly off the buttons
+  window.focus();
+  if (document.activeElement && document.activeElement.tagName === 'BUTTON') {
+    document.activeElement.blur();
+  }
+  
+  if (State.loopTimer) clearInterval(State.loopTimer);
+  State.loopTimer = setInterval(runUniversalSimulationIntervalClockTick, CONFIG.TICK_INTERVAL_MS);
+  
+  RetroAudioEngine.syncBlowerEngineSound(State.powerLevel);
+  updateInterfaceReadoutsPanel();
+}
+
+function toggleSimulationPauseState() {
+  const modal = document.getElementById('modal-container');
+  if (State.phase === 'PLAYING' || State.phase === 'UNTANGLING') {
+    let internalOldPhase = State.phase;
+    State.phase = 'PAUSED';
+    RetroAudioEngine.syncBlowerEngineSound(0); 
+    modal.style.display = "flex";
+    modal.innerHTML = `
+      <h2 class="panel-header" style="text-align:center; margin-top:0;">📋 PAUSED — STAFF BREAK</h2>
+      <p style="text-align:center;">Review shift guidelines descriptions before unfreezing cleaning simulation loops:</p>
+      <ul style="max-width:580px; margin:0 auto; padding-left:25px; line-height:1.6; text-align:left;">
+        <li><span class="amber">W,A,S,D</span> — Move location. You cannot climb vertically over chairs.</li>
+        <li><span class="amber">0, 1, 2, 3</span> — Adjust motor speed airflow pressure settings.</li>
+        <li><span class="amber">HOLD L</span> — Lift cord over headrests (Trace lines cleanly reset back straight to outlet).</li>
+        <li><span class="amber">U</span> — Yank cord free (Up to 10ft away radius) | <span class="amber">P</span> — Plug in line (Requires standing adjacent).</li>
+        <li><span class="amber">C</span> — Call Manager for Inspection (End Cleaning).</li>
+      </ul>
+      <h3 class="ok" style="text-align:center; margin-top:20px;">Press [ESC] / [I] / [H] to resume cleaning!</h3>
+    `;
+    
+    window.addEventListener('keydown', function unpauseCheck(e) {
+      if (e.key.toLowerCase() === 'i' || e.key === 'Escape' || e.key.toLowerCase() === 'h') {
+        window.removeEventListener('keydown', unpauseCheck);
+        modal.style.display = "none";
+        State.phase = internalOldPhase;
+        window.focus();
+        if (document.activeElement) document.activeElement.blur();
+        RetroAudioEngine.syncBlowerEngineSound(State.powerLevel);
+        updateInterfaceReadoutsPanel();
+      }
+    });
+  }
+}
+
+// -------------------------------------------------------------
+// SYSTEM: MANAGER GRADING LOGIC
+// -------------------------------------------------------------
+function terminateSimulationShift(timedOut) {
+  State.phase = 'SUMMARY';
+  State.shiftEvaluated = true; // Marks that grading has occurred
+  clearInterval(State.loopTimer);
+  RetroAudioEngine.silence(); 
+  
+  let performancePct = getCleanProgressPercentage();
+  let gradeLetter = 'F';
+  
+  // Severe punishment for calling it early while not 100% spotless
+  if (!timedOut && performancePct < 100) {
+    gradeLetter = 'F (FIRED - Wasting Manager Time)';
+  } else {
+    if (performancePct === 100) {
+      gradeLetter = (State.clockTime > 120) ? 'A+' : 'A';
+    } else if (performancePct >= 95) {
+      gradeLetter = 'B';
+    } else if (performancePct >= 85) {
+      gradeLetter = 'C';
+    } else {
+      gradeLetter = 'F (Unacceptable)';
+    }
+  }
+
+  const modal = document.getElementById('modal-container');
+  modal.style.display = "flex";
+  modal.innerHTML = `
+    <div>
+      <h2 class="panel-header" style="margin-top:0;">📋 MANAGER INSPECTION</h2>
+      <p><strong>Inspection Trigger:</strong> ${timedOut ? '<span class="warn">TIME RAN OUT</span>' : '<span class="ok">MANAGER CALLED EARLY</span>'}</p>
+      <hr style="border-color:#323244;">
+      <h3>Trash Swept to Front: <span class="ok">${performancePct}% Amassed</span></h3>
+      <h3>Manager's Grade: <br><br><span class="warn">[${gradeLetter}]</span></h3>
+      <h3>Loose Cash Found: <span class="ok">$${State.foundCashAmount.toFixed(2)}</span></h3>
+    </div>
+    <div>
+      <button onclick="resumeSimulationShiftAfterGrading()" style="margin-bottom:10px;">OK (Continue Cleaning)</button>
+      <button onclick="displayDifficultySelectionWindow()">Start Next Cleanup</button>
+    </div>
+  `;
+}
+
+// -------------------------------------------------------------
+// SYSTEM: SHIFT RESUMPTION
+// -------------------------------------------------------------
+function resumeSimulationShiftAfterGrading() {
+  document.getElementById('modal-container').style.display = "none";
+  State.phase = 'PLAYING';
+  
+  window.focus();
+  if (document.activeElement && document.activeElement.tagName === 'BUTTON') {
+    document.activeElement.blur();
+  }
+  
+  if (State.loopTimer) clearInterval(State.loopTimer);
+  State.loopTimer = setInterval(runUniversalSimulationIntervalClockTick, CONFIG.TICK_INTERVAL_MS);
+  RetroAudioEngine.syncBlowerEngineSound(State.powerLevel);
+  updateInterfaceReadoutsPanel();
+}
+
+document.addEventListener('click', () => {
+  if (State.phase === 'PLAYING' || State.phase === 'UNTANGLING') {
+    window.focus();
+    if (document.activeElement && document.activeElement.tagName === 'BUTTON') document.activeElement.blur();
+  }
+});
+
+// Kick off initial setup state
+displayDifficultySelectionWindow();
+</script>
+
+</body>
+</html>

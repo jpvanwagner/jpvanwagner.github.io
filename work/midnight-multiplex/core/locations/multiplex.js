@@ -47,7 +47,7 @@ Screens.GAME_PLACEHOLDER = {
       actionLine('wait',  'wait 5 minutes',                                     false),
       actionLine('sheet', 'view your character sheet (or press F3)',            false),
       actionLine('log',   'view full event log',                                false),
-      actionLine('debug', 'open the debug menu (launch minigames / Mapster)',   false),
+      actionLine('debug', 'open the debug menu (launch minigames / tools)',     false),
       actionLine('menu',  'return to the title',                                false),
       actionLine('save',  'save your progress',                                 false),
     ];

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Library (3D view)</title>
+<!-- The 3D map view inside the game's Facility panel. It runs Mapster's own engine
+     (mapster/, copied from the TOOL--Mapster repo) in VIEWER MODE: no player, just a camera
+     you can pan, zoom, rotate and tilt. The game sends it the map and the patrons
+     (js/view3d.js); js/viewer3d.js draws them and reports clicks back. -->
+<style>
+  @font-face { font-family: 'Atkinson Hyperlegible'; src: url('assets/fonts/AtkinsonHyperlegible-Regular.woff2') format('woff2'); }
+  @font-face { font-family: 'Special Elite'; src: url('assets/fonts/SpecialElite.woff2') format('woff2'); }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0f2d52; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; }
+  #game-container { position: absolute; inset: 0; }
+  #fade { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity .5s; z-index: 5; }
+  /* the engine's player HUD isn't used in viewer mode */
+  #ui, #msg, #dialogue, #dir, #minimap-mini, #painter-ui, .overhead-txt, #diag-overlay { display: none !important; }
+  #compass-ui { position: absolute; top: 10px; right: 12px; width: 46px; height: 46px; border-radius: 50%; border: 2px solid #8fd8ff; background: rgba(10,30,58,0.7); color: #fff; font: bold 9px/1 'Courier New', monospace; pointer-events: none; z-index: 6; }
+  .compass-border-label { position: absolute; color: #fff; text-shadow: 1px 1px 0 #000; font-size: 9px; }
+  .compass-border-label.n { top: -11px; left: 50%; transform: translateX(-50%); color: #ff8a7a; }
+  .compass-border-label.s { bottom: -11px; left: 50%; transform: translateX(-50%); }
+  .compass-border-label.e { right: -10px; top: 50%; transform: translateY(-50%); }
+  .compass-border-label.w { left: -10px; top: 50%; transform: translateY(-50%); }
+  .compass-dial { position: absolute; inset: 0; transition: transform .15s; border-radius: 50%; }
+  .compass-dial-arrow { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 11px solid #ffd98a; }
+  #compass-tilt { display: none; }
+  #labels { position: absolute; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
+  .lbl { position: absolute; transform: translate(-50%, -50%); background: rgba(10,30,58,0.78); color: #fff; border-radius: 4px; padding: 1px 6px 3px; font: 12px 'Special Elite', 'Atkinson Hyperlegible', sans-serif; white-space: nowrap; text-align: center; }
+  .lbl img { width: 14px; height: 14px; vertical-align: -3px; margin-right: 3px; }
+  .lbl i { display: block; height: 3px; margin-top: 2px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
+  .lbl i b { display: block; height: 100%; }
+  .bang { position: absolute; transform: translate(-50%, -100%); color: #ff3b3b; font: bold 15px sans-serif; text-shadow: 0 0 3px #000; }
+  #loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #b9cae6; font-size: 13px; z-index: 7; }
+</style>
+<script src="mapster/lib/three.min.js"></script>
+<script src="mapster/lib/GLTFLoader.js"></script>
+<script src="mapster/lib/SkeletonUtils.js"></script>
+<script src="js/library-textures.js"></script>
+<script src="js/patron-models.js"></script>
+<script src="mapster/core/cameraControls.js"></script>
+<script src="mapster/vfx/skyboxManager.js"></script>
+<script src="mapster/vfx/lightingManager.js"></script>
+<script src="mapster/vfx/fogManager.js"></script>
+<script src="mapster/vfx/weatherManager.js"></script>
+<script src="mapster/vfx/rain.js"></script>
+<script src="mapster/vfx/snow.js"></script>
+<script src="mapster/textures/floor.js"></script>
+<script src="mapster/textures/wall.js"></script>
+<script src="mapster/core/windowPainter.js"></script>
+<script src="mapster/core/gameData.js"></script>
+<script src="mapster/core/items.js"></script>
+<script src="mapster/core/tokens.js"></script>
+<script src="mapster/core/dialogueRuntime.js"></script>
+<script src="mapster/core/engine.js"></script>
+</head>
+<body>
+<div id="game-container"></div><div id="fade"></div>
+<div id="ui"></div>
+<div id="compass-ui"><span class="compass-border-label n">N</span><span class="compass-border-label e">E</span><span class="compass-border-label s">S</span><span class="compass-border-label w">W</span><div class="compass-dial"><div class="compass-dial-arrow"></div></div><div id="compass-tilt"><div class="mid"></div><div class="mark"></div><div class="deg">0°</div></div></div>
+<div id="msg"></div><div id="dialogue"></div>
+<div id="dir"><canvas id="minimap-canvas"></canvas><div id="dir-info"></div></div>
+<div id="minimap-mini"><canvas id="minimap-mini-canvas" width="120" height="120"></canvas></div>
+<div id="painter-ui"></div>
+<div id="labels"></div>
+<div id="loading">Building the library in 3D&hellip;</div>
+<script src="js/viewer3d.js"></script>
+</body>
+</html>

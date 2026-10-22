@@ -1,0 +1,98 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation; /* no double-tap zoom on buttons */
+  overscroll-behavior: none;
+}
+
+[hidden] { display: none !important; }
+.mono { font-family: var(--mono); }
+.muted { color: var(--ink-3); }
+
+kbd {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid currentColor;
+  opacity: 0.7;
+  margin-left: 6px;
+}
+
+/* Buttons ------------------------------------------------------------------ */
+.btn {
+  font: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  padding: 7px 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.12s, border-color 0.12s, transform 0.05s;
+}
+.btn:hover:not(:disabled) { background: var(--paper-2); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-block { width: 100%; }
+.btn-icon { min-width: 34px; padding-left: 8px; padding-right: 8px; font-size: 15px; }
+.btn:focus-visible, .dock-tab:focus-visible, .level-card:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+.btn-sm { padding: 4px 8px; font-size: 12px; }
+.btn-ghost { background: transparent; }
+.btn-primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+.btn-primary:hover:not(:disabled) { background: #3a4049; }
+
+.btn-ok { background: var(--ok); border-color: var(--ok); color: #fff; }
+.btn-ok:hover:not(:disabled) { background: #367a42; }
+.btn-danger { background: var(--card); border-color: var(--danger); color: var(--danger); }
+.btn-danger:hover:not(:disabled) { background: var(--danger-soft); }
+.btn-escort { background: var(--card); border-color: var(--ok); color: var(--ok); }
+.btn-escort:hover:not(:disabled) { background: var(--ok-soft); }
+.btn-wait { background: var(--card); border-color: var(--warn); color: #a86a10; }
+.btn-wait:hover:not(:disabled) { background: var(--warn-soft); }
+.btn-info { background: var(--info); border-color: var(--info); color: #fff; }
+.btn-info:hover:not(:disabled) { background: #285f98; }
+.btn-neutral { background: var(--ink-2); border-color: var(--ink-2); color: #fff; }
+
+.chip {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: var(--line-2);
+  color: var(--ink-2);
+}
+.chip-warn { background: var(--warn-soft); color: #a86a10; }
+.chip-danger { background: var(--danger-soft); color: var(--danger); }
+
+.dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.dot-guest { background: var(--c-guest); }
+.dot-employee { background: var(--c-employee); }
+.dot-officer { background: transparent; border: 2.5px solid var(--c-officer); }
+
+/* Input mode (ui/input.js sets html[data-input]): say "Tap" or "Click", show or
+   hide keyboard hints. */
+html:not([data-input='touch']) .when-touch { display: none; }
+html[data-input='touch'] .when-touch { display: revert; }
+html[data-input='touch'] .when-mouse { display: none; }
+html[data-input='touch'] .keys.when-touch { display: grid; }
+html[data-input='touch'] kbd { display: none; }
+html[data-keyhints='off'] kbd { display: none; }
+#legend.is-off { display: none !important; }

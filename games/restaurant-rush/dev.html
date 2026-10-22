@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#141012" />
+    <title>Mama Maggie's Restaurant Rush</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%238f1d21'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia,serif' font-style='italic' font-weight='700' font-size='17' fill='%23faf7f2'%3EM%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./src/styles.css" />
+    <script>
+      // Startup safety net: if the game hasn't come up a few seconds after load, show what
+      // happened (where boot stopped, any error, what arrived on the page) instead of a silent,
+      // empty page. Copy details puts the report on the clipboard to send along.
+      (function () {
+        var errors = [];
+        var started = Date.now();
+        window.__rrStep = window.__rrStep || 'page loaded; game script not started yet';
+        window.addEventListener('error', function (e) {
+          var t = e.target;
+          if (t && t !== window && (t.src || t.href)) { errors.push('Could not load ' + String(t.tagName).toLowerCase() + ' ' + String(t.src || t.href).slice(-90)); return; }
+          errors.push((e.message || String(e.error || e)) + (e.filename ? ' @' + String(e.filename).slice(-40) + ':' + e.lineno : ''));
+        }, true);
+        // A blocked script fires no error event, only a content-security-policy violation.
+        document.addEventListener('securitypolicyviolation', function (e) {
+          errors.push('Blocked by the page host (' + e.violatedDirective + (e.blockedURI ? ': ' + e.blockedURI : '') + ')');
+        });
+        window.addEventListener('unhandledrejection', function (e) { errors.push('Promise: ' + String(e.reason && e.reason.message || e.reason)); });
+
+        function webgl() {
+          try {
+            var c = document.createElement('canvas');
+            return c.getContext('webgl2') ? 'WebGL 2 available' : c.getContext('webgl') ? 'WebGL 1 only' : 'WebGL unavailable';
+          } catch (err) { return 'WebGL check failed: ' + err.message; }
+        }
+        function report() {
+          var scripts = [];
+          for (var i = 0; i < document.scripts.length; i++) {
+            var sc = document.scripts[i];
+            scripts.push(sc.src ? 'file ' + sc.src.split('/').pop().slice(0, 40) : sc.textContent.length + ' chars' + (sc.type ? ' (' + sc.type + ')' : ''));
+          }
+          var styles = [];
+          try { for (var j = 0; j < document.styleSheets.length; j++) { var ss = document.styleSheets[j]; styles.push(ss.href ? 'file ' + ss.href.split('/').pop().slice(0, 40) : 'inline'); } } catch (err) {}
+          var be = window.__rrBootError;
+          return [
+            'Stopped at: ' + window.__rrStep,
+            'Error: ' + (be ? (be.message || be) + (be.stack ? '\n  ' + String(be.stack).split('\n').slice(1, 4).join('\n  ') : '') : errors.length ? errors.slice(0, 3).join(' | ') : 'none reported'),
+            'Graphics: ' + webgl(),
+            'Scripts on page: ' + scripts.length + ' [' + scripts.join(', ') + ']',
+            'Stylesheets: ' + styles.length + ' [' + styles.join(', ') + ']',
+            'Page size: ' + document.documentElement.outerHTML.length + ' chars',
+            'Seconds since load: ' + Math.round((Date.now() - started) / 1000),
+            'Browser: ' + navigator.userAgent,
+          ].join('\n');
+        }
+        function show() {
+          if (window.__rr || document.getElementById('rr-boot-fail')) return;
+          var text = report();
+          var gl = /unavailable|failed/.test(text) || /webgl|context/i.test(text.split('\n')[1]);
+          var box = document.createElement('div');
+          box.id = 'rr-boot-fail';
+          box.setAttribute('role', 'alert');
+          box.style.cssText = 'position:fixed;inset:0;z-index:999;display:grid;place-items:center;padding:16px;background:#141012;color:#faf7f2;font:15px/1.5 system-ui,sans-serif;text-align:center;overflow:auto';
+          box.innerHTML = '<div style="max-width:640px;width:100%"><div style="font:italic 800 30px Georgia,serif;color:#fff;margin-bottom:8px">Mama Maggie&#39;s Restaurant Rush couldn&#39;t start</div>' +
+            '<p>' + (gl ? 'Your browser couldn&#39;t start 3D graphics (WebGL). Turn on hardware acceleration in the browser settings, or try another browser.' : 'Something went wrong while loading. The details below say where it stopped.') + '</p>' +
+            '<pre style="text-align:left;white-space:pre-wrap;word-break:break-word;font:12px/1.5 ui-monospace,monospace;color:#e9e2da;background:#221c1d;border:1px solid #3a3233;border-radius:8px;padding:10px 12px;margin:12px 0"></pre>' +
+            '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">' +
+            '<button type="button" data-act="copy" style="font:600 14px system-ui;padding:8px 14px;border-radius:8px;border:1px solid #8f1d21;background:#8f1d21;color:#fff;cursor:pointer">Copy details</button>' +
+            '<button type="button" data-act="close" style="font:600 14px system-ui;padding:8px 14px;border-radius:8px;border:1px solid #6a5d5e;background:transparent;color:#faf7f2;cursor:pointer">Dismiss</button></div></div>';
+          var pre = box.querySelector('pre');
+          pre.textContent = text;
+          box.querySelector('[data-act=copy]').onclick = function () {
+            var btn = this;
+            var done = function () { btn.textContent = 'Copied'; };
+            var fallback = function () { var r = document.createRange(); r.selectNodeContents(pre); var sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); btn.textContent = 'Selected - press Ctrl+C'; };
+            try { navigator.clipboard.writeText(text).then(done, fallback); } catch (err) { fallback(); }
+          };
+          box.querySelector('[data-act=close]').onclick = function () { box.remove(); };
+          document.body.appendChild(box);
+        }
+        // Inside the claude.ai viewer, also save the report to this artifact's own database so it
+        // can be read back without anyone copying it. Elsewhere (a saved file, another site)
+        // window.claude doesn't exist and this does nothing.
+        var loadId = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14) + '-' + Math.random().toString(36).slice(2, 6);
+        function gameState() {
+          var c = document.querySelector('#canvas-host canvas');
+          var out = { booted: !!window.__rr, step: String(window.__rrStep), frames: window.__rrFrames || 0,
+            titleShown: !!document.querySelector('.title-screen'), bootFailShown: !!document.getElementById('rr-boot-fail'),
+            viewport: innerWidth + 'x' + innerHeight, visibility: document.visibilityState };
+          if (c) {
+            out.canvas = c.width + 'x' + c.height + ' (css ' + c.clientWidth + 'x' + c.clientHeight + ')';
+            try {
+              var gl = c.getContext('webgl2') || c.getContext('webgl');
+              var dbg = gl && gl.getExtension('WEBGL_debug_renderer_info');
+              out.gpu = gl ? (dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : 'hidden') + (gl.isContextLost() ? ' (context lost)' : '') : 'no context';
+            } catch (err) { out.gpu = 'check failed: ' + err.message; }
+          }
+          try {
+            var g = window.__rr && window.__rr.G;
+            if (g) out.game = { running: g.running, view: g.view, clock: Math.round(g.clock), actors: g.actors.length, parties: g.parties.length };
+          } catch (err) { out.game = 'read failed: ' + err.message; }
+          return out;
+        }
+        function save(kind) {
+          try {
+            if (!window.claude || !window.claude.use) return;
+            window.claude.use('db').then(function (db) {
+              if (!db) return;
+              return db.doc('diagnostics/' + loadId).set({ kind: kind, at: new Date().toISOString(),
+                report: report(), errors: errors.slice(0, 10), state: gameState() });
+            }).catch(function () {});
+          } catch (err) {}
+        }
+        window.addEventListener('load', function () {
+          setTimeout(function () { show(); save(window.__rr ? 'started' : 'failed-to-start'); }, 4000);
+          // A second snapshot: is the game still drawing, did anything break after start?
+          setTimeout(function () { save(window.__rr ? 'running-20s' : 'failed-to-start-20s'); }, 20000);
+        });
+        // If the game comes up late after all, get out of the way.
+        var poll = setInterval(function () {
+          if (!window.__rr) return;
+          clearInterval(poll);
+          var box = document.getElementById('rr-boot-fail');
+          if (box) box.remove();
+        }, 500);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="app">
+      <header id="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">M</span>
+          <span class="brand-text">
+            <span class="brand-title">Mama Maggie&#39;s</span>
+            <span class="brand-sub" id="hud-place"></span>
+          </span>
+        </div>
+        <nav class="views" aria-label="Stations">
+          <button class="view-btn" data-view="floor" title="Dining room map (1)"><kbd>1</kbd>Floor</button>
+          <button class="view-btn" data-view="bar" title="Bartend (2)"><kbd>2</kbd>Bar<span class="badge" id="badge-bar"></span></button>
+          <button class="view-btn" data-view="kitchen" title="Cook on the line (3)"><kbd>3</kbd>Kitchen<span class="badge" id="badge-kitchen"></span></button>
+          <button class="view-btn" data-view="office" title="Manager's office (4)"><kbd>4</kbd>Office</button>
+        </nav>
+        <div class="hud-stats">
+          <div class="stat"><span class="stat-label" id="hud-day">Day 1</span><span class="stat-value mono" id="hud-clock">11:00 AM</span></div>
+          <div class="stat"><span class="stat-label">Today</span><span class="stat-value mono" id="hud-take">$0</span></div>
+          <div class="stat"><span class="stat-label">Rating</span><span class="stat-value" id="hud-rating">–</span></div>
+          <div class="stat stat-hide-sm"><span class="stat-label">Served</span><span class="stat-value mono" id="hud-served">0</span></div>
+        </div>
+        <button class="phase-pill" id="hud-phase" type="button" title="Quiet hours: the crew runs the room. Click to take over."></button>
+        <div class="hud-buttons">
+          <button class="btn btn-ghost btn-icon" id="btn-pause" title="Pause (Space)" aria-label="Pause">❚❚</button>
+          <button class="btn btn-ghost btn-icon" id="btn-speed" title="Game speed (, .)" aria-label="Game speed">1×</button>
+          <button class="btn btn-ghost btn-icon" id="btn-sound" title="Sound on/off (M)" aria-label="Sound on/off" aria-pressed="true"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M4 9h4l5-4v14l-5-4H4z"/><path class="snd-on" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="snd-off" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button>
+          <button class="btn btn-ghost btn-icon" id="btn-full" title="Full screen (F)" aria-label="Full screen"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+          <button class="btn btn-ghost btn-icon" id="btn-help" title="How to play (H)" aria-label="How to play">?</button>
+        </div>
+      </header>
+
+      <div id="main">
+        <aside id="host-panel" class="side">
+          <div class="side-head">
+            <h2>Host stand</h2>
+            <span class="side-sub" id="queue-count">No one waiting</span>
+          </div>
+          <div class="side-hint" id="host-hint">Pick a party, then click an open table that fits them.</div>
+          <ul id="queue-list" class="card-list"></ul>
+          <div class="side-head small"><h3>Tables</h3><span class="side-sub" id="tables-open"></span></div>
+          <div id="table-chips" class="chip-grid"></div>
+        </aside>
+
+        <main id="stage">
+          <div id="canvas-host"></div>
+          <div id="world-overlay"></div>
+          <div id="station-ui"></div>
+          <div id="alert-strip" hidden></div>
+          <div id="toasts" aria-live="polite"></div>
+          <div id="pause-veil" hidden><div>Paused<small>Space to resume</small></div></div>
+        </main>
+
+        <aside id="floor-panel" class="side">
+          <div class="side-head"><h2>On the floor</h2><span class="side-sub" id="task-count"></span></div>
+          <ul id="task-list" class="card-list"></ul>
+          <div class="side-head small"><h3>Tickets</h3></div>
+          <div id="ticket-summary"></div>
+          <div class="side-head small"><h3>Crew</h3></div>
+          <ul id="crew-list" class="crew"></ul>
+        </aside>
+      </div>
+    </div>
+    <div id="modal-root"></div>
+    <script type="module" src="./src/boot.js"></script>
+  </body>
+</html>

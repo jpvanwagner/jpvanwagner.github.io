@@ -1,0 +1,202 @@
+/*
+ * App shell. The layout is picked in JS from the viewport (= iframe) size and
+ * written to #app[data-layout] (see ui/Layout.js). The map gets the lion's
+ * share of the space in every layout:
+ *
+ *   side-stack | side-tabs | side-tabs-all   map left, panels in a sidebar
+ *   bottom-wide | bottom-tabs                map on top, panels underneath
+ *
+ * --ui-zoom (set by Layout.js) scales the chrome on small windows / embeds;
+ * the map canvas and the labels pinned to it are never zoomed.
+ */
+#topbar, #dock, #camera-hud, #legend, #view-controls, #alert-strip, .screen-card, .modal-card { zoom: var(--ui-zoom); }
+#app {
+  --side-w: clamp(300px, 27vw, 390px);
+  display: grid;
+  grid-template-areas: 'top top' 'stage dock';
+  grid-template-rows: calc(var(--topbar-h) * var(--ui-zoom)) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) calc(var(--side-w) * var(--ui-zoom));
+  height: 100vh;
+  height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+#topbar {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 14px;
+  min-width: 0;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  z-index: 3;
+}
+.brand { display: flex; flex-direction: column; line-height: 1.1; min-width: 0; flex: 0 1 auto; }
+.brand-title { font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; font-size: 15px; white-space: nowrap; }
+.brand-sub { font-size: 11px; color: var(--ink-3); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.hud-stats { display: flex; gap: 6px; flex: 1; justify-content: center; min-width: 0; }
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius);
+  background: var(--paper-2);
+  border: 1px solid var(--line-2);
+  min-width: 80px;
+}
+.stat-label { font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+.stat-value { font-size: 18px; font-weight: 800; line-height: 1.15; white-space: nowrap; }
+.stat-score .stat-value { font-size: 21px; }
+.stat.is-hot { background: var(--danger-soft); border-color: #eec4bd; }
+.stat.is-hot .stat-value { color: var(--danger); }
+.stat.flash-up { animation: flashUp 0.5s; }
+.stat.flash-down { animation: flashDown 0.5s; }
+@keyframes flashUp { 0% { background: var(--ok-soft); } }
+@keyframes flashDown { 0% { background: var(--danger-soft); } }
+.hud-buttons { display: flex; align-items: center; gap: 6px; flex: none; }
+.hud-buttons .btn-icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 34px; min-width: 0; padding: 0; }
+.hud-buttons svg { display: block; }
+.speed-group { display: flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper-2); }
+.speed-group .btn-icon { width: 32px; height: 30px; border: 0; }
+.speed-btn[aria-pressed='true'], #btn-pause.is-paused { background: var(--ink); color: #fff; }
+#btn-pause .icon-play { display: none; }
+#btn-pause.is-paused .icon-play { display: block; }
+#btn-pause.is-paused .icon-pause { display: none; }
+#btn-speed-cycle { display: none !important; font-weight: 800; font-size: 12px; }
+/* The top bar never overlaps itself: as it narrows, the speed buttons collapse
+   into one cycle button and help / fullscreen move into Settings. */
+#topbar { container-type: inline-size; }
+@container (max-width: 760px) {
+  .speed-btn, #btn-help, #btn-fullscreen { display: none !important; }
+  #btn-speed-cycle { display: inline-flex !important; }
+  .stat-loose { display: none; }
+}
+@container (max-width: 420px) {
+  #hud-mult-wrap { display: none; }
+}
+
+#stage { grid-area: stage; position: relative; overflow: hidden; min-height: 0; min-width: 0; }
+#canvas-host, #canvas-host canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#canvas-host canvas { touch-action: none; } /* we handle pinch / drag ourselves */
+#world-overlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+
+#legend {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  background: rgba(251, 250, 247, 0.92);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 7px 9px;
+  font-size: 11.5px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 210px;
+  pointer-events: none;
+}
+.legend-row { display: flex; align-items: center; gap: 8px; }
+.legend-sep { height: 1px; background: var(--line-2); margin: 2px 0; }
+.legend-note { font-size: 10.5px; color: var(--ink-3); line-height: 1.35; }
+.swatch { width: 16px; height: 6px; border-radius: 2px; flex: none; display: inline-block; }
+.swatch-secure { background: #2f6fb0; box-shadow: 0 0 0 2px #6fa3d8; }
+.swatch-door { background: #c08a52; box-shadow: 0 0 0 2px #d9b48a; }
+
+#view-controls { position: absolute; right: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 4px; z-index: 2; }
+#view-controls .btn { width: 34px; height: 34px; padding: 0; font-size: 18px; box-shadow: var(--shadow); }
+#stage.in-camera #view-controls { display: none; }
+
+/* --- Dock (panels) ------------------------------------------------------------------ */
+#dock {
+  grid-area: dock;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  background: var(--paper);
+  border-left: 1px solid var(--line);
+  min-height: 0;
+  min-width: 0;
+}
+#dock > .panel { min-height: 0; }
+.dock-tabs { display: none; }
+#alert-strip { display: none; }
+#alert-strip:not([hidden]) { display: grid; }
+
+/* side-stack: all three panels in the sidebar */
+#app[data-layout='side-stack'] #desk-panel { flex: 0 0 auto; max-height: 48%; }
+#app[data-layout='side-stack'] #waiting-panel { flex: 1 1 26%; }
+#app[data-layout='side-stack'] #incident-panel { flex: 1.4 1 34%; }
+
+/* side-tabs: desk always visible, waiting / incidents share a tabbed area */
+#app[data-layout='side-tabs'] #desk-panel { flex: 0 0 auto; max-height: 58%; }
+#app[data-layout='side-tabs'] #waiting-panel,
+#app[data-layout='side-tabs'] #incident-panel { display: none; flex: 1 1 0; }
+#app[data-layout='side-tabs'] #dock[data-tab='waiting'] #waiting-panel,
+#app[data-layout='side-tabs'] #dock[data-tab='incidents'] #incident-panel { display: flex; }
+
+/* all-tabs layouts: one panel at a time */
+#app[data-layout='side-tabs-all'] #dock > .panel,
+#app[data-layout='bottom-tabs'] #dock > .panel { display: none; flex: 1 1 0; }
+#app[data-layout='side-tabs-all'] #dock[data-tab='desk'] #desk-panel,
+#app[data-layout='side-tabs-all'] #dock[data-tab='waiting'] #waiting-panel,
+#app[data-layout='side-tabs-all'] #dock[data-tab='incidents'] #incident-panel,
+#app[data-layout='bottom-tabs'] #dock[data-tab='desk'] #desk-panel,
+#app[data-layout='bottom-tabs'] #dock[data-tab='waiting'] #waiting-panel,
+#app[data-layout='bottom-tabs'] #dock[data-tab='incidents'] #incident-panel { display: flex; }
+
+#app[data-layout='side-tabs'] .dock-tabs,
+#app[data-layout='side-tabs-all'] .dock-tabs,
+#app[data-layout='bottom-tabs'] .dock-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; flex: none; }
+#app[data-layout='side-tabs'] .dock-tab[data-tab='desk'] { display: none; }
+#app[data-layout='side-tabs'] .dock-tabs { order: 1; } /* tabs sit below the desk panel */
+#app[data-layout='side-tabs'] #desk-panel { order: 0; }
+#app[data-layout='side-tabs'] #waiting-panel,
+#app[data-layout='side-tabs'] #incident-panel { order: 2; }
+
+/* bottom layouts: map on top, dock underneath */
+#app[data-layout^='bottom'] {
+  grid-template-areas: 'top' 'stage' 'dock';
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: calc(var(--topbar-h) * var(--ui-zoom)) minmax(0, 1fr) calc(var(--dock-h) * var(--ui-zoom));
+}
+#app[data-layout^='bottom'] #dock { border-left: 0; border-top: 1px solid var(--line); }
+#app[data-layout='bottom-wide'] { --dock-h: clamp(250px, 34dvh, 380px); }
+#app[data-layout='bottom-wide'] #dock { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
+#app[data-layout='bottom-wide'] #desk-panel { grid-row: span 2; }
+#app[data-layout='bottom-tabs'] { --dock-h: min(44dvh, 380px); }
+
+/* Compact sidebars on short landscape screens */
+#app[data-layout='side-tabs-all'] { --side-w: clamp(260px, 42vw, 360px); }
+#app[data-layout='side-tabs-all'] #dock { padding: 6px; gap: 6px; }
+
+/* --- Compact top bar (phones, small embeds) ---------------------------------------- */
+@media (max-width: 760px), (max-height: 560px) {
+  :root { --topbar-h: 44px; }
+  #topbar { gap: 6px; padding: 0 8px; }
+  .brand-sub { display: none; }
+  .brand-title { font-size: 12px; }
+  .stat { min-width: 0; padding: 1px 7px; }
+  .stat-label { font-size: 8px; letter-spacing: 0.04em; }
+  .stat-label .long { display: none; }
+  .stat-value, .stat-score .stat-value { font-size: 15px; }
+  .hud-stats { gap: 4px; justify-content: flex-end; }
+  .hud-buttons { gap: 4px; }
+  .hud-buttons .btn-icon { width: 32px; height: 32px; }
+  #view-controls { right: 6px; bottom: 6px; }
+}
+@media (max-width: 1100px) {
+  .stat-loose { display: none; }
+}
+@media (max-width: 480px) {
+  .brand { display: none; }
+  .hud-stats { justify-content: flex-start; }
+}
+
+/* The legend only where the stage is roomy */
+#app:not([data-layout='side-stack']) #legend { display: none; }
+@media (max-width: 1250px) { #legend { display: none; } }

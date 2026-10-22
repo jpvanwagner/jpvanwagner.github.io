@@ -196,7 +196,12 @@
     document.addEventListener('fullscreenchange', function () {
         try {
             if (!navigator.keyboard || !navigator.keyboard.lock) return;
-            if (document.fullscreenElement) navigator.keyboard.lock(['Escape']).catch(function () {});
+            var fs = document.fullscreenElement;
+            // a sample course in full screen (pages/js/classic.js) has no use for Esc, so a tap of Esc just exits
+            var inner = null;
+            try { inner = fs && fs.contentDocument && fs.contentDocument.fullscreenElement; } catch (e2) {}
+            if ((fs && fs.classList.contains('course-frame')) || (inner && inner.classList.contains('course-frame'))) { navigator.keyboard.unlock(); return; }
+            if (fs) navigator.keyboard.lock(['Escape']).catch(function () {});
             else navigator.keyboard.unlock();
         } catch (e) {}
     });

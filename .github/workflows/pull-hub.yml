@@ -1,0 +1,45 @@
+name: Central Portfolio Pull Hub
+
+# This allows you to click a "Run workflow" button in GitHub
+# and allows your other repositories to ping it automatically
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  build-and-sync:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Check out the SITE-Portfolio repository using native runner permissions
+      - name: Checkout Portfolio
+        uses: actions/checkout@v4
+
+      # 2. Prepare Python for reading the JSON and running your site tools
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      # 3. Copy each project's public files (tools/pull-hub.py explains the rules:
+      #    "files" allowlists, developer files never published, stale copies pruned)
+      - name: Fetch source files
+        env:
+          MY_PAT: ${{ secrets.PORTFOLIO_TOKEN }}
+        run: python tools/pull-hub.py
+
+      # 4. Run the Portfolio indexing and cache-busting tools
+      - name: Run Cache-Busting and Indexing
+        run: |
+          python tools/build-search-index.py
+          python tools/stamp-version.py
+
+      # 5. Commit all downloaded files and script outputs back to SITE-Portfolio
+      - name: Commit and Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          # Check if there are changes; if so, commit and push
+          git diff --quiet && git diff --staged --quiet || git commit -m "Automated hub sync from source repositories"
+          git push

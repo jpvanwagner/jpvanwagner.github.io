@@ -1,0 +1,92 @@
+BEYOND THE STACKS - ASSET CREDITS
+=================================
+
+Everything below is free to use under the license named. Game design, writing and
+code are by Joseph VanWagner.
+
+EMOJI ART (assets/emoji/*.svg)
+------------------------------
+Twemoji graphics, copyright Twitter, Inc. and other contributors.
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
+Source: https://github.com/jdecked/twemoji (files taken from the @twemoji/svg
+15.0.0 package on npm). Used unmodified. File names are the emoji's Unicode
+code points.
+
+INTERFACE ICONS (inlined in js/icons.js)
+----------------------------------------
+Tabler Icons 3.49.0, copyright (c) 2020-2026 Pawel Kuna. MIT License.
+https://tabler.io/icons
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+
+FONTS (assets/fonts/)
+---------------------
+Each font's full license text sits next to it. Latin subsets, as served by Google Fonts.
+  Atkinson Hyperlegible  - copyright 2020 Braille Institute of America, Inc. SIL Open Font License 1.1 (*-OFL.txt)
+  Courier Prime          - copyright 2015 The Courier Prime Project Authors. SIL Open Font License 1.1 (*-OFL.txt)
+  Special Elite          - copyright 2010 Brian J. Bonislawsky DBA Astigmatic (AOETI).
+                           Apache License 2.0 (SpecialElite-LICENSE.txt). From the @fontsource/special-elite
+                           package on npm (https://fonts.google.com/specimen/Special+Elite).
+
+TEXTURES (js/library-textures.js)
+---------------------------------
+Photo textures from ambientCG (https://ambientcg.com), by Lennart Demes.
+Licensed CC0 1.0 Universal (public domain): https://creativecommons.org/publicdomain/zero/1.0/
+Resized to 256 px and bundled as text. Where each one is used:
+  WoodFloor051 https://ambientcg.com/view?id=WoodFloor051 light oak plank floor: Reference, Program Room, entry
+  Carpet007    https://ambientcg.com/view?id=Carpet007    polka-dot carpet: Children's Section
+  Carpet016    https://ambientcg.com/view?id=Carpet016    beige carpet: Study Rooms
+  Carpet012    https://ambientcg.com/view?id=Carpet012    blue-grey commercial carpet: staff offices
+  Carpet006    https://ambientcg.com/view?id=Carpet006    carpet tiles: PC Lab
+  Tiles036     https://ambientcg.com/view?id=Tiles036     white ceramic tile: restrooms, break room
+  Terrazzo005  https://ambientcg.com/view?id=Terrazzo005  terrazzo: entryway and hall
+  Concrete036  https://ambientcg.com/view?id=Concrete036  stained concrete: basement
+  Concrete034  https://ambientcg.com/view?id=Concrete034  smooth concrete: sidewalks, block walls
+  Road012A     https://ambientcg.com/view?id=Road012A     asphalt: parking lot
+  Grass004     https://ambientcg.com/view?id=Grass004     lawn
+  Bricks101    https://ambientcg.com/view?id=Bricks101    red brick: outside walls
+  Plaster001   https://ambientcg.com/view?id=Plaster001   plaster: inside walls
+The teen zone's arcade carpet and the shelving are Mapster's own drawn textures.
+
+PATRON FIGURES (js/patron-models.js)
+------------------------------------
+"Mini Characters 1" by Kenney (https://kenney.nl/assets/mini-characters):
+ten characters, glasses, a cane and a wheelchair, with their animations.
+Licensed CC0 1.0 Universal (public domain); the pack's license file is
+assets/kenney-mini-characters-License.txt. Repacked as GLB (texture embedded,
+unused animations removed) and bundled as text.
+glTF loading: three.js GLTFLoader and SkeletonUtils r128 (mapster/lib/),
+MIT License, same as three.js below.
+
+3D VIEW (viewer3d.html, mapster/)
+---------------------------------
+The 3D map is drawn by the Mapster engine (mapster/core, mapster/vfx,
+mapster/textures), copied from https://github.com/Nostalginaut/TOOL--Mapster,
+the author's own level editor.
+three.js r128 (mapster/lib/three.min.js), copyright 2010-2021 three.js authors.
+MIT License; full text in mapster/lib/three-LICENSE.txt.
+
+SOUND
+-----
+No audio files: the few interface sounds are synthesized in the browser (js/sfx.js).
+
+THE LIBRARY
+-----------
+maps/library.html was built in Mapster (https://github.com/Nostalginaut/TOOL--Mapster).

@@ -1,0 +1,87 @@
+
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>__MAP_NAME__</title>
+<style>
+body{margin:0;overflow:hidden;background:#000;font-family:sans-serif;}
+#ui{position:absolute;top:158px;left:10px;color:#fff;background:rgba(0,0,0,0.8);padding:12px 15px;border:1px solid #333;pointer-events:none;z-index:10; font-size:13px; line-height:1.5;}
+#msg{position:absolute;top:18%;left:50%;transform:translateX(-50%);background:rgba(6,10,16,0.92);color:#e8fbff;padding:14px 22px;font-size:18px;font-family:'Courier New',monospace;letter-spacing:1px;border:3px solid #06b6d4;border-radius:2px;display:none;z-index:30;text-align:center;text-transform:uppercase;font-weight:bold;box-shadow:0 0 18px rgba(6,182,212,0.55),inset 0 0 12px rgba(0,0,0,0.6);text-shadow:0 0 6px rgba(6,182,212,0.8);}
+#dialogue{position:absolute;bottom:5%;left:50%;transform:translateX(-50%);width:80%;max-width:800px;background:rgba(0,0,0,0.9);color:#fff;padding:20px;border:4px solid #06b6d4;display:none;z-index:20;font-size:18px;box-shadow:0 0 20px #000;}
+#fade{position:absolute;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:999;opacity:0;pointer-events:none;transition:opacity 0.5s;}
+#dir{display:none;position:absolute;top:5%;left:50%;transform:translateX(-50%) scale(0.82);transform-origin:top center;background:#111;border:3px solid #eab308;color:#fff;padding:14px;max-width:380px;z-index:100;text-align:center;max-height:88vh;overflow:auto;pointer-events:auto;}
+canvas#minimap{background:#000;border:1px solid #333;margin-top:10px;cursor:pointer;}
+.overhead-txt{position:absolute;transform:translate(-50%,-100%);color:#fff;text-shadow:1px 1px 0 #000;pointer-events:none;font-weight:bold;z-index:30;}
+#compass-ui{position:absolute;top:20px;right:20px;width:72px;height:72px;border-radius:50%;border:2px solid #a855f7;background:rgba(0,0,0,0.55);color:#fff;font-weight:bold;font-size:11px;font-family:'Courier New',monospace;line-height:1;pointer-events:none;overflow:visible;perspective:240px;}
+/* FIXED outer border markings — show absolute world directions. These do
+   NOT rotate with the camera; they're anchored to the screen. The dial
+   inside (with the player arrow / forward indicator) rotates. */
+.compass-border-label{position:absolute;color:#fff;text-shadow:1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;font-weight:bold;font-size:10px;line-height:1;}
+.compass-border-label.n{top:-14px;left:50%;transform:translateX(-50%);color:#ef4444;}
+.compass-border-label.s{bottom:-14px;left:50%;transform:translateX(-50%);}
+.compass-border-label.e{right:-14px;top:50%;transform:translateY(-50%);}
+.compass-border-label.w{left:-14px;top:50%;transform:translateY(-50%);}
+/* #6: 3D dial — spins on Z for heading AND tips on X for the map tilt. */
+.compass-dial{position:absolute;inset:0;transition:transform 0.15s;transform-style:preserve-3d;border-radius:50%;}
+.compass-dial::before{content:'';position:absolute;inset:8px;border-radius:50%;border:1px solid rgba(168,85,247,0.5);}
+/* #6: tilt pitch-ladder beside the dial — marker rides the -30..+30 tilt range. */
+#compass-tilt{position:absolute;left:-18px;top:6px;width:8px;height:60px;border:1px solid #a855f7;border-radius:3px;background:rgba(0,0,0,0.5);}
+#compass-tilt .mid{position:absolute;left:-2px;right:-2px;top:50%;height:1px;background:rgba(168,85,247,0.7);}
+#compass-tilt .mark{position:absolute;left:-1px;width:8px;height:3px;background:#fcd34d;border-radius:1px;transition:top 0.15s;}
+#compass-tilt .deg{position:absolute;left:10px;bottom:-2px;font-size:8px;color:#c4b5fd;white-space:nowrap;}
+.compass-dial-arrow{position:absolute;top:6px;left:50%;transform:translateX(-50%);
+                    width:0;height:0;
+                    border-left:6px solid transparent;border-right:6px solid transparent;
+                    border-bottom:14px solid #fcd34d;}
+/* Fixed forward pointer at the top — always indicates screen-up. */
+.compass-pointer{position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+                 width:0;height:0;
+                 border-left:7px solid transparent;border-right:7px solid transparent;
+                 border-bottom:11px solid #a855f7;}
+.close-btn{position:absolute;top:10px;right:10px;background:#ef4444;color:#fff;border:none;padding:5px 15px;cursor:pointer;font-weight:bold;border-radius:4px;}
+</style>
+<scr__ipt src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></scr__ipt>
+<scr__ipt src="__MAPSTER_PREFIX__core/helpManager.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__core/cameraControls.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__vfx/skyboxManager.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__vfx/lightingManager.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__vfx/fogManager.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__vfx/weatherManager.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__vfx/rain.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__vfx/snow.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__textures/floor.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__textures/wall.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__core/windowPainter.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__core/gameData.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__core/items.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__core/tokens.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__core/dialogueRuntime.js"></scr__ipt>
+<scr__ipt src="__ROOT_PREFIX__core/engine.js"></scr__ipt>
+</head><body>
+<div id="game-container"></div><div id="fade"></div>
+<div id="ui"><b style="color:#06b6d4;font-size:16px;">__MAP_NAME__</b><br><span id="wasd-indicator" style="line-height:1.4;">Movement (faces): <span id="dir-w" style="color:#fcd34d;">N</span>&nbsp;[W]&nbsp; <span id="dir-d" style="color:#fcd34d;">E</span>&nbsp;[D]&nbsp; <span id="dir-s" style="color:#fcd34d;">S</span>&nbsp;[S]&nbsp; <span id="dir-a" style="color:#fcd34d;">W</span>&nbsp;[A]</span><br>Shift: Turn in place | Q/E: Rotate Cam | T: Tilt | V: View<br>G: Interact | Space: Jump | F: Flashlight | M: Map<br><span id="inv" style="color:#fcd34d;">Keys: None</span></div>
+<div id="compass-ui"><span class="compass-border-label n">N</span><span class="compass-border-label e">E</span><span class="compass-border-label s">S</span><span class="compass-border-label w">W</span><div class="compass-dial"><div class="compass-dial-arrow"></div></div><div id="compass-tilt"><div class="mid"></div><div class="mark"></div><div class="deg">0°</div></div></div>
+<div id="msg"></div><div id="dialogue"></div>
+<div id="dir"><button class="close-btn" onclick="document.getElementById('dir').style.display='none'">X</button><h2 style="margin:0 0 5px 0;">Directory</h2><canvas id="minimap-canvas"></canvas><div id="dir-info" style="position:absolute; bottom:8px; left:8px; right:8px; padding:6px 8px; background:rgba(0,0,0,0.85); color:#fcd34d; font-size:11px; font-family:sans-serif; min-height:18px; border:1px solid #555; border-radius:3px;">Hover a tile to inspect. Right-click a warp tile to fast-travel.</div></div>
+<!-- A SEPARATE small minimap overlay — toggled by M, does NOT capture input,
+     does NOT block movement. The big #dir modal above is what opens when
+     the player interacts with a directory kiosk. -->
+<div id="minimap-mini" style="display:none; position:absolute; top:20px; left:20px; background:rgba(0,0,0,0.65); border:1px solid #06b6d4; border-radius:4px; padding:4px; z-index:50; pointer-events:none;"><canvas id="minimap-mini-canvas" width="120" height="120" style="image-rendering:pixelated; display:block;"></canvas></div>
+<div id="painter-ui" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#222; padding:20px; border:2px solid #06b6d4; z-index:100;"><h3 style="margin:0 0 10px 0; color:#fff;">Draw on Window</h3><canvas id="in-game-canvas" style="border:1px solid #555; background:rgba(255,255,255,0.1); cursor:crosshair;"></canvas><br><button id="close-painter" style="margin-top:10px; padding:5px 10px; background:#06b6d4; border:none; cursor:pointer;">Save & Close</button></div>
+
+<scr__ipt type="application/json" id="map-data">
+__JSON__
+</scr__ipt>
+
+__DIALOGUE_BLOBS__
+
+<scr__ipt type="text/javascript">
+window.addEventListener('load', () => {
+    if (typeof initEngine === 'function') {
+        initEngine();
+    } else {
+        const err = document.createElement('div');
+        err.style.cssText = "position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:red; color:white; padding:20px; font-family:sans-serif; z-index:9999;";
+        err.innerHTML = "<b>ENGINE FAILED TO LOAD</b><br>Could not locate core/engine.js.<br>Please ensure the exported file is in the folder its Export Folder Depth was set for (e.g., /Mapster/maps/).";
+        document.body.appendChild(err);
+    }
+});
+</scr__ipt>
+</body></html>

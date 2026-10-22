@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+<title>Mall Run</title>
+<link rel="stylesheet" href="css/style.css">
+<!-- three.js is vendored in lib/ so the game works offline / inside an LMS. -->
+<script type="importmap">
+{ "imports": { "three": "./lib/three/three.module.min.js" } }
+</script>
+</head>
+<body>
+<canvas id="gc"></canvas>
+<canvas id="fx"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="bankBox"><span id="bankLabel">&times;1</span><div id="bankTrack"><div id="bankFill"></div></div></div>
+  <div id="scoreBox"><div id="score">0</div><div id="distance">0 m</div></div>
+</div>
+<div id="buffs"></div>
+<button id="pauseBtn" aria-label="Pause">&#10073;&#10073;</button>
+<div id="turnFlag"></div>
+<div id="flash"></div>
+
+<!-- TITLE -->
+<div id="title" class="overlay">
+  <div class="plate"><div class="title-big">MALL RUN</div><div class="title-sub">ENDLESS QUIZ RUN</div></div>
+  <div id="charBox">
+    <canvas id="charPrev"></canvas>
+    <div class="setup">
+      <input id="nameInput" type="text" maxlength="14" value="Player" autocomplete="off" spellcheck="false" aria-label="Player name" placeholder="Your name">
+      <div class="tabs" role="tablist">
+        <button class="tab on" data-tab="body">Body</button><button class="tab" data-tab="hair">Hair</button><button class="tab" data-tab="colors">Colors</button>
+      </div>
+      <div class="tabpane" data-pane="body">
+        <div class="pick"><span>Frame</span><div class="look-opts"><button class="look on" data-look="a">A</button><button class="look" data-look="b">B</button></div></div>
+        <div class="pick"><span>Height</span><div class="cycler" id="heightCyc"></div></div>
+        <div class="pick"><span>Build</span><div class="cycler" id="buildCyc"></div></div>
+        <div class="pick"><span>Skin</span><div class="swatches" id="skinSw"></div></div>
+      </div>
+      <div class="tabpane" data-pane="hair" hidden>
+        <div class="pick"><span>Style</span><div class="cycler" id="hairCyc"></div></div>
+        <div class="pick"><span>Color</span><div class="swatches" id="hairSw"></div></div>
+      </div>
+      <div class="tabpane" data-pane="colors" hidden>
+        <div class="pick"><span>Shirt</span><div class="swatches" id="shirtSw"></div></div>
+        <div class="pick"><span>Pants</span><div class="swatches" id="pantsSw"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row" style="margin-top:14px;"><button class="btn" id="playBtn">PLAY</button></div>
+  <div class="btn-row"><button class="btn pink small" id="settingsBtn">&#9881; Settings</button><button class="btn ghost small" id="helpBtn">? How to play</button><button class="btn ghost small" id="fsBtn">&#9974; Fullscreen</button></div>
+  <div class="jv-credit"><a href="https://jvanwagner.neocities.org/" target="_blank" rel="noopener" title="Visit Joe VanWagner's portfolio"><img class="jv-icon" src="img/jv-head.png" alt="" width="24" height="24" onerror="this.style.display='none'"><span><span id="copyYears">2026</span> Joe VanWagner</span></a></div>
+</div>
+
+<!-- HOW TO PLAY -->
+<div id="help" class="overlay"><div class="menu-h">How to play</div><div class="card help-card" id="ctrlHint"></div><button class="btn" id="helpDone" style="margin-top:16px;">Got it</button></div>
+
+<!-- SETTINGS -->
+<div id="settings" class="overlay"><div class="menu-h">&#9881; Settings</div><div class="card" id="setGrid"></div><button class="btn" id="setDone" style="margin-top:16px;">Done</button></div>
+
+<!-- QUESTION -->
+<div id="quiz" class="overlay"><div class="qcard">
+  <span id="qbadge" class="power">Power-up!</span>
+  <div id="timerWrap"><div id="timerBar"></div></div>
+  <div id="qtext">Question?</div><div id="answers"></div><div id="qresult"></div>
+</div></div>
+
+<!-- PAUSE -->
+<div id="pause" class="overlay"><div class="menu-h">Paused</div><div class="btn-row"><button class="btn" id="resumeBtn">Resume</button></div><div class="btn-row"><button class="btn ghost small" id="pauseFsBtn">&#9974; Fullscreen</button><button class="btn pink small" id="restartBtn">Restart</button><button class="btn ghost small" id="pauseTitleBtn">Title</button></div></div>
+
+<!-- END -->
+<div id="ended" class="overlay"><div class="plate end-plate">
+  <div class="go-title" id="endTitle">Game Over</div>
+  <div class="go-score" id="endScore">0</div>
+  <div class="note" id="endStats"></div>
+  <div class="btn-row" style="margin-top:12px;"><button class="btn" id="againBtn">Run Again</button><button class="btn ghost small" id="endTitleBtn">Title</button></div>
+  <div class="btn-row"><button class="btn pink small" id="saveImgBtn">&#11015; Save image</button></div>
+  <div id="shareBox" class="share-box">
+    <div class="share-h">Share your score</div>
+    <div class="share-text" id="shareText"></div>
+    <div class="share-row" id="shareLinkRow"></div>
+    <div class="note">Facebook doesn't let sites fill in your post, so its button copies the text for you to paste.</div>
+  </div>
+</div></div>
+
+<!-- shown if the browser can't run the game (no WebGL / opened from file://) -->
+<div id="bootError" class="overlay"><div class="plate"><div class="go-title">Can't start</div><div class="note" id="bootErrorMsg"></div></div></div>
+
+<!-- DEV-ONLY -->
+<script type="module" src="js/main.js"></script>
+<script>
+  // dev.html loads the source modules, which browsers block on file:// URLs.
+  if (location.protocol === "file:") {
+    document.getElementById("bootErrorMsg").innerHTML =
+      "This is the <b>developer</b> page; it needs a local server (<b>npm start</b>).<br>" +
+      "To just play, open <b>index.html</b> instead &mdash; it's a single self-contained file.";
+    document.getElementById("bootError").classList.add("show");
+  }
+</script>
+<!-- /DEV-ONLY -->
+</body>
+</html>

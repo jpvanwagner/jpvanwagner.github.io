@@ -1,0 +1,7 @@
+/* Source for the precompiled editor/vendor/tailwind.css - see that file's own
+   header comment and tailwind.config.js for why this is precompiled instead
+   of loaded live from the Play CDN. Regenerate with `npm run build:css`
+   after adding any new Tailwind utility class to the editor's markup. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

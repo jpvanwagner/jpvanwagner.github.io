@@ -1,0 +1,125 @@
+{
+  "credit": "People: Microsoft Rocketbox avatar library (MIT licence), https://github.com/microsoft/Microsoft-Rocketbox",
+  "avatars": [
+    {
+      "id": "male-adult-01",
+      "sex": "m",
+      "role": "guest",
+      "file": "male-adult-01.json"
+    },
+    {
+      "id": "male-adult-02",
+      "sex": "m",
+      "role": "guest",
+      "file": "male-adult-02.json"
+    },
+    {
+      "id": "male-adult-03",
+      "sex": "m",
+      "role": "guest",
+      "file": "male-adult-03.json"
+    },
+    {
+      "id": "male-adult-04",
+      "sex": "m",
+      "role": "guest",
+      "file": "male-adult-04.json"
+    },
+    {
+      "id": "male-adult-05",
+      "sex": "m",
+      "role": "guest",
+      "file": "male-adult-05.json"
+    },
+    {
+      "id": "male-adult-06",
+      "sex": "m",
+      "role": "guest",
+      "file": "male-adult-06.json"
+    },
+    {
+      "id": "male-adult-07",
+      "sex": "m",
+      "role": "guest",
+      "file": "male-adult-07.json"
+    },
+    {
+      "id": "male-adult-08",
+      "sex": "m",
+      "role": "guest",
+      "file": "male-adult-08.json"
+    },
+    {
+      "id": "female-adult-01",
+      "sex": "f",
+      "role": "guest",
+      "file": "female-adult-01.json"
+    },
+    {
+      "id": "female-adult-02",
+      "sex": "f",
+      "role": "guest",
+      "file": "female-adult-02.json"
+    },
+    {
+      "id": "female-adult-03",
+      "sex": "f",
+      "role": "guest",
+      "file": "female-adult-03.json"
+    },
+    {
+      "id": "female-adult-04",
+      "sex": "f",
+      "role": "guest",
+      "file": "female-adult-04.json"
+    },
+    {
+      "id": "female-adult-05",
+      "sex": "f",
+      "role": "guest",
+      "file": "female-adult-05.json"
+    },
+    {
+      "id": "female-adult-06",
+      "sex": "f",
+      "role": "guest",
+      "file": "female-adult-06.json"
+    },
+    {
+      "id": "female-adult-07",
+      "sex": "f",
+      "role": "guest",
+      "file": "female-adult-07.json"
+    },
+    {
+      "id": "female-adult-08",
+      "sex": "f",
+      "role": "guest",
+      "file": "female-adult-08.json"
+    },
+    {
+      "id": "chef-female-01",
+      "sex": "f",
+      "role": "chef",
+      "file": "chef-female-01.json"
+    },
+    {
+      "id": "business-male-01",
+      "sex": "m",
+      "role": "staff",
+      "file": "business-male-01.json"
+    },
+    {
+      "id": "business-female-01",
+      "sex": "f",
+      "role": "staff",
+      "file": "business-female-01.json"
+    }
+  ],
+  "clips": {
+    "m:walkSpeed": 1.018,
+    "m": "anims-m.json",
+    "f:walkSpeed": 1.21,
+    "f": "anims-f.json"
+  }
+}

@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>COOL JUSTIN'S TIMBER LANES</title>
+    <style>
+        /* --- STRICT 16-COLOR EGA PALETTE --- */
+        body { 
+            margin: 0; background: #000000; color: #AAAAAA; 
+            font-family: 'Courier New', monospace; overflow: hidden; 
+            display: flex; flex-direction: column; height: 100vh; user-select: none; 
+        }
+
+        #carpet-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
+
+        #header-banner {
+            background: #000000; border-bottom: 4px solid #555555;
+            padding: 15px 20px 10px 20px; position: relative;
+            text-align: center; box-shadow: 0 4px 15px rgba(255, 85, 255, 0.4);
+            animation: ambient-flicker 5s infinite; height: 60px; z-index: 10;
+        }
+        .cursive-neon {
+            position: absolute; top: 8px; left: 50%; transform: translateX(-160px) rotate(-8deg);
+            font-family: 'Brush Script MT', 'Pacifico', cursive; font-size: 28px;
+            color: #FF55FF; text-shadow: 0 0 5px #FF55FF, 0 0 10px #AA00AA; z-index: 10;
+        }
+        .retro-neon {
+            font-family: 'Arial Black', 'Impact', sans-serif; font-size: 42px;
+            letter-spacing: -2px; color: #55FFFF; 
+            text-shadow: 0 0 8px #55FFFF, 0 0 15px #00AAAA;
+            margin-top: 5px; white-space: nowrap; word-spacing: -8px;
+        }
+
+        @keyframes ambient-flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.93; } }
+        .flicker-fast { animation: letter-flicker-1 6s infinite; will-change: opacity; }
+        @keyframes letter-flicker-1 { 0%, 95%, 98%, 100% { opacity: 1; } 96%, 97% { opacity: 0.1; } }
+        /* The two flicker animations only modulate opacity — declaring
+           `will-change: opacity` hints the browser to put the affected
+           elements on their own compositor layer so the changes don't
+           trigger a full repaint of the surrounding canvas every frame. */
+        #header-banner { will-change: opacity; }
+
+        /* --- GAME UI & SCALING FIX --- */
+        #game-container { 
+            display: flex; flex: 1; width: 100vw; position: relative; justify-content: center;
+            min-height: 0; 
+        }
+        
+        #sidebar { 
+            width: 340px; background: #000000; border-left: 4px solid #AA0000; border-right: 4px solid #AA0000;
+            padding: 15px; box-sizing: border-box; flex-shrink: 0; 
+            display: flex; flex-direction: column; overflow-y: auto; z-index: 10;
+        }
+
+        #canvas-wrapper { 
+            width: 700px; display: flex; justify-content: center; align-items: flex-start; 
+            background: #000000; position: relative; overflow: hidden;
+            border-left: 6px solid #555555; border-right: 6px solid #555555;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+            min-height: 0; 
+        }
+
+        canvas { 
+            background: #000000; cursor: crosshair; transform-origin: top center;
+            max-width: 100%; max-height: 100%; aspect-ratio: 7/9; object-fit: contain;
+            /* When the canvas is scaled up to fit larger viewports (and it
+               almost always will be — the internal size is 700×900 but the
+               display size depends on the embedding window), `pixelated`
+               makes the GPU composite a nearest-neighbor sample instead of
+               smoothing every frame. This is dramatically cheaper than
+               default bilinear filtering for a stretched canvas. */
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            /* #10: promote the scaled canvas to its own GPU layer so the
+               browser composites the upscale once instead of re-rasterizing
+               the stretched bitmap each frame — noticeably smoother on big
+               displays. */
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+
+        /* --- 90s BOWLING CRT TV OVERLAY --- */
+        #crt-tv {
+            position: absolute; top: 25%; left: 50%;
+            transform: translateX(-50%) scale(0);
+            width: 380px; height: 220px;
+            background: repeating-linear-gradient(45deg, #0000AA, #0000AA 10px, #5555FF 10px, #5555FF 20px);
+            border: 16px solid #555555; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,1), inset 0 0 20px #000000;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+        #crt-tv.active { transform: translateX(-50%) scale(1); }
+        #crt-text {
+            font-family: 'Arial Black', Impact, sans-serif; font-size: 60px;
+            color: #FFFF55; text-shadow: 6px 6px #AA0000;
+            font-style: italic; animation: pulse 0.3s infinite alternate;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+
+        /* --- SIDEBAR COMPONENTS --- */
+        .clipboard-header { color: #FFFFFF; text-align: center; border-bottom: 2px solid #555555; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; font-size: 16px; }
+        .mode-row { display: flex; gap: 5px; margin-bottom: 10px; }
+        button { background: #000000; color: #AAAAAA; border: 2px solid #555555; padding: 8px; width: 100%; cursor: pointer; font-weight: bold; font-family: 'Courier New', monospace; transition: 0.2s;}
+        button:hover { background: #555555; color: #FFFFFF; }
+        
+        #turnIndicator { font-size: 18px; margin: 10px 0; text-align: center; color: #55FFFF; font-weight: bold; background: #002222; padding: 5px; border: 2px solid #00AAAA; }
+        
+        /* MULTIPLAYER SCORECARD */
+        #scorecard { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        .player-row { display: flex; border: 2px solid #555555; background: #000000; }
+        .name-box { width: 45px; background: #220000; color: #FF5555; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 14px; border-right: 2px solid #555555;}
+        .frames-container { display: grid; grid-template-columns: repeat(10, 1fr); flex: 1; }
+        .frame { border-right: 2px solid #555555; position: relative; height: 36px; }
+        .frame:last-child { border-right: none; }
+        .frame-num { position: absolute; top: 1px; left: 2px; font-size: 9px; color: #AAAAAA; }
+        .rolls { position: absolute; top: 0; right: 0; display: flex; border-bottom: 1px solid #555555; border-left: 1px solid #555555; }
+        .roll-box { width: 11px; height: 11px; border-left: 1px solid #555555; text-align: center; font-size: 10px; font-weight: bold; color: #FFFF55; line-height: 11px; }
+        .roll-box:first-child { border-left: none; }
+        .frame-score { position: absolute; bottom: 2px; width: 100%; text-align: center; font-size: 12px; color: #FFFFFF; font-weight: bold; }
+        .total-box { width: 40px; background: #002200; color: #55FF55; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 14px; border-left: 2px solid #555555;}
+
+        .control-help { background: #000000; border: 2px solid #555555; padding: 10px; font-size: 11px; line-height: 1.5; color: #AAAAAA; margin-bottom: 15px; }
+        .highlight { color: #FFFF55; font-weight: bold; }
+        
+        .stat-panel { border: 2px solid #55FFFF; padding: 10px; background: #002222; margin-top: auto;}
+        .stat-panel h4 { margin: 0 0 10px 0; color: #55FFFF; text-align: center; font-size: 14px;}
+        .slider-row { margin-bottom: 10px; }
+        .slider-row label { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #FFFFFF;}
+        input[type=range] { width: 100%; margin-top: 5px; accent-color: #FF55FF; }
+    </style>
+</head>
+<body>
+
+<div id="carpet-layer"></div>
+
+<div id="header-banner">
+    <div class="cursive-neon">Cool Justin's</div>
+    <div class="retro-neon">
+        <span>TIMBER</span><span class="flicker-fast">LANES</span>
+    </div>
+</div>
+
+<div id="game-container">
+    <div id="canvas-wrapper">
+        <canvas id="game"></canvas>
+        <div id="crt-tv"><div id="crt-text">STRIKE!</div></div>
+    </div>
+    
+    <div id="sidebar">
+        <div class="clipboard-header">
+            SHIFT: AUDITORIUM 3<br>
+            <span style="font-size: 12px; color: #555555;">ATTENDANT STATION</span>
+        </div>
+        
+        <button id="mode1">1P PRACTICE</button>
+        <div class="mode-row">
+            <button id="mode2">2P HOTSEAT</button>
+            <button id="mode3">1P VS AI</button>
+        </div>
+        <button id="bumperBtn" style="margin-bottom: 15px;">BUMPERS: OFF</button>
+        
+        <div id="turnIndicator">TURN: P1</div>
+        <div id="scorecard"></div>
+        
+        <div class="control-help">
+            <span class="highlight">A/D</span> Move Ball<br>
+            <span class="highlight">MOUSE X</span> Aim Angle<br>
+            <span class="highlight">SCROLL</span> Set Spin Arc<br>
+            <span class="highlight">CLICK & HOLD</span> Power<br>
+            <span class="highlight">RELEASE</span> Throw
+        </div>
+
+        <div class="stat-panel">
+            <h4>[ RPG STAT TESTER ]</h4>
+            <div class="slider-row">
+                <label>BRAWN (Power) <span id="brawnVal" style="color:#FFFF55">5</span></label>
+                <input type="range" id="brawnSlider" min="1" max="10" value="5">
+            </div>
+            <div class="slider-row">
+                <label>FINESSE (Spin Hook) <span id="finVal" style="color:#FFFF55">5</span></label>
+                <input type="range" id="finSlider" min="1" max="10" value="5">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== PROCEDURAL ARCADE CARPET ====================
+    function generateCarpet() {
+        const bg = document.createElement('canvas');
+        bg.width = 256; bg.height = 256;
+        const ctx = bg.getContext('2d');
+        ctx.fillStyle = '#110022'; ctx.fillRect(0,0,256,256);
+        const colors = ['#FF55FF', '#55FFFF', '#FFFF55'];
+        for(let i=0; i<40; i++) {
+            ctx.fillStyle = colors[Math.floor(Math.random()*colors.length)];
+            let x = Math.random()*256; let y = Math.random()*256;
+            let type = Math.floor(Math.random()*3);
+            ctx.beginPath();
+            if(type === 0) {
+                let s = 10+Math.random()*15;
+                ctx.moveTo(x, y); ctx.lineTo(x+s, y+s*1.5); ctx.lineTo(x-s, y+s*1.5);
+            } else if(type === 1) {
+                ctx.moveTo(x,y); ctx.lineTo(x+10,y-10); ctx.lineTo(x+20,y); ctx.lineTo(x+30,y-10);
+                ctx.lineWidth = 3; ctx.strokeStyle = ctx.fillStyle; ctx.stroke(); continue;
+            } else {
+                ctx.fillRect(x,y, 4,4); ctx.fillRect(x+8,y-8, 4,4); continue;
+            }
+            ctx.fill();
+        }
+        document.getElementById('carpet-layer').style.background = `url(${bg.toDataURL()}) repeat`;
+    }
+    generateCarpet();
+
+    // ==================== EGA PALETTES ====================
+    const BALL_COLORS = {
+        "BLUE": { base: '#0000AA', high: '#5555FF' },
+        "RED": { base: '#AA0000', high: '#FF5555' },
+        "GREEN": { base: '#00AA00', high: '#55FF55' },
+        "PURPLE": { base: '#AA00AA', high: '#FF55FF' }
+    };
+    const COLOR_KEYS = Object.keys(BALL_COLORS);
+
+    // ==================== ENGINE CONFIGURATION ====================
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+
+    canvas.width = 700; canvas.height = 900; 
+
+    const PIXELS_PER_INCH = 3.8; 
+    const LANE_WIDTH = 41.5 * PIXELS_PER_INCH; 
+    const GUTTER_WIDTH = 9 * PIXELS_PER_INCH; 
+    const DIVIDER_WIDTH = 12 * PIXELS_PER_INCH; 
+    const FULL_LANE_MODULE = LANE_WIDTH + (GUTTER_WIDTH*2) + DIVIDER_WIDTH; 
+
+    const BALL_RADIUS = (8.5 / 2) * PIXELS_PER_INCH; 
+    const PIN_RADIUS = (4.75 / 2) * PIXELS_PER_INCH; 
+
+    // ──────────────────────────────────────────────────────────────────────
+    //   PIN SPACING NOTES
+    // ──────────────────────────────────────────────────────────────────────
+    //  USBC spec: pin centers are 12 inches apart, edge-to-edge ≈ 7.25 in.
+    //  At PIXELS_PER_INCH = 3.8 that's 45.6 px between centers.
+    //
+    //  Strict realism *looks* spread out on a small TV-style screen because
+    //  arcade/console bowling games traditionally fudge the spacing tighter
+    //  to make the triangle feel more iconic. We follow the same convention
+    //  here: PIN_SPACING_DISPLAY is 85% of the real value, just for the
+    //  drawing math. Edge case detection / hit physics still use the real
+    //  PIN_RADIUS, so this only affects visual layout — gameplay is the
+    //  same as before.
+    //
+    //  To go back to strict spec, set the multiplier below to 1.0.
+    const PIN_SPACING        = 12 * PIXELS_PER_INCH;          // ← spec value (unused for layout, kept for reference)
+    const PIN_SPACING_VISUAL = 12 * PIXELS_PER_INCH * 0.85;   // ← what we actually draw with
+
+    const CENTER_LANE_X = canvas.width / 2;
+    const LEFT_LANE_X = CENTER_LANE_X - FULL_LANE_MODULE;
+    const RIGHT_LANE_X = CENTER_LANE_X + FULL_LANE_MODULE;
+    const BALL_START_Y = 820; const PIN_START_Y = 160; 
+
+    const BASE_POWER = 8.0; 
+    const POWER_MULTIPLIER = 0.16; 
+    
+    // RPG Stats
+    let playerStats = { brawn: 5, finesse: 5 };
+    document.getElementById('brawnSlider').oninput = (e) => { playerStats.brawn = parseInt(e.target.value); document.getElementById('brawnVal').innerText = playerStats.brawn; };
+    document.getElementById('finSlider').oninput = (e) => { playerStats.finesse = parseInt(e.target.value); document.getElementById('finVal').innerText = playerStats.finesse; };
+
+    // ==================== GAME STATE & LANES ====================
+    let aiming = true; let charging = false; let power = 0; let powerDir = 1; let angle = 0; let bumpersOn = false;
+    const keys = { left: false, right: false };
+
+    // Players Array
+    let players = [];
+    let activePlayerIndex = 0;
+    let currentFrame = 0; 
+    let rollInFrame = 0;
+
+    const SLANG_WORDS = ["BANG!", "POW!", "ZOWIE!", "BIFF!", "WHAM!", "KAPOW!", "SOCK!", "ZAP!", "BOFF!", "CRASH!", "WHACK!", "THWACK!"];
+    const EGA_NEONS = ["#FFEB3B", "#FF3B30", "#FF55FF", "#55FFFF", "#FF9500", "#4CFF4C"];
+
+    function createLaneState(centerX, isAmbient) {
+        return {
+            centerX: centerX,
+            isAmbient: isAmbient,
+            ball: { x: centerX, y: BALL_START_Y, radius: BALL_RADIUS, vx: 0, vy: 0, spin: 0, rolling: false, rotation: 0, colorKey: isAmbient ? COLOR_KEYS[Math.floor(Math.random()*COLOR_KEYS.length)] : "BLUE" },
+            pins: [],
+            sweeper: { active: false, y: -50, state: 0, text: "", color: "", callback: null },
+            aiTimer: 0,
+            frameStep: 0
+        };
+    }
+
+    let mainLane = createLaneState(CENTER_LANE_X, false);
+    let ambientLanes = [createLaneState(LEFT_LANE_X, true), createLaneState(RIGHT_LANE_X, true)];
+    let allLanes = [ambientLanes[0], mainLane, ambientLanes[1]];
+
+    function formatName(str, def) {
+        let n = str ? str.trim().substring(0, 3).toUpperCase() : def;
+        return n.length > 0 ? n : def;
+    }
+
+    function promptColor(playerNum) {
+        let col = prompt(`Player ${playerNum} Color (BLUE, RED, GREEN, PURPLE):`, "BLUE");
+        if (!col) return "BLUE";
+        col = col.toUpperCase().trim();
+        return COLOR_KEYS.includes(col) ? col : "BLUE";
+    }
+
+    function setupGame(mode) {
+        players = [];
+        if (mode === 0) {
+            players.push({ name: "P1", color: "BLUE", isAI: false, frames: Array.from({length: 10}, () => ({ rolls: [] })) });
+        } else if (mode === 1) {
+            let n1 = formatName(prompt("Enter Player 1 Name (3 letters):", "P1"), "P1");
+            let c1 = promptColor(1);
+            let n2 = formatName(prompt("Enter Player 2 Name (3 letters):", "P2"), "P2");
+            let c2 = promptColor(2);
+            players.push({ name: n1, color: c1, isAI: false, frames: Array.from({length: 10}, () => ({ rolls: [] })) });
+            players.push({ name: n2, color: c2, isAI: false, frames: Array.from({length: 10}, () => ({ rolls: [] })) });
+        } else if (mode === 2) {
+            let n1 = formatName(prompt("Enter Your Name (3 letters):", "P1"), "P1");
+            let c1 = promptColor(1);
+            players.push({ name: n1, color: c1, isAI: false, frames: Array.from({length: 10}, () => ({ rolls: [] })) });
+            players.push({ name: "CPU", color: "RED", isAI: true, frames: Array.from({length: 10}, () => ({ rolls: [] })) });
+        }
+
+        activePlayerIndex = 0; currentFrame = 0; rollInFrame = 0;
+        allLanes.forEach(l => initPins(l));
+        resetMainBall(); 
+        updateScorecard();
+    }
+
+    function initPins(lane) {
+        lane.pins = [];
+        // Use the visual spacing constant (see comments by PIN_SPACING above).
+        const rowHeight = PIN_SPACING_VISUAL * Math.cos(Math.PI / 6); 
+        for (let row = 0; row < 4; row++) {
+            const rowWidth = row * PIN_SPACING_VISUAL;
+            const rowStartX = lane.centerX - (rowWidth / 2);
+            for (let i = 0; i <= row; i++) {
+                lane.pins.push({ 
+                    x: rowStartX + (i * PIN_SPACING_VISUAL), 
+                    y: PIN_START_Y + (row * rowHeight), 
+                    r: PIN_RADIUS, 
+                    knocked: false, vx: 0, vy: 0, angle: 0, angularVelocity: 0 
+                });
+            }
+        }
+    }
+
+    function resetMainBall() {
+        mainLane.ball.x = CENTER_LANE_X; mainLane.ball.y = BALL_START_Y; mainLane.ball.vx = mainLane.ball.vy = mainLane.ball.rotation = 0;
+        mainLane.ball.rolling = false; aiming = true; power = 0; angle = 0; mainLane.aiTimer = 0;
+        mainLane.ball.colorKey = players[activePlayerIndex]?.color || "BLUE";
+        document.getElementById('turnIndicator').innerText = `TURN: ${players[activePlayerIndex]?.name || "P1"} (FRAME ${Math.min(currentFrame+1, 10)})`;
+    }
+
+    function showTV(text, cssColor) {
+        const tv = document.getElementById('crt-tv');
+        const tvText = document.getElementById('crt-text');
+        tvText.innerText = text;
+        tv.style.background = `repeating-linear-gradient(45deg, ${cssColor}, ${cssColor} 10px, #000000 10px, #000000 20px)`;
+        tv.classList.add('active');
+        setTimeout(() => tv.classList.remove('active'), 2500);
+    }
+
+    function activateSweeper(lane, callback) {
+        lane.sweeper.active = true; lane.sweeper.state = 1; lane.sweeper.callback = callback;
+        lane.sweeper.text = SLANG_WORDS[Math.floor(Math.random() * SLANG_WORDS.length)];
+        lane.sweeper.color = EGA_NEONS[Math.floor(Math.random() * EGA_NEONS.length)];
+        lane.sweeper.tilt = (Math.random() - 0.5) * 0.5;   // #10: jaunty comic tilt
+    }
+
+    function handleAmbientLogic(lane) {
+        if (!lane.ball.rolling && !lane.sweeper.active) {
+            lane.aiTimer++;
+            if (lane.aiTimer > 90) {
+                lane.ball.rolling = true;
+                let error = (Math.random() - 0.5) * 10;
+                lane.ball.vx = Math.sin(error * Math.PI / 180) * 11;
+                lane.ball.vy = -Math.cos(error * Math.PI / 180) * 16;
+                lane.ball.spin = (Math.random() - 0.5) * 5;
+                lane.aiTimer = 0;
+            }
+        }
+
+        if (lane.ball.y < -100 && !lane.sweeper.active) {
+            lane.ball.rolling = false;
+            let knocked = lane.pins.filter(p => p.knocked).length;
+            
+            activateSweeper(lane, () => {
+                if (lane.frameStep === 1 || knocked === 10) {
+                    initPins(lane);
+                    lane.frameStep = 0;
+                } else {
+                    lane.pins = lane.pins.filter(p => !p.knocked);
+                    lane.frameStep = 1;
+                }
+                lane.ball.x = lane.centerX; lane.ball.y = BALL_START_Y;
+                lane.ball.vx = lane.ball.vy = lane.ball.spin = lane.ball.rotation = 0;
+                lane.ball.colorKey = COLOR_KEYS[Math.floor(Math.random()*COLOR_KEYS.length)];
+            });
+        }
+    }
+
+    function endMainThrow() {
+        if (currentFrame >= 10) return;
+        
+        let p = players[activePlayerIndex];
+        let knockedThisRoll = mainLane.pins.filter(pin => pin.knocked).length;
+        let previouslyKnocked = p.frames[currentFrame].rolls.length > 0 ? p.frames[currentFrame].rolls[0] : 0;
+        let officiallyKnocked = knockedThisRoll - previouslyKnocked;
+        
+        p.frames[currentFrame].rolls.push(officiallyKnocked);
+        
+        let r = p.frames[currentFrame].rolls;
+        let isStrike = (r.length === 1 && officiallyKnocked === 10);
+        let isSpare = (r.length === 2 && (r[0] + r[1] === 10) && !isStrike);
+
+        if (isStrike) showTV("STRIKE!", "#0000AA");
+        else if (isSpare) showTV("SPARE!", "#AA00AA");
+
+        let frameDone = false;
+        if (currentFrame < 9) { 
+            if (isStrike || rollInFrame === 1) frameDone = true;
+            else rollInFrame = 1; 
+        } else {
+            if (r.length === 1 && !isStrike) frameDone = false;
+            else if (r.length === 2 && (r[0] === 10 || r[0] + r[1] === 10)) frameDone = false;
+            else frameDone = true;
+        }
+
+        let resetRequired = false;
+        if (frameDone) {
+            activePlayerIndex++;
+            if (activePlayerIndex >= players.length) {
+                activePlayerIndex = 0;
+                currentFrame++;
+            }
+            rollInFrame = 0;
+            resetRequired = true; 
+        } else {
+            if (currentFrame === 9 && (r[0]===10 || (r.length===2 && r[0]+r[1]===10 && r[0]!==10))) resetRequired = true;
+            else resetRequired = false;
+        }
+
+        updateScorecard();
+
+        activateSweeper(mainLane, () => {
+            if (resetRequired) initPins(mainLane);
+            else mainLane.pins = mainLane.pins.filter(pin => !pin.knocked); 
+            
+            resetMainBall();
+            if (currentFrame >= 10) setTimeout(() => setupGame(players.length === 1 ? 0 : players[1].isAI ? 2 : 1), 4000);
+        });
+    }
+
+    function updateScorecard() {
+        let html = '';
+        players.forEach(p => {
+            let framesHtml = ''; let cumulativeScore = 0;
+            for (let i = 0; i < 10; i++) {
+                let f = p.frames[i]; let is10th = (i === 9); let rollHTML = '';
+                if (is10th) {
+                    let r1 = f.rolls[0] !== undefined ? (f.rolls[0]===10?'X':f.rolls[0]) : '';
+                    let r2 = f.rolls[1] !== undefined ? (f.rolls[1]===10?'X':(f.rolls[0]+f.rolls[1]===10?'/':f.rolls[1])) : '';
+                    let r3 = f.rolls[2] !== undefined ? (f.rolls[2]===10?'X':(f.rolls[1]!==10&&f.rolls[1]+f.rolls[2]===10?'/':f.rolls[2])) : '';
+                    rollHTML = `<div class="roll-box">${r1===0?'-':r1}</div><div class="roll-box">${r2===0?'-':r2}</div><div class="roll-box">${r3===0?'-':r3}</div>`;
+                } else {
+                    let r1 = f.rolls[0] !== undefined ? (f.rolls[0]===10?'':f.rolls[0]) : '';
+                    let r2 = f.rolls[0]===10?'X':(f.rolls[1]!==undefined?(f.rolls[0]+f.rolls[1]===10?'/':f.rolls[1]):'');
+                    rollHTML = `<div class="roll-box">${r1===0?'-':r1}</div><div class="roll-box">${r2===0?'-':r2}</div>`;
+                }
+
+                let frameScoreDisplay = '';
+                if (f.rolls.length > 0 && (is10th || f.rolls.length === 2 || f.rolls[0] === 10)) {
+                    cumulativeScore += f.rolls.reduce((a,b)=>a+b,0);
+                    frameScoreDisplay = cumulativeScore; 
+                }
+                framesHtml += `<div class="frame"><div class="frame-num">${i+1}</div><div class="rolls">${rollHTML}</div><div class="frame-score">${frameScoreDisplay}</div></div>`;
+            }
+            html += `<div class="player-row"><div class="name-box" style="color:${BALL_COLORS[p.color].high}">${p.name}</div><div class="frames-container">${framesHtml}</div><div class="total-box">${cumulativeScore}</div></div>`;
+        });
+        document.getElementById('scorecard').innerHTML = html;
+    }
+
+    // ==================== TRUE ELASTIC ANGULAR PHYSICS ====================
+    function resolveCollision(objA, objB, massA, massB, isPinToPin) {
+        let dx = objB.x - objA.x;
+        let dy = objB.y - objA.y;
+        let dist = Math.hypot(dx, dy);
+        
+        let minDist = objA.r + objB.r;
+        if (isPinToPin) minDist *= 1.25; // Domino scatter buffer
+
+        if (dist < minDist && dist > 0) {
+            let nx = dx / dist; let ny = dy / dist;
+
+            // Separate
+            let overlap = minDist - dist;
+            objA.x -= nx * (overlap / 2); objA.y -= ny * (overlap / 2);
+            objB.x += nx * (overlap / 2); objB.y += ny * (overlap / 2);
+
+            let dvx = objB.vx - objA.vx; let dvy = objB.vy - objA.vy;
+            let velAlongNormal = dvx * nx + dvy * ny;
+            if (velAlongNormal > 0) return;
+
+            let e = 0.85; // Bouncy pins
+            let j = -(1 + e) * velAlongNormal;
+            j /= (1 / massA) + (1 / massB);
+
+            let impulseX = j * nx; let impulseY = j * ny;
+
+            objA.vx -= impulseX / massA; objA.vy -= impulseY / massA;
+            objB.vx += impulseX / massB; objB.vy += impulseY / massB;
+
+            // Handle Knockdown and Angular Transfer
+            if (objB.hasOwnProperty('knocked')) {
+                let hitSpeed = Math.hypot(objA.vx, objA.vy);
+                if (hitSpeed > 0.5) {
+                    if (!objB.knocked) {
+                        objB.knocked = true;
+                        objB.angle = (Math.random() > 0.5 ? 1 : -1) * (Math.PI / 2); // Snap sideways
+                    }
+                    // Transfer spin/angular velocity
+                    let spinTransfer = objA.spin ? objA.spin * 0.05 : objA.angularVelocity * 0.5;
+                    objB.angularVelocity += spinTransfer + (Math.random() - 0.5) * 0.3;
+                }
+            }
+            if (objA.hasOwnProperty('knocked')) {
+                let hitSpeed = Math.hypot(objB.vx, objB.vy);
+                if (hitSpeed > 0.5) {
+                    if (!objA.knocked) {
+                        objA.knocked = true;
+                        objA.angle = (Math.random() > 0.5 ? 1 : -1) * (Math.PI / 2);
+                    }
+                    objA.angularVelocity += objB.angularVelocity * 0.5 + (Math.random() - 0.5) * 0.3;
+                }
+            }
+        }
+    }
+
+    function updatePhysics(lane) {
+        let simBall = lane.ball; let simPins = lane.pins;
+        if (!simBall.rolling) return;
+
+        let spinMod = lane.isAmbient ? 0.009 : (playerStats.finesse * 0.0018);
+        simBall.x += simBall.vx; simBall.y += simBall.vy; simBall.vx += simBall.spin * spinMod; 
+        
+        let speed = Math.hypot(simBall.vx, simBall.vy);
+        simBall.rotation += speed * 0.05; 
+        simBall.vx *= 0.995; simBall.vy *= 0.995;
+        if (simBall.vy > -4) simBall.vy -= 0.15; 
+
+        const leftBound = lane.centerX - (LANE_WIDTH/2) + simBall.radius; 
+        const rightBound = lane.centerX + (LANE_WIDTH/2) - simBall.radius;
+        
+        if (simBall.x <= leftBound || simBall.x >= rightBound) {
+            if (bumpersOn && !lane.isAmbient) { 
+                simBall.vx *= -0.8; simBall.x = simBall.x <= leftBound ? leftBound : rightBound; 
+            } else { 
+                simBall.spin = 0; simBall.vx *= 0.8; simBall.x = simBall.x <= leftBound ? leftBound - GUTTER_WIDTH/2 : rightBound + GUTTER_WIDTH/2; 
+            }
+        }
+
+        // Ball -> Pin (Ball Mass = 16.0, Pin Mass = 3.5)
+        let tempBall = {x: simBall.x, y: simBall.y, vx: simBall.vx, vy: simBall.vy, r: simBall.radius, spin: simBall.spin};
+        simPins.forEach(p => {
+            if (!p.knocked || Math.hypot(p.vx, p.vy) > 0.5) {
+                resolveCollision(tempBall, p, 16.0, 3.5, false);
+                // Extra shatter force from Brawn
+                if (p.knocked && Math.hypot(p.vx, p.vy) > 0.1 && !lane.isAmbient) {
+                    p.vy -= (playerStats.brawn * 0.2); 
+                }
+            }
+        });
+        simBall.x = tempBall.x; simBall.y = tempBall.y; simBall.vx = tempBall.vx; simBall.vy = tempBall.vy;
+
+        // Pin -> Pin Domino Effect
+        for (let i = 0; i < simPins.length; i++) {
+            for (let j = i + 1; j < simPins.length; j++) {
+                if (simPins[i].knocked || simPins[j].knocked) {
+                    resolveCollision(simPins[i], simPins[j], 3.5, 3.5, true);
+                }
+            }
+        }
+
+        // Pin Update & Kickback Plates
+        simPins.forEach(p => { 
+            if (p.knocked) { 
+                p.x += p.vx; p.y += p.vy; 
+                p.vx *= 0.94; p.vy *= 0.94; // Slide friction
+                p.angle += p.angularVelocity;
+                p.angularVelocity *= 0.96; // Spin friction
+                
+                if (p.x < leftBound - simBall.radius) { p.x = leftBound - simBall.radius; p.vx *= -0.8; p.angularVelocity += p.vy * 0.05; }
+                if (p.x > rightBound + simBall.radius) { p.x = rightBound + simBall.radius; p.vx *= -0.8; p.angularVelocity -= p.vy * 0.05; }
+            }
+        });
+    }
+
+    // ==================== VISUAL RENDERING ====================
+    function drawLane(centerX) {
+        const startX = centerX - (LANE_WIDTH/2);
+        const plankWidth = 4;
+        for (let x = startX; x < startX + LANE_WIDTH; x += plankWidth) {
+            ctx.fillStyle = (Math.floor(x / plankWidth) % 2 === 0) ? '#AA5500' : '#884400'; 
+            ctx.fillRect(x, 0, plankWidth, canvas.height);
+        }
+
+        ctx.fillStyle = '#000000'; ctx.fillRect(startX - GUTTER_WIDTH, 0, GUTTER_WIDTH, canvas.height); ctx.fillRect(startX + LANE_WIDTH, 0, GUTTER_WIDTH, canvas.height);
+        ctx.fillStyle = '#333333'; ctx.fillRect(startX - GUTTER_WIDTH + 4, 0, GUTTER_WIDTH - 8, canvas.height); ctx.fillRect(startX + LANE_WIDTH + 4, 0, GUTTER_WIDTH - 8, canvas.height);
+        ctx.fillStyle = '#555555'; ctx.fillRect(startX + LANE_WIDTH + GUTTER_WIDTH, 0, DIVIDER_WIDTH, canvas.height);
+        ctx.fillStyle = '#AAAAAA'; ctx.fillRect(startX + LANE_WIDTH + GUTTER_WIDTH, 0, 4, canvas.height);
+        ctx.fillStyle = '#000000'; ctx.fillRect(startX + LANE_WIDTH + GUTTER_WIDTH + DIVIDER_WIDTH - 4, 0, 4, canvas.height);
+        
+        if (bumpersOn && centerX === CENTER_LANE_X) {
+            for (let y = 0; y < canvas.height; y += 30) {
+                ctx.fillStyle = (Math.floor(y / 30) % 2 === 0) ? '#AA0000' : '#FF5555';
+                ctx.fillRect(startX - 10, y, 10, 30); ctx.fillRect(startX + LANE_WIDTH, y, 10, 30);
+            }
+        }
+    }
+
+    function drawRoundAnimatedBall(b) {
+        const cx = b.x; const cy = b.y; const r = b.radius;
+        const colors = BALL_COLORS[b.colorKey];
+        
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = colors.base; ctx.fill();
+        
+        const rot = b.rotation; 
+        let highA = rot - Math.PI/4;
+        if (Math.cos(highA) > 0) {
+            let hy = Math.sin(highA) * (r * 0.7);
+            ctx.beginPath(); ctx.arc(cx - r*0.2, cy + hy, r*0.4, 0, Math.PI * 2);
+            ctx.fillStyle = colors.high; ctx.fill();
+        }
+
+        let holes = [ { a: rot }, { a: rot + 0.3 }, { a: rot + 0.15, xo: 6 } ];
+        ctx.fillStyle = '#000000';
+        holes.forEach(h => {
+            if (Math.cos(h.a) > 0) {
+                let yOffset = Math.sin(h.a) * (r * 0.7); let xOffset = h.xo || -2;
+                ctx.beginPath(); ctx.arc(cx + xOffset, cy + yOffset, 2.5, 0, Math.PI*2); ctx.fill();
+            }
+        });
+    }
+
+    function drawPin(p) {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+
+        // If knocked, physically rotate the true pin geometry
+        if (p.knocked) ctx.rotate(p.angle);
+
+        // Scale all the pin geometry off the actual collision radius so the
+        // visible pin matches its regulation footprint (4.75" base diameter).
+        // The pin's base width should be ~2*PIN_RADIUS; we used to hardcode
+        // rw=1.5 which made the visible body roughly 2× too wide for its
+        // collision circle. Spacing center-to-center is regulation 12".
+        // PIN_RADIUS ≈ 9.025px → rw ≈ 1.13.
+        const rw = (p.r || 9) / 8;
+        // Shadow base if standing
+        if (!p.knocked) {
+            ctx.fillStyle = '#000000';
+            ctx.beginPath(); ctx.ellipse(0, 15, p.r, p.r*0.4, 0, 0, Math.PI*2); ctx.fill();
+        }
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(-6*rw, 1*rw, 12*rw, 6*rw); // Base
+        ctx.fillRect(-5*rw, -4*rw, 10*rw, 5*rw); // Lower body
+        ctx.fillRect(-3*rw, -12*rw, 6*rw, 8*rw); // Neck
+        ctx.fillRect(-5*rw, -18*rw, 10*rw, 6*rw); // Head
+
+        ctx.fillStyle = '#AAAAAA'; ctx.fillRect(2*rw, -18*rw, 3*rw, 25*rw); // Shading
+        ctx.fillStyle = '#AA0000'; ctx.fillRect(-4*rw, -10*rw, 8*rw, 2*rw); // Stripe
+
+        ctx.restore();
+    }
+
+    function drawSweeper(lane) {
+        if (!lane.sweeper.active) return;
+        let s = lane.sweeper;
+        ctx.fillStyle = '#555555'; ctx.fillRect(lane.centerX - LANE_WIDTH/2 - 10, s.y - 60, LANE_WIDTH + 20, 60);
+        ctx.fillStyle = '#AAAAAA'; ctx.fillRect(lane.centerX - LANE_WIDTH/2 - 10, s.y - 10, LANE_WIDTH + 20, 10);
+        ctx.fillStyle = '#AA0000'; ctx.fillRect(lane.centerX - LANE_WIDTH/2, s.y - 5, LANE_WIDTH, 10);
+
+        // #10: comic-book "BANG! POW!" burst — bold italic word with a thick
+        // black outline and a slight tilt, like the old Batman TV cards.
+        ctx.save();
+        ctx.translate(lane.centerX, s.y - 38);
+        ctx.rotate((s.tilt || 0));
+        ctx.font = "900 30px 'Arial Black', 'Courier New', monospace";
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.lineJoin = "round";
+        // thick black outline
+        ctx.lineWidth = 7; ctx.strokeStyle = "#000000"; ctx.strokeText(s.text, 0, 0, LANE_WIDTH + 30);
+        // white inner outline for that printed-comic pop
+        ctx.lineWidth = 3; ctx.strokeStyle = "#ffffff"; ctx.strokeText(s.text, 0, 0, LANE_WIDTH + 30);
+        // colored fill
+        ctx.fillStyle = s.color; ctx.fillText(s.text, 0, 0, LANE_WIDTH + 30);
+        ctx.restore();
+        ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+    }
+
+    // ==================== MAIN LOOP ====================
+    function gameLoop() {
+        // AI Logic for Main Lane
+        if (players.length > 0 && players[activePlayerIndex].isAI && aiming && !mainLane.sweeper.active) {
+            mainLane.aiTimer++;
+            if (!charging && mainLane.aiTimer > 60) {
+                let aiError = (10 - playerStats.finesse) * 1.5;
+                angle = (Math.random() - 0.5) * aiError; 
+                mainLane.ball.spin = Math.floor((Math.random() - 0.5) * (playerStats.finesse));
+                charging = true; power = 0; powerDir = 1; mainLane.aiTimer = 0;
+            } else if (charging && mainLane.aiTimer > (30 + Math.random()*50)) {
+                charging = false;
+                let statBasePower = 3.0 + (playerStats.brawn * 0.5); 
+                let statMultiplier = 0.05 + (playerStats.brawn * 0.015);
+                const actualPower = statBasePower + ((power / 100) * 10 * statMultiplier * 10);
+                mainLane.ball.vx = Math.sin(angle * Math.PI / 180) * actualPower;
+                mainLane.ball.vy = -Math.cos(angle * Math.PI / 180) * (actualPower * 1.5);
+                mainLane.ball.rolling = true; aiming = false; mainLane.aiTimer = 0;
+            }
+        }
+
+        if (aiming && (!players[activePlayerIndex]?.isAI)) {
+            if (keys.left) mainLane.ball.x -= 4;
+            if (keys.right) mainLane.ball.x += 4;
+            const clampBorder = CENTER_LANE_X - (LANE_WIDTH/2) + mainLane.ball.radius;
+            mainLane.ball.x = Math.max(clampBorder, Math.min(CENTER_LANE_X + (LANE_WIDTH/2) - mainLane.ball.radius, mainLane.ball.x));
+        }
+
+        if (charging) { power += 3 * powerDir; if (power >= 100 || power <= 0) powerDir *= -1; }
+
+        // Render Layers
+        ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        allLanes.forEach(lane => {
+            drawLane(lane.centerX);
+            
+            ctx.fillStyle = '#AAAAAA';
+            for(let i = -2; i <= 2; i++) {
+                const arrowX = lane.centerX + (i * 25);
+                const arrowY = BALL_START_Y - 200 - (Math.abs(i) * 20);
+                ctx.fillRect(arrowX - 2, arrowY, 4, 4); ctx.fillRect(arrowX - 6, arrowY + 4, 12, 4);
+            }
+
+            lane.pins.forEach(p => drawPin(p));
+            if (lane.ball.rolling || (lane === mainLane && aiming) || (lane.isAmbient && lane.aiTimer > 0)) drawRoundAnimatedBall(lane.ball);
+
+            if (lane.sweeper.active) {
+                if (lane.sweeper.state === 1) {
+                    lane.sweeper.y += 11;   // #12: faster descent (was 6)
+                    if (lane.sweeper.y > PIN_START_Y + 140) { lane.sweeper.state = 2; if (lane.sweeper.callback) { lane.sweeper.callback(); lane.sweeper.callback = null; } }
+                    lane.pins.forEach(p => { if (p.knocked && p.y < lane.sweeper.y) p.y = lane.sweeper.y + p.r; });
+                } else if (lane.sweeper.state === 2) {
+                    lane.sweeper.y -= 9;    // #12: faster retract (was 4)
+                    if (lane.sweeper.y < -100) lane.sweeper.active = false;
+                }
+                drawSweeper(lane);
+            }
+        });
+
+        // Ambient Physics & AI Update
+        ambientLanes.forEach(lane => {
+            handleAmbientLogic(lane);
+            updatePhysics(lane);
+        });
+
+        // Main Lane Physics Update
+        updatePhysics(mainLane);
+        if (mainLane.ball.rolling && mainLane.ball.y < -100) { mainLane.ball.rolling = false; endMainThrow(); }
+
+        // Main Lane Aiming UI 
+        if (aiming && (!players[activePlayerIndex]?.isAI)) {
+            ctx.fillStyle = '#55FF55'; 
+            let simX = mainLane.ball.x; let simY = mainLane.ball.y;
+            let simVX = Math.sin(angle * Math.PI / 180) * 15;
+            let simVY = -Math.cos(angle * Math.PI / 180) * 15;
+            let actualSpinInfluence = (playerStats.finesse * 0.0018); 
+
+            for (let i = 0; i < 8; i++) {
+                simX += simVX; simY += simVY; simVX += mainLane.ball.spin * actualSpinInfluence * 20; 
+                if (i % 2 === 0) ctx.fillRect(simX, simY, 4, 4);
+            }
+            ctx.fillStyle = '#FFFFFF'; ctx.font = `bold 16px 'Courier New'`;
+            ctx.fillText(`SPIN: ${mainLane.ball.spin > 0 ? 'RIGHT' : mainLane.ball.spin < 0 ? 'LEFT' : 'NONE'}`, 20, canvas.height - 20);
+        }
+
+        // ── STATUS INDICATOR ─────────────────────────────────────────────
+        // Show "READY" / "WAIT" centered at the bottom so the player knows
+        // when input is accepted. Critical because side lanes also have
+        // pinsetter animations that look very similar to the main lane's,
+        // so the player would otherwise have no way to tell whether they're
+        // blocked by THEIR pinsetter (input gated) or just watching someone
+        // else's (input free, they can keep bowling).
+        if (!players[activePlayerIndex]?.isAI) {
+            const canBowl = canThrow();
+            ctx.textAlign = "center";
+            ctx.font = "bold 18px 'Courier New', monospace";
+            if (canBowl) {
+                ctx.fillStyle = '#55FF55';
+                ctx.fillText('READY — click & hold to throw', canvas.width / 2, canvas.height - 8);
+            } else if (mainLane.sweeper.active) {
+                ctx.fillStyle = '#FFAA55';
+                ctx.fillText('CLEARING PINS — wait...', canvas.width / 2, canvas.height - 8);
+            } else if (mainLane.ball.rolling) {
+                ctx.fillStyle = '#55AAFF';
+                ctx.fillText('BALL IN PLAY', canvas.width / 2, canvas.height - 8);
+            }
+            ctx.textAlign = "left";
+        }
+
+        // Power Meter
+        if (charging || aiming) {
+            const meterX = canvas.width - 40; const meterY = canvas.height - 150;
+            ctx.fillStyle = '#000000'; ctx.fillRect(meterX, meterY, 20, 120);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(meterX, meterY, 20, 2); ctx.fillRect(meterX, meterY + 120, 20, 2);
+            ctx.fillRect(meterX, meterY, 2, 120); ctx.fillRect(meterX + 18, meterY, 2, 120);
+            if (charging) {
+                ctx.fillStyle = power > 85 ? '#FF5555' : '#55FF55';
+                const fillH = (power / 100) * 116;
+                ctx.fillRect(meterX + 2, meterY + 118 - fillH, 16, fillH);
+            }
+        }
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    // ==================== ROBUST INPUT HANDLING ====================
+    window.addEventListener('keydown', e => {
+        if (e.key === 'a' || e.key === 'ArrowLeft') keys.left = true;
+        if (e.key === 'd' || e.key === 'ArrowRight') keys.right = true;
+    });
+    window.addEventListener('keyup', e => {
+        if (e.key === 'a' || e.key === 'ArrowLeft') keys.left = false;
+        if (e.key === 'd' || e.key === 'ArrowRight') keys.right = false;
+    });
+
+    canvas.addEventListener('mousemove', e => {
+        if (players.length > 0 && players[activePlayerIndex]?.isAI) return;
+        if (!aiming || charging) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const mouseX = (e.clientX - rect.left) * scaleX;
+        angle = (mouseX - (canvas.width / 2)) * 0.15;
+        angle = Math.max(-35, Math.min(35, angle)); 
+    });
+
+    canvas.addEventListener('wheel', e => {
+        if (players.length > 0 && players[activePlayerIndex]?.isAI) return;
+        if (aiming && !charging) {
+            e.preventDefault();
+            mainLane.ball.spin = Math.max(-10, Math.min(10, mainLane.ball.spin + (e.deltaY > 0 ? 1 : -1)));
+        }
+    }, {passive: false});
+
+    // #12/#10: the player may throw whenever they're aiming and their OWN
+    // pinsetter isn't actively clearing pins. Once the sweeper has reset the
+    // pins (state 2 = retracting up and out of the way), input is freed so
+    // there's no dead wait for the full retract. Side-lane pinsetters never
+    // affect this (they're separate lane objects) — purely flavor.
+    function canThrow() {
+        return aiming && !(mainLane.sweeper.active && mainLane.sweeper.state === 1);
+    }
+
+    canvas.addEventListener('mousedown', e => { 
+        if (players.length > 0 && players[activePlayerIndex]?.isAI) return;
+        if (canThrow()) {
+            e.preventDefault(); charging = true; power = 0; powerDir = 1;
+        }
+    });
+    
+    window.addEventListener('mouseup', () => {
+        if (players.length > 0 && players[activePlayerIndex]?.isAI) return;
+        if (charging) {
+            charging = false;
+            let statBasePower = 3.0 + (playerStats.brawn * 0.5); 
+            let statMultiplier = 0.05 + (playerStats.brawn * 0.015);
+            const safePower = Math.max(10, power);
+            const actualPower = statBasePower + ((safePower / 100) * 10 * statMultiplier * 10);
+            
+            mainLane.ball.vx = Math.sin(angle * Math.PI / 180) * actualPower;
+            mainLane.ball.vy = -Math.cos(angle * Math.PI / 180) * (actualPower * 1.5);
+            mainLane.ball.rolling = true; aiming = false;
+        }
+    });
+
+    document.getElementById('mode1').onclick = () => setupGame(0);
+    document.getElementById('mode2').onclick = () => setupGame(1);
+    document.getElementById('mode3').onclick = () => setupGame(2);
+    document.getElementById('bumperBtn').onclick = () => {
+        bumpersOn = !bumpersOn;
+        document.getElementById('bumperBtn').textContent = `BUMPERS: ${bumpersOn ? 'ON' : 'OFF'}`;
+    };
+
+    setupGame(0);
+    gameLoop();
+</script>
+</body>
+</html>

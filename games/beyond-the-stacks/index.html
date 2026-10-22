@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>/* portfolio demo: lets the page around this game mute it (shared/demo-controls.js) */try{if(parent!==window&&parent.DemoControls)parent.DemoControls.early(window)}catch(e){}</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beyond The Stacks</title>
+<meta name="description" content="A library programming job simulator built from real-world scenarios: plan a year of public programs, book the right rooms, market them at the right time, and keep the whole community on your side.">
+<meta name="theme-color" content="#1d2b4f">
+<link rel="icon" href="assets/emoji/1f4da.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css?v=afa84ddc">
+</head>
+<body>
+
+<div id="app" aria-hidden="true">
+  <!-- HUD -->
+  <header id="hud">
+    <div class="brand">
+      <img src="assets/emoji/1f4da.svg" alt="">
+      <div><h1>Beyond The Stacks</h1><small id="ui-quarter">Fall Quarter &middot; Programming Office</small></div>
+    </div>
+    <div class="clock" aria-live="off">
+      <div class="clock-face"><div id="ui-date">Week 1 &middot; Mon, Sep 7</div><div id="ui-time">9:00 AM</div></div>
+      <div class="speed" role="group" aria-label="Time controls">
+        <button type="button" id="btn-pause" class="tbtn" data-icon="player-pause" data-tip="Pause / play|Space bar. Time also pauses while you configure a program."></button>
+        <button type="button" class="tbtn spd" data-speed="0.5" data-tip="Half speed|Key 1">&frac12;&times;</button>
+        <button type="button" class="tbtn spd" data-speed="1">1&times;</button>
+        <button type="button" class="tbtn spd" data-speed="2">2&times;</button>
+        <button type="button" class="tbtn spd" data-speed="4">4&times;</button>
+        <button type="button" class="tbtn spd" data-speed="8">8&times;</button>
+        <button type="button" id="btn-skip-event" class="tbtn" data-icon="player-track-next" data-tip="Skip ahead|Fast-forward to just before today's next program, or to closing time."></button>
+        <button type="button" id="btn-skip-day" class="tbtn" data-icon="player-skip-forward" data-tip="End the day|Fast-forward to closing time."></button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat" data-tip="Budget|What's left of this year's programming money. Programs are paid for when you lock them in."><span class="k">Budget</span><span class="v" id="ui-budget">$6,000</span></div>
+      <div class="stat stat-gw" tabindex="0" data-tip-html="gw"><span class="k">Goodwill</span><span class="v" id="ui-gw">60%</span><span class="gw-bars" id="ui-gw-bars"></span></div>
+      <div class="stat" data-tip="Circulation|Items checked out this year. Programs and new library cards push it up."><span class="k">Circulation</span><span class="v" id="ui-circ">0</span></div>
+      <div class="stat" data-tip="Visits|Everyone who has come through the doors this year."><span class="k">Visits</span><span class="v" id="ui-visits">0</span></div>
+      <div class="stat" data-tip="Staff hours this week|Program prep and run time booked this week, out of what the team can absorb. Go over and quality drops."><span class="k">Staff hrs</span><span class="v" id="ui-staff">0/14</span></div>
+      <div class="stat" data-tip="Scheduled|Programs still to come this year."><span class="k">Scheduled</span><span class="v" id="ui-sched">0</span></div>
+    </div>
+    <div class="tools">
+      <button type="button" class="tbtn" id="btn-help" data-icon="help-circle" data-tip="How to play"></button>
+      <button type="button" class="tbtn" id="btn-collapse-all"></button>
+      <button type="button" class="tbtn" id="btn-sound" data-icon="volume" data-tip="Sound on/off"></button>
+      <button type="button" class="tbtn" id="btn-fullscreen"></button>
+      <button type="button" class="tbtn" id="btn-settings" data-icon="settings" data-tip="Settings|Speed, weekly pauses, load a different Mapster map, restart."></button>
+    </div>
+  </header>
+
+  <main id="workspace">
+    <!-- Community Pulse -->
+    <section id="feed-panel" class="panel paper" aria-label="Community Pulse">
+      <div class="panel-head">
+        <h2><img src="assets/emoji/1f4e3.svg" alt="">Community Pulse</h2>
+        <div class="seg" role="group" aria-label="Filter posts">
+          <button type="button" class="on" data-feed-filter="all">All</button>
+          <button type="button" data-feed-filter="pos">Praise</button>
+          <button type="button" data-feed-filter="neg">Gripes</button>
+          <button type="button" data-feed-filter="staff">Staff</button>
+        </div>
+      </div>
+      <div id="feed-container" aria-live="polite"></div>
+    </section>
+
+    <!-- Calendar -->
+    <section id="calendar-panel" class="panel paper" aria-label="Master Schedule">
+      <div class="panel-head">
+        <h2><img src="assets/emoji/1f4c5.svg" alt="">Master Schedule</h2>
+        <div class="seg" id="cal-quarters" role="group" aria-label="Jump to a quarter"></div>
+        <div class="lead-legend" data-tip="Marketing lead time|How far ahead a program is, from today. 4 to 6 weeks out is the sweet spot for getting the word out.">
+          <span class="lg bad"></span>&lt;3 wks <span class="lg ok"></span>3 <span class="lg good"></span>4&ndash;6 <span class="lg ok"></span>7&ndash;11 <span class="lg bad"></span>12+
+        </div>
+      </div>
+      <div id="calendar-grid" role="grid"></div>
+      <div id="place-banner" hidden><span id="place-text"></span><button type="button" id="place-cancel" class="btn small">Cancel</button></div>
+    </section>
+
+    <!-- Facility map (drawn from the Mapster map) -->
+    <section id="map-panel" class="panel blueprint" aria-label="Facility map">
+      <div class="panel-head">
+        <h2><img src="assets/emoji/1f3db.svg" alt="">Facility Status</h2>
+        <div class="seg floor-tabs" id="floor-tabs" role="tablist" aria-label="Floors"></div>
+        <div class="seg" role="group" aria-label="Map view">
+          <button type="button" data-viewmode="3d" data-tip="3D view|Mapster's 3D view of the library. Drag to pan, scroll to zoom, right-drag (or Shift+drag) to rotate and tilt, or use the buttons. Q/E rotate and T tilts too.">3D</button>
+          <button type="button" data-viewmode="2d" data-tip="Blueprint|A flat plan of the floor. Scroll to zoom, drag to pan.">Blueprint</button>
+        </div>
+        <div class="seg">
+          <button type="button" id="ov-noise" data-tip="Noise overlay|Show where sound is spreading right now.">Noise</button>
+          <button type="button" id="ov-labels" class="on">Labels</button>
+        </div>
+      </div>
+      <div id="map-wrap">
+        <canvas id="facility-canvas" aria-label="Top-down map of the library floor"></canvas>
+        <div id="room-tip" hidden></div>
+        <div id="map-controls" aria-label="Camera">
+          <button type="button" class="mc only3d" data-cam="rotl" data-icon="rotate-ccw" data-tip="Rotate left|Q, or right-drag"></button>
+          <button type="button" class="mc only3d" data-cam="rotr" data-icon="rotate-cw" data-tip="Rotate right|E, or right-drag"></button>
+          <button type="button" class="mc only3d" data-cam="tiltu" data-icon="arrow-bar-to-up" data-tip="Tilt toward top-down"></button>
+          <button type="button" class="mc only3d" data-cam="tiltd" data-icon="arrow-bar-to-down" data-tip="Tilt toward eye level"></button>
+          <button type="button" class="mc" data-cam="zin" data-icon="zoom-in" data-tip="Zoom in|Scroll wheel too"></button>
+          <button type="button" class="mc" data-cam="zout" data-icon="zoom-out" data-tip="Zoom out"></button>
+          <button type="button" class="mc" data-cam="reset" data-icon="focus-centered" data-tip="Reset the view"></button>
+        </div>
+        <div id="map-hint" hidden></div>
+      </div>
+      <div class="noise-key" id="noise-key" hidden><span class="noise-scale"><b>Quiet</b><i></i><b>Loud</b></span><span id="noise-status"></span></div>
+      <div class="map-legend" id="map-legend"></div>
+    </section>
+  </main>
+
+  <!-- Program cards -->
+  <section id="deck-panel" aria-label="Program cards">
+    <div class="deck-head">
+      <h2><img src="assets/emoji/1f9e9.svg" alt="">Program Cards</h2>
+      <div class="seg" id="deck-filter" role="group" aria-label="Filter cards by audience"></div>
+      <button type="button" class="btn small workshop-btn" id="btn-workshop" data-icon="cards" data-tip="Card Workshop|Create your own program cards, edit them, and hide cards you don't use."> Card Workshop</button>
+      <p class="hint">Drag a card onto a day, or click a card and then a day. Right-click cards, bookings, days and rooms for more.</p>
+    </div>
+    <div id="deck" role="list"></div>
+  </section>
+</div>
+
+<!-- Program configuration (opens beside the map so you can click rooms on it) -->
+<aside id="config-modal" class="drawer" hidden role="dialog" aria-modal="false" aria-labelledby="cfg-title">
+  <div class="drawer-head">
+    <img id="cfg-emoji" src="" alt="">
+    <div><h2 id="cfg-title">Configure Program</h2><div id="cfg-sub"></div></div>
+    <button type="button" class="tbtn close" id="cfg-close" data-icon="x" aria-label="Close"></button>
+  </div>
+  <div class="drawer-body">
+    <p id="cfg-blurb" class="blurb"></p>
+    <p id="cfg-mode" class="mode-note" hidden></p>
+    <fieldset><legend>When</legend><div id="cfg-date"></div><div id="cfg-slots" class="slots"></div></fieldset>
+    <fieldset id="cfg-repeat-fs"><legend>Repeat</legend><div id="cfg-repeat"></div></fieldset>
+    <fieldset><legend>Where <span class="aside">or click a room on the map &rarr;</span></legend><div id="cfg-rooms" class="rooms"></div><ul id="cfg-fit" class="notes"></ul></fieldset>
+    <fieldset><legend>Scope: niche or broad?</legend>
+      <div class="scope-row">
+        <svg id="cfg-cone" viewBox="0 0 120 60" aria-hidden="true"></svg>
+        <div class="scope-ctl">
+          <input type="range" id="scope-slider" min="1" max="10" value="5" aria-label="Scope">
+          <div class="slider-labels"><span>Highly niche</span><span>Broad appeal</span></div>
+          <div id="cfg-scope-text" class="small-print"></div>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset><legend>Refreshments &amp; add-ons</legend><div id="cfg-addons" class="checks"></div></fieldset>
+    <fieldset><legend>Marketing push</legend><div id="cfg-marketing" class="mk"></div><div id="cfg-lead" class="lead"></div></fieldset>
+    <fieldset class="proj"><legend>Projection</legend><div id="cfg-projection"></div></fieldset>
+  </div>
+  <div class="drawer-foot">
+    <button type="button" class="btn danger" id="btn-remove" hidden>Cancel program</button>
+    <span class="grow"></span>
+    <button type="button" class="btn" id="btn-cancel">Close</button>
+    <button type="button" class="btn primary" id="btn-confirm-schedule">Lock in Schedule</button>
+  </div>
+</aside>
+
+<!-- Title screen -->
+<section id="title-screen" class="overlay on">
+  <canvas id="title-art" aria-hidden="true"></canvas>
+  <div class="title-card">
+    <img src="assets/emoji/1f4da.svg" alt="" class="title-logo">
+    <h1>Beyond The Stacks</h1>
+    <p class="tag">A Library Programming Job Simulator</p>
+    <p class="pitch">You're the library's new programming director. Plan a year of programs for seniors, adults, teens and families with young children, in the library and out in the community, then open the doors and live with the results. Built from real-world library programming scenarios.</p>
+    <label class="title-pop">Your town's population
+      <input type="text" id="title-pop" inputmode="numeric" list="pop-presets" value="30,000" aria-describedby="title-pop-hint">
+      <datalist id="pop-presets"></datalist>
+      <small id="title-pop-hint">More people means more visitors and bigger crowds; the rooms stay the same size.</small>
+    </label>
+    <div class="title-btns">
+      <button type="button" class="btn primary big" id="btn-new">Start the Year</button>
+      <button type="button" class="btn big" id="btn-continue" hidden>Continue</button>
+      <button type="button" class="btn big" id="btn-title-help">How to Play</button>
+    </div>
+    <p class="small-print" id="map-source"></p>
+    <p class="small-print"><a href="#" id="btn-credits">Credits</a></p>
+  </div>
+</section>
+
+<!-- Generic modal (intro memo, help, settings, week wrap-up, final report, credits) -->
+<!-- In-game "are you sure?" (Screens.ask): stacks above everything, even the Card Workshop -->
+<section id="ask" class="overlay ask" role="alertdialog" aria-modal="true" aria-labelledby="ask-title" aria-describedby="ask-text">
+  <div class="modal-card paper">
+    <h2 id="ask-title"></h2>
+    <p id="ask-text"></p>
+    <div class="ask-foot"><button type="button" class="btn" id="ask-no"></button><button type="button" class="btn primary" id="ask-yes"></button></div>
+  </div>
+</section>
+
+<section id="modal" class="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-card paper">
+    <button type="button" class="tbtn close" id="modal-close" data-icon="x" aria-label="Close"></button>
+    <h2 id="modal-title"></h2>
+    <div id="modal-body"></div>
+    <div id="modal-foot"></div>
+  </div>
+</section>
+
+<div id="tooltip" role="tooltip" hidden></div>
+<div id="toasts" aria-live="polite"></div>
+<div id="coach" hidden><p id="coach-text"></p><div><button type="button" class="btn small" id="coach-skip">Skip tips</button><button type="button" class="btn small primary" id="coach-next">Next</button></div></div>
+<input type="file" id="map-file" accept=".html,.htm" hidden>
+
+<script src="js/icons.js?v=043269bd"></script>
+<script src="js/sfx.js?v=f6ca55c7"></script>
+<script src="js/data.js?v=cc1a2b78"></script>
+<script src="js/library-map.js?v=b1e36d90"></script>
+<script src="js/map-loader.js?v=89af84b2"></script>
+<script src="js/programs.js?v=7c9e95b5"></script>
+<script src="js/sim.js?v=f0582968"></script>
+<script src="js/facility-view.js?v=cb84b2b6"></script>
+<script src="js/view3d.js?v=81cf065b"></script>
+<script src="js/menu.js?v=7e08e320"></script>
+<script src="js/feed.js?v=02e9790b"></script>
+<script src="js/planner.js?v=567e80a7"></script>
+<script src="js/workshop.js?v=9fb53a95"></script>
+<script src="js/screens.js?v=a0c61769"></script>
+<script src="js/panels.js?v=f2dfd90d"></script>
+<script src="js/engine.js?v=1061256a"></script>
+</body>
+</html>

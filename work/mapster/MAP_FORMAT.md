@@ -49,7 +49,7 @@ Each cell is an object. Every field is optional (absent/`null` = nothing there):
 ```jsonc
 {
   "f":  { … } | null,   // FLOOR tile
-  "o":  { … } | null,   // OBJECT sitting on the tile (start, car, key, arcade, bench, npc, sign, stairs, ladder, warp…)
+  "o":  { … } | null,   // OBJECT sitting on the tile (start, car, key, arcade, bench, npc, sign, stairs, ladder, elevator, warp…)
   "c":  { … } | null,   // CEILING
   "n":  { … } | null,   // NORTH edge (wall / door / window / counter / attachment host)
   "s":  { … } | null,   // SOUTH edge
@@ -103,6 +103,15 @@ carries the behaviour.
 { "n":"car","v":"car","c":"#8a2f2f","s":"🚗",
   "meta":{ "solid":true, "jumpable":false, "carDir":"s",
            "keyId":"MultiplexKey", "keyLabel":"multiplex key" } }
+
+// a PARKING STALL floor — asphalt (c) with a painted line (ac) down its WEST edge;
+// a row of these is a row of parking spaces
+{ "n":"Parking Stall","v":"parking","c":"#3d434c","ac":"#f5f5f0","meta":{} }
+
+// an ELEVATOR (object slot) — put one on the SAME tile on every floor it serves.
+// It doesn't block; SPACE inside rides to the next floor up (from the top, back down).
+// rot turns its open doors (0 = doors facing south, then clockwise)
+{ "n":"Elevator","v":"elevator","c":"#9aa3ad","s":"🛗","meta":{ "rot":0, "solid":false } }
 
 // an exit waypoint (object slot) — crossing an unlocked door on this tile
 // fires engineOnExitReached (used to end a tutorial lesson / advance the flow)

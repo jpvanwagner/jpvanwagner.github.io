@@ -120,6 +120,7 @@ window.BrowserTabs = {
         // The window's existing iframe becomes tab 1
         const tabId = 't' + (++this.count);
         frame.dataset.tab = tabId;
+        frame.allow = 'fullscreen; autoplay; clipboard-write'; frame.allowFullscreen = true;   // so pages' own full screen (e.g. sample courses) works
         frame.removeAttribute('onload');
         frame.addEventListener('load', () => this.onFrameLoad(instId, tabId));
         inst.tabs = [{ id: tabId, frame, history: inst.history, historyIndex: inst.historyIndex, title: 'Loading...' }];

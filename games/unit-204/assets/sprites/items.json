@@ -1,0 +1,953 @@
+{
+ "frames": [
+  {
+   "filename": "sock",
+   "frame": {
+    "x": 1,
+    "y": 1,
+    "w": 12,
+    "h": 8
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 8
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 8
+   },
+   "duration": 100
+  },
+  {
+   "filename": "hanger",
+   "frame": {
+    "x": 14,
+    "y": 1,
+    "w": 14,
+    "h": 8
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 14,
+    "h": 8
+   },
+   "sourceSize": {
+    "w": 14,
+    "h": 8
+   },
+   "duration": 100
+  },
+  {
+   "filename": "menu",
+   "frame": {
+    "x": 29,
+    "y": 1,
+    "w": 12,
+    "h": 8
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 8
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 8
+   },
+   "duration": 100
+  },
+  {
+   "filename": "cd",
+   "frame": {
+    "x": 42,
+    "y": 1,
+    "w": 12,
+    "h": 7
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 7
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 7
+   },
+   "duration": 100
+  },
+  {
+   "filename": "phonebook",
+   "frame": {
+    "x": 55,
+    "y": 1,
+    "w": 12,
+    "h": 7
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 7
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 7
+   },
+   "duration": 100
+  },
+  {
+   "filename": "pizza",
+   "frame": {
+    "x": 68,
+    "y": 1,
+    "w": 14,
+    "h": 8
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 14,
+    "h": 8
+   },
+   "sourceSize": {
+    "w": 14,
+    "h": 8
+   },
+   "duration": 100
+  },
+  {
+   "filename": "flipflop",
+   "frame": {
+    "x": 83,
+    "y": 1,
+    "w": 12,
+    "h": 7
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 7
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 7
+   },
+   "duration": 100
+  },
+  {
+   "filename": "dust",
+   "frame": {
+    "x": 96,
+    "y": 1,
+    "w": 12,
+    "h": 6
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 6
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 6
+   },
+   "duration": 100
+  },
+  {
+   "filename": "brick",
+   "frame": {
+    "x": 109,
+    "y": 1,
+    "w": 10,
+    "h": 6
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 10,
+    "h": 6
+   },
+   "sourceSize": {
+    "w": 10,
+    "h": 6
+   },
+   "duration": 100
+  },
+  {
+   "filename": "charger",
+   "frame": {
+    "x": 120,
+    "y": 1,
+    "w": 12,
+    "h": 6
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 6
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 6
+   },
+   "duration": 100
+  },
+  {
+   "filename": "catalog",
+   "frame": {
+    "x": 133,
+    "y": 1,
+    "w": 12,
+    "h": 7
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 7
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 7
+   },
+   "duration": 100
+  },
+  {
+   "filename": "coupon",
+   "frame": {
+    "x": 146,
+    "y": 1,
+    "w": 10,
+    "h": 7
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 10,
+    "h": 7
+   },
+   "sourceSize": {
+    "w": 10,
+    "h": 7
+   },
+   "duration": 100
+  },
+  {
+   "filename": "dvd",
+   "frame": {
+    "x": 157,
+    "y": 1,
+    "w": 10,
+    "h": 7
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 10,
+    "h": 7
+   },
+   "sourceSize": {
+    "w": 10,
+    "h": 7
+   },
+   "duration": 100
+  },
+  {
+   "filename": "envelope",
+   "frame": {
+    "x": 168,
+    "y": 1,
+    "w": 12,
+    "h": 6
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 6
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 6
+   },
+   "duration": 100
+  },
+  {
+   "filename": "tape",
+   "frame": {
+    "x": 181,
+    "y": 1,
+    "w": 12,
+    "h": 6
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 6
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 6
+   },
+   "duration": 100
+  },
+  {
+   "filename": "soysauce",
+   "frame": {
+    "x": 194,
+    "y": 1,
+    "w": 7,
+    "h": 5
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 7,
+    "h": 5
+   },
+   "sourceSize": {
+    "w": 7,
+    "h": 5
+   },
+   "duration": 100
+  },
+  {
+   "filename": "bakingsoda",
+   "frame": {
+    "x": 202,
+    "y": 1,
+    "w": 7,
+    "h": 7
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 7,
+    "h": 7
+   },
+   "sourceSize": {
+    "w": 7,
+    "h": 7
+   },
+   "duration": 100
+  },
+  {
+   "filename": "pickles",
+   "frame": {
+    "x": 210,
+    "y": 1,
+    "w": 7,
+    "h": 8
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 7,
+    "h": 8
+   },
+   "sourceSize": {
+    "w": 7,
+    "h": 8
+   },
+   "duration": 100
+  },
+  {
+   "filename": "fishstick",
+   "frame": {
+    "x": 218,
+    "y": 1,
+    "w": 13,
+    "h": 5
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 13,
+    "h": 5
+   },
+   "sourceSize": {
+    "w": 13,
+    "h": 5
+   },
+   "duration": 100
+  },
+  {
+   "filename": "stapler",
+   "frame": {
+    "x": 232,
+    "y": 1,
+    "w": 11,
+    "h": 5
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 11,
+    "h": 5
+   },
+   "sourceSize": {
+    "w": 11,
+    "h": 5
+   },
+   "duration": 100
+  },
+  {
+   "filename": "mug",
+   "frame": {
+    "x": 244,
+    "y": 1,
+    "w": 9,
+    "h": 6
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 9,
+    "h": 6
+   },
+   "sourceSize": {
+    "w": 9,
+    "h": 6
+   },
+   "duration": 100
+  },
+  {
+   "filename": "chopsticks",
+   "frame": {
+    "x": 254,
+    "y": 1,
+    "w": 12,
+    "h": 5
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 5
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 5
+   },
+   "duration": 100
+  },
+  {
+   "filename": "mousetrap",
+   "frame": {
+    "x": 267,
+    "y": 1,
+    "w": 12,
+    "h": 5
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 5
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 5
+   },
+   "duration": 100
+  },
+  {
+   "filename": "soap",
+   "frame": {
+    "x": 280,
+    "y": 1,
+    "w": 8,
+    "h": 4
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 8,
+    "h": 4
+   },
+   "sourceSize": {
+    "w": 8,
+    "h": 4
+   },
+   "duration": 100
+  },
+  {
+   "filename": "shampoo",
+   "frame": {
+    "x": 289,
+    "y": 1,
+    "w": 5,
+    "h": 7
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 5,
+    "h": 7
+   },
+   "sourceSize": {
+    "w": 5,
+    "h": 7
+   },
+   "duration": 100
+  },
+  {
+   "filename": "burgerphone",
+   "frame": {
+    "x": 295,
+    "y": 1,
+    "w": 11,
+    "h": 7
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 11,
+    "h": 7
+   },
+   "sourceSize": {
+    "w": 11,
+    "h": 7
+   },
+   "duration": 100
+  },
+  {
+   "filename": "vhs",
+   "frame": {
+    "x": 307,
+    "y": 1,
+    "w": 12,
+    "h": 7
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 7
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 7
+   },
+   "duration": 100
+  },
+  {
+   "filename": "waffles",
+   "frame": {
+    "x": 320,
+    "y": 1,
+    "w": 10,
+    "h": 6
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 10,
+    "h": 6
+   },
+   "sourceSize": {
+    "w": 10,
+    "h": 6
+   },
+   "duration": 100
+  },
+  {
+   "filename": "icetray",
+   "frame": {
+    "x": 331,
+    "y": 1,
+    "w": 12,
+    "h": 4
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 4
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 4
+   },
+   "duration": 100
+  },
+  {
+   "filename": "spoon",
+   "frame": {
+    "x": 344,
+    "y": 1,
+    "w": 12,
+    "h": 4
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 4
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 4
+   },
+   "duration": 100
+  },
+  {
+   "filename": "tie",
+   "frame": {
+    "x": 357,
+    "y": 1,
+    "w": 9,
+    "h": 21
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 9,
+    "h": 21
+   },
+   "sourceSize": {
+    "w": 9,
+    "h": 21
+   },
+   "duration": 100
+  },
+  {
+   "filename": "tie small",
+   "frame": {
+    "x": 367,
+    "y": 1,
+    "w": 5,
+    "h": 13
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 5,
+    "h": 13
+   },
+   "sourceSize": {
+    "w": 5,
+    "h": 13
+   },
+   "duration": 100
+  }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.3",
+  "image": "items.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 373,
+   "h": 23
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "sock",
+    "from": 0,
+    "to": 0,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "hanger",
+    "from": 1,
+    "to": 1,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "menu",
+    "from": 2,
+    "to": 2,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "cd",
+    "from": 3,
+    "to": 3,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "phonebook",
+    "from": 4,
+    "to": 4,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "pizza",
+    "from": 5,
+    "to": 5,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "flipflop",
+    "from": 6,
+    "to": 6,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "dust",
+    "from": 7,
+    "to": 7,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "brick",
+    "from": 8,
+    "to": 8,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "charger",
+    "from": 9,
+    "to": 9,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "catalog",
+    "from": 10,
+    "to": 10,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "coupon",
+    "from": 11,
+    "to": 11,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "dvd",
+    "from": 12,
+    "to": 12,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "envelope",
+    "from": 13,
+    "to": 13,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "tape",
+    "from": 14,
+    "to": 14,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "soysauce",
+    "from": 15,
+    "to": 15,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "bakingsoda",
+    "from": 16,
+    "to": 16,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "pickles",
+    "from": 17,
+    "to": 17,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "fishstick",
+    "from": 18,
+    "to": 18,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "stapler",
+    "from": 19,
+    "to": 19,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "mug",
+    "from": 20,
+    "to": 20,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "chopsticks",
+    "from": 21,
+    "to": 21,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "mousetrap",
+    "from": 22,
+    "to": 22,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "soap",
+    "from": 23,
+    "to": 23,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "shampoo",
+    "from": 24,
+    "to": 24,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "burgerphone",
+    "from": 25,
+    "to": 25,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "vhs",
+    "from": 26,
+    "to": 26,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "waffles",
+    "from": 27,
+    "to": 27,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "icetray",
+    "from": 28,
+    "to": 28,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "spoon",
+    "from": 29,
+    "to": 29,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "tie",
+    "from": 30,
+    "to": 30,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "tie small",
+    "from": 31,
+    "to": 31,
+    "direction": "forward",
+    "color": "#000000ff"
+   }
+  ],
+  "layers": [
+   {
+    "name": "Layer 1",
+    "opacity": 255,
+    "blendMode": "normal"
+   }
+  ],
+  "slices": []
+ }
+}

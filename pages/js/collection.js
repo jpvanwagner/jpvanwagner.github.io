@@ -11,8 +11,9 @@
  * is filled with every card from the matching section of projects.html, so the cards only ever
  * live in ONE place: add a new card on the Portfolio page and it shows up everywhere (Home too,
  * via js/showcase.js). If projects.html can't be read, the fallback link inside the grid stays.
- * data-collection-extra="page.html#card-id" also adds one card from another page at the end
- * (games.html uses it for the Midnight at the Multiplex card on my-projects.html).
+ * data-collection-extra="page.html#card-id" also adds cards from other pages at the end, in order
+ * (several, separated by spaces; games.html uses it for the Restaurant Rush and Midnight at the
+ * Multiplex cards on my-projects.html).
  */
 (function () {
     function shuffle(list) {
@@ -75,15 +76,21 @@
     }
 
     function fillFromPortfolio(grid) {
-        const [extraPage, extraId] = (grid.dataset.collectionExtra || '').split('#');
+        // "page.html#id page.html#id2 ..." -> [[page, id], ...]; each page is fetched only once
+        const extras = (grid.dataset.collectionExtra || '').split(/\s+/).filter(Boolean)
+            .map(ref => ref.split('#')).filter(([page, id]) => page && id);
+        const pages = [...new Set(extras.map(([page]) => page))];
         Promise.all([
             fetchDoc('projects.html'),
-            extraPage && extraId ? fetchDoc(extraPage).catch(() => null) : Promise.resolve(null)
-        ]).then(([doc, extraDoc]) => {
+            Promise.all(pages.map(page => fetchDoc(page).catch(() => null)))
+        ]).then(([doc, extraDocs]) => {
             const sec = doc.getElementById(grid.dataset.collectionSource);
             const cards = sec ? [...sec.querySelectorAll('article.card')] : [];
-            const extra = extraDoc && extraDoc.getElementById(extraId);
-            if (extra) { extra.removeAttribute('id'); cards.push(extra); }
+            extras.forEach(([page, id]) => {
+                const extraDoc = extraDocs[pages.indexOf(page)];
+                const extra = extraDoc && extraDoc.getElementById(id);
+                if (extra) { extra.removeAttribute('id'); cards.push(extra); }
+            });
             if (!cards.length) return;
             grid.replaceChildren(...cards.map(c => document.importNode(c, true)));
             const count = document.querySelector('[data-collection-count]');

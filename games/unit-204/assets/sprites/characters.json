@@ -1,0 +1,1083 @@
+{
+ "frames": [
+  {
+   "filename": "you idle 0",
+   "frame": {
+    "x": 1,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 1100
+  },
+  {
+   "filename": "you idle 1",
+   "frame": {
+    "x": 50,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 1100
+  },
+  {
+   "filename": "you blink",
+   "frame": {
+    "x": 99,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 130
+  },
+  {
+   "filename": "you talk 0",
+   "frame": {
+    "x": 148,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 125
+  },
+  {
+   "filename": "you talk 1",
+   "frame": {
+    "x": 197,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 125
+  },
+  {
+   "filename": "you walk 0",
+   "frame": {
+    "x": 246,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "you walk 1",
+   "frame": {
+    "x": 295,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "you walk 2",
+   "frame": {
+    "x": 344,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "you walk 3",
+   "frame": {
+    "x": 393,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "you walk 4",
+   "frame": {
+    "x": 442,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "you walk 5",
+   "frame": {
+    "x": 491,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "you walk 6",
+   "frame": {
+    "x": 540,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "you walk 7",
+   "frame": {
+    "x": 589,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "you clip",
+   "frame": {
+    "x": 638,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 100
+  },
+  {
+   "filename": "dana idle 0",
+   "frame": {
+    "x": 687,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 1100
+  },
+  {
+   "filename": "dana idle 1",
+   "frame": {
+    "x": 736,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 1100
+  },
+  {
+   "filename": "dana blink",
+   "frame": {
+    "x": 785,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 130
+  },
+  {
+   "filename": "dana talk 0",
+   "frame": {
+    "x": 834,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 125
+  },
+  {
+   "filename": "dana talk 1",
+   "frame": {
+    "x": 883,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 125
+  },
+  {
+   "filename": "dana walk 0",
+   "frame": {
+    "x": 932,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "dana walk 1",
+   "frame": {
+    "x": 981,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "dana walk 2",
+   "frame": {
+    "x": 1030,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "dana walk 3",
+   "frame": {
+    "x": 1079,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "dana walk 4",
+   "frame": {
+    "x": 1128,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "dana walk 5",
+   "frame": {
+    "x": 1177,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "dana walk 6",
+   "frame": {
+    "x": 1226,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "dana walk 7",
+   "frame": {
+    "x": 1275,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "dana phone",
+   "frame": {
+    "x": 1324,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 100
+  },
+  {
+   "filename": "dana point",
+   "frame": {
+    "x": 1373,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 100
+  },
+  {
+   "filename": "dana pointUp",
+   "frame": {
+    "x": 1422,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 100
+  },
+  {
+   "filename": "mgr idle 0",
+   "frame": {
+    "x": 1471,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 1100
+  },
+  {
+   "filename": "mgr idle 1",
+   "frame": {
+    "x": 1520,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 1100
+  },
+  {
+   "filename": "mgr blink",
+   "frame": {
+    "x": 1569,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 130
+  },
+  {
+   "filename": "mgr talk 0",
+   "frame": {
+    "x": 1618,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 125
+  },
+  {
+   "filename": "mgr talk 1",
+   "frame": {
+    "x": 1667,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 125
+  },
+  {
+   "filename": "mgr walk 0",
+   "frame": {
+    "x": 1716,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "mgr walk 1",
+   "frame": {
+    "x": 1765,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "mgr walk 2",
+   "frame": {
+    "x": 1814,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "mgr walk 3",
+   "frame": {
+    "x": 1863,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "mgr walk 4",
+   "frame": {
+    "x": 1912,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "mgr walk 5",
+   "frame": {
+    "x": 1961,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "mgr walk 6",
+   "frame": {
+    "x": 2010,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  },
+  {
+   "filename": "mgr walk 7",
+   "frame": {
+    "x": 2059,
+    "y": 1,
+    "w": 48,
+    "h": 70
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 70
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 70
+   },
+   "duration": 90
+  }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.3",
+  "image": "characters.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 2108,
+   "h": 72
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "you idle",
+    "from": 0,
+    "to": 1,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "you blink",
+    "from": 2,
+    "to": 2,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "you talk",
+    "from": 3,
+    "to": 4,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "you walk",
+    "from": 5,
+    "to": 12,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "you clip",
+    "from": 13,
+    "to": 13,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "dana idle",
+    "from": 14,
+    "to": 15,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "dana blink",
+    "from": 16,
+    "to": 16,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "dana talk",
+    "from": 17,
+    "to": 18,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "dana walk",
+    "from": 19,
+    "to": 26,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "dana phone",
+    "from": 27,
+    "to": 27,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "dana point",
+    "from": 28,
+    "to": 28,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "dana pointUp",
+    "from": 29,
+    "to": 29,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "mgr idle",
+    "from": 30,
+    "to": 31,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "mgr blink",
+    "from": 32,
+    "to": 32,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "mgr talk",
+    "from": 33,
+    "to": 34,
+    "direction": "forward",
+    "color": "#000000ff"
+   },
+   {
+    "name": "mgr walk",
+    "from": 35,
+    "to": 42,
+    "direction": "forward",
+    "color": "#000000ff"
+   }
+  ],
+  "layers": [
+   {
+    "name": "Layer 1",
+    "opacity": 255,
+    "blendMode": "normal"
+   }
+  ],
+  "slices": []
+ }
+}

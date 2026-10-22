@@ -60,12 +60,15 @@ window.SiteConfig = {
     // own window at this size; Traditional View has a page for each (pages/project-game-<id>.html).
     // thumb = the picture in the desktop's Games folder. A short looping clip for the folder's preview
     // pane goes in images/previews/<id>.webm + .mp4 + .jpg (poster); none = the thumb is shown instead.
+    // kind = what the desktop folders call it (left out = 'Learning game').
     games: [
         { id: 'mall-run',    label: 'Mall Run',    width: 900, height: 620, tip: 'Endless 3D runner quiz', thumb: 'images/games/mall-run-v2.jpg' },
         { id: 'quiz-guy',    label: 'Quiz-Guy',    width: 640, height: 700, tip: 'Maze-chase quiz', thumb: 'images/games/quiz-guy-v2.jpg' },
         { id: 'quizaga',     label: 'Quizaga',     width: 640, height: 860, tip: 'Space-shooter quiz', thumb: 'images/games/quizaga-v2.jpg' },
         { id: 'quizcavator', label: 'Quizcavator', width: 640, height: 860, tip: 'Digging quiz', thumb: 'images/games/quizcavator-v2.jpg' },
-        { id: 'right-this-way', label: 'Right This Way, Please', width: 1180, height: 760, tip: 'Access-desk security game', thumb: 'images/games/right-this-way.jpg' },
+        { id: 'beyond-the-stacks', label: 'Beyond The Stacks', ownControls: true, width: 1280, height: 800, tip: 'A library programming job simulator (early development)', thumb: 'images/games/beyond-the-stacks.jpg' },
+        { id: 'restaurant-rush', label: "Mama Maggie's Restaurant Rush", ownControls: true, width: 1180, height: 760, tip: 'Run a family trattoria through lunch and dinner', thumb: 'images/games/restaurant-rush.jpg', kind: 'Game' },
+        { id: 'right-this-way', label: 'Right This Way, Please!', width: 1180, height: 760, tip: 'Access-desk security game', thumb: 'images/games/right-this-way.jpg' },
         { id: 'unit-204',    label: 'Unit 204',    width: 960, height: 572, tip: 'Point-and-click inspections and safety walks', thumb: 'images/games/unit-204.jpg', ownControls: true }   // has its own full screen and sound settings
     ],
 

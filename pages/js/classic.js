@@ -86,6 +86,8 @@
         document.querySelectorAll('[data-year]').forEach(function (el) {
             el.textContent = firstYear < nowYear ? firstYear + '\u2013' + nowYear : String(nowYear);
         });
+        // Ongoing date ranges ("2013 to <this year>"): <span data-this-year> always shows the current year
+        document.querySelectorAll('[data-this-year]').forEach(function (el) { el.textContent = String(nowYear); });
         // "Years of experience" numbers: <span data-years-since="2011-06"> shows whole years since
         // that month, so the count goes up by itself every June
         var now = new Date();
@@ -101,6 +103,53 @@
         // Inside the Retro Desktop: tell NetCrawler this page's title and address. The desktop
         // can't always read them itself (browsers block that when the site is opened from a
         // folder via file://), so the page reports them. See desktop/js/apps/browser-tabs.js.
+        // Sample courses: "Open the course full screen" (and the note's "full-screen version" link) put the
+        // embedded course into REAL full screen, in both views, with an Exit button and Esc to come back.
+        // Devices without full screen for page elements (iPhones) open the course in a real browser tab instead.
+        // Works on any page with a plain .course-frame iframe; game/tool demos (data-demo*) keep their own controls.
+        var courseFrame = document.querySelector('.course-frame');
+        var courseIframe = courseFrame && courseFrame.querySelector('iframe:not([data-demo]):not([data-demo-guard])');
+        if (courseIframe) {
+            var courseUrl = new URL(courseIframe.getAttribute('src'), document.baseURI).href;
+            var fsEl = function () { return document.fullscreenElement || document.webkitFullscreenElement; };
+            var canFs = !!(courseFrame.requestFullscreen || courseFrame.webkitRequestFullscreen) &&
+                        (document.fullscreenEnabled || document.webkitFullscreenEnabled);
+            var exitFs = function () { (document.exitFullscreen || document.webkitExitFullscreen).call(document); };
+            var enterFs = function () {
+                if (!canFs) { window.open(courseUrl, '_blank', 'noopener'); return; }
+                var req = courseFrame.requestFullscreen || courseFrame.webkitRequestFullscreen;
+                var p = req.call(courseFrame);
+                if (p && p.catch) p.catch(function () { window.open(courseUrl, '_blank', 'noopener'); });
+            };
+            // the Exit button only shows while the course fills the screen (see .course-fs-exit in classic.css)
+            var exitBtn = document.createElement('button');
+            exitBtn.type = 'button'; exitBtn.className = 'course-fs-exit';
+            exitBtn.title = 'Leave full screen (or press Esc)';
+            exitBtn.innerHTML = '&#x2715; Exit full screen';
+            exitBtn.addEventListener('click', exitFs);
+            courseFrame.appendChild(exitBtn);
+            var syncFs = function () {
+                var on = fsEl() === courseFrame;
+                courseFrame.classList.toggle('is-fullscreen', on);
+                if (on) { try { courseIframe.contentWindow.focus(); } catch (err) {} }
+            };
+            document.addEventListener('fullscreenchange', syncFs);
+            document.addEventListener('webkitfullscreenchange', syncFs);
+            // runs before the NetCrawler "open in a new tab" handler below, so these links never open a tab
+            document.addEventListener('click', function (e) {
+                var a = e.target.closest && e.target.closest('a[target="_blank"]');
+                if (!a) return;
+                var href;
+                try { href = new URL(a.getAttribute('href'), document.baseURI).href; } catch (err) { return; }
+                if (href !== courseUrl) return;
+                e.preventDefault(); e.stopImmediatePropagation();
+                if (fsEl() === courseFrame) exitFs(); else enterFs();
+            }, true);
+            document.querySelectorAll('a[target="_blank"]').forEach(function (a) {
+                try { if (new URL(a.getAttribute('href'), document.baseURI).href === courseUrl) a.title = 'Fill your whole screen with the course (Esc to exit)'; } catch (err) {}
+            });
+        }
+
         if (framed) {
             var report = function () {
                 try { window.parent.postMessage({ type: 'nc-page', href: location.href, title: document.title,

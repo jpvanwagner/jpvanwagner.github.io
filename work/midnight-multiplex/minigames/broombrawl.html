@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Broom Brawl</title>
+<!-- Load the Win9x theme from the parent directory -->
+<link rel="stylesheet" href="../theme/win9x.css">
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+        color: #fff;
+        font-family: "MS Sans Serif", Tahoma, sans-serif;
+    }
+    #game-container {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+    }
+    #ui-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 100;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 20px;
+    }
+    .win95-win {
+        pointer-events: auto;
+    }
+    /* Top Bar for Scores / Return */
+    #top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    #score-board {
+        font-size: 24px;
+        text-shadow: 2px 2px 0 #000;
+        font-weight: bold;
+    }
+    /* Combat Menu */
+    #combat-menu {
+        align-self: center;
+        width: 400px;
+        text-align: center;
+        display: none;
+    }
+    .combat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .greyed-out {
+        opacity: 0.5;
+        pointer-events: none;
+        text-decoration: line-through;
+    }
+    /* Timer Bar */
+    #timer-track {
+        height: 10px;
+        background: #000;
+        border: 2px solid #808080;
+        border-right-color: #dfdfdf;
+        border-bottom-color: #dfdfdf;
+        margin-bottom: 10px;
+        display: none;
+    }
+    #timer-bar {
+        height: 100%;
+        background: #000080;
+        width: 100%;
+        transition: none;
+    }
+    /* Setup Menu */
+    #setup-menu {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 300px;
+    }
+    #setup-menu select {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+</style>
+</head>
+<body>
+
+<!-- The Arena Map Data for engine.js -->
+<script type="application/json" id="map-data">
+{
+    "name": "Broom Brawl Arena",
+    "settings": {
+        "camMode": "fps",
+        "movementMode": "fixed",
+        "allowWindowDraw": false,
+        "bgMode": "black"
+    },
+    "start": { "x": 2, "z": 4, "f": 0 },
+    "map": [
+        [
+            [{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}}],
+            [{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}}],
+            [{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"},"o":{"v":"npc","meta":{"name":"Rival","cloth":"#5b1a1a","rot":2,"solid":true,"ai":"stand"}}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}}],
+            [{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}}],
+            [{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}},{"f":{"v":"concrete","c":"#222"}}]
+        ]
+    ]
+}
+</script>
+
+<div id="game-container"></div>
+
+<div id="ui-layer">
+    <div id="top-bar">
+        <button class="win95-btn" onclick="exitMinigame()">◀ Return</button>
+        <div id="score-board">
+            <span style="color:#38bdf8">Player: <span id="score-p">0</span></span> | 
+            <span style="color:#f43f5e">Rival: <span id="score-n">0</span></span>
+        </div>
+    </div>
+
+    <!-- Setup Menu -->
+    <div id="setup-menu" class="win95-win">
+        <div class="win95-title">Broom Brawl Setup</div>
+        <div class="win95-body">
+            <label>Color:</label>
+            <select id="opt-color">
+                <option value="blue">Blue</option>
+                <option value="red">Red</option>
+            </select>
+            
+            <label>Format:</label>
+            <select id="opt-format">
+                <option value="3">Best of 3</option>
+                <option value="5">Best of 5</option>
+            </select>
+
+            <label>Pacing:</label>
+            <select id="opt-pacing">
+                <option value="atb">Active Time (Timer)</option>
+                <option value="turn">Turn-Based (Infinite)</option>
+            </select>
+
+            <button class="win95-btn" style="width:100%" onclick="Brawl.startMatch()">FIGHT!</button>
+        </div>
+    </div>
+
+    <!-- Combat Menu -->
+    <div id="combat-menu" class="win95-win">
+        <div class="win95-title">Your Move</div>
+        <div class="win95-body">
+            <div id="timer-track"><div id="timer-bar"></div></div>
+            <div id="menu-step-1" class="combat-grid">
+                <button class="win95-btn" id="btn-strike" onclick="Brawl.selectAction('strike')">Strike</button>
+                <button class="win95-btn" id="btn-block" onclick="Brawl.selectAction('block')">Block</button>
+                <button class="win95-btn" id="btn-parry" onclick="Brawl.selectAction('parry')">Parry</button>
+                <button class="win95-btn" id="btn-dodge" onclick="Brawl.selectAction('dodge')">Dodge</button>
+            </div>
+            <div id="menu-step-2" class="combat-grid" style="display:none;">
+                <button class="win95-btn" onclick="Brawl.commitAction('high')">High</button>
+                <button class="win95-btn" onclick="Brawl.commitAction('mid')">Mid</button>
+                <button class="win95-btn" onclick="Brawl.commitAction('low')">Low</button>
+                <button class="win95-btn" onclick="Brawl.backToStep1()">Back</button>
+            </div>
+            <div id="menu-step-dodge" class="combat-grid" style="display:none;">
+                <button class="win95-btn" onclick="Brawl.commitAction('left')">Left</button>
+                <button class="win95-btn" onclick="Brawl.commitAction('back')">Back</button>
+                <button class="win95-btn" onclick="Brawl.commitAction('right')">Right</button>
+                <button class="win95-btn" onclick="Brawl.backToStep1()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Core Engine Dependencies -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="../core/cameraControls.js"></script>
+<script src="../core/display.js"></script>
+<script src="../core/engine.js"></script>
+
+<script>
+function exitMinigame() {
+    if (window.parent && typeof window.parent.closeMinigame === 'function') {
+        window.parent.closeMinigame();
+    } else {
+        window.history.back();
+    }
+}
+
+// Custom Audio Synth for Brooms & Sabers
+const AudioFX = {
+    ctx: null,
+    humOsc: null,
+    init() {
+        if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+    },
+    clack() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+        osc.connect(gain).connect(this.ctx.destination);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.1);
+    },
+    saberClash() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(200, this.ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+        osc.connect(gain).connect(this.ctx.destination);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+    },
+    saberSwing() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(250, this.ctx.currentTime + 0.2);
+        osc.frequency.linearRampToValueAtTime(150, this.ctx.currentTime + 0.4);
+        gain.gain.setValueAtTime(0.01, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.3, this.ctx.currentTime + 0.2);
+        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
+        osc.connect(gain).connect(this.ctx.destination);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.4);
+    },
+    toggleHum(on) {
+        this.init();
+        if (on && !this.humOsc) {
+            this.humOsc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            this.humOsc.type = 'sawtooth';
+            this.humOsc.frequency.value = 60;
+            gain.gain.value = 0.05;
+            this.humOsc.connect(gain).connect(this.ctx.destination);
+            this.humOsc.start();
+        } else if (!on && this.humOsc) {
+            this.humOsc.stop();
+            this.humOsc = null;
+        }
+    }
+};
+
+const Brawl = {
+    secretActive: false,
+    playerScore: 0,
+    npcScore: 0,
+    targetScore: 3,
+    useATB: false,
+    timer: 0,
+    timerDuration: 3.5, // seconds to react
+    rafId: null,
+    
+    // Viewmodels & Rigs
+    playerWeapon: null,
+    npc: null,
+    npcWeapon: null,
+
+    // State
+    state: 'setup', // setup, windup, resolution, gameover
+    isOffBalance: false,
+    currentAction: '',
+    
+    // Animations
+    animData: {
+        player: { tx: 0.3, ty: -0.4, tz: -0.6, rx: -Math.PI/4, rz: 0 },
+        camera: { px: 0, pz: 0, rx: 0, rz: 0 }
+    },
+
+    init() {
+        // Wait for engine to build the map
+        const checkReady = setInterval(() => {
+            if (window.__midmultiEngineStarted && typeof scene !== 'undefined') {
+                clearInterval(checkReady);
+                this.setupSecretListener();
+            }
+        }, 100);
+    },
+
+    setupSecretListener() {
+        let typed = "";
+        document.addEventListener('keydown', (e) => {
+            if(e.key.length === 1) typed += e.key.toLowerCase();
+            if(typed.length > 20) typed = typed.slice(-20);
+            if(typed.includes("lightsaber") && !this.secretActive) {
+                this.secretActive = true;
+                this.updateWeaponMaterials();
+                AudioFX.toggleHum(true);
+            }
+        });
+    },
+
+    startMatch() {
+        // Parse settings
+        const pCol = document.getElementById('opt-color').value;
+        const nCol = pCol === 'blue' ? 'red' : 'blue';
+        this.targetScore = parseInt(document.getElementById('opt-format').value, 10);
+        this.useATB = document.getElementById('opt-pacing').value === 'atb';
+
+        document.getElementById('setup-menu').style.display = 'none';
+
+        // Find NPC
+        this.npc = npcs[0]; // Assuming only 1 NPC in the arena
+
+        // Build Weapons
+        const geo = new THREE.CylinderGeometry(0.02, 0.02, 1.2, 8);
+        this.playerWeapon = new THREE.Mesh(geo, this.getWeaponMat(pCol));
+        this.npcWeapon = new THREE.Mesh(geo, this.getWeaponMat(nCol));
+
+        // Attach player weapon to FPS camera
+        const cam = camManager.perspCamera;
+        cam.add(this.playerWeapon);
+        scene.add(cam); // Ensure camera is in scene graph to render children
+
+        // Attach NPC weapon to their right arm
+        const npcArm = this.npc.m.userData.limbs.armR;
+        this.npcWeapon.position.set(0, -0.4, 0);
+        npcArm.add(this.npcWeapon);
+
+        if(this.secretActive) this.updateWeaponMaterials();
+
+        this.playerScore = 0;
+        this.npcScore = 0;
+        this.updateScoreboard();
+
+        // Lock camera so player can't look away
+        window.__worldPaused = true; 
+
+        // Start animation loop override
+        this.customAnimLoop();
+
+        setTimeout(() => this.startTurn(), 1000);
+    },
+
+    getWeaponMat(colorId) {
+        const hex = colorId === 'blue' ? 0x22d3ee : 0xf43f5e;
+        if(this.secretActive) {
+            return new THREE.MeshBasicMaterial({ color: hex });
+        }
+        return new THREE.MeshLambertMaterial({ color: hex });
+    },
+
+    updateWeaponMaterials() {
+        if(!this.playerWeapon || !this.npcWeapon) return;
+        
+        const pCol = document.getElementById('opt-color').value;
+        const nCol = pCol === 'blue' ? 'red' : 'blue';
+        const pHex = pCol === 'blue' ? '#22d3ee' : '#f43f5e';
+        const nHex = nCol === 'blue' ? '#22d3ee' : '#f43f5e';
+
+        this.playerWeapon.material = this.getWeaponMat(pCol);
+        this.npcWeapon.material = this.getWeaponMat(nCol);
+
+        // Add glow halos
+        if(typeof addNeonHalo !== 'undefined') {
+            addNeonHalo(this.playerWeapon, pHex, 0.8);
+            addNeonHalo(this.npcWeapon, nHex, 0.8);
+        }
+    },
+
+    startTurn() {
+        this.state = 'windup';
+        this.currentAction = '';
+        
+        // Decide NPC Move
+        const moves = ['strike', 'block', 'parry'];
+        const targets = ['high', 'mid', 'low'];
+        this.npcAction = moves[Math.floor(Math.random() * moves.length)];
+        this.npcTarget = targets[Math.floor(Math.random() * targets.length)];
+
+        // Pose NPC to telegraph
+        const L = this.npc.m.userData.limbs;
+        L.armR.rotation.set(0,0,0);
+        L.torso.rotation.set(0,0,0);
+
+        if (this.npcAction === 'strike') {
+            if (this.npcTarget === 'high') L.armR.rotation.x = -2.8;
+            if (this.npcTarget === 'mid') L.armR.rotation.x = -1.5;
+            if (this.npcTarget === 'low') { L.torso.rotation.x = -0.4; L.armR.rotation.x = -0.5; }
+        } else if (this.npcAction === 'block') {
+            L.armR.rotation.x = -1.0; L.armR.rotation.z = 0.5;
+        } else if (this.npcAction === 'parry') {
+            L.armR.rotation.x = -1.0; L.armR.rotation.z = -0.5;
+        }
+
+        // Setup Player UI
+        document.getElementById('combat-menu').style.display = 'block';
+        this.backToStep1();
+
+        // Enforce Off-Balance Penalty
+        const btnStrike = document.getElementById('btn-strike');
+        const btnParry = document.getElementById('btn-parry');
+        if (this.isOffBalance) {
+            btnStrike.classList.add('greyed-out');
+            btnParry.classList.add('greyed-out');
+        } else {
+            btnStrike.classList.remove('greyed-out');
+            btnParry.classList.remove('greyed-out');
+        }
+
+        // Start Timer if ATB
+        if (this.useATB) {
+            this.timer = this.timerDuration;
+            document.getElementById('timer-track').style.display = 'block';
+            document.getElementById('timer-bar').style.width = '100%';
+            this.lastTick = Date.now();
+            this.tickTimer();
+        } else {
+            document.getElementById('timer-track').style.display = 'none';
+        }
+    },
+
+    tickTimer() {
+        if (this.state !== 'windup' || !this.useATB) return;
+        const now = Date.now();
+        const dt = (now - this.lastTick) / 1000;
+        this.lastTick = now;
+        
+        this.timer -= dt;
+        const pct = Math.max(0, (this.timer / this.timerDuration) * 100);
+        document.getElementById('timer-bar').style.width = pct + '%';
+
+        if (this.timer <= 0) {
+            this.currentAction = 'idle';
+            this.commitAction('none');
+        } else {
+            requestAnimationFrame(() => this.tickTimer());
+        }
+    },
+
+    selectAction(act) {
+        if(this.isOffBalance && (act === 'strike' || act === 'parry')) return;
+        this.currentAction = act;
+        document.getElementById('menu-step-1').style.display = 'none';
+        if(act === 'dodge') {
+            document.getElementById('menu-step-dodge').style.display = 'grid';
+        } else {
+            document.getElementById('menu-step-2').style.display = 'grid';
+        }
+    },
+
+    backToStep1() {
+        document.getElementById('menu-step-1').style.display = 'grid';
+        document.getElementById('menu-step-2').style.display = 'none';
+        document.getElementById('menu-step-dodge').style.display = 'none';
+    },
+
+    commitAction(target) {
+        this.state = 'resolution';
+        document.getElementById('combat-menu').style.display = 'none';
+        this.playerTarget = target;
+        this.resolveClash();
+    },
+
+    resolveClash() {
+        let outcome = '';
+        const pa = this.currentAction, pt = this.playerTarget;
+        const na = this.npcAction, nt = this.npcTarget;
+
+        if (pa === 'strike') {
+            if (na === 'strike') {
+                outcome = 'Double Hit!'; this.playerScore++; this.npcScore++;
+            } else if (na === 'block' && nt === pt) {
+                outcome = 'Blocked!';
+            } else if (na === 'parry' && nt === pt) {
+                outcome = 'Parried!'; this.isOffBalance = true;
+            } else {
+                outcome = 'Hit!'; this.playerScore++;
+            }
+        } else if (pa === 'block') {
+            if (na === 'strike') {
+                outcome = (nt === pt) ? 'Blocked!' : 'Hit by Rival!';
+                if (nt !== pt) this.npcScore++;
+            } else {
+                outcome = 'Standoff';
+            }
+        } else if (pa === 'parry') {
+            if (na === 'strike') {
+                if (nt === pt) { outcome = 'Perfect Parry!'; this.playerScore++; } // Award point for perfect parry to speed up game
+                else { outcome = 'Hit by Rival!'; this.npcScore++; }
+            } else {
+                outcome = 'Whiffed Parry...';
+            }
+        } else if (pa === 'dodge') {
+            if (na === 'strike') {
+                // Simplistic dodge logic: back dodges low, left/right dodge high/mid
+                let evaded = false;
+                if(pt === 'back' && nt === 'low') evaded = true;
+                if((pt === 'left' || pt === 'right') && (nt === 'high' || nt === 'mid')) evaded = true;
+                
+                if (evaded) { outcome = 'Evaded!'; }
+                else { outcome = 'Hit by Rival!'; this.npcScore++; }
+            } else {
+                outcome = 'Dodge...';
+            }
+        } else {
+            // Idle (timeout)
+            if (na === 'strike') { outcome = 'Hit by Rival!'; this.npcScore++; }
+            else { outcome = 'Nothing happens.'; }
+        }
+
+        // Animate
+        this.playCombatAnim(pa, pt, na, nt, outcome);
+    },
+
+    playCombatAnim(pa, pt, na, nt, outcome) {
+        // Reset flags if not parried this turn
+        if (outcome !== 'Parried!') this.isOffBalance = false;
+
+        // Sound
+        if(outcome.includes('Hit') || outcome.includes('Double')) {
+            this.secretActive ? AudioFX.saberSwing() : playSnd('error');
+        } else if (outcome.includes('Block') || outcome.includes('Parry')) {
+            this.secretActive ? AudioFX.saberClash() : AudioFX.clack();
+        }
+
+        // Animate Player Weapon
+        if (pa === 'strike') {
+            this.animData.player.rx = -Math.PI/2; // Thrust forward
+        } else if (pa === 'block' || pa === 'parry') {
+            this.animData.player.rz = Math.PI/2; // Hold horizontal
+            this.animData.player.tx = 0;
+        } else if (pa === 'dodge') {
+            if (pt === 'left') this.animData.camera.rx = -0.2;
+            if (pt === 'right') this.animData.camera.rx = 0.2;
+            if (pt === 'back') this.animData.camera.px = -0.5;
+        }
+
+        // Animate NPC swing (if striking)
+        if (na === 'strike') {
+            this.npc.m.userData.limbs.armR.rotation.x = 0; // Swing down
+        }
+
+        this.updateScoreboard();
+        if(typeof showMsg !== 'undefined') showMsg(outcome);
+
+        // Wait, then reset
+        setTimeout(() => {
+            this.resetPoses();
+            if (this.playerScore >= this.targetScore || this.npcScore >= this.targetScore) {
+                this.endMatch();
+            } else {
+                this.startTurn();
+            }
+        }, 1500);
+    },
+
+    resetPoses() {
+        this.animData.player.tx = 0.3;
+        this.animData.player.ty = this.isOffBalance ? -1.0 : -0.4; // Drop if off balance
+        this.animData.player.tz = -0.6;
+        this.animData.player.rx = -Math.PI/4;
+        this.animData.player.rz = 0;
+
+        this.animData.camera.px = 0;
+        this.animData.camera.pz = 0;
+        this.animData.camera.rx = 0;
+        
+        this.npc.m.userData.limbs.armR.rotation.set(0,0,0);
+        this.npc.m.userData.limbs.torso.rotation.set(0,0,0);
+    },
+
+    updateScoreboard() {
+        document.getElementById('score-p').innerText = this.playerScore;
+        document.getElementById('score-n').innerText = this.npcScore;
+    },
+
+    endMatch() {
+        this.state = 'gameover';
+        let msg = "DRAW!";
+        if (this.playerScore > this.npcScore) msg = "YOU WIN!";
+        else if (this.npcScore > this.playerScore) msg = "YOU LOSE!";
+        
+        const menu = document.getElementById('setup-menu');
+        menu.innerHTML = `<div class="win95-title">Match Over</div><div class="win95-body" style="text-align:center"><h1>${msg}</h1><button class="win95-btn" onclick="exitMinigame()">Leave Arena</button></div>`;
+        menu.style.display = 'block';
+    },
+
+    customAnimLoop() {
+        // Runs alongside the engine to lerp our custom viewmodel & camera wobbles
+        if (this.state !== 'gameover') requestAnimationFrame(() => this.customAnimLoop());
+
+        if (this.playerWeapon) {
+            const p = this.playerWeapon;
+            const ad = this.animData.player;
+            p.position.lerp(new THREE.Vector3(ad.tx, ad.ty, ad.tz), 0.1);
+            p.rotation.x += (ad.rx - p.rotation.x) * 0.1;
+            p.rotation.z += (ad.rz - p.rotation.z) * 0.1;
+        }
+
+        if (camManager && camManager.perspCamera) {
+            const cam = camManager.perspCamera;
+            const ac = this.animData.camera;
+            
+            // Wobble if off balance
+            let wobbleZ = 0;
+            if (this.isOffBalance) {
+                wobbleZ = Math.sin(Date.now() * 0.01) * 0.05;
+            }
+
+            // Lerp dodge offsets (applied on top of base position)
+            cam.position.x += (ac.px - cam.position.x) * 0.1; // simplified relative dodge
+            cam.rotation.z = wobbleZ + (ac.rx * 0.5); // Tilt
+        }
+    }
+};
+
+window.onload = () => { Brawl.init(); };
+</script>
+</body>
+</html>

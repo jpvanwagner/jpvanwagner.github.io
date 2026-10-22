@@ -1,0 +1,85 @@
+{
+      "games": [
+        {
+          "repo": "Nostalginaut/GAME-Right-This-Way-Please-",
+          "dest": "games/right-this-way"
+        },
+        {
+          "repo": "Nostalginaut/GAME-Midnight-at-the-Multiplex",
+          "dest": "work/midnight-multiplex"
+        },
+        {
+          "repo": "Nostalginaut/GAME--Unit-204",
+          "dest": "games/unit-204"
+        },
+        {
+          "repo": "Nostalginaut/GAME-Mall-Run",
+          "dest": "games/mall-run"
+        },
+        {
+          "repo": "Nostalginaut/GAME-PeeDee-s-Dental-Defense",
+          "dest": "work/peedee"
+        },
+        {
+          "repo": "Nostalginaut/GAME--Beyond-The-Stacks",
+          "dest": "games/beyond-the-stacks"
+        },
+        {
+          "repo": "Nostalginaut/GAME--Restaurant-Rush",
+          "dest": "games/restaurant-rush" 
+        },
+        {
+          "repo": "Nostalginaut/GAME-Quizcade-Suite",
+          "dest": "games" 
+        }
+      ],
+      "tools": [
+        {
+          "repo": "Nostalginaut/TOOL--Mapster",
+          "dest": "work/mapster"
+        },
+        {
+          "repo": "Nostalginaut/TOOL--Atlasworks",
+          "dest": "work/atlasworks"
+        },
+        {
+          "repo": "Nostalginaut/TOOL-Scenemaker",
+          "dest": "work/scenemaker"
+        },
+        {
+          "repo": "Nostalginaut/TOOL--Vinyasa",
+          "dest": "work/vinyasa",
+          "files": {
+            "portfolio/index.html": "index.html",
+            "assets/fonts/Nunito-Regular.ttf": "fonts/Nunito-Regular.ttf",
+            "assets/fonts/Nunito-Bold.ttf": "fonts/Nunito-Bold.ttf"
+          }
+        },
+        {
+          "repo": "Nostalginaut/TOOL--ZenTabs",
+          "dest": "work/zentabs",
+          "files": {
+            "portfolio/index.html": "index.html",
+            "assets/fonts/Nunito-Regular.ttf": "fonts/Nunito-Regular.ttf",
+            "assets/fonts/Nunito-Bold.ttf": "fonts/Nunito-Bold.ttf"
+          }
+        },
+        {
+          "repo": "Nostalginaut/TOOL-Course-Catalog",
+          "dest": "work/course-catalog",
+          "files": {
+            "portfolio/course-catalog.html": "index.html"
+          }
+        }
+      ],
+      "shared_dependencies": [
+        {
+          "source_repo": "Nostalginaut/GAME-Midnight-at-the-Multiplex",
+          "source_path": "core/engine.js",
+          "destinations": [
+            "work/mapster/core/engine.js",
+            "work/scenemaker/core/engine.js"
+          ]
+        }
+      ]
+    }

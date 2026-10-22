@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#ebe8e1" />
+    <title>Right This Way, Please</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2710%27 cy=%2716%27 r=%276%27 fill=%27%23e28743%27/%3E%3Ccircle cx=%2722%27 cy=%2716%27 r=%275%27 fill=%27none%27 stroke=%27%231f2937%27 stroke-width=%273%27/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- TOP BAR: title, score, multiplier, officers, clock -->
+      <header id="topbar">
+        <div class="brand">
+          <span class="brand-title">Right This Way, Please</span>
+          <span class="brand-sub" id="hud-level"></span>
+        </div>
+        <div class="hud-stats">
+          <div class="stat stat-score"><span class="stat-label">Score</span><span class="stat-value" id="hud-score">0</span></div>
+          <div class="stat" id="hud-mult-wrap" title="Doubles for every unescorted visitor inside"><span class="stat-label"><span class="long">Incident </span>mult.</span><span class="stat-value" id="hud-mult">×1</span></div>
+          <div class="stat"><span class="stat-label">Officers<span class="long"> free</span></span><span class="stat-value" id="hud-officers">0/0</span></div>
+          <div class="stat stat-loose"><span class="stat-label">Inside unescorted</span><span class="stat-value" id="hud-loose">0</span></div>
+          <div class="stat stat-clock" title="Today's date: compare it with the expiry date on staff badges"><span class="stat-label mono" id="hud-date">Today</span><span class="stat-value mono" id="hud-clock">07:00 AM</span></div>
+        </div>
+        <div class="hud-buttons">
+          <div class="speed-group" role="group" aria-label="Game speed">
+            <button class="btn btn-ghost btn-icon speed-btn" data-speed="0.5" title="Half speed (,)" aria-label="Half speed" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 5.5l8.5 6.5L4 18.5z" fill="currentColor"/><text x="13.6" y="19.5" font-size="10" font-weight="800" font-family="Arial, sans-serif" fill="currentColor">½</text></svg></button>
+            <button class="btn btn-ghost btn-icon" id="btn-pause" title="Pause / resume (Space)" aria-label="Pause"><span class="icon icon-pause"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/></svg></span><span class="icon icon-play"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M7 5l12 7-12 7z" fill="currentColor"/></svg></span></button>
+            <button class="btn btn-ghost btn-icon speed-btn" data-speed="2" title="Fast forward, 2× (.)" aria-label="Fast forward" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M3 6l8 6-8 6zM12 6l8 6-8 6z" fill="currentColor"/></svg></button>
+            <button class="btn btn-ghost btn-icon speed-btn" data-speed="3" title="Super fast forward, 3× (.)" aria-label="Super fast forward" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M1.5 6.5l6.5 5.5-6.5 5.5zM8.75 6.5l6.5 5.5-6.5 5.5zM16 6.5l6.5 5.5L16 17.5z" fill="currentColor"/></svg></button>
+            <button class="btn btn-ghost btn-icon" id="btn-speed-cycle" title="Game speed (, .)" aria-label="Change game speed"><span id="speed-label">1×</span></button>
+          </div>
+          <button class="btn btn-ghost btn-icon" id="btn-settings" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8zm7.6 4.5 1.9 1.4-1.9 3.3-2.2-.8c-.5.4-1.1.8-1.8 1l-.4 2.3h-3.8l-.4-2.3c-.7-.2-1.3-.6-1.8-1l-2.2.8-1.9-3.3 1.9-1.4a6.6 6.6 0 0 1 0-2.2L2.9 9.5l1.9-3.3 2.2.8c.5-.4 1.1-.8 1.8-1l.4-2.3h3.8l.4 2.3c.7.2 1.3.6 1.8 1l2.2-.8 1.9 3.3-1.9 1.4a6.6 6.6 0 0 1 0 2.2z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></button>
+          <button class="btn btn-ghost btn-icon" id="btn-help" title="How to play (H)" aria-label="How to play"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.7.3-1 .8-1 1.5v.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.9" r="1.1" fill="currentColor"/></svg></button>
+          <button class="btn btn-ghost btn-icon" id="btn-fullscreen" title="Fullscreen (F)" aria-label="Toggle fullscreen" hidden><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </header>
+
+      <!-- MAP / 3D STAGE -->
+      <main id="stage">
+        <div id="canvas-host"></div>
+        <div id="world-overlay"></div>
+        <!-- Map zoom controls (also: wheel / pinch / drag / double-tap) -->
+        <div id="view-controls">
+          <button class="btn btn-icon" id="btn-zoom-in" title="Zoom in (+)" aria-label="Zoom in">+</button>
+          <button class="btn btn-icon" id="btn-zoom-out" title="Zoom out (-)" aria-label="Zoom out">&minus;</button>
+          <button class="btn btn-icon" id="btn-zoom-reset" title="Fit map (0)" aria-label="Fit whole map" hidden>&#x2922;</button>
+        </div>
+        <!-- Compact layouts: the most urgent incident, always visible -->
+        <div id="alert-strip" hidden></div>
+        <div id="camera-hud" hidden>
+          <div class="cam-label"><span class="rec-dot"></span><span id="cam-name">CAM</span></div>
+          <div class="cam-rooms" id="cam-rooms"></div>
+          <div class="cam-hint">Visitors in view behave (their incident timers pause). <b>Send guard</b> to actually deal with them.</div>
+          <div class="cam-actions">
+            <button class="btn btn-ghost btn-sm" id="btn-cam-prev" title="Previous camera ([)">&larr;</button>
+            <button class="btn btn-primary" id="btn-cam-exit">Return to map <kbd>⌫</kbd></button>
+            <button class="btn btn-ghost btn-sm" id="btn-cam-next" title="Next camera (])">&rarr;</button>
+          </div>
+        </div>
+        <aside id="legend">
+          <div class="legend-row"><span class="dot dot-guest"></span>Visitor</div>
+          <div class="legend-row"><span class="dot dot-employee"></span>Employee</div>
+          <div class="legend-row"><span class="dot dot-officer"></span>Officer</div>
+          <div class="legend-row"><span class="swatch swatch-secure"></span>Secure door (badge)</div>
+          <div class="legend-row"><span class="swatch swatch-door"></span>Door</div>
+          <div class="legend-sep"></div>
+          <div class="legend-note"><span class="when-mouse">Click</span><span class="when-touch">Tap</span> a <b>CAM</b> tag for a 3D view, or a propped (amber) door to send an officer.<br /><span class="when-mouse">Scroll or drag</span><span class="when-touch">Pinch or drag</span> to zoom &amp; pan the map.</div>
+        </aside>
+      </main>
+
+      <!-- BOTTOM DOCK: desk, waiting area, incidents -->
+      <footer id="dock" data-tab="desk">
+        <nav class="dock-tabs" role="tablist" aria-label="Panels">
+          <button class="dock-tab" data-tab="desk" role="tab">Desk <span class="tab-badge" id="tab-badge-desk"></span></button>
+          <button class="dock-tab" data-tab="waiting" role="tab">Waiting <span class="tab-badge" id="tab-badge-waiting"></span></button>
+          <button class="dock-tab" data-tab="incidents" role="tab">Incidents <span class="tab-badge" id="tab-badge-incidents"></span></button>
+        </nav>
+        <section class="panel" id="desk-panel">
+          <header class="panel-head">
+            <span class="panel-title">Access Desk</span>
+            <span class="chip" id="desk-queue">Line: 0</span>
+          </header>
+          <div class="timer-row">
+            <span class="timer-label">Entry response</span>
+            <div class="timer-bar"><div class="timer-fill" id="desk-timer"></div></div>
+            <span class="timer-value mono" id="desk-pace" title="Entry window: starts slow, tightens as the line and waiting area fill">10.0s</span>
+          </div>
+          <div class="panel-body" id="desk-body"></div>
+          <div class="desk-actions" id="desk-actions"></div>
+          <div class="desk-frozen" id="desk-frozen" hidden>
+            <strong>Processing delay</strong>
+            <span>Escort arrived before the guest pass was printed.</span>
+            <div class="timer-bar"><div class="timer-fill timer-fill-warn" id="desk-frozen-timer"></div></div>
+          </div>
+          <div class="desk-renewals" id="desk-renewals" hidden></div>
+        </section>
+
+        <section class="panel" id="waiting-panel">
+          <header class="panel-head">
+            <span class="panel-title">Waiting Area</span>
+            <span class="chip chip-warn" id="waiting-count">0/9</span>
+          </header>
+          <div class="panel-body scroll" id="waiting-list"></div>
+        </section>
+
+        <section class="panel" id="incident-panel">
+          <header class="panel-head">
+            <span class="panel-title">Incident Log</span>
+            <span class="chip" id="incident-open">0 open</span>
+          </header>
+          <div class="timer-row">
+            <span class="timer-label">Incident response</span>
+            <div class="timer-bar"><div class="timer-fill timer-fill-danger" id="incident-timer"></div></div>
+            <span class="timer-who" id="incident-who"></span>
+          </div>
+          <div class="panel-body scroll" id="incident-list"></div>
+        </section>
+      </footer>
+    </div>
+
+    <!-- Start / pause / end-of-shift screens -->
+    <div class="screen" id="screen-start" hidden></div>
+    <div class="screen" id="screen-briefing" hidden></div>
+    <div class="screen" id="screen-pause" hidden></div>
+    <div class="screen" id="screen-end" hidden></div>
+    <div class="screen" id="screen-settings" hidden></div>
+
+    <!-- dev-only:start -->
+    <script>
+      // This page needs the Vite dev server. Opened as a file, point to the standalone build.
+      if (location.protocol === 'file:') {
+        document.body.innerHTML =
+          '<div style="font:16px system-ui;max-width:520px;margin:15vh auto;line-height:1.5">' +
+          '<h2>This is the development page</h2><p>To play, open <b>index.html</b> instead.</p>' +
+          '<p>To develop, run <code>npm install</code> then <code>npm run dev</code>.</p></div>';
+      }
+    </script>
+    <!-- dev-only:end -->
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

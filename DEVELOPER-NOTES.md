@@ -130,6 +130,20 @@ work/                      Sample e-learning (unmodified Rise 360 web exports, o
                three.js is bundled in lib/, Tailwind is pre-built into vendor/tailwind.css (no CDNs), and
                portfolio-samples.js adds sample maps from maps/samples/; mapster.html?sample=sunrise opens one.
                See work/mapster/README.md. Page: pages/project-mapster.html.)
+  vinyasa/     (Vinyasa, my Asana notification app for Windows: index.html is a browser preview of its window,
+               fonts/ for the preview. Page: pages/project-vinyasa.html, screenshots in images/projects/vinyasa/.
+               The download is the latest release of the public Nostalginaut/vinyasa-releases repo, published by the
+               TOOL--Vinyasa repo's GitHub Actions whenever its VERSION changes on main; the link
+               https://github.com/Nostalginaut/vinyasa-releases/releases/latest/download/Vinyasa-portable.zip always
+               gets the newest one (on the project page and the card in my-projects.html).
+               ** Synced by pull-hub (config/sources.json lists exactly these files): edit it there, not here. **)
+  zentabs/     (ZenTabs, my browser-tab app for Windows: index.html is a browser preview of its window, fonts/ for the
+               preview. Page: pages/project-zentabs.html, screenshots in images/projects/zentabs/. The download is the
+               latest release of the public Nostalginaut/zentabs-releases repo, published by the TOOL--ZenTabs repo's
+               GitHub Actions whenever its VERSION changes on main; the link
+               https://github.com/Nostalginaut/zentabs-releases/releases/latest/download/ZenTabs-portable.zip always
+               gets the newest one, so the page and the card in my-projects.html never need updating for a new version.
+               ** Synced by pull-hub (config/sources.json lists exactly these files): edit it there, not here. **)
   property-post-orders/ (its video, assets/Incident_Documentation_Pro.mp4, is added separately)
                            Each is shown on pages/project-<name>.html in an embedded frame.
                            To add a course: unzip the Rise export's "content" folder into work/<name>/,
@@ -139,6 +153,11 @@ work/                      Sample e-learning (unmodified Rise 360 web exports, o
 
 games/                     Playable learning games, one self-contained index.html each
   mall-run/  quiz-guy/  quizaga/  quizcavator/  right-this-way/  builder/ (Quizcade Builder)
+  restaurant-rush/  (one self-contained index.html, three.js inlined; page: pages/project-game-restaurant-rush.html,
+             screenshots in images/games/restaurant-rush/, listed on my-projects.html rather than the Portfolio page)
+  beyond-the-stacks/  (Beyond The Stacks: index.html + css/ js/ assets/ maps/ (its Mapster map), viewer3d.html and mapster/
+             (Mapster's engine + three.js for the 3D view); page: pages/project-game-beyond-the-stacks.html, screenshots in
+             images/games/beyond-the-stacks/. Early development: the page carries a .dev-warning box.)
   unit-204/  (Unit 204: index.html + css/ js/ assets/fonts/, synced from the GAME--Unit-204 repo by its
              sync-to-portfolio workflow; its sounds are embedded in js/sounds.js, so no audio files)
                            ** Synced automatically: edit each game in its own repo, not here. ** Every game
@@ -146,7 +165,9 @@ games/                     Playable learning games, one self-contained index.htm
                            whenever the game changes on its main branch (a change made here is overwritten
                            by the next sync): GAME-Quizcade-Suite (quizaga, quiz-guy, quizcavator, builder),
                            GAME-Mall-Run (mall-run), GAME-Right-This-Way-Please- (right-this-way),
-                           GAME--Unit-204 (unit-204) and PeeDee's Dental Defense (work/peedee/).
+                           GAME--Unit-204 (unit-204), GAME--Restaurant-Rush (restaurant-rush), GAME--Beyond-The-Stacks
+                           (beyond-the-stacks; listed in config/sources.json, synced daily by pull-hub) and PeeDee's
+                           Dental Defense (work/peedee/).
                            Listed in config/site-config.js (games); Traditional View page for each is
                            pages/project-game-<id>.html. To add one: drop it in games/<id>/index.html,
                            add it to `games` in the config, copy a project-game page, add a card to
@@ -156,6 +177,11 @@ tools/
   build-search-index.py    Rebuilds pages/js/search-index.js (run after changing page text). Not needed on Neocities.
   stamp-version.py         Writes config/site-version.js; a new stamp makes the tutorial tips show again for returning visitors.
   make-cursors.py          Redraws images/cursors/*.png from pixel maps. Not needed on Neocities.
+  pull-hub.py              Copies each project's public files from its own repo into this site (run daily by
+                           .github/workflows/pull-hub.yml; sources listed in config/sources.json). Developer
+                           files (CLAUDE.md, READMEs, tests/, scripts/, docs/ notes, launchers) are never copied.
+                           A repo that also holds private material MUST list exactly what to publish with a
+                           "files" map, e.g. TOOL-Course-Catalog publishes only its anonymized copy as index.html.
 
 (Resume: the "View my resume" buttons on resume.html, about.html and contact.html link to the
  live Google Docs version, so it's always current. Change that link in those three pages.)

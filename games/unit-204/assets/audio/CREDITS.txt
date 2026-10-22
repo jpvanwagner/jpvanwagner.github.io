@@ -1,0 +1,9 @@
+Sound effects by Kenney (https://kenney.nl), released under CC0 1.0
+(https://creativecommons.org/publicdomain/zero/1.0/). Converted to MP3.
+
+footsteps.mp3, chime.mp3, thud.mp3
+  from https://github.com/KenneyNL/Starter-Kit-3D-Platformer (walking, coin, land)
+click-a.mp3, click-b.mp3, tick.mp3, swish.mp3, city-ambience.mp3
+  from https://github.com/KenneyNL/Starter-Kit-City-Builder (placement-a, placement-b, rotate, removal-a, ambience)
+ratchet.mp3
+  from https://github.com/KenneyNL/Starter-Kit-FPS (weapon_change)

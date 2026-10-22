@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-GAME-RESTAURANT-RUSH.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+    The game lives in /games/restaurant-rush/ (synced from the GAME--Restaurant-Rush repo by the hub sync).
+    Screenshots: images/games/restaurant-rush/<name>.webp + thumbs/<name>.jpg (480x300). The names are
+    generic (floor, bar, kitchen...) so a new screenshot can simply replace the old file.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="b061b3e5">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mama Maggie's Restaurant Rush: restaurant-management game</title>
+    <meta name="description" content="Mama Maggie's Restaurant Rush, a playable restaurant-management game by Joseph VanWagner: run lunch and dinner at a family Italian trattoria, from seating guests and taking orders to the bar, the wood-fired oven, and a crew you hire and train.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=36ab3463">
+    <link rel="stylesheet" href="../shared/share.css?v=ebba4e48">
+    <link rel="stylesheet" href="css/modern.css?v=3e888b3d">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=cfeec6d1"></script>
+    <script src="../config/shared-content.js?v=12d7c148"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=771fd672"></script>
+    <script src="js/tip-bar.js?v=8c4ef0d2"></script>              <!-- "Buy me a coffee" bar below the tool/game -->
+    <script src="js/page-toc.js?v=d252b5e8"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/lightbox.js?v=af09d593">        </script>   <!-- click a screenshot to see it full size -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=32b0920c"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=726959f6"></script>
+</head>
+<body data-title="Mama Maggie's Restaurant Rush" data-nav="my-projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="my-projects.html">&larr; Back to Projects</a></p>
+                <p class="kicker">Game · A restaurant-management sim · HTML / JavaScript / 3D</p>
+                <h1>Mama Maggie's Restaurant Rush</h1>
+                <!-- Early-development warning (styles: .dev-warning in css/classic.css and css/modern.css). Remove it when the game is finished. -->
+                <div class="dev-warning" role="note" aria-label="Early development warning">
+                    <span class="dev-warning-icon" aria-hidden="true">&#9888;</span>
+                    <div>
+                        <strong>This game is still in early development.</strong> Expect graphical glitches, and many
+                        features won't work correctly yet.
+                    </div>
+                </div>
+                <p class="lede">Run lunch and dinner at a family trattoria: seat the line, take the orders, work the bar and the
+                   wood-fired oven, and keep every table happy until the doors lock.</p>
+                <p>My restaurant-management game is set in Mama Maggie's, a family-owned Italian trattoria with an old-meets-new
+                   look in deep red, black, and white. You run lunch service from an overhead map of the dining room, and
+                   whenever a job needs your hands you drop into a close-up 3D station: down to a table to take an order,
+                   behind the bar to mix a drink, or onto the line to fire a pizza. The dining room keeps moving while
+                   you're away, and that's where the rush comes from. Between shifts you run the back office: hire and
+                   train a crew, refine the family recipes, and watch the trattoria's reputation grow.</p>
+                <p><strong>Controls:</strong> <kbd>1</kbd> floor, <kbd>2</kbd> bar, <kbd>3</kbd> kitchen, <kbd>4</kbd> office,
+                   <kbd>Esc</kbd> back to the floor, <kbd>Space</kbd> pause, <kbd>,</kbd> <kbd>.</kbd> slower or faster (&frac12;&times; to 3&times;),
+                   <kbd>H</kbd> help; everything else is a click. Best on a computer.</p>
+                <div class="btn-row">
+                    <a class="btn primary" href="../games/restaurant-rush/index.html?v=fbb17b0a" target="_blank" rel="noopener">Play full screen</a>
+                    <!-- Retro Desktop only: open the game in its own desktop window -->
+                    <button class="btn retro-only" type="button" onclick="parent.GamesApp.open('restaurant-rush')" title="Opens the game as its own program on the desktop, with a full-screen button">Open as a desktop program</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- The game: /games/restaurant-rush/index.html plus its assets/ and people/ folders (synced from the game's repo) -->
+        <section class="panel">
+            <div class="panel-body course-panel">
+                <div class="course-frame" style="aspect-ratio: 16 / 10; height: auto; max-height: 90vh;">
+                    <iframe data-demo-guard src="../games/restaurant-rush/index.html?v=fbb17b0a" title="Mama Maggie's Restaurant Rush (playable game)" loading="lazy" allow="fullscreen; clipboard-write" allowfullscreen></iframe>
+                </div>
+                <p class="course-note">Tip: click inside the game first so it can detect your keyboard. Your days, cash, crew, and
+                   recipes are saved in your browser. On a small screen, try the
+                <a href="../games/restaurant-rush/index.html?v=fbb17b0a" target="_blank" rel="noopener">full-screen version</a>.</p>
+
+                <h2>Screenshots</h2>
+                <div class="shots">
+                    <figure><a class="zoom" href="../images/games/restaurant-rush/floor.webp" data-caption="The floor map as the lunch rush begins: a table eating, one waiting on food, a big party reading the menu, and a table to clear."><img src="../images/games/restaurant-rush/thumbs/floor.jpg" alt="An overhead 3D view of the trattoria's dining room with guests at their tables, table labels, the kitchen and office at the back, and the bar on the right" loading="lazy"></a><figcaption>Running the floor</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/restaurant-rush/order.webp" data-caption="Taking an order: each guest says what they want in a speech bubble that fades, so listen closely and key it in."><img src="../images/games/restaurant-rush/thumbs/order.jpg" alt="A close-up of a party of five seated at a long table with a red checked cloth, one guest's order in a speech bubble, and the order pad below" loading="lazy"></a><figcaption>Taking an order at the table</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/restaurant-rush/kitchen.webp" data-caption="The kitchen: pasta, meatballs, and calamari cooking on the line while a pepperoni pizza is built for the wood-fired oven."><img src="../images/games/restaurant-rush/thumbs/kitchen.jpg" alt="The kitchen station with the ticket rail, pots and fryers cooking, a tiled pizza oven, and an ingredient panel" loading="lazy"></a><figcaption>The line and the wood-fired oven</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/restaurant-rush/bar.webp" data-caption="The bar, seen from a stool: an Aperol Spritz on the mat, the recipe card checking every step, and the bartender working the back bar."><img src="../images/games/restaurant-rush/thumbs/bar.jpg" alt="The bar station from a stool, with backlit bottle shelves, an Aperitivo neon sign, the bartender, a spritz on the mat, and the recipe card" loading="lazy"></a><figcaption>Pouring to the line at the bar</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/restaurant-rush/office.webp" data-caption="Between shifts in the office: put each person in the role they fit, and train their stats up to (or past) their natural potential."><img src="../images/games/restaurant-rush/thumbs/office.jpg" alt="The between-shifts office with cash, payroll, a word-of-mouth rank, and a crew card showing roles and four stats" loading="lazy"></a><figcaption>The crew, between shifts</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/restaurant-rush/hiring.webp" data-caption="Help wanted: three new applicants every day, each with their own strengths, weaknesses, and quirk."><img src="../images/games/restaurant-rush/thumbs/hiring.jpg" alt="Three applicant cards with their stats, a personality quirk, and a suggested role" loading="lazy"></a><figcaption>Hiring help</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/restaurant-rush/recipes.webp" data-caption="The family recipe book: refining a dish makes it taste better and lets it sell for more."><img src="../images/games/restaurant-rush/thumbs/recipes.jpg" alt="A list of six dishes, each with a refinement level, its next improvement, and a price to refine it" loading="lazy"></a><figcaption>Refining the recipes</figcaption></figure>
+                    <figure><a class="zoom" href="../images/games/restaurant-rush/title.webp" data-caption="The title screen: Mama Maggie's, cucina di famiglia since 1962."><img src="../images/games/restaurant-rush/thumbs/title.jpg" alt="The Mama Maggie's Restaurant Rush title screen with a red M seal on a dark background" loading="lazy"></a><figcaption>The title screen</figcaption></figure>
+                </div>
+
+                <h2>How it plays</h2>
+                <ul>
+                    <li><strong>Lunch and dinner.</strong> Every day has two services. You run the rushes yourself, a few minutes each
+                        at normal speed; in the quieter hours either side, your crew runs the room on their own while the clock
+                        speeds up, and you can step in whenever you like. Everything keeps running while you're busy somewhere else.</li>
+                    <li><strong>Hosting.</strong> Parties of one to six line up by the door. Pick one and seat them at a table that
+                        fits before they lose patience; couples and solo diners can take a seat at the bar.</li>
+                    <li><strong>Serving.</strong> When a table is ready, the camera drops down to it and each guest says what they'd
+                        like. The words fade, so you have to listen: asking "Pardon?" costs a little patience, and wrong items
+                        upset the table.</li>
+                    <li><strong>The kitchen.</strong> Build pizzas from dough, sauce, cheese, and toppings, then bake them in the
+                        wood-fired oven, turning them halfway. Boil spaghetti and fettuccine, simmer meatballs, and fry calamari on
+                        the line, pulling each one in its perfect window. Then plate it and send it.</li>
+                    <li><strong>The bar.</strong> Mix every drink by its recipe: the right glass, ice or no ice, hold each bottle to
+                        pour to the line, shake if it needs it, garnish, and serve. Each step counts toward the drink's quality.</li>
+                    <li><strong>Managing the room.</strong> Guests' moods drain while they wait. Unhappy tables ask for the manager,
+                        and you decide how to make it right: an apology, a tiramis&ugrave; on the house, or half off the bill. Tips
+                        follow the mood, and dirty tables need clearing before the next party can sit.</li>
+                    <li><strong>The crew.</strong> Three people answer the help-wanted sign every day, each with four strengths:
+                        <strong>Hands</strong> in the kitchen, <strong>Feet</strong> on the floor, <strong>Charm</strong> with guests,
+                        and <strong>Flair</strong> behind the bar, plus a personality quirk, like a chatterbox guests love or a
+                        showboat who earns extra tips. Put them in the roles they fit (host, runner, busser, line cook, or
+                        bartender), and they take that work off your hands.</li>
+                    <li><strong>Training.</strong> Everyone has a natural potential in each stat. Training up to it is cheap, so you
+                        can lean into what someone does best, or pay more to push past it and shore up a weakness. Staff also
+                        improve with experience on the job, and each role unlocks a new skill once its stat is high enough.</li>
+                    <li><strong>Recipes and reputation.</strong> Refining a recipe makes the dish taste better and sell for more.
+                        Good reviews spread by word of mouth, moving the trattoria up five ranks, from <em>Neighbourhood secret</em>
+                        to <em>Worth the trip</em>. Each rank brings bigger crowds, and from the second rank on, a food critic
+                        visits every shift.</li>
+                </ul>
+
+                <h2>How it's built</h2>
+                <p>Mama Maggie's Restaurant Rush is built with three.js and Vite. It loads as a small page that fetches the rest as
+                   it's needed: the 3D engine and the restaurant first, then each station the first time you open it, and each guest's
+                   model when they walk in. Scenery that shares a material is merged at start-up, so the dining room draws in a few
+                   hundred calls instead of more than a thousand. The people are animated avatars from Microsoft's open-source
+                   Rocketbox library, converted and compressed for the web. The simulation is kept separate from the graphics, so the
+                   whole restaurant can also run without them: a test bot plays complete days in Node to check the balance. Progress
+                   saves in the browser.</p>
+
+                <h2>Design features</h2>
+                <ul class="tags"><li>Game design</li><li>Management sim</li><li>Time pressure</li><li>three.js</li><li>3D</li><li>JavaScript</li><li>Staff and training systems</li></ul>
+
+                <div class="btn-row">
+                    <a class="btn" href="my-projects.html">&larr; Back to Projects</a>
+                    <a class="btn primary" href="../games/restaurant-rush/index.html?v=fbb17b0a" target="_blank" rel="noopener">Play full screen</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

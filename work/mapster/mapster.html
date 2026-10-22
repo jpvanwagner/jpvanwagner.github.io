@@ -3,10 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Mapster</title>
-    <!-- PORTFOLIO BUILD: Tailwind is pre-built into vendor/tailwind.css (no CDN). Rebuild it
-         with the Tailwind 3.4 CLI over mapster.html + core/helpManager.js + core/fillTools.js
-         if the editor gains new utility classes. -->
-    <link rel="stylesheet" href="./vendor/tailwind.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./theme/win9x.css">
     
     <!-- Load Modular Systems for Editor UI (Strict Pathing Applied).
@@ -826,6 +823,7 @@ const TOOLS = {
         {n:'Marble', type:'f', v:'marble', c:'#eef0f2', ac:'#8390a8'},
         {n:'Terrazzo', type:'f', v:'terrazzo', c:'#efece4', ac:'#e05a4d'},
         {n:'Diagonal Stripes', type:'f', v:'stripes', c:'#222222', ac:'#f4d03f'},
+        {n:'Parking Stall', type:'f', v:'parking', c:'#3d434c', ac:'#f5f5f0'},
         {n:'Arcade Carpet', type:'f', v:'carpet', c:'#0a0a12', ac:'#f472b6'}
     ],
     Walls: [
@@ -844,7 +842,7 @@ const TOOLS = {
     'Decor & Props': [
         {n:'Urinal', type:'att', v:'urinal', s:'🚹', c:'#f8fafc'}, {n:'Sink', type:'att', v:'sink', s:'🚰', c:'#f8fafc'}, {n:'Towel Disp.', type:'att', v:'towel', s:'🧻', c:'#94a3b8'},
         {n:'Mirror (Wall)', type:'att', v:'mirror', s:'🪞'}, {n:'Mirror (Full)', type:'att', v:'mirror_full', s:'🪞'}, {n:'Register', type:'att', v:'register', s:'📠'},
-        {n:'Arcade (Stand)', type:'o', v:'arcade', s:'🕹️'}, {n:'Arcade (Sit)', type:'o', v:'arcade_sit', s:'💺'}, {n:'Trash Bin', type:'o', v:'trash', s:'🗑️'}, {n:'Bench', type:'o', v:'bench', s:'🛋️'}, {n:'Car', type:'o', v:'car', s:'🚗', c:'#3b5ba5'}
+        {n:'Arcade (Stand)', type:'o', v:'arcade', s:'🕹️'}, {n:'Arcade (Sit)', type:'o', v:'arcade_sit', s:'💺'}, {n:'Trash Bin', type:'o', v:'trash', s:'🗑️'}, {n:'Storage Box', type:'o', v:'box', s:'📦', c:'#b08350'}, {n:'Bench', type:'o', v:'bench', s:'🛋️'}, {n:'Car', type:'o', v:'car', s:'🚗', c:'#3b5ba5'}
     ],
     Interactive: [
         {n:'Movie Poster', type:'att', v:'poster', s:'🖼️'}, {n:'Promo Standee', type:'o', v:'standee', s:'🧍‍♂️'}, {n:'Sign', type:'o', v:'sign', s:'🪧'}, 
@@ -852,7 +850,7 @@ const TOOLS = {
         {n:'Exit Sign (wall)', type:'o', v:'exit_sign', s:'🚪', c:'#ff4d1c'}, {n:'Pointing Arrow', type:'o', v:'arrow', s:'⬇️', c:'#ffd23f'}
     ],
     Structure: [
-        {n:'Player Start', type:'o', v:'start', s:'⭐'}, {n:'Ladder', type:'o', v:'ladder', s:'🪜'}, {n:'Stairs', type:'o', v:'stairs', s:'🪜'}, {n:'Portal Pad', type:'o', v:'warp_pad', s:'🌀'}, {n:'Warp Point', type:'o', v:'warp_point', s:'📍', c:'#10b981'}
+        {n:'Player Start', type:'o', v:'start', s:'⭐'}, {n:'Ladder', type:'o', v:'ladder', s:'🪜'}, {n:'Stairs', type:'o', v:'stairs', s:'🪜'}, {n:'Elevator', type:'o', v:'elevator', s:'🛗', c:'#9aa3ad'}, {n:'Portal Pad', type:'o', v:'warp_pad', s:'🌀'}, {n:'Warp Point', type:'o', v:'warp_point', s:'📍', c:'#10b981'}
     ],
     'Zones & Fog': [
         // paint a zone id onto tiles (cell.zone). The active zone + palette
@@ -1214,6 +1212,7 @@ function getDefaultMeta(v, color) {
     if(['urinal', 'sink', 'towel', 'mirror', 'mirror_full', 'switch', 'poster', 'neon', 'neon_num', 'neon_text', 'sconce', 'neon_stripe', 'register'].includes(v)) { m.attachments = [{v: v, offset: 0, offsetY: 0, color: color, neonText: '00'}]; }
     if(v === 'ladder' || v === 'urinal' || v === 'sink' || v === 'poster' || v === 'switch' || v === 'towel' || v === 'stairs' || v === 'mirror' || v === 'mirror_full') m.rot = 0;
     if(v === 'stairs') m.stairDir = 'n';   // which way the flight climbs (n/s/e/w)
+    if(v === 'elevator') { m.rot = 0; m.solid = false; }   // walk-in cab; rot turns its open doors
     if(v === 'glass_full' || v === 'window_insert') m.paintData = null; 
     if(v === 'counter' || v === 'counter_door') { m.jumpable = false; m.connects = true; }
     if(v === 'counter_door') { m.counterDoorStyle = 'swing'; }   // 'swing' | 'lift'
@@ -2104,12 +2103,6 @@ function _renderPropertiesInner() {
         html += mChk('Locked', 'locked') + mInp('Required Key ID', 'reqKey', 'text') + mChk('Lockable From Inside', 'internalLock') + mInp('Hit Points (0 = Indest.)', 'hp', 'number');
         const dirs = (obj.v === 'door_swing' || obj.v === 'counter_door') ? ['Left Hinge (In)', 'Left Hinge (Out)', 'Right Hinge (In)', 'Right Hinge (Out)'] : ['Slide Left', 'Slide Right'];
         html += `<label class="block text-xs mt-3 text-gray-300 font-bold">Door Direction</label><button class="w-full bg-gray-700 py-1.5 text-xs mt-1 rounded text-white hover:bg-gray-600 transition-colors" onclick="updateMeta('dir', (${obj.meta.dir||0}+1)%${dirs.length}, 'num'); renderProperties();">${dirs[obj.meta.dir||0]} (Cycle)</button>`;
-        // a STAIRS object climbs in a chosen direction (the engine
-        // builds a visible flight; stairDir sets which edge it rises toward).
-        if(obj.v === 'stairs') {
-            html += `<label class="block text-xs mt-3 text-gray-300 font-bold">Stair Direction (climbs toward)</label><select onchange="updateMeta('stairDir', this.value, 'text')" class="w-full bg-gray-900 p-1.5 rounded text-white text-xs mt-1 border border-gray-700 outline-none"><option value="n" ${(obj.meta.stairDir||'n')==='n'?'selected':''}>North (up)</option><option value="s" ${obj.meta.stairDir==='s'?'selected':''}>South (down)</option><option value="e" ${obj.meta.stairDir==='e'?'selected':''}>East (right)</option><option value="w" ${obj.meta.stairDir==='w'?'selected':''}>West (left)</option></select>`;
-            html += `<p style="font-size:10px;color:#9ca3af;margin-top:4px;line-height:1.3">A single flight connects to the floor ABOVE automatically \u2014 the player walks onto it and climbs up (no second flight needed), landing one tile past the top in this direction. For two-way travel, also place a flight (or ladder) on the upper floor where they come back down.</p>`;
-        }
         // counter doors can be a swing door or a lift-top flap.
         if(obj.v === 'counter_door') {
             html += `<label class="block text-xs mt-3 text-gray-300 font-bold">Counter Door Style</label><select onchange="updateMeta('counterDoorStyle', this.value, 'text')" class="w-full bg-gray-900 p-1.5 rounded text-white text-xs mt-1 border border-gray-700 outline-none"><option value="swing" ${(obj.meta.counterDoorStyle||'swing')==='swing'?'selected':''}>Swing Door (hinged side)</option><option value="lift" ${obj.meta.counterDoorStyle==='lift'?'selected':''}>Lift-Top (flap, no posts)</option></select>`;
@@ -2138,6 +2131,15 @@ function _renderPropertiesInner() {
             html += `<p class="text-[10px] text-gray-500 mt-1">Handle &amp; push plate sit on the latch side (opposite the hinge), on both faces. Knobs/levers appear automatically; this just picks the look.</p>`;
             html += `</div>`;
         }
+    }
+    // a STAIRS object climbs in a chosen direction (the engine
+    // builds a visible flight; stairDir sets which edge it rises toward).
+    if(obj.v === 'stairs') {
+        html += `<label class="block text-xs mt-3 text-gray-300 font-bold">Stair Direction (climbs toward)</label><select onchange="updateMeta('stairDir', this.value, 'text')" class="w-full bg-gray-900 p-1.5 rounded text-white text-xs mt-1 border border-gray-700 outline-none"><option value="n" ${(obj.meta.stairDir||'n')==='n'?'selected':''}>North (up)</option><option value="s" ${obj.meta.stairDir==='s'?'selected':''}>South (down)</option><option value="e" ${obj.meta.stairDir==='e'?'selected':''}>East (right)</option><option value="w" ${obj.meta.stairDir==='w'?'selected':''}>West (left)</option></select>`;
+        html += `<p style="font-size:10px;color:#9ca3af;margin-top:4px;line-height:1.3">A single flight connects to the floor ABOVE automatically \u2014 the player walks onto it and climbs up (no second flight needed), landing one tile past the top in this direction. For two-way travel, also place a flight (or ladder) on the upper floor where they come back down.</p>`;
+    }
+    if(obj.v === 'elevator') {
+        html += `<p style="font-size:10px;color:#9ca3af;margin-top:4px;line-height:1.3">Place an elevator on the SAME tile on every floor it serves. The player walks in and presses SPACE to ride to the next floor up (from the top floor, back down to the lowest). Rotate it to face its doors toward the hall.</p>`;
     }
     if(obj.meta.rot !== undefined && !obj.v?.startsWith('door') && obj.v !== 'counter_door' && !obj.v?.startsWith('solid_diag')) {
         const rots = ['North (Top)', 'East (Right)', 'South (Bottom)', 'West (Left)'];
@@ -2958,7 +2960,7 @@ canvas#minimap{background:#000;border:1px solid #333;margin-top:10px;cursor:poin
                  border-bottom:11px solid #a855f7;}
 .close-btn{position:absolute;top:10px;right:10px;background:#ef4444;color:#fff;border:none;padding:5px 15px;cursor:pointer;font-weight:bold;border-radius:4px;}
 </style>
-<scr__ipt src="__ROOT_PREFIX__lib/three.min.js"></scr__ipt>
+<scr__ipt src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></scr__ipt>
 <scr__ipt src="__MAPSTER_PREFIX__core/helpManager.js"></scr__ipt>
 <scr__ipt src="__ROOT_PREFIX__core/cameraControls.js"></scr__ipt>
 <scr__ipt src="__ROOT_PREFIX__vfx/skyboxManager.js"></scr__ipt>
@@ -3007,6 +3009,5 @@ window.addEventListener('load', () => {
 </scr__ipt>
 </body></html>
 </script>
-<script src="portfolio-samples.js"></script>   <!-- portfolio add-on: sample maps (not part of Mapster itself) -->
 </body>
 </html>

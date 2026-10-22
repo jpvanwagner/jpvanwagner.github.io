@@ -384,9 +384,9 @@ function initEngine() {
     // - Otherwise: render the named procedural function from FloorTextures or
     //   WallTextures into a 64×64 canvas and wrap it as a CanvasTexture.
     //
-    // TODO (roadmap §6.5): texCache lookup here would massively cut memory
-    // for tiled walls — currently every brick tile generates its own canvas.
-    const texCache = {};
+    // TODO (roadmap §6.5): a texture cache keyed on (type, hex, ac) here would
+    // massively cut memory for tiled walls — currently every brick tile
+    // generates its own canvas.
     function getTex(type, hex, ac, dUrl) {
         if (dUrl) {
             const t = new THREE.Texture(); const img = new Image();
@@ -1001,17 +1001,22 @@ function initEngine() {
                         // side of the door so passing THROUGH (not standing under) advances.
                         const g = new THREE.Group();
                         const col = cell.o.c || '#d11f1f';   // classic exit-red
-                        const cv = document.createElement('canvas'); cv.width = 192; cv.height = 88;
+                        // meta.signText lets the same sign say something else (e.g. a
+                        // decorative "ENTRANCE"); longer words get a wider sign.
+                        const _sTxt = String((cell.o.meta && cell.o.meta.signText) || 'EXIT').toUpperCase();
+                        const _wide = _sTxt.length > 5, CW = _wide ? 320 : 192;
+                        const cv = document.createElement('canvas'); cv.width = CW; cv.height = 88;
                         const ct = cv.getContext('2d');
-                        ct.fillStyle = '#f6f1e4'; ct.fillRect(0, 0, 192, 88);            // lit face
-                        ct.strokeStyle = col; ct.lineWidth = 6; ct.strokeRect(3, 3, 186, 82); // red border
-                        ct.font = 'bold 52px Arial,Helvetica,sans-serif'; ct.textAlign = 'center'; ct.textBaseline = 'middle';
+                        ct.fillStyle = '#f6f1e4'; ct.fillRect(0, 0, CW, 88);            // lit face
+                        ct.strokeStyle = col; ct.lineWidth = 6; ct.strokeRect(3, 3, CW - 6, 82); // red border
+                        let _fs = 52; ct.font = 'bold ' + _fs + 'px Arial,Helvetica,sans-serif'; ct.textAlign = 'center'; ct.textBaseline = 'middle';
+                        while (ct.measureText(_sTxt).width > CW - 22 && _fs > 18) { _fs -= 2; ct.font = 'bold ' + _fs + 'px Arial,Helvetica,sans-serif'; }
                         ct.fillStyle = col; ct.shadowColor = col; ct.shadowBlur = 6;
-                        ct.fillText('EXIT', 96, 48);
+                        ct.fillText(_sTxt, CW / 2, 48);
                         const tex = new THREE.CanvasTexture(cv); tex.magFilter = THREE.LinearFilter;
                         const housing = new THREE.MeshBasicMaterial({ color: '#2a2a2a' });
                         const faceMat = new THREE.MeshBasicMaterial({ map: tex });
-                        const SW = 0.62, SH = 0.28, SD = 0.07;
+                        const SW = _wide ? 0.62 * CW / 192 : 0.62, SH = 0.28, SD = 0.07;
                         const panel = new THREE.Mesh(new THREE.BoxGeometry(SW, SH, SD),
                             [housing, housing, housing, housing, faceMat, housing]);   // face on +Z
                         g.add(panel);
@@ -1271,7 +1276,7 @@ function initEngine() {
                         // anim loop.
                         if (cell.o.meta && cell.o.meta.sparkle) {
                             const spk = makeSparkle(cell.o.meta.sparkleColor || '#fff6a8');
-                            spk.position.set(0, 0.22, 0);   // sit ON the object, not floating above
+                            spk.position.set(0, (cell.o.meta.sparkleY != null ? +cell.o.meta.sparkleY : 0.22), 0);   // sit ON the object (meta.sparkleY raises it, e.g. onto a car roof)
                             g.add(spk);
                             g.userData.sparkle = spk;        // so pickup can remove it
                             sparkleObjects.push({ grp: spk, t: Math.random() * Math.PI * 2 });
@@ -1735,7 +1740,6 @@ function initEngine() {
                                 // Local axes on the slab: the slab is thin along
                                 // `thinAxis`; its two faces face ±that axis. The
                                 // long axis runs along the wall.
-                                const slabThin = isH ? 'z' : 'x';     // thin dimension
                                 const faceOffset = (isH ? wZ : wX) / 2 + 0.012;
                                 const longHalf = (isH ? wX : wZ) / 2;
                                 // Window placement: meta.doorWindow on/off; shape
@@ -1793,7 +1797,7 @@ function initEngine() {
                                 const latchSign = (md.dir === 0 || md.dir === 2) ? 1 : -1;  // opposite hinge
                                 const handleL = latchSign * (longHalf - 0.08);
                                 const handleY = dMesh.position.y - dh * 0.02;
-                                const metalMat = new THREE.MeshStandardMaterial ? new THREE.MeshStandardMaterial({ color: 0xcdd2d8, metalness: 0.7, roughness: 0.35 }) : new THREE.MeshLambertMaterial({ color: 0xcdd2d8 });
+                                const metalMat = (typeof THREE.MeshStandardMaterial === 'function') ? new THREE.MeshStandardMaterial({ color: 0xcdd2d8, metalness: 0.7, roughness: 0.35 }) : new THREE.MeshLambertMaterial({ color: 0xcdd2d8 });
                                 const placeOnFaces = (mkMesh) => {
                                     [faceOffset, -faceOffset].forEach(fo => {
                                         const mh = mkMesh();
@@ -2214,6 +2218,13 @@ function initEngine() {
     // floor above it). The host uses this for the Indoors/Outdoors indicator.
     window.enginePlayerOutdoors = () => {
         try {
+            // A black/white background is an interior "void" map (the tutorial
+            // rooms, the debug room): those only place ceiling LIGHTS here and
+            // there, so the ceiling test below called most of their floor
+            // "Outdoors". Treat them as indoors; sky/night/custom maps (a real
+            // sky overhead) keep the per-tile ceiling test.
+            const _bg = CONFIG.settings && CONFIG.settings.bgMode;
+            if (_bg === 'black' || _bg === 'white') return false;
             const cell = MAP[pFlr] && MAP[pFlr][pZ] && MAP[pFlr][pZ][pX];
             if (!cell) return false;
             const ceilingAbove = !!cell.c || !!(MAP[pFlr + 1] && MAP[pFlr + 1][pZ] && MAP[pFlr + 1][pZ][pX] && MAP[pFlr + 1][pZ][pX].f);
@@ -2397,7 +2408,7 @@ function initEngine() {
     //                              even as the camera moves.
     //   pos='bottom' (default)   → fixed-position banner near the top of screen
     //                              (uses the #msg div from the export template).
-    function showMsg(txt, pos = 'bottom', tgtMesh = null) {
+    function showMsg(txt, pos = 'bottom', tgtMesh = null, ms = 2000) {
         // #5 FIX: an NPC/object with textOffset 'global' (the default) must fall
         // back to the MAP's global Text Position setting. Previously 'global'
         // was passed straight through and never matched 'overhead', so the
@@ -2425,7 +2436,11 @@ function initEngine() {
             return;
         }
         const m = document.getElementById('msg');
-        if (m) { m.innerHTML = txt; m.style.display = 'block'; setTimeout(() => m.style.display = 'none', 2000); }
+        // One hide-timer per box: every message used to schedule its OWN 2s hide,
+        // so an earlier message's timer (e.g. the "you forgot the key" nudge)
+        // could blank a NEWER message almost instantly ("You grab the key…"
+        // never seemed to appear). Cancel the previous timer first.
+        if (m) { m.innerHTML = txt; m.style.display = 'block'; if (m._hideTimer) clearTimeout(m._hideTimer); m._hideTimer = setTimeout(() => { m.style.display = 'none'; m._hideTimer = null; }, ms || 2000); }
     }
     // #14: a STICKY message that stays until the player dismisses it (next key or
     // click), used for poster descriptions / commentary that shouldn't blink away.
@@ -2433,6 +2448,7 @@ function initEngine() {
         const m = document.getElementById('msg');
         if (!m) return;
         m.innerHTML = txt; m.style.display = 'block';
+        if (m._hideTimer) { clearTimeout(m._hideTimer); m._hideTimer = null; }   // a pending showMsg() hide mustn't blank this
         if (m._stickyTimer) { clearTimeout(m._stickyTimer); m._stickyTimer = null; }
         const host = (typeof container !== 'undefined' && container) ? container : document;
         window.__posterMsgPaused = true;   // #9: freeze the world like dialogue while this is up
@@ -2585,19 +2601,6 @@ function initEngine() {
       if (flr + 1 < MAP.length) return flr + 1;
       if (flr - 1 >= 0) return flr - 1;
       return -1;
-    }
-
-    function changeFloor(newFlr, via) {
-      newFlr = Math.max(0, Math.min(MAP.length - 1, newFlr));
-      if (newFlr === pFlr) return;
-      const up = newFlr > pFlr;
-      pFlr = newFlr; mmPeek = null; tPos.y = pFlr * FLR_H;
-      applyFloorVisibility();   // #7d: reveal/hide floors for the new floor
-      const fd = document.getElementById('fade');
-      if (fd) { fd.style.opacity = 1; setTimeout(() => { fd.style.opacity = 0; applyFloorFog(pFlr, pX, pZ); }, 500); }
-      else { applyFloorFog(pFlr, pX, pZ); }
-      const word = via === 'jump' ? (up ? 'Climbed' : 'Jumped down') : (via === 'stairs' ? (up ? 'Up the stairs' : 'Down the stairs') : (up ? 'Climbed up' : 'Climbed down'));
-      showMsg((up ? '\u25b2 ' : '\u25bc ') + word + ' \u2014 Floor ' + (pFlr + 1) + ' of ' + MAP.length);
     }
 
     // Where you END UP after taking stairs: one tile OFF the top (in the climb
@@ -3273,6 +3276,23 @@ function initEngine() {
         return false;
     }
 
+    // EXIT THROUGH AN INTERIOR DOOR. checkCollision() only fires the exit when
+    // you walk off the MAP EDGE through an open perimeter door (the lesson rooms).
+    // A waypoint whose door is INSIDE the map — the parking lot's theater doors —
+    // never fired, so walking in did nothing. This fires it when you step OUT of
+    // an exitWaypoint tile THROUGH that tile's door edge (call it after a successful
+    // step, with the tile you came from).
+    function fireExitIfThroughDoor(fromX, fromZ, flr, dirStr) {
+        const cell = MAP[flr] && MAP[flr][fromZ] && MAP[flr][fromZ][fromX];
+        const edge = cell && cell[dirStr];
+        if (!cell || !cell.o || !cell.o.meta || !cell.o.meta.exitWaypoint) return;
+        if (!edge || String(edge.v || '').indexOf('door') !== 0) return;
+        if (typeof window.engineOnExitReached !== 'function' || window.__exitFireLatch) return;
+        window.__exitFireLatch = true;
+        setTimeout(() => { window.__exitFireLatch = false; }, 500);
+        try { window.engineOnExitReached(cell.o.meta || {}); } catch (e) {}
+    }
+
     function checkCollision(nx, nz, pF, dirStr, isJumpMove) {
         // Off the map edge → block, or fire the configured edge warp.
         if (nx < 0 || nx >= W || nz < 0 || nz >= H) {
@@ -3701,7 +3721,7 @@ function initEngine() {
         try {
             if ((typeof window.__hostPromptOpen === 'function' && window.__hostPromptOpen())) return;
         } catch (e2) {}
-        // While a Saymaker conversation is playing, capture input for it:
+        // While a branching conversation (DialogueRuntime) is playing, capture input for it:
         // Space advances a line; Escape ends the conversation. Block
         // movement/camera keys so the player can't walk off mid-dialogue.
         if (window.DialogueRuntime && window.DialogueRuntime.isActive()) {
@@ -3804,6 +3824,7 @@ function initEngine() {
                     if (!checkCollision(pX+dx, pZ+dz, pFlr, dS, false)) {
                         if (gapPromptActive) return;
                         pX += dx; pZ += dz; tPos.x = pX; tPos.z = pZ; isMov = true; lastMoveTime = Date.now();
+                        fireExitIfThroughDoor(pX - dx, pZ - dz, pFlr, dS);
                         let co = MAP[pFlr][pZ][pX].o;
                         if (co?.v === 'ladder') { const _t = floorTargetFrom(pFlr, pX, pZ); if (_t >= 0) showMsg('Press SPACE to climb the ladder.'); }   // stairs auto-walk (no prompt); ladders still prompt
                         if (MAP[pFlr][pZ][pX].f?.meta?.isWarp) executeWarp(MAP[pFlr][pZ][pX].f.meta);
@@ -4005,20 +4026,9 @@ function initEngine() {
                     return;
                 }
 
-                // Nothing jumpable. If nothing interactable either, hop in place /
-                // over a gap (preserves the prior plain-jump behavior).
-                const frontInteractable = npcs.some(n => n.x === ix && n.z === iz && n.f === pFlr) || npc
-                    || interactables.some(i => i.f === pFlr && ((i.x === ix && i.z === iz) || (i.x === pX && i.z === pZ && i.dir === dStr) || (i.x === ix && i.z === iz && i.dir === oppDir)))
-                    || doorObjects.some(d => d.f === pFlr && ((d.x === pX && d.z === pZ && d.dir === dStr) || (d.x === ix && d.z === iz && d.dir === oppDir)))
-                    // a paintable/breakable window counts whether the
-                    // glass edge is on the FACED tile (ix,iz) OR on the player's OWN
-                    // tile in their facing dir (pX,pZ,dStr) — the latter is the side
-                    // you start on. Without the second clause the engine treated
-                    // Space as a plain jump ("Vaulted over!") and you couldn't
-                    // draw/break from that side.
-                    || paintableWindows.some(w =>
-                         ((w.x === ix && w.z === iz) && (w.dir === dStr || w.dir === oppDir)) ||
-                         ((w.x === pX && w.z === pZ) && w.dir === dStr));   // own-tile matches FACING only — oppDir here meant the window BEHIND you hijacked Space when you faced something else (e.g. a bench)
+                // Nothing jumpable: hop in place, or forward over a gap if moving.
+                // (Space always jumps, even facing an NPC/door/window — interacting
+                // is G, since #5.)
                 if (!isJump && !isMov) {   // #5: Space always jumps even facing an NPC
                     // jump FORWARD only if the player is actively moving in
                     // that direction (a move key was pressed recently). Otherwise
@@ -4117,13 +4127,6 @@ function initEngine() {
             }
             if (canDraw && !canBreak && typeof window.openInGamePainter === 'function') { window.openInGamePainter(paintWin); return; }
             if (canBreak) { doBreak(); return; }
-            {
-                // (legacy break block kept disabled — doBreak() above replaces it)
-                let gE1 = null, gE2 = null, glassEdge = null;
-                if (false) {
-                    return;
-                }
-            }
 
             // Talk to NPC / read a sign — both share the same dialogue UI.
             let tgt = npc || sgn;
@@ -4170,7 +4173,7 @@ function initEngine() {
                 if (tgt.meta.swoopType && tgt.meta.swoopType !== 'none' && camManager) { let tgtPos = tgt.mesh ? tgt.mesh.position : tgt.m.position; camManager.startCinematic(tgt.meta.swoopType, tgtPos, player.position, tgt.meta.overheadZoomDist, tgt.meta.overheadRot); }
                 // Stop any "stopOnInteract" PositionalAudio attached to the same meta object.
                 let aObj = localAudios.find(a => a.meta === tgt.meta); if (aObj && aObj.meta.audioStopInteract) { aObj.audio.stop(); }
-                // If a SAYMAKER dialogue file is attached, play the full
+                // If a branching dialogue file is attached, play the full
                 // branching conversation (skill checks, camera moves, choices)
                 // instead of the one-shot dialogue string. The runtime handles
                 // its own overlay + Space-to-advance.
@@ -4279,6 +4282,17 @@ function initEngine() {
 
             // Try a center-tile interactable (key/bench/dir/warp/switch/text).
             let centerInter = interactables.find(i => i.x === ix && i.z === iz && i.f === pFlr && !i.dir); let inter = edgeInter || centerInter;
+            // YOUR CAR is forgiving: G anywhere right NEXT to it counts (the car
+            // mesh overhangs a neighbouring tile, so players "facing the car" were
+            // often facing the wrong tile and nothing happened).
+            if (!inter && keyFetchCar && pFlr === keyFetchCar.f && Math.max(Math.abs(pX - keyFetchCar.x), Math.abs(pZ - keyFetchCar.z)) <= 1) {
+                inter = interactables.find(i => i.x === keyFetchCar.x && i.z === keyFetchCar.z && i.f === keyFetchCar.f && i.obj && i.obj.v === 'car') || null;
+            }
+            // Someone else's car: say so (players couldn't tell which car was theirs).
+            if (!inter) {
+                const _fo = MAP[pFlr] && MAP[pFlr][iz] && MAP[pFlr][iz][ix] && MAP[pFlr][iz][ix].o;
+                if (_fo && _fo.v === 'car' && !(_fo.meta && _fo.meta.keyId)) { showMsg(keyFetchCar ? 'Not your car. Yours is the one with the glint on the roof.' : 'Not your car.'); playSnd('error'); return; }
+            }
             if (inter) {
                 if (inter.obj?.v === 'key') {
                     const grp = inter.grp || inter.mesh;          // the whole key GROUP (body + sparkle)
@@ -4286,15 +4300,21 @@ function initEngine() {
                     // kill any sparkle on this object so it doesn't linger after pickup.
                     const spk = grp.userData && grp.userData.sparkle;
                     if (spk) { spk.visible = false; if (spk.parent) spk.parent.remove(spk); const si = sparkleObjects.findIndex(s => s.grp === spk); if (si >= 0) sparkleObjects.splice(si, 1); }
-                    showMsg('Obtained: ' + pickupLabel(inter)); updateInv(); playSnd('click'); return;
+                    showMsg('Obtained: ' + pickupLabel(inter), 'bottom', null, 3000); updateInv(); playSnd('click');
+                    try { if (window.engineLogEvent) window.engineLogEvent('Picked up: ' + pickupLabel(inter)); } catch (e) {}
+                    return;
                 }
                 if (inter.obj?.v === 'car') {
                     // #7: the multiplex key lives INSIDE your car — interact to grab it
                     // (once). meta.keyTaken guards against taking it twice.
                     if (inter.obj.meta?.keyId && !inter.obj.meta.keyTaken) {
                         inventory.push(inter.obj.meta.keyId); inter.obj.meta.keyTaken = true;
-                        showMsg('You grab the ' + (inter.obj.meta.keyLabel || 'multiplex key') + ' from your car.');
+                        showMsg('Got it \u2014 you grab the ' + (inter.obj.meta.keyLabel || 'multiplex key') + ' from your car.', 'bottom', null, 4000);
                         if (typeof updateInv === 'function') updateInv(); playSnd('click');
+                        // the "this is your car" glint has done its job
+                        const _cs = inter.grp && inter.grp.userData && inter.grp.userData.sparkle;
+                        if (_cs) { _cs.visible = false; if (_cs.parent) _cs.parent.remove(_cs); const si = sparkleObjects.findIndex(s => s.grp === _cs); if (si >= 0) sparkleObjects.splice(si, 1); }
+                        try { if (window.engineLogEvent) window.engineLogEvent('Got the ' + (inter.obj.meta.keyLabel || 'multiplex key') + ' from your car.'); } catch (e) {}
                     } else { showMsg('Just your car. Nothing else in it.'); }
                     return;
                 }
@@ -4475,6 +4495,7 @@ function initEngine() {
             if (!checkCollision(pX + dx, pZ + dz, pFlr, dS, false)) {
                 if (gapPromptActive) return;
                 pX += dx; pZ += dz; tPos.x = pX; tPos.z = pZ; isMov = true; lastMoveTime = Date.now();
+                fireExitIfThroughDoor(pX - dx, pZ - dz, pFlr, dS);
                 // Stepping onto a ladder/stairs tile: bump floor up (or down if on top floor).
                 let checkObj = MAP[pFlr][pZ][pX].o;
                 if (checkObj?.v === 'ladder' || checkObj?.v === 'stairs') {
@@ -4522,7 +4543,7 @@ function initEngine() {
     // #19: MOUSE in the in-game modals. A click drives the shop and every dialogue
     // exactly like the keyboard does, so players never have to touch a key mid-scene.
     // Capture phase + stopPropagation so it pre-empts the prompt-opener in game.js
-    // (a click inside a modal must not also open the command prompt). Saymaker choices
+    // (a click inside a modal must not also open the command prompt). Dialogue choices
     // are already buttons; the dialogue-TREE choices are wired in debugroom.js.
     function _engineModalClick(e) {
         if (window.__engineGen !== __myEngineGen) return;
@@ -5057,7 +5078,7 @@ function initEngine() {
         // WORLD PAUSE. When a dialogue that requested it is open, freeze the
         // simulation (NPC AI, player stepping) but keep rendering so the scene
         // still shows behind the conversation. The host sets window.__worldPaused
-        // (Saymaker's "Pause world during dialogue", on by default).
+        // (the dialogue file's "pause world" option, on by default).
         const worldPaused = ((typeof window.__worldPaused !== 'undefined') ? !!window.__worldPaused : false)
             || !!window.__posterMsgPaused   // #9: poster/interaction notes freeze the world like dialogue
             || (typeof window.__anyModalOpen === 'function' && window.__anyModalOpen());   // #21: modals pause the world by default
@@ -5308,8 +5329,12 @@ function initEngine() {
                 // LADDER climb — alternating hands/feet reaching up the rungs.
                 player.userData.walkPhase += dt * 5.0;
                 const sw = Math.sin(player.userData.walkPhase);
-                L.legL.hip.rotation.x = -0.55 + sw * 0.45; L.legR.hip.rotation.x = -0.55 - sw * 0.45;
-                L.legL.knee.rotation.x = 0.7; L.legR.knee.rotation.x = 0.7;
+                // LEG SIGNS (the rig faces -Z): hip +x swings the THIGH FORWARD, knee -x
+                // folds the SHIN BACK — the way a real knee bends (same as setCrouched /
+                // setSeated). The old ladder/jump poses used the opposite signs, which bent
+                // the knees backward like a bird's.
+                L.legL.hip.rotation.x = 0.55 + sw * 0.45; L.legR.hip.rotation.x = 0.55 - sw * 0.45;
+                L.legL.knee.rotation.x = -0.7; L.legR.knee.rotation.x = -0.7;
                 L.armL.rotation.x = -2.3 + sw * 0.35; L.armR.rotation.x = -2.3 - sw * 0.35;   // arms up gripping rungs
                 L.torso.position.set(0, L.hipY + 0.40, -0.02); L.torso.rotation.x = 0.0;
             } else if (isJump) {
@@ -5317,10 +5342,10 @@ function initEngine() {
                 if (jumpStyle === 'climb') {
                     // CLIMB pose — one knee up high, torso pitched forward, arms
                     // reaching up as if pulling up and over.
-                    L.legL.hip.rotation.x = -1.5 * air;
-                    L.legR.hip.rotation.x = -0.4 * air;
-                    L.legL.knee.rotation.x = 1.6 * air;
-                    L.legR.knee.rotation.x = 0.6 * air;
+                    L.legL.hip.rotation.x = 1.5 * air;          // lead knee up in front
+                    L.legR.hip.rotation.x = 0.4 * air;
+                    L.legL.knee.rotation.x = -1.6 * air;        // shins fold back (real knee bend)
+                    L.legR.knee.rotation.x = -0.6 * air;
                     L.armL.rotation.x = -1.4 * air;             // arms forward/up (reach)
                     L.armR.rotation.x = -1.4 * air;
                 } else if (jumpStyle === 'recoil') {
@@ -5334,16 +5359,16 @@ function initEngine() {
                     // little as you drop to the floor below.
                     L.armL.rotation.x = -2.2 * air; L.armL.rotation.z = 0.4 * air;
                     L.armR.rotation.x = -2.2 * air; L.armR.rotation.z = -0.4 * air;
-                    L.legL.hip.rotation.x = -0.7 * air;
-                    L.legR.hip.rotation.x = -0.5 * air;
-                    L.legL.knee.rotation.x = 0.9 * air;
-                    L.legR.knee.rotation.x = 0.7 * air;
+                    L.legL.hip.rotation.x = 0.7 * air;
+                    L.legR.hip.rotation.x = 0.5 * air;
+                    L.legL.knee.rotation.x = -0.9 * air;
+                    L.legR.knee.rotation.x = -0.7 * air;
                 } else {
                     // VAULT pose — tuck legs, swing arms.
-                    L.legL.hip.rotation.x = -1.1 * air;
-                    L.legR.hip.rotation.x = -1.1 * air;
-                    L.legL.knee.rotation.x = 1.3 * air;
-                    L.legR.knee.rotation.x = 1.3 * air;
+                    L.legL.hip.rotation.x = 1.1 * air;          // knees tuck up in FRONT
+                    L.legR.hip.rotation.x = 1.1 * air;
+                    L.legL.knee.rotation.x = -1.3 * air;        // shins fold back under
+                    L.legR.knee.rotation.x = -1.3 * air;
                     L.armL.rotation.x = 0.9 * air;
                     L.armR.rotation.x = 0.9 * air;
                 }
@@ -5353,8 +5378,8 @@ function initEngine() {
                 L.legL.hip.rotation.x = s;
                 L.legR.hip.rotation.x = -s;
                 // Knees bend a touch on the back-swing so feet clear the floor.
-                L.legL.knee.rotation.x = Math.max(0, -s) * 0.5;
-                L.legR.knee.rotation.x = Math.max(0, s) * 0.5;
+                L.legL.knee.rotation.x = -Math.max(0, -s) * 0.5;   // negative = shin folds back (heel lifts)
+                L.legR.knee.rotation.x = -Math.max(0, s) * 0.5;
                 L.armL.rotation.x = -s * 0.7;
                 L.armR.rotation.x = s * 0.7;
             } else {
@@ -5517,8 +5542,8 @@ function initEngine() {
                     const s = Math.sin(n._walkPhase) * 0.6;
                     if (Lw.legL && Lw.legL.hip) {
                         Lw.legL.hip.rotation.x = s; Lw.legR.hip.rotation.x = -s;
-                        Lw.legL.knee.rotation.x = Math.max(0, -s) * 0.5;
-                        Lw.legR.knee.rotation.x = Math.max(0, s) * 0.5;
+                        Lw.legL.knee.rotation.x = -Math.max(0, -s) * 0.5;   // negative = shin folds back (see the player walk)
+                        Lw.legR.knee.rotation.x = -Math.max(0, s) * 0.5;
                     }
                     if (Lw.armL) { Lw.armL.rotation.x = -s * 0.7; Lw.armR.rotation.x = s * 0.7; }
                 }
@@ -5586,7 +5611,7 @@ function initEngine() {
                 } else if (mode === 'lookaround') {
                     L.torso.rotation.y = Math.sin(t * 1.2) * 0.5;   // glance L/R
                 } else if (mode === 'tapfoot') {
-                    L.legR.knee.rotation.x = Math.max(0, Math.sin(t * 7)) * 0.5; // tap
+                    L.legR.knee.rotation.x = -Math.max(0, Math.sin(t * 7)) * 0.35; // tap: heel lifts back (negative = real knee bend)
                 } else if (mode === 'nod') {
                     L.torso.rotation.x = 0.12 + Math.sin(t * 2) * 0.12; // slow nod
                 }
@@ -5858,29 +5883,16 @@ function initEngine() {
         if (CONFIG.settings.camMode !== 'fps' && CONFIG.settings.camMode !== 'fps_toggle' && (!camManager || !camManager.isCinematic)) {
             if (player.position.distanceTo(renderCam.position) > 0.1) {
                 // ── WALL SEE-THROUGH (x-ray) ──────────────────────────────────
-                // Reworked per request: a WIDER fade radius around the character,
-                // with PER-TILE distance falloff (walls get progressively less
-                // transparent the farther they are, back to fully opaque at the
-                // radius edge), and it never reveals UNEXPLORED enclosed areas.
+                // Direct occluders only: a fan of rays from the camera to the
+                // player's body (feet/center/head/shoulders). Any wall the rays hit
+                // before reaching the player is DIRECTLY hiding the player, so it
+                // clears to XRAY_NEAR opacity. This only ever reveals what's between
+                // the camera and the player, so it never exposes unexplored rooms.
+                // (The old "PASS 2" radius-widening fade was removed in #13 — see
+                // the note at the end of this block.)
                 //
-                // Two passes:
-                //   PASS 1 — direct occluders: a fan of rays from the camera to the
-                //     player's body (feet/center/head/shoulders). Any wall the rays
-                //     hit before reaching the player is DIRECTLY hiding the player,
-                //     so it clears to the most-transparent level. This only ever
-                //     reveals the player's own tile, so it's always safe.
-                //   PASS 2 — radius widening: every wall within XRAY_RADIUS tiles of
-                //     the player that is on the CAMERA side (could occlude) fades by
-                //     distance — but ONLY if BOTH tiles it borders are already
-                //     VISITED. Walls bounding a room the player hasn't entered have
-                //     an unvisited side, so they stay solid (no peeking into
-                //     unexplored enclosed areas).
-                //
-                // TUNING: XRAY_RADIUS (tiles), XRAY_NEAR (closest opacity),
-                // XRAY_PER_TILE (how fast it returns to opaque per tile).
-                const XRAY_RADIUS = 4.0;      // tiles
+                // TUNING: XRAY_NEAR (opacity of a wall hiding the player).
                 const XRAY_NEAR = 0.10;       // opacity right next to the player
-                const XRAY_PER_TILE = 0.22;   // +opacity per tile of distance
                 const pp = player.position;
                 const fade = (obj, op) => {
                     if (obj.userData.oOp >= 1.0 && hWalls.indexOf(obj) < 0) {

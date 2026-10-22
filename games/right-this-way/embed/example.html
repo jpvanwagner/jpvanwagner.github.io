@@ -1,0 +1,66 @@
+<!doctype html>
+<!--
+  Example: embedding Right This Way, Please in a portfolio page.
+
+  1. Copy WEBDEMO.HTML (repo root) next to your page (it is ONE self-contained file:
+     scripts, styles and fonts are inlined; it makes no external requests).
+  2. Paste the .se-embed block + its <style> into your page.
+
+  The game sizes itself to whatever box the iframe gets and switches layouts
+  for phones, tablets and desktops, portrait or landscape. On smaller boxes
+  the panels and text scale down so the whole game fits without scrolling.
+  It pauses itself when scrolled out of view. On phones, the "open full
+  screen" link gives the best experience.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio: Right This Way, Please embed example</title>
+    <style>
+      body { margin: 0; font-family: system-ui, sans-serif; background: #f6f5f2; color: #222; }
+      main { max-width: 1100px; margin: 0 auto; padding: 32px 16px 80px; }
+
+      /* ---- copy from here --------------------------------------------- */
+      .se-embed {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 10;          /* desktop / tablet landscape */
+        max-height: calc(100vh - 32px); /* never taller than the window, */
+        max-height: calc(100svh - 32px);
+        min-height: min(420px, calc(100svh - 32px)); /* so it never needs scrolling */
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+        background: #ebe8e1;
+      }
+      @media (max-width: 760px) and (orientation: portrait) {
+        .se-embed { aspect-ratio: auto; height: 85svh; min-height: 0; } /* phones */
+      }
+      .se-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+      .se-embed-links { margin: 8px 0 0; font-size: 14px; }
+      /* ---- to here ------------------------------------------------------ */
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Right This Way, Please</h1>
+      <p>A top-down security-desk management game built with three.js. Keep every visitor escorted.</p>
+
+      <!-- ---- copy from here ---------------------------------------------- -->
+      <div class="se-embed">
+        <iframe
+          src="../WEBDEMO.HTML"
+          title="Right This Way, Please - playable game"
+          allow="fullscreen; web-share; clipboard-write"
+          allowfullscreen
+          loading="lazy"
+        ></iframe>
+      </div>
+      <p class="se-embed-links"><a href="../WEBDEMO.HTML" target="_blank" rel="noopener">Open full screen &#8599;</a></p>
+      <!-- ---- to here ----------------------------------------------------- -->
+
+      <p>More portfolio content below the game&hellip;</p>
+    </main>
+  </body>
+</html>

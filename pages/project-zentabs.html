@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-ZENTABS.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="6cb1329b">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZenTabs</title>
+    <meta name="description" content="ZenTabs by Joseph VanWagner: a calm list of every tab open in your browsers, with gentle reminders for the ones that linger, as a window or a slim bar docked like a second taskbar. A free, portable Windows app that keeps itself up to date.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=36ab3463">
+    <link rel="stylesheet" href="../shared/share.css?v=ebba4e48">
+    <link rel="stylesheet" href="css/modern.css?v=3e888b3d">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=cfeec6d1"></script>
+    <script src="../config/shared-content.js?v=12d7c148"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=771fd672"></script>
+    <script src="js/tip-bar.js?v=8c4ef0d2"></script>              <!-- "Buy me a coffee" bar below the tool/game -->
+    <script src="js/lightbox.js?v=af09d593"></script>
+    <script src="js/page-toc.js?v=d252b5e8"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=32b0920c"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=726959f6"></script>
+</head>
+<body data-title="ZenTabs" data-nav="my-projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="my-projects.html">&larr; Back to Projects</a></p>
+                <p class="kicker">Tool · Windows desktop app (Python)</p>
+                <h1>ZenTabs</h1>
+                <p class="lede">A calm list of every tab open in your browsers, with gentle reminders for the ones that linger.</p>
+                <p>Tabs pile up. One is a thing to read later, one is a task half-done, one is a page you meant to close an hour
+                   ago, and they're spread across three windows and two browsers. <strong>ZenTabs</strong> gathers every tab open
+                   in Chrome, Edge, Brave, Opera and Firefox into one quiet list, with how long each has been open, so you can
+                   see what's there, jump straight to a tab, or close a handful at once. When a tab has been open a long while, a
+                   small note in the corner of the screen asks: <strong>still need this tab?</strong></p>
+                <p>It can also shrink to a <strong>slim bar</strong>, docked along the top or bottom of the screen like a second
+                   taskbar: one drop-down of every tab, and a few small buttons for the one you pick.</p>
+                <p>It's a companion to <a href="project-vinyasa.html">Vinyasa</a>, built in the same calm style, and the two can
+                   share that strip: tabs on one side, Asana on the other. The point is less clutter and fewer decisions, not
+                   one more thing demanding attention.</p>
+                <div class="btn-row">
+                    <a class="btn primary" href="https://github.com/Nostalginaut/zentabs-releases/releases/latest/download/ZenTabs-portable.zip">Download for Windows (.zip, 21 MB)</a>
+                    <a class="btn" href="#try-it">Try the preview</a>
+                </div>
+                <p class="course-note">Free, for Windows 10 and 11. Nothing to install: unzip it and double-click
+                   <strong>ZenTabs.exe</strong>. It keeps itself up to date. ZenTabs only reads tab titles, never your
+                   pages, and nothing about you or your tabs is sent anywhere.</p>
+            </div>
+        </section>
+
+        <!-- The preview is synced from the TOOL--ZenTabs repo into /work/zentabs/ (config/sources.json);
+             the download is the latest release of the public zentabs-releases repo. -->
+        <section class="panel">
+            <div class="panel-body course-panel">
+                <h2 id="try-it">Try it</h2>
+                <p>The real app runs on Windows, so here's a preview of it in your browser, with ten sample tabs. Click a
+                   tab, then try <strong>Keep</strong>, <strong>Quiet</strong> or <strong>Close tab</strong>; switch to the
+                   <strong>Waiting</strong> view; or click <strong>Show a reminder</strong> to see (and hear) the note ZenTabs
+                   shows for a tab that's been open too long. Then click <strong>Try the bar</strong>: pick a tab from the
+                   drop-down and watch the pretend browser switch to it, and right-click the bar to dock it at the top or make it
+                   compact.</p>
+                <div class="course-frame" style="height: min(80vh, 680px);">
+                    <iframe data-demo src="../work/zentabs/index.html" title="ZenTabs (preview of the app's window)" loading="lazy" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                </div>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Interactive preview</li><li>Browser tabs</li></ul>
+
+                <h2>Getting started</h2>
+                <ol>
+                    <li><strong>Download and unzip.</strong> Then move the <em>ZenTabs</em> folder somewhere you'll keep it, like Documents.</li>
+                    <li><strong>Double-click ZenTabs.exe.</strong> Windows may say &ldquo;Windows protected your PC&rdquo;, because
+                        ZenTabs is a small independent app that isn't registered with Microsoft. Click <em>More info</em>, then
+                        <em>Run anyway</em>. You'll only see this once.</li>
+                    <li><strong>That's it.</strong> Your open tabs appear in a moment, the longest-open at the top. There's no
+                        account to make and nothing to set up; Settings is there if you'd like to change the reminder time or the
+                        look.</li>
+                </ol>
+
+                <h2>What it does</h2>
+                <ul>
+                    <li><strong>Every tab, one list:</strong> tabs from every window of Chrome, Edge, Brave, Opera and Firefox
+                        (and most browsers built on them), with the browser and how long each has been open. Search it, sort it,
+                        or switch to <em>Waiting</em> (open past your reminder time) or <em>Quiet</em> (tabs you mean to keep).</li>
+                    <li><strong>One click to act:</strong> double-click a tab to bring its window forward and switch to it.
+                        Select several to <em>Close</em> them at once, <em>Keep</em> them (their count starts over), or make them
+                        <em>Quiet</em> so ZenTabs never asks about them.</li>
+                    <li><strong>A gentle question, not an alarm:</strong> after a tab has been open a while (15 minutes to a week;
+                        two hours to start), one small note at a time asks <em>Still need this tab?</em>, with <em>Close it</em>,
+                        <em>Keep it</em> and <em>Go to tab</em>, and a soft singing bowl if you like. Notes wait while you're using
+                        ZenTabs itself, and can be paused from the tray.</li>
+                    <li><strong>Remembers between runs:</strong> a tab's time survives a restart, and even a drag to another
+                        window, so &ldquo;open for 3 days&rdquo; really means three days.</li>
+                    <li><strong>A second taskbar:</strong> the window can shrink to a slim bar, as tall as the taskbar: floating
+                        anywhere (&ldquo;compact&rdquo;), or docked along the top or bottom of the screen, full width or part of
+                        it. Docked, it keeps its strip clear the way the taskbar does, so maximized windows stop at it, and at the
+                        bottom it sits just above the taskbar. It steps aside for full-screen videos and games.</li>
+                    <li><strong>A drop-down of every tab:</strong> each with its browser's own icon, its title and how long it's
+                        been open, with search. Pick one to switch straight to it. Small buttons beside it close the tab, set a
+                        reminder just for it (in 15 minutes, an hour, tomorrow, or never), star it as a favorite, or save a
+                        shortcut to the page in your Downloads folder. Right-click the bar for everything else.</li>
+                    <li><strong>Beside Vinyasa:</strong> give the bar part of the width, and
+                        <a href="project-vinyasa.html">Vinyasa's</a> one-line ticker, docked on the same edge, sits in the rest.</li>
+                    <li><strong>Keeps itself up to date:</strong> it checks for a new version when it starts and at noon and
+                        midnight. An update shows as <em>ZenTabs 1.1 is ready &middot; Update now</em>, or, with automatic updates
+                        on, installs itself and restarts while you're not using it. Your settings carry over.</li>
+                    <li><strong>Out of the way:</strong> close it to the system tray, where a small dot appears on its icon when
+                        tabs are waiting. Dawn and Dusk themes, three text sizes, and it can start when you sign in.</li>
+                    <li><strong>Portable and private:</strong> settings live next to the app, so the folder can move to another
+                        computer. ZenTabs reads tab titles the way a screen reader does; it never looks inside your pages (starring
+                        a tab or saving a shortcut reads that tab's address bar), and its only request to the internet is
+                        GitHub's newest version number.</li>
+                </ul>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Browser tabs</li><li>Focus</li><li>Reminders</li><li>Taskbar</li><li>Usability</li></ul>
+
+                <h2>Screenshots</h2>
+                <div class="shots">
+                    <figure><a class="zoom" href="../images/projects/zentabs/window.webp" data-caption="The ZenTabs window in the Dawn and Dusk themes: every open tab, the longest-open first. Tabs past their reminder time are a soft clay color; quiet ones fade back."><img src="../images/projects/zentabs/thumbs/window.jpg" alt="Two ZenTabs windows, one light and one dark, each listing ten browser tabs with how long each has been open" loading="lazy"></a><figcaption>The window, Dawn and Dusk</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/zentabs/bar-bottom.webp" data-caption="Docked at the bottom, just above the taskbar, with its drop-down open: every tab, its browser and how long it's been open. Maximized windows stop at the bar."><img src="../images/projects/zentabs/thumbs/bar-bottom.jpg" alt="A browser window above a slim ZenTabs bar and the taskbar, with a list of tabs opening upward from the bar" loading="lazy"></a><figcaption>Docked at the bottom</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/zentabs/bar-beside-vinyasa.webp" data-caption="Sharing the strip: ZenTabs' bar on the left half, Vinyasa's one-line ticker on the right, like one taskbar."><img src="../images/projects/zentabs/thumbs/bar-beside-vinyasa.jpg" alt="A slim bar along the bottom of the screen: ZenTabs' tab drop-down on the left, Vinyasa's notification ticker on the right" loading="lazy"></a><figcaption>Beside Vinyasa</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/zentabs/bar-top.webp" data-caption="Docked at the top (in the Dusk theme), with a tab picked: close it, set a reminder, star it or save a shortcut with the small buttons."><img src="../images/projects/zentabs/thumbs/bar-top.jpg" alt="A dark ZenTabs bar along the top of the screen above a browser window, showing the picked tab and small buttons" loading="lazy"></a><figcaption>Docked at the top</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/zentabs/bar-compact.webp" data-caption="The compact bar: no title bar or border, floating wherever you drag it."><img src="../images/projects/zentabs/thumbs/bar-compact.jpg" alt="A small floating ZenTabs bar over a browser window" loading="lazy"></a><figcaption>Compact</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/zentabs/reminder.webp" data-caption="A reminder: a small note in the corner of the screen about one tab that has been open a long while, with Close it, Keep it and Go to tab."><img src="../images/projects/zentabs/thumbs/reminder.jpg" alt="The ZenTabs window with a small 'Still need this tab?' note in the lower-right corner" loading="lazy"></a><figcaption>&ldquo;Still need this tab?&rdquo;</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/zentabs/waiting.webp" data-caption="The Waiting view (in the Dusk theme), with two tabs selected: close, keep or quiet them together."><img src="../images/projects/zentabs/thumbs/waiting.jpg" alt="A dark ZenTabs window showing four waiting tabs, two of them selected, with a Close 2 tabs button" loading="lazy"></a><figcaption>Waiting tabs</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/zentabs/update.webp" data-caption="When a new version is published, a quiet notice appears under the title: Update now, What's new, or Later."><img src="../images/projects/zentabs/thumbs/update.jpg" alt="The ZenTabs window with a notice reading 'ZenTabs 1.1.0 is ready' and Update now, What's new and Later" loading="lazy"></a><figcaption>An update is ready</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/zentabs/settings-prefs.webp" data-caption="Preferences (in the Dusk theme): when to be reminded, and how; the look; and the window."><img src="../images/projects/zentabs/thumbs/settings-prefs.jpg" alt="ZenTabs preferences in a dark theme, with reminder, look and window options" loading="lazy"></a><figcaption>Preferences</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/zentabs/settings-bar.webp" data-caption="Show ZenTabs as: a window, a compact bar, or docked at the top or bottom; the bar's width and position."><img src="../images/projects/zentabs/thumbs/settings-bar.jpg" alt="ZenTabs settings with choices for window, compact bar and docked bar, and width settings" loading="lazy"></a><figcaption>Bar settings</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/zentabs/settings-favorites.webp" data-caption="Favorites (in the Dusk theme): the pages you starred, to open, copy, save as shortcuts or remove."><img src="../images/projects/zentabs/thumbs/settings-favorites.jpg" alt="A dark settings page listing three favorite pages with Open, Copy link, Save a shortcut and Remove buttons" loading="lazy"></a><figcaption>Favorites</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/zentabs/settings-updates.webp" data-caption="Updates: check for a new version on start and at noon and midnight, and optionally install it automatically."><img src="../images/projects/zentabs/thumbs/settings-updates.jpg" alt="ZenTabs preferences scrolled to the Updates section with two checkboxes" loading="lazy"></a><figcaption>Update settings</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/zentabs/settings-about.webp" data-caption="About: the version, a Check for updates button, what ZenTabs reads (and doesn't), and credits."><img src="../images/projects/zentabs/thumbs/settings-about.jpg" alt="ZenTabs' About page with a Check for updates button and credits" loading="lazy"></a><figcaption>About &amp; credits</figcaption></figure>
+                </div>
+
+                <h2>How it's built</h2>
+                <p>ZenTabs is a single Python program with a Tkinter interface. Browsers don't let other programs see their tabs,
+                   but they do describe their own windows to screen readers, so ZenTabs uses that same accessibility interface
+                   (Windows UI Automation) to find the tab strip in each browser window and read each tab's title, skipping the
+                   web pages themselves. A background thread does this every few seconds and hands the window a fresh list
+                   through a queue, so the two never trip over each other. Each tab is recognized by a stable ID while it's open,
+                   which is how a tab keeps its time when its title changes or it's dragged to another window.</p>
+                <p>Acting on a tab is done the careful way: <em>Close</em> presses the tab's own close button through the same
+                   interface, so nothing needs to be in front and no keystroke can land in the wrong window. The reminders came
+                   from asking what a calm interruption looks like: one note at a time, never while you're using ZenTabs itself,
+                   and always with a way to say &ldquo;don't ask again&rdquo;.</p>
+                <p>The docked bar is a Windows &ldquo;app bar&rdquo;: ZenTabs asks Windows for a strip along the edge of the screen,
+                   the same way the taskbar keeps its own, and Windows moves maximized windows out of the way (and puts the strip
+                   just above a bottom taskbar). ZenTabs keeps an eye on it, too: if the screen, the taskbar or the strip changes,
+                   it docks again, and it gives the strip back when it quits.</p>
+                <p>Every change is built and tested automatically: GitHub Actions compiles one portable <strong>ZenTabs.exe</strong>
+                   with PyInstaller on Windows, opens a real browser to check that the built app can read its tabs (and their
+                   addresses and icons), docks it along the bottom and the top of the screen, and runs the updater end to end. Merging a new version publishes it as a release, and running copies find it on their next
+                   check, download it, verify its checksum, and swap themselves for it.</p>
+
+                <h2>Credits</h2>
+                <ul>
+                    <li>Singing bowl sound: <a href="https://freesound.org/people/ryancacophony/sounds/202017/" target="_blank" rel="noopener">&ldquo;Singing Bell Hit 2&rdquo; by ryancacophony</a> (Freesound, CC0)</li>
+                    <li>Typeface: <a href="https://github.com/googlefonts/nunito" target="_blank" rel="noopener">Nunito</a> by The Nunito Project Authors (SIL Open Font License)</li>
+                    <li>Built with Python, Tkinter, Pillow, pystray, <a href="https://github.com/yinkaisheng/Python-UIAutomation-for-Windows" target="_blank" rel="noopener">uiautomation</a> and psutil.</li>
+                    <li>Browser names belong to their makers. ZenTabs is an independent app.</li>
+                </ul>
+                <h2>Design features</h2>
+                <ul class="tags"><li>Python</li><li>Tkinter</li><li>UI Automation</li><li>Desktop app</li><li>Reminders</li><li>Dark mode</li><li>Self-updating</li><li>App bar</li><li>GitHub Actions</li></ul>
+                <div class="btn-row">
+                    <a class="btn" href="my-projects.html">&larr; Back to Projects</a>
+                    <a class="btn primary" href="https://github.com/Nostalginaut/zentabs-releases/releases/latest/download/ZenTabs-portable.zip">Download for Windows</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>

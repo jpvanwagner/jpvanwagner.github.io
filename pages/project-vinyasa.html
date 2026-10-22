@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<!--
+    PAGES/PROJECT-VINYASA.HTML - Portfolio project detail page (Traditional View; also shown inside the retro desktop's browser).
+    Edit the text inside <main>. The header, menu, footer and "NOTE:" line are built by
+    js/layout.js from config/site-config.js (edit them there, once, for every page); blocks marked
+    data-shared="..." come from config/shared-content.js. Works in both Traditional View and the Retro Desktop.
+    Your name/tagline fill in automatically from config/site-config.js ([data-owner], [data-tagline]).
+    class="retro-only" = show only inside the Retro Desktop (badges, emoji); hidden in Traditional View.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="page-version" content="8c990a65">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vinyasa</title>
+    <meta name="description" content="Vinyasa by Joseph VanWagner: calm, always-on-top notifications for the Asana projects you care about, as a window or a one-line ticker docked beside ZenTabs. A free, portable Windows app that keeps itself up to date.">
+    <link rel="icon" href="../images/icons/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="../images/icons/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/classic.css?v=36ab3463">
+    <link rel="stylesheet" href="../shared/share.css?v=ebba4e48">
+    <link rel="stylesheet" href="css/modern.css?v=3e888b3d">    <!-- Traditional View look (not used inside the Retro Desktop) -->
+    <script src="../config/site-config.js?v=cfeec6d1"></script>
+    <script src="../config/shared-content.js?v=12d7c148"></script>   <!-- stats, colleague quotes (shared) -->
+    <script src="js/layout.js?v=084affc3"></script>               <!-- header, menu, footer, NOTE line -->
+    <script src="js/classic.js?v=771fd672"></script>
+    <script src="js/tip-bar.js?v=8c4ef0d2"></script>              <!-- "Buy me a coffee" bar below the tool/game -->
+    <script src="js/lightbox.js?v=af09d593"></script>
+    <script src="js/page-toc.js?v=d252b5e8"></script>             <!-- "On this page" box from the headings -->
+    <script src="js/search.js?v=92eeb169"></script>
+    <script src="../shared/demo-controls.js?v=32b0920c"></script>   <!-- Mute + Full screen above each demo -->
+    <script src="../shared/share.js?v=726959f6"></script>
+</head>
+<body data-title="Vinyasa" data-nav="my-projects.html">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- ===== HEADER: built by js/layout.js (edit the menu in config/site-config.js) ===== -->
+    <header class="site-header"></header>
+
+    <main id="content">
+        <section class="panel">
+            <div class="panel-body">
+                <p class="breadcrumb"><a href="my-projects.html">&larr; Back to Projects</a></p>
+                <p class="kicker">Tool · Windows desktop app (Python)</p>
+                <h1>Vinyasa</h1>
+                <p class="lede">Calm notifications for the Asana projects you care about.</p>
+                <p>Asana can tell you about everything, which quickly becomes too much to notice anything. I wanted to know about
+                   the handful of projects that matter to my day, as it happens, without keeping a browser tab open or wading
+                   through an inbox. <strong>Vinyasa</strong> is a small window that stays on top of your work (or tucks into the
+                   system tray) and quietly lists what changed: <strong>new tasks</strong>, <strong>completed tasks</strong>, and
+                   tasks that were <strong>moved or reassigned</strong>. A gently struck singing bowl rings when something arrives.</p>
+                <p>It can also be a <strong>one-line ticker</strong>, as tall as the taskbar, docked along the top or bottom of
+                   the screen, showing each notification in turn. Docked beside <a href="project-zentabs.html">ZenTabs</a>' bar, the
+                   two share one strip: your browser tabs on one side, your Asana projects on the other.</p>
+                <p>It's named for the yoga practice of moving with your breath: the idea is to stay in your flow and only look up
+                   when there's a reason to.</p>
+                <div class="btn-row">
+                    <a class="btn primary" href="https://github.com/Nostalginaut/vinyasa-releases/releases/latest/download/Vinyasa-portable.zip">Download for Windows (.zip, 21 MB)</a>
+                    <a class="btn" href="#try-it">Try the preview</a>
+                </div>
+                <p class="course-note">Free, for Windows 10 and 11. Nothing to install: unzip it and double-click
+                   <strong>Vinyasa.exe</strong>. It keeps itself up to date. Vinyasa only talks to Asana (and asks GitHub for the
+                   newest version number); nothing is sent anywhere else.</p>
+            </div>
+        </section>
+
+        <!-- The preview and the download are synced from the TOOL--Vinyasa repo into /work/vinyasa/ (config/sources.json) -->
+        <section class="panel">
+            <div class="panel-body course-panel">
+                <h2 id="try-it">Try it</h2>
+                <p>The real app runs on Windows, so here's a preview of it in your browser, with a few sample notifications.
+                   Click <strong>Send a sample notification</strong> to hear the bowl, then try <strong>Got it</strong>,
+                   <strong>Snooze</strong>, and <strong>Switch to Dusk</strong>. Then click <strong>Try the ticker</strong> to see
+                   it docked beside ZenTabs' bar, turning to the next notification every few seconds.</p>
+                <div class="course-frame" style="height: min(78vh, 640px);">
+                    <iframe data-demo src="../work/vinyasa/index.html" title="Vinyasa (preview of the app's window)" loading="lazy" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                </div>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Interactive preview</li><li>Notifications</li></ul>
+
+                <h2>Getting started</h2>
+                <ol>
+                    <li><strong>Download and unzip.</strong> Then move the <em>Vinyasa</em> folder somewhere you'll keep it, like Documents.</li>
+                    <li><strong>Double-click Vinyasa.exe.</strong> Windows may say &ldquo;Windows protected your PC&rdquo;, because
+                        Vinyasa is a small independent app that isn't registered with Microsoft. Click <em>More info</em>, then
+                        <em>Run anyway</em>. You'll only see this once.</li>
+                    <li><strong>Connect Asana.</strong> The Settings window shows you how to make a personal access token in Asana (a
+                        password just for Vinyasa) and checks that it works.</li>
+                    <li><strong>Pick your projects</strong> from a searchable list of your own, choose what you'd like to hear about in
+                        each, and click <strong>Save</strong>. That's it.</li>
+                </ol>
+
+                <h2>What it does</h2>
+                <ul>
+                    <li><strong>Only what you ask for:</strong> for each project, choose new tasks, completed tasks, moves and
+                        reassignments, or any mix. Changes you make yourself are skipped, so you only hear about other people's.</li>
+                    <li><strong>Every notification, one click:</strong> <em>Open in Asana</em> goes straight to the task;
+                        <em>Got it</em> clears it; <em>Snooze</em> quiets that task for a while; <em>Mute task</em> stops it for good
+                        (and it can be unmuted in Settings).</li>
+                    <li><strong>Gentle sounds:</strong> a recorded singing bowl by default, a soft &ldquo;gling&rdquo;, a synthesized
+                        chime, or any sound file of your own. It can repeat until you respond, or stay silent.</li>
+                    <li><strong>Out of the way:</strong> keep it on top of other windows, or close it to the system tray, where a small
+                        dot appears on its icon when something new arrives. Pause notifications from the tray when you need focus.</li>
+                    <li><strong>A one-line ticker:</strong> the window can become a single line, as tall as the taskbar, showing
+                        each notification in turn (it holds still while your pointer is on it). Click one to open it in Asana, or
+                        use its small Got it, Snooze and Open buttons; right-click for everything else. It floats anywhere, or
+                        docks along the top or bottom of the screen like a second taskbar, keeping maximized windows clear.</li>
+                    <li><strong>Beside ZenTabs:</strong> docked on the same edge as <a href="project-zentabs.html">ZenTabs</a>' bar,
+                        it sits in the free part of ZenTabs' strip, so the two read as one taskbar.</li>
+                    <li><strong>Keeps itself up to date:</strong> it checks for a new version when it starts and at noon and
+                        midnight, and can install it by itself and restart while you're not using it. Your settings carry over.</li>
+                    <li><strong>Easy on the eyes:</strong> a light Dawn theme and a dark Dusk theme, three text sizes, and the rounded,
+                        friendly Nunito typeface.</li>
+                    <li><strong>Portable:</strong> settings live next to the app, so the whole folder can move to another computer or a
+                        USB stick. It can also start itself when you sign in to Windows.</li>
+                </ul>
+                <ul class="tags section-tags" aria-label="Tags for this section"><li>Asana</li><li>Notifications</li><li>Focus</li><li>Taskbar</li><li>Usability</li></ul>
+
+                <h2>Screenshots</h2>
+                <div class="shots">
+                    <figure><a class="zoom" href="../images/projects/vinyasa/window.webp" data-caption="The Vinyasa window in the Dawn and Dusk themes: each notification is color-coded by what happened, with one-click actions underneath."><img src="../images/projects/vinyasa/thumbs/window.jpg" alt="Two Vinyasa windows, one light and one dark, each listing task notifications" loading="lazy"></a><figcaption>The window, Dawn and Dusk</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/vinyasa/ticker-beside-zentabs.webp" data-caption="The ticker docked at the bottom beside ZenTabs' bar: one strip, just above the taskbar, with browser tabs on the left and Asana on the right."><img src="../images/projects/vinyasa/thumbs/ticker-beside-zentabs.jpg" alt="A slim strip along the bottom of the screen: ZenTabs' tab bar on the left and Vinyasa's one-line notification ticker on the right" loading="lazy"></a><figcaption>Beside ZenTabs</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/vinyasa/ticker-top.webp" data-caption="Docked at the top (in the Dusk theme), again sharing the strip with ZenTabs."><img src="../images/projects/vinyasa/thumbs/ticker-top.jpg" alt="A dark strip along the top of the screen with ZenTabs' bar and Vinyasa's ticker side by side above a browser window" loading="lazy"></a><figcaption>Docked at the top</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/vinyasa/ticker-compact.webp" data-caption="The compact ticker: no title bar or border, floating wherever you drag it."><img src="../images/projects/vinyasa/thumbs/ticker-compact.jpg" alt="A small floating Vinyasa ticker showing a new task notification over a browser window" loading="lazy"></a><figcaption>Compact ticker</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/vinyasa/settings-connect.webp" data-caption="Connect: three numbered steps for making an Asana token, with a button that checks it."><img src="../images/projects/vinyasa/thumbs/settings-connect.jpg" alt="The Connect page of Vinyasa's settings with three numbered steps and a token field" loading="lazy"></a><figcaption>Connecting to Asana</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/vinyasa/settings-projects.webp" data-caption="Projects: what to hear about in each project you follow."><img src="../images/projects/vinyasa/thumbs/settings-projects.jpg" alt="A list of three projects, each with checkboxes for new, completed, and moved tasks" loading="lazy"></a><figcaption>Choosing projects</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/vinyasa/settings-prefs.webp" data-caption="Preferences (in the Dusk theme): the look, and how to show Vinyasa: a window, a compact ticker, or docked at the top or bottom, beside ZenTabs."><img src="../images/projects/vinyasa/thumbs/settings-prefs.jpg" alt="Vinyasa's preferences in a dark theme, with theme, text size and ticker options" loading="lazy"></a><figcaption>Preferences</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/vinyasa/settings-updates.webp" data-caption="Updates: check for a new version on start and at noon and midnight, and optionally install it automatically."><img src="../images/projects/vinyasa/thumbs/settings-updates.jpg" alt="Vinyasa preferences scrolled to the Updates section with two checkboxes" loading="lazy"></a><figcaption>Updates</figcaption></figure>
+                    <figure><a class="zoom" href="../images/projects/vinyasa/settings-about.webp" data-caption="About: the version and a Check for updates button, what Vinyasa sends where, who made it, and credits."><img src="../images/projects/vinyasa/thumbs/settings-about.jpg" alt="Vinyasa's About page with credits" loading="lazy"></a><figcaption>About &amp; credits</figcaption></figure>
+                </div>
+
+                <h2>How it's built</h2>
+                <p>Vinyasa is a single Python program with a Tkinter interface. A background thread asks Asana's Events API what
+                   changed in each project every few seconds, using the API's sync tokens so it only ever sees what's new, and it
+                   turns those raw events into plain sentences (&ldquo;Moved to In Review&rdquo;, &ldquo;Assigned to Jordan&rdquo;).
+                   If Asana can't be reached it waits longer between tries and says so, instead of failing silently. The window,
+                   the tray icon, and the setup screens are all drawn to look calm in both themes, with large click targets and
+                   wording written for people who have never seen an API token before.</p>
+                <p>The ticker turns through the notifications on a timer that pauses under the pointer, and when something new
+                   arrives it jumps straight to it with a moment's soft highlight. Docked, it's a Windows &ldquo;app bar&rdquo;, the
+                   same mechanism the taskbar uses to keep maximized windows clear. When ZenTabs' bar is already docked on the
+                   same edge with room beside it, Vinyasa finds it and settles into the free part of its strip instead of
+                   claiming a strip of its own, and it follows along if ZenTabs moves or leaves.</p>
+                <p>Every change to the app is built and tested automatically: GitHub Actions compiles it into one portable
+                   <strong>Vinyasa.exe</strong> with PyInstaller on Windows, checks that it reaches GitHub, docks along the edge
+                   of the screen and can update itself, and zips it with a short &ldquo;Read me first&rdquo;. Merging a new version
+                   publishes it as a release, and running copies find it on their next check, download it, verify its
+                   checksum, and swap themselves for it.</p>
+
+                <h2>Credits</h2>
+                <ul>
+                    <li>Singing bowl sound: <a href="https://freesound.org/people/ryancacophony/sounds/202017/" target="_blank" rel="noopener">&ldquo;Singing Bell Hit 2&rdquo; by ryancacophony</a> (Freesound, CC0)</li>
+                    <li>Gling sound: <a href="https://freesound.org/people/manuelsound/sounds/829480/" target="_blank" rel="noopener">&ldquo;Gling&rdquo; by manuelsound</a> (Freesound, CC0)</li>
+                    <li>Typeface: <a href="https://github.com/googlefonts/nunito" target="_blank" rel="noopener">Nunito</a> by The Nunito Project Authors (SIL Open Font License)</li>
+                    <li>Asana is a trademark of Asana, Inc. Vinyasa is an independent app, not made by or affiliated with Asana.</li>
+                </ul>
+                <h2>Design features</h2>
+                <ul class="tags"><li>Python</li><li>Tkinter</li><li>Asana API</li><li>Desktop app</li><li>Notifications</li><li>Dark mode</li><li>Plain-language setup</li><li>App bar</li><li>Self-updating</li><li>GitHub Actions</li></ul>
+                <div class="btn-row">
+                    <a class="btn" href="my-projects.html">&larr; Back to Projects</a>
+                    <a class="btn primary" href="https://github.com/Nostalginaut/vinyasa-releases/releases/latest/download/Vinyasa-portable.zip">Download for Windows</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER: built by js/layout.js ===== -->
+    <footer class="site-footer"></footer>
+</body>
+</html>
